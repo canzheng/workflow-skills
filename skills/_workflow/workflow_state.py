@@ -1,0 +1,369 @@
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from pathlib import Path
+
+
+WORKFLOW_SECTIONS = ["BACKLOG", "SHAPING", "READY", "IN_PROGRESS", "DONE", "DEFER"]
+SECTION_RE = re.compile(r"^## \[(?P<name>[A-Z_]+)\]$")
+FEATURE_ENTRY_RE = re.compile(
+    r"^###\s+`(?P<id>[^`]+)`(?:\s+\[(?P<tag>[^\]]+)\])?\s+\[(?P<title>[^\]]+)\]\((?P<link>[^)]+)\)$"
+)
+BACKLOG_ITEM_RE = re.compile(
+    r"^###\s+`(?P<id>v\d+-b\d+)`(?:\s+\[(?P<tag>[^\]]+)\])?\s+(?P<title>.+?)\s*$"
+)
+TASK_HEADER_RE = re.compile(r"^### (?P<id>T\d+): (?P<title>.+)$")
+TASK_STATUS_RE = re.compile(r"^- Status: `(?P<status>[^`]+)`$")
+FIELD_HEADER_RE = re.compile(r"^- (?P<field>[^:]+):(?P<rest>.*)$")
+TASK_REF_RE = re.compile(r"`([^`]+)`")
+FEATURE_ID_RE = re.compile(r"^- Feature ID: `([^`]+)`$", re.MULTILINE)
+
+
+class WorkflowStateError(RuntimeError):
+    pass
+
+
+@dataclass(frozen=True)
+class TaskRecord:
+    task_id: str
+    task_title: str
+    status: str
+    depends_on: tuple[str, ...]
+    status_line_index: int
+
+
+@dataclass(frozen=True)
+class TaskReadinessDrift:
+    promotable_task_ids: list[str]
+    invalid_ready_task_ids: list[str]
+    unknown_dependency_errors: list[str]
+
+    def has_errors(self) -> bool:
+        return bool(self.invalid_ready_task_ids or self.unknown_dependency_errors)
+
+    def has_drift(self) -> bool:
+        return bool(self.promotable_task_ids or self.invalid_ready_task_ids or self.unknown_dependency_errors)
+
+
+@dataclass(frozen=True)
+class DependencyResolution:
+    status: str | None
+    error: str | None = None
+
+
+@dataclass(frozen=True)
+class BacklogFeatureEntry:
+    feature_id: str
+    title: str
+    link: str
+    tag: str | None = None
+
+
+@dataclass(frozen=True)
+class BacklogItemEntry:
+    backlog_id: str
+    title: str
+    backlog_index: int
+    tag: str | None = None
+
+
+@dataclass(frozen=True)
+class ParsedBacklogDocument:
+    feature_sections: dict[str, list[BacklogFeatureEntry]]
+    backlog_items: list[BacklogItemEntry]
+    malformed_entries: list[str]
+
+
+def parse_backlog_document(text: str) -> ParsedBacklogDocument:
+    feature_sections: dict[str, list[BacklogFeatureEntry]] = {name: [] for name in WORKFLOW_SECTIONS}
+    backlog_items: list[BacklogItemEntry] = []
+    malformed_entries: list[str] = []
+    current_section: str | None = None
+
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        header = SECTION_RE.match(line)
+        if header:
+            current_section = header.group("name")
+            continue
+
+        if current_section not in feature_sections or not line.startswith("###"):
+            continue
+
+        if current_section == "BACKLOG":
+            backlog_match = BACKLOG_ITEM_RE.match(line)
+            if backlog_match:
+                backlog_items.append(
+                    BacklogItemEntry(
+                        backlog_id=backlog_match.group("id"),
+                        title=backlog_match.group("title"),
+                        backlog_index=len(backlog_items) + 1,
+                        tag=backlog_match.group("tag"),
+                    )
+                )
+                continue
+
+            malformed_entries.append(
+                f"line {line_number} in section [BACKLOG] has malformed backlog entry: {line}"
+            )
+            continue
+
+        feature_match = FEATURE_ENTRY_RE.match(line)
+        if feature_match:
+            feature_sections[current_section].append(
+                BacklogFeatureEntry(
+                    feature_id=feature_match.group("id"),
+                    title=feature_match.group("title"),
+                    link=feature_match.group("link"),
+                    tag=feature_match.group("tag"),
+                )
+            )
+            continue
+
+        malformed_entries.append(
+            f"line {line_number} in section [{current_section}] has malformed feature entry: {line}"
+        )
+
+    return ParsedBacklogDocument(
+        feature_sections=feature_sections,
+        backlog_items=backlog_items,
+        malformed_entries=malformed_entries,
+    )
+
+
+def parse_tasks(feature_text: str) -> list[TaskRecord]:
+    lines = feature_text.splitlines()
+    tasks: list[TaskRecord] = []
+
+    current_id: str | None = None
+    current_title: str | None = None
+    current_status = ""
+    current_status_line_index = -1
+    current_depends_on: list[str] = []
+    current_field: str | None = None
+
+    def flush_task() -> None:
+        nonlocal current_id, current_title, current_status, current_status_line_index, current_depends_on, current_field
+        if current_id is None or current_title is None:
+            return
+        tasks.append(
+            TaskRecord(
+                task_id=current_id,
+                task_title=current_title,
+                status=current_status,
+                depends_on=tuple(current_depends_on),
+                status_line_index=current_status_line_index,
+            )
+        )
+        current_id = None
+        current_title = None
+        current_status = ""
+        current_status_line_index = -1
+        current_depends_on = []
+        current_field = None
+
+    for line_index, line in enumerate(lines):
+        task_header = TASK_HEADER_RE.match(line)
+        if task_header:
+            flush_task()
+            current_id = task_header.group("id")
+            current_title = task_header.group("title")
+            continue
+
+        if current_id is None:
+            continue
+
+        status_match = TASK_STATUS_RE.match(line)
+        if status_match:
+            current_status = status_match.group("status")
+            current_status_line_index = line_index
+            current_field = "Status"
+            continue
+
+        field_match = FIELD_HEADER_RE.match(line)
+        if field_match:
+            current_field = field_match.group("field")
+            if current_field == "Depends On":
+                current_depends_on.extend(TASK_REF_RE.findall(field_match.group("rest")))
+            continue
+
+        if current_field == "Depends On":
+            current_depends_on.extend(TASK_REF_RE.findall(line))
+
+    flush_task()
+    return tasks
+
+
+def parse_feature_id(feature_text: str, *, feature_file: Path | None = None) -> str | None:
+    feature_id_match = FEATURE_ID_RE.search(feature_text)
+    if feature_id_match:
+        return feature_id_match.group(1)
+    if feature_file is None:
+        return None
+    stem = feature_file.stem
+    if "-" not in stem:
+        return stem
+    return stem.split("-", 2)[0] + "-" + stem.split("-", 2)[1] if stem.count("-") >= 1 else stem
+
+
+def _feature_tasks_by_id(feature_text: str) -> dict[str, TaskRecord]:
+    return {task.task_id: task for task in parse_tasks(feature_text)}
+
+
+def _active_features_dir(repo_root: Path) -> Path:
+    current_version = repo_root / "docs" / "planning" / "current_version"
+    if not current_version.exists():
+        raise WorkflowStateError("docs/planning/current_version is missing")
+    return current_version.resolve() / "features"
+
+
+def _find_feature_file_for_id(
+    repo_root: Path,
+    dependency_feature_id: str,
+    feature_file_cache: dict[str, Path | None],
+) -> Path | None:
+    if dependency_feature_id in feature_file_cache:
+        return feature_file_cache[dependency_feature_id]
+
+    features_dir = _active_features_dir(repo_root)
+    matches = sorted(features_dir.glob(f"{dependency_feature_id}-*.md"))
+    if len(matches) == 1:
+        feature_file_cache[dependency_feature_id] = matches[0]
+    else:
+        feature_file_cache[dependency_feature_id] = None
+    return feature_file_cache[dependency_feature_id]
+
+
+def _resolve_dependency(
+    dependency: str,
+    *,
+    local_feature_id: str | None,
+    local_tasks_by_id: dict[str, TaskRecord],
+    repo_root: Path | None,
+    feature_file_cache: dict[str, Path | None],
+    task_cache: dict[Path, dict[str, TaskRecord]],
+) -> DependencyResolution:
+    if "/" not in dependency:
+        task = local_tasks_by_id.get(dependency)
+        if task is None:
+            return DependencyResolution(status=None, error=f"references unknown dependency ids: {dependency}")
+        return DependencyResolution(status=task.status)
+
+    dependency_feature_id, dependency_task_id = dependency.split("/", 1)
+    if local_feature_id is not None and dependency_feature_id == local_feature_id:
+        task = local_tasks_by_id.get(dependency_task_id)
+        if task is None:
+            return DependencyResolution(status=None, error=f"references unknown dependency ids: {dependency}")
+        return DependencyResolution(status=task.status)
+
+    if repo_root is None:
+        return DependencyResolution(status=None, error=f"references unknown dependency ids: {dependency}")
+
+    dependency_feature_file = _find_feature_file_for_id(repo_root, dependency_feature_id, feature_file_cache)
+    if dependency_feature_file is None:
+        return DependencyResolution(status=None, error=f"references unknown dependency ids: {dependency}")
+
+    dependency_tasks_by_id = task_cache.get(dependency_feature_file)
+    if dependency_tasks_by_id is None:
+        dependency_tasks_by_id = _feature_tasks_by_id(dependency_feature_file.read_text(encoding="utf-8"))
+        task_cache[dependency_feature_file] = dependency_tasks_by_id
+
+    task = dependency_tasks_by_id.get(dependency_task_id)
+    if task is None:
+        return DependencyResolution(status=None, error=f"references unknown dependency ids: {dependency}")
+    return DependencyResolution(status=task.status)
+
+
+def compute_task_readiness_drift(
+    feature_text: str,
+    *,
+    feature_file: Path | None = None,
+    repo_root: Path | None = None,
+) -> TaskReadinessDrift:
+    tasks = parse_tasks(feature_text)
+    local_tasks_by_id = {task.task_id: task for task in tasks}
+    local_feature_id = parse_feature_id(feature_text, feature_file=feature_file)
+    feature_file_cache: dict[str, Path | None] = {}
+    task_cache: dict[Path, dict[str, TaskRecord]] = {}
+
+    unknown_dependency_errors: list[str] = []
+    promotable_task_ids: list[str] = []
+    invalid_ready_task_ids: list[str] = []
+
+    for task in tasks:
+        dependency_statuses: list[str] = []
+        missing_dependency_errors: list[str] = []
+        for dependency in task.depends_on:
+            resolved = _resolve_dependency(
+                dependency,
+                local_feature_id=local_feature_id,
+                local_tasks_by_id=local_tasks_by_id,
+                repo_root=repo_root,
+                feature_file_cache=feature_file_cache,
+                task_cache=task_cache,
+            )
+            if resolved.error is not None:
+                missing_dependency_errors.append(resolved.error)
+                continue
+            if resolved.status is not None:
+                dependency_statuses.append(resolved.status)
+
+        if missing_dependency_errors:
+            unknown_dependency_errors.append(f"{task.task_id} {'; '.join(missing_dependency_errors)}")
+            continue
+
+        dependencies_satisfied = all(status == "done" for status in dependency_statuses)
+        if task.status == "todo" and dependencies_satisfied:
+            promotable_task_ids.append(task.task_id)
+        if task.status == "ready" and not dependencies_satisfied:
+            invalid_ready_task_ids.append(task.task_id)
+
+    return TaskReadinessDrift(
+        promotable_task_ids=promotable_task_ids,
+        invalid_ready_task_ids=invalid_ready_task_ids,
+        unknown_dependency_errors=unknown_dependency_errors,
+    )
+
+
+def promote_ready_tasks(
+    feature_text: str,
+    *,
+    feature_file: Path | None = None,
+    repo_root: Path | None = None,
+) -> tuple[str, list[str]]:
+    tasks = parse_tasks(feature_text)
+    drift = compute_task_readiness_drift(feature_text, feature_file=feature_file, repo_root=repo_root)
+    if drift.has_errors():
+        raise WorkflowStateError("; ".join(format_task_readiness_drift_messages(drift)))
+
+    promotable_task_ids = set(drift.promotable_task_ids)
+    if not promotable_task_ids:
+        return feature_text, []
+
+    lines = feature_text.splitlines()
+    for task in tasks:
+        if task.task_id in promotable_task_ids:
+            if task.status_line_index < 0:
+                raise WorkflowStateError(f"{task.task_id} is missing a Status line")
+            lines[task.status_line_index] = "- Status: `ready`"
+
+    updated_text = "\n".join(lines)
+    if feature_text.endswith("\n"):
+        updated_text += "\n"
+    return updated_text, drift.promotable_task_ids
+
+
+def format_task_readiness_drift_messages(
+    drift: TaskReadinessDrift,
+    *,
+    feature_label: str | None = None,
+) -> list[str]:
+    prefix = f"{feature_label} " if feature_label else ""
+    messages: list[str] = []
+    for task_id in drift.promotable_task_ids:
+        messages.append(f"{prefix}{task_id} could be `ready` but is still `todo`")
+    for task_id in drift.invalid_ready_task_ids:
+        messages.append(f"{prefix}{task_id} is `ready` but its dependencies are not all `done`")
+    for error in drift.unknown_dependency_errors:
+        messages.append(f"{prefix}{error}")
+    return messages

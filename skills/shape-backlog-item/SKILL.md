@@ -1,0 +1,51 @@
+---
+name: shape-backlog-item
+description: Use when taking a backlog item and turning it into one or more shaped feature files under the repository workflow
+---
+
+# Shape Backlog Item
+
+## Overview
+
+This skill promotes one backlog item into one or more features in `[SHAPING]`, or rewrites it into smaller backlog items first.
+
+It is a workflow wrapper around `brainstorming`. It owns target selection, feature ID assignment, file creation, and backlog updates.
+
+## Defaults
+
+- If the user names a backlog item, use it.
+- Otherwise select the first item under `[BACKLOG]` in `<repo_root>/docs/planning/current_version/BACKLOG.md`.
+- "First" means top-to-bottom document order.
+
+## Workflow
+
+1. Run `audit-workflow`.
+2. Resolve the active version through `<repo_root>/docs/planning/current_version`.
+3. Read the selected backlog item.
+4. Wrap `brainstorming` to decide whether the item becomes:
+   - one feature
+   - multiple features below the 5-feature split limit
+   - or smaller backlog items first
+5. For each promoted feature:
+   - assign the next feature ID
+   - create the feature file under `features/`
+   - write `Problem`, `Goal`, `Scope`, and `Design Spec`
+   - seed `Implementation Plan` and `Tasks` only if the design already justifies them
+6. Update feature files first, then update `BACKLOG.md`.
+7. Place promoted features at the bottom of `[SHAPING]`, preserving the existing top-to-bottom order of earlier items.
+8. Re-run `audit-workflow`.
+
+## Rules
+
+- Follow the global workflow contract plus any repo-local `AGENTS.md` overrides.
+- Keep a single backlog-item split below 5 features.
+- If the work appears to need 5 or more features, split it into multiple `[BACKLOG]` items first.
+- Do not mark any feature `[READY]` in this skill.
+
+## Stop Conditions
+
+- The selected item is not in `[BACKLOG]`
+- The split is still unclear after shaping
+- The item appears to need 5 or more features before a smaller backlog split
+- A feature ID collision or link-path conflict appears
+- `audit-workflow` reports an invalid workflow state

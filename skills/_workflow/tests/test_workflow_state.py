@@ -1,0 +1,211 @@
+from __future__ import annotations
+
+import textwrap
+from pathlib import Path
+
+from _workflow.workflow_state import compute_task_readiness_drift, parse_backlog_document, promote_ready_tasks
+
+
+def _feature_text() -> str:
+    return textwrap.dedent(
+        """\
+        # Feature: Example
+
+        ## 0. Meta
+        - Feature ID: `v1-f999`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+        - Current Task: `none`
+
+        ## 6. Tasks
+
+        ### T01: First task
+        - Status: `done`
+        - Depends On:
+          - none
+
+        ### T02: Second task
+        - Status: `todo`
+        - Depends On:
+          - `T01`
+
+        ### T03: Third task
+        - Status: `todo`
+        - Depends On:
+          - `T02`
+
+        ### T04: Parallel task
+        - Status: `todo`
+        - Depends On:
+          - none
+
+        ### T05: Invalid ready task
+        - Status: `ready`
+        - Depends On:
+          - `T03`
+        """
+    )
+
+
+def test_compute_task_readiness_drift_reports_all_eligible_todo_and_invalid_ready_tasks() -> None:
+    drift = compute_task_readiness_drift(_feature_text())
+
+    assert drift.promotable_task_ids == ["T02", "T04"]
+    assert drift.invalid_ready_task_ids == ["T05"]
+    assert drift.unknown_dependency_errors == []
+
+
+def test_promote_ready_tasks_marks_all_eligible_todo_tasks_ready_without_touching_blocked_tasks() -> None:
+    feature_text = _feature_text().replace("- Status: `ready`\n", "- Status: `todo`\n", 1)
+
+    updated_text, promoted_task_ids = promote_ready_tasks(feature_text)
+
+    assert promoted_task_ids == ["T02", "T04"]
+    assert "### T02: Second task\n- Status: `ready`" in updated_text
+    assert "### T04: Parallel task\n- Status: `ready`" in updated_text
+    assert "### T03: Third task\n- Status: `todo`" in updated_text
+
+
+def test_compute_task_readiness_drift_accepts_done_cross_feature_dependencies(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    (repo / "docs" / "planning").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "planning" / "current_version").symlink_to(Path("versions/v1"))
+
+    external_feature = textwrap.dedent(
+        """\
+        # Feature: External
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
+        - Current Task: `none`
+
+        ## 6. Tasks
+
+        ### T03: External task
+        - Status: `done`
+        - Depends On:
+          - none
+        """
+    )
+    (feature_dir / "v1-f001-external.md").write_text(external_feature, encoding="utf-8")
+
+    local_feature = textwrap.dedent(
+        """\
+        # Feature: Local
+
+        ## 0. Meta
+        - Feature ID: `v1-f002`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+        - Current Task: `none`
+
+        ## 6. Tasks
+
+        ### T01: First task
+        - Status: `done`
+        - Depends On:
+          - none
+
+        ### T02: Second task
+        - Status: `todo`
+        - Depends On:
+          - `T01`
+          - `v1-f001/T03`
+        """
+    )
+    local_feature_path = feature_dir / "v1-f002-local.md"
+    local_feature_path.write_text(local_feature, encoding="utf-8")
+
+    drift = compute_task_readiness_drift(local_feature, feature_file=local_feature_path, repo_root=repo)
+
+    assert drift.promotable_task_ids == ["T02"]
+    assert drift.invalid_ready_task_ids == []
+    assert drift.unknown_dependency_errors == []
+
+
+def test_parse_backlog_document_accepts_optional_tags_and_flexible_spacing() -> None:
+    backlog_text = textwrap.dedent(
+        """\
+        # V1 Backlog
+
+        ## [BACKLOG]
+
+        ### `v1-b001`   [DISCOVERY]   First backlog item
+
+        ## [SHAPING]
+
+        ### `v1-f001`   [BOUNDARY]   [First feature](features/v1-f001-first-feature.md)
+
+        ## [READY]
+
+        None yet.
+
+        ## [IN_PROGRESS]
+
+        None yet.
+
+        ## [DONE]
+
+        None yet.
+
+        ## [DEFER]
+
+        None yet.
+        """
+    )
+
+    parsed = parse_backlog_document(backlog_text)
+
+    assert parsed.malformed_entries == []
+    assert [(item.backlog_id, item.tag, item.title) for item in parsed.backlog_items] == [
+        ("v1-b001", "DISCOVERY", "First backlog item")
+    ]
+    shaping_entries = parsed.feature_sections["SHAPING"]
+    assert len(shaping_entries) == 1
+    assert shaping_entries[0].feature_id == "v1-f001"
+    assert shaping_entries[0].tag == "BOUNDARY"
+    assert shaping_entries[0].title == "First feature"
+    assert shaping_entries[0].link == "features/v1-f001-first-feature.md"
+
+
+def test_parse_backlog_document_reports_malformed_structured_entries() -> None:
+    backlog_text = textwrap.dedent(
+        """\
+        # V1 Backlog
+
+        ## [BACKLOG]
+
+        ### Missing backlog id
+
+        ## [SHAPING]
+
+        ### `v1-f001` Missing linked title
+
+        ## [READY]
+
+        None yet.
+
+        ## [IN_PROGRESS]
+
+        None yet.
+
+        ## [DONE]
+
+        None yet.
+
+        ## [DEFER]
+
+        None yet.
+        """
+    )
+
+    parsed = parse_backlog_document(backlog_text)
+
+    assert parsed.backlog_items == []
+    assert parsed.feature_sections["SHAPING"] == []
+    assert "malformed backlog entry" in parsed.malformed_entries[0]
+    assert "malformed feature entry" in parsed.malformed_entries[1]

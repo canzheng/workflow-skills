@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+SKILLS_ROOT = Path(__file__).resolve().parents[2]
+if str(SKILLS_ROOT) not in sys.path:
+    sys.path.insert(0, str(SKILLS_ROOT))
+
+from _workflow.workflow_state import (
+    WORKFLOW_SECTIONS,
+    compute_task_readiness_drift,
+    format_task_readiness_drift_messages,
+    parse_backlog_document,
+    parse_tasks,
+)
+
+
+class WorkflowError(RuntimeError):
+    pass
+
+
+def repo_root(explicit_root: str | None = None) -> Path:
+    if explicit_root:
+        return Path(explicit_root).resolve()
+
+    env_root = os.environ.get("WORKFLOW_REPO_ROOT")
+    if env_root:
+        return Path(env_root).resolve()
+
+    resolved = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        cwd=Path.cwd(),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if resolved.returncode == 0:
+        return Path(resolved.stdout.strip()).resolve()
+
+    raise WorkflowError("could not determine repo root; run inside the target repo or pass --repo-root")
+
+
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--repo-root", help="Override the repository root for fixture-backed task resolution.")
+    return parser.parse_args(argv)
+
+
+def read_backlog(root: Path):
+    current_version = root / "docs" / "planning" / "current_version"
+    if not current_version.exists():
+        raise WorkflowError("docs/planning/current_version is missing")
+    if not current_version.is_symlink():
+        raise WorkflowError("docs/planning/current_version is not a symlink")
+
+    version_root = current_version.resolve()
+    backlog_path = version_root / "BACKLOG.md"
+    if not backlog_path.exists():
+        raise WorkflowError(f"{backlog_path.relative_to(root)} is missing")
+
+    parsed_backlog = parse_backlog_document(backlog_path.read_text(encoding="utf-8"))
+    if parsed_backlog.malformed_entries:
+        raise WorkflowError(
+            "; ".join(f"{backlog_path.relative_to(root)} {message}" for message in parsed_backlog.malformed_entries)
+        )
+    return backlog_path, parsed_backlog
+
+
+def resolve_task(root: Path) -> dict[str, str]:
+    backlog_path, parsed_backlog = read_backlog(root)
+    feature_tasks: dict[tuple[str, str], tuple[Path, list[object]]] = {}
+    active_tasks = 0
+
+    for section_name in WORKFLOW_SECTIONS[1:]:
+        for entry in parsed_backlog.feature_sections.get(section_name, []):
+            feature_id = entry.feature_id
+            link = entry.link
+            feature_path = (backlog_path.parent / link).resolve()
+            if not feature_path.exists():
+                raise WorkflowError(
+                    f"{backlog_path.relative_to(root)} section [{section_name}] links missing feature file {link}"
+                )
+            tasks = parse_tasks(feature_path.read_text(encoding="utf-8"))
+            active_tasks += sum(1 for task in tasks if task.status == "in_progress")
+            feature_tasks[(section_name, feature_id)] = (feature_path, tasks)
+
+    if active_tasks:
+        raise WorkflowError("repository already has a task with status `in_progress`")
+
+    for section_name in ("IN_PROGRESS", "READY"):
+        for entry in parsed_backlog.feature_sections.get(section_name, []):
+            feature_id = entry.feature_id
+            feature_path, tasks = feature_tasks[(section_name, feature_id)]
+            readiness_drift = compute_task_readiness_drift(
+                feature_path.read_text(encoding="utf-8"),
+                feature_file=feature_path,
+                repo_root=root,
+            )
+            if readiness_drift.has_drift():
+                drift_messages = "; ".join(
+                    format_task_readiness_drift_messages(
+                        readiness_drift,
+                        feature_label=str(feature_path.relative_to(root)),
+                    )
+                )
+                raise WorkflowError(f"task readiness drift detected: {drift_messages}")
+            for task in tasks:
+                if task.status != "ready":
+                    continue
+                return {
+                    "feature_id": feature_id,
+                    "feature_path": str(feature_path.relative_to(root)),
+                    "feature_section": section_name,
+                    "task_id": task.task_id,
+                    "task_title": task.task_title,
+                }
+
+    raise WorkflowError("no startable task found in [IN_PROGRESS] or [READY]")
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv or sys.argv[1:])
+    try:
+        payload = resolve_task(repo_root(args.repo_root))
+    except WorkflowError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+
+    print(json.dumps(payload, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

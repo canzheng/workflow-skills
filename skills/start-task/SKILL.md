@@ -1,0 +1,67 @@
+---
+name: start-task
+description: Use when starting the next ready task, ensuring the feature worktree exists, and executing task work under the repository workflow
+---
+
+# Start Task
+
+## Overview
+
+This skill starts one task, ensures the feature worktree is ready, and immediately executes that task.
+
+It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolation, followed by a task-scoped execution mode and the appropriate work method inside that mode.
+
+## Defaults
+
+- If the user names a task, use it.
+- Otherwise select:
+  - the first feature under `[IN_PROGRESS]` in the active version backlog that still has a task with status `ready`
+  - otherwise the first feature under `[READY]` in the active version backlog
+  - then the first task in that feature with status `ready`
+- "First" means top-to-bottom document order.
+- For the default path, use `python "${CODEX_HOME:-$HOME/.codex}/skills/start-task/scripts/resolve_start_task.py"`.
+
+## Workflow
+
+1. Run `audit-workflow`.
+2. Confirm there is no repository task already marked `in_progress`.
+3. Resolve the target feature and task.
+4. Confirm the feature is `[IN_PROGRESS]` or `[READY]`, the task is `ready`, and the feature has no task-readiness drift against the shared dependency model.
+5. Wrap `using-git-worktrees`:
+   - use the repo's preferred worktree root
+   - if this is the first executing task for the feature, create one feature branch/worktree
+   - otherwise re-enter or reuse the existing feature branch/worktree for that feature
+6. Update the feature file:
+   - set `Current Task`
+   - mark the task `in_progress`
+7. If the feature is currently `[READY]`, move the backlog entry to the bottom of `[IN_PROGRESS]`. If the feature is already `[IN_PROGRESS]`, leave the backlog entry there.
+8. Re-run `audit-workflow`.
+9. Choose execution mode:
+   - prefer `subagent-driven-development` when available and still scoped to this one task
+   - otherwise use `executing-plans`
+10. Within the chosen execution mode, choose the work method:
+   - use `systematic-debugging` when the task is primarily a debug task
+   - use `test-driven-development` when the task is implementation or bugfix work with tests in scope
+11. Execute the task work inside the selected feature worktree:
+   - keep execution scoped to this one task
+   - apply the chosen work method inside the chosen execution mode
+   - stop only when the task is ready for `complete-task`, or when the task must be marked `blocked` or `cancelled`
+
+## Rules
+
+- Only one repository task may be `in_progress`.
+- One task means one task ID and one bounded acceptance target.
+- A feature in execution owns one feature branch/worktree reused across its sequential tasks.
+- Do not start a second task while another is active.
+- Keep any `subagent-driven-development` execution scoped to the one active task only.
+- Treat `systematic-debugging` and `test-driven-development` as task methods inside the chosen execution mode, not as peer replacements for that mode.
+- Do not finish the feature branch/worktree in this skill.
+
+## Stop Conditions
+
+- Another repository task is already `in_progress`
+- The target feature is neither `[READY]` nor `[IN_PROGRESS]`
+- The task is not `ready`
+- Task scope is missing or invalid
+- Worktree creation fails
+- `audit-workflow` reports an invalid workflow state
