@@ -17,6 +17,9 @@ Keep mirrored skill directories layout-compatible with Codex’s `skills/` root;
 ## Testing Guidelines
 When changing workflow Python code or mirrored tests, run the smallest relevant pytest target first, then broaden only if needed. Tests under `skills/_workflow/tests/` only need to run from this repo, but they must use relative path discovery so contributors can clone the repo anywhere. If you add install behavior, cover it in `tests/test_install_script.py`.
 
+## Workflow Notes
+Planning-only wrappers such as `shape-backlog-item` and `ready-feature` should start from a clean primary checkout and leave that primary checkout clean before they exit, usually by committing the intentional planning-state changes. The first `start-task` for a feature should create the worktree from that clean primary checkout, and every later task on the same feature should resume in the same feature worktree, not in the primary checkout or a different worktree. `complete-task` should leave the feature worktree clean for the next handoff, usually by committing the task's intended changes before the task is reported done.
+
 ## Commit & Pull Request Guidelines
 This repo started without inherited git history, so use short imperative commit subjects scoped to one change, for example `test: make workflow script tests path-relative`. In pull requests, summarize which skill directories changed, note whether the change must also be installed with `bash install.sh`, and list the exact verification commands you ran.
 

@@ -34,10 +34,15 @@ It is a workflow wrapper around `brainstorming`. It owns target selection, featu
 6. Update feature files first, then update `BACKLOG.md`.
 7. Place promoted features at the bottom of `[SHAPING]`, preserving the existing top-to-bottom order of earlier items.
 8. Re-run `audit-workflow`.
+9. Commit the intentional planning-state changes when needed to leave the primary checkout clean before exiting.
+10. Confirm the primary checkout is clean before exit.
 
 ## Rules
 
 - Follow the global workflow contract plus any repo-local `AGENTS.md` overrides.
+- This skill is planning-only. Run it from a clean primary checkout and do not create or reuse a feature worktree here.
+- Leave the primary checkout clean before exiting this skill.
+- A clean planning exit usually means committing the intentional shaping changes, but the invariant is a clean primary checkout.
 - Keep a single backlog-item split below 5 features.
 - If the work appears to need 5 or more features, split it into multiple `[BACKLOG]` items first.
 - Do not mark any feature `[READY]` in this skill.
@@ -48,4 +53,5 @@ It is a workflow wrapper around `brainstorming`. It owns target selection, featu
 - The split is still unclear after shaping
 - The item appears to need 5 or more features before a smaller backlog split
 - A feature ID collision or link-path conflict appears
+- The primary checkout cannot be left clean before exit
 - `audit-workflow` reports an invalid workflow state

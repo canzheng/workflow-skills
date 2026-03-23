@@ -30,10 +30,15 @@ It is a workflow wrapper around `writing-plans`, with optional `brainstorming` i
 7. Run `python "${CODEX_HOME:-$HOME/.codex}/skills/_workflow/scripts/sync_task_readiness.py" --feature-file <feature-file>` and ensure at least one task has status `ready`.
 8. Update the feature file first, then move the backlog entry from `[SHAPING]` to the bottom of `[READY]`.
 9. Re-run `audit-workflow`.
+10. Commit the intentional planning-state changes when needed to leave the primary checkout clean before exiting.
+11. Confirm the primary checkout is clean before exit.
 
 ## Rules
 
 - Do not create `docs/superpowers/plans/` artifacts.
+- This skill is planning-only. Run it from a clean primary checkout and do not create or reuse a feature worktree here.
+- Leave the primary checkout clean before exiting this skill.
+- A clean planning exit usually means committing the intentional readiness changes, but the invariant is a clean primary checkout.
 - Do not promote the feature to `[READY]` unless at least one task is `ready`.
 - Preserve the existing feature file and update only relevant sections.
 
@@ -43,4 +48,5 @@ It is a workflow wrapper around `writing-plans`, with optional `brainstorming` i
 - The feature file does not exist
 - The design is too incomplete to plan from safely
 - No task can honestly be marked `ready`
+- The primary checkout cannot be left clean before exit
 - `audit-workflow` reports an invalid workflow state
