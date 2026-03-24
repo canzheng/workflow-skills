@@ -2,23 +2,30 @@
 
 This repository already has a stable release-board and execution workflow centered on `docs/planning/current_version/BACKLOG.md`, per-feature files, audit checks, and feature worktrees. The missing piece is a canonical behavior-spec layer for shaping: today the feature file mixes workflow state, design prose, implementation planning, and task execution evidence in one place.
 
-The agreed target is narrower than a full workflow replacement. `BACKLOG.md` remains the authority for queue order and feature status transitions. Execution still uses the current workflow wrappers, worktree rules, and validation evidence. OpenSpec becomes the authority for shaping artifacts and readiness inputs. Feature files become thin records that track execution state and link to the relevant OpenSpec change and specs.
+The agreed target is narrower than a full workflow replacement. `BACKLOG.md` remains the authority for queue order and feature status transitions. Execution still uses the current workflow wrappers, worktree rules, and validation evidence. OpenSpec becomes the authority for shaping artifacts, readiness inputs, and task status. Feature files become thin records that track workflow identity, links to the relevant OpenSpec change and specs, validation evidence, and any minimal execution context still required by the workflow engine.
 
 ## Goals / Non-Goals
 
 **Goals:**
+- Make OpenSpec a mandatory dependency of the workflow rather than an optional integration.
 - Make one linked OpenSpec change the shaping/readiness authority for a promoted feature.
 - Keep backlog ordering, feature-board state, and execution handoff under the existing workflow system.
-- Reduce feature-file content to execution-oriented metadata, task progress, evidence, and OpenSpec links.
-- Extend audit so OpenSpec-backed workflow states can be checked structurally rather than informally.
+- Reduce feature-file content to execution-oriented metadata, evidence, and OpenSpec links.
+- Make OpenSpec `tasks.md` the authoritative task ledger used by `ready-feature`, `start-task`, and `complete-task`.
+- Extend audit so OpenSpec-backed workflow states and OpenSpec task invariants can be checked structurally rather than informally.
 
 **Non-Goals:**
 - Replace `BACKLOG.md` with OpenSpec as the release-planning board.
-- Move task execution, worktree lifecycle, or final branch handling into OpenSpec.
+- Move worktree lifecycle or final branch handling into OpenSpec.
 - Require global workflow skills to depend on repo-local slash commands or generated `.codex/` instructions.
-- Redesign `start-task` and `complete-task` in the same change beyond the metadata they depend on.
 
 ## Decisions
+
+### Decision: Make OpenSpec mandatory for the workflow
+The workflow will require `openspec/` to exist and will assume OpenSpec artifacts are available in every adopting repository. This avoids carrying a fallback behavior for legacy planning-only repos inside the active workflow engine.
+
+Alternative considered:
+- Keep dual classic/hybrid behaviors. Rejected because it doubles the state model and prolongs migration complexity.
 
 ### Decision: Keep `BACKLOG.md` as the release-board authority
 The version backlog already provides ordering, status sections, and release scope. OpenSpec does not currently offer an equivalent version-scoped backlog board. Keeping the existing board avoids duplicating release planning in OpenSpec.
@@ -34,13 +41,19 @@ Alternatives considered:
 - Allow one change to cover many promoted features. Rejected because it weakens feature-level state transitions and worktree ownership.
 
 ### Decision: Make feature files thin execution records
-Feature files will keep feature identity, backlog reference, linked OpenSpec change/specs, execution task state, current task, and validation evidence. Design spec and implementation plan prose move out of the feature file and into OpenSpec artifacts.
+Feature files will keep feature identity, backlog reference, linked OpenSpec change/specs, current-task context if needed, and validation evidence. Design spec, implementation planning, task definitions, and task status move out of the feature file and into OpenSpec artifacts.
 
 Alternative considered:
 - Continue dual-writing design and plan content into both OpenSpec and feature files. Rejected because it creates exactly the split-source drift this change is meant to remove.
 
+### Decision: Make OpenSpec tasks authoritative for execution
+`openspec/changes/<change-id>/tasks.md` will define the execution tasks and carry their checkbox status. Workflow skills will read and update OpenSpec task status directly instead of maintaining a second authored task ledger in the feature file.
+
+Alternative considered:
+- Keep a synchronized execution task ledger in the feature file. Rejected as the steady state because it recreates a second mutable task source of truth.
+
 ### Decision: Extend audit with structural OpenSpec checks only
-The audit should verify that required OpenSpec links and shaping/readiness artifacts exist, but it should not attempt deep semantic analysis of spec quality. OpenSpec validation remains the semantic/spec-focused tool.
+The audit should verify that required OpenSpec links and shaping/readiness artifacts exist, and that OpenSpec task status satisfies workflow invariants, but it should not attempt deep semantic analysis of spec quality. OpenSpec validation remains the semantic/spec-focused tool.
 
 Alternative considered:
 - Parse OpenSpec semantics deeply inside `audit-workflow`. Rejected for the first integration because it would create a large, brittle validator instead of a narrow workflow guard.
@@ -54,19 +67,19 @@ Alternative considered:
 ## Risks / Trade-offs
 
 - [Feature-file template churn] → Update initializer/template and wrapper expectations together so planning artifacts do not drift.
-- [Audit misses a meaningful readiness gap] → Limit the first integration to deterministic existence/linkage checks and add tests for expected failure modes.
-- [Execution wrappers become inconsistent with new thin feature files] → Scope this change so shaping/readiness wrappers and audit are updated first, and explicitly defer deeper `start-task`/`complete-task` changes unless needed.
-- [OpenSpec and workflow state diverge during adoption] → Treat the linked OpenSpec change as the shaping/readiness authority and avoid dual-writing planning prose into feature files.
+- [Audit misses a meaningful readiness gap] → Limit the first integration to deterministic existence/linkage and task-status checks and add tests for expected failure modes.
+- [OpenSpec task parsing becomes brittle] → Keep task syntax constrained to OpenSpec checkbox conventions and add parser coverage for representative task files.
+- [OpenSpec and workflow state diverge during adoption] → Treat the linked OpenSpec change as the shaping and task authority and avoid dual-writing task sections into feature files.
 
 ## Migration Plan
 
-1. Add OpenSpec-backed workflow requirements and the new integration capability.
-2. Update the workflow contract, feature template, and wrapper skill docs to reflect thin feature files plus OpenSpec links.
-3. Extend audit and repair helpers to validate linked change IDs and readiness prerequisites.
-4. Update tests to cover OpenSpec-linked shaping/readiness cases.
+1. Add mandatory-OpenSpec workflow requirements and the new integration capability.
+2. Update the workflow contract, feature template, and wrapper skill docs to reflect links-plus-evidence feature files.
+3. Extend audit, repair, and task-resolution helpers to validate linked change IDs, readiness prerequisites, and OpenSpec task status.
+4. Update tests to cover OpenSpec-linked shaping/readiness and OpenSpec task parsing/execution.
 5. Adopt the new model for future promoted features; migrate existing feature files only when they are touched next.
 
 ## Open Questions
 
-- Should feature files contain a synchronized execution task ledger derived from OpenSpec `tasks.md`, or should `start-task` read OpenSpec tasks directly?
 - Should `[DONE]` require an OpenSpec archive step, or remain independent from archive/final-branch handling?
+- Should feature files retain `Current Task`, or should current-task discovery be computed entirely from OpenSpec task state?

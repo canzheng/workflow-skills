@@ -17,6 +17,8 @@ from _workflow.workflow_state import (
     compute_task_readiness_drift,
     format_task_readiness_drift_messages,
     parse_backlog_document,
+    parse_tasks,
+    parse_feature_openspec_change,
 )
 
 SECTION_RE = re.compile(r"^## \[(?P<name>[A-Z_]+)\]$", re.MULTILINE)
@@ -80,6 +82,15 @@ def main(argv: list[str] | None = None) -> int:
             print(f"ERROR: {error}")
         return 1
 
+    openspec_root = root / "openspec"
+    if not openspec_root.exists():
+        errors.append("openspec is missing")
+    else:
+        if not (openspec_root / "specs").is_dir():
+            errors.append("openspec/specs is missing")
+        if not (openspec_root / "changes").is_dir():
+            errors.append("openspec/changes is missing")
+
     backlog = current_path / "BACKLOG.md"
     if not backlog.exists():
         errors.append(f"{backlog.relative_to(root)} is missing")
@@ -130,7 +141,26 @@ def main(argv: list[str] | None = None) -> int:
                     f"{feature_path.relative_to(root)} has Backlog Reference {backlog_ref_match.group(1)}, expected {expected_anchor}"
                 )
 
-            task_statuses = TASK_STATUS_RE.findall(feature_text)
+            change_id = parse_feature_openspec_change(feature_text)
+            if change_id is None:
+                errors.append(f"{feature_path.relative_to(root)} is missing OpenSpec Change metadata")
+            else:
+                change_dir = root / "openspec" / "changes" / change_id
+                if not change_dir.exists():
+                    errors.append(
+                        f"{feature_path.relative_to(root)} links missing OpenSpec change openspec/changes/{change_id}"
+                    )
+                if section_name == "READY":
+                    for required_name in ("proposal.md", "design.md", "tasks.md"):
+                        if not (change_dir / required_name).exists():
+                            errors.append(
+                                f"{feature_path.relative_to(root)} is in [READY] but linked OpenSpec change is missing {required_name}"
+                            )
+
+            task_statuses = [
+                task.status
+                for task in parse_tasks(feature_text, feature_file=feature_path, repo_root=root)
+            ]
             in_progress_tasks += sum(1 for status in task_statuses if status == "in_progress")
 
             if section_name == "READY" and "ready" not in task_statuses:

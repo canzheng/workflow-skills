@@ -9,7 +9,7 @@ description: Use when validating the repository workflow state before or after a
 
 Run the deterministic workflow audit before and after any state-changing workflow action.
 
-The audit checks the active version under `<repo_root>/docs/planning/current_version` against the global workflow contract, plus any repo-local `AGENTS.md` overlay.
+The audit checks the active version under `<repo_root>/docs/planning/current_version` and the required `openspec/` scaffold against the global workflow contract, plus any repo-local `AGENTS.md` overlay.
 
 ## Run
 
@@ -20,14 +20,17 @@ python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow
 ## What It Checks
 
 - `current_version` exists and is a symlink
+- `openspec/` exists with the required `specs/` and `changes/` directories
 - the active backlog has the required section order
 - every non-`[BACKLOG]` feature entry links to an existing feature file
 - feature IDs match between backlog and feature files
 - feature backlog anchors match the owning backlog section
-- every `[READY]` feature has at least one task with status `ready`
+- every promoted feature links to an existing OpenSpec change
+- every `[READY]` feature links to an OpenSpec change with `proposal.md`, `design.md`, and `tasks.md`
+- every `[READY]` feature has at least one OpenSpec task with status `ready`
 - no feature has task-readiness drift such as:
-  - a task that could be `ready` but is still `todo`
-  - a task marked `ready` whose dependencies are not all `done`
+  - an OpenSpec task reference that points at an unknown dependency id
+  - inconsistent OpenSpec-backed task readiness
   - a task that references an unknown dependency id
 - at most one repository task is `in_progress`
 

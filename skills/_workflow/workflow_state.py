@@ -18,6 +18,9 @@ TASK_STATUS_RE = re.compile(r"^- Status: `(?P<status>[^`]+)`$")
 FIELD_HEADER_RE = re.compile(r"^- (?P<field>[^:]+):(?P<rest>.*)$")
 TASK_REF_RE = re.compile(r"`([^`]+)`")
 FEATURE_ID_RE = re.compile(r"^- Feature ID: `([^`]+)`$", re.MULTILINE)
+OPEN_SPEC_CHANGE_RE = re.compile(r"^- OpenSpec Change: `([^`]+)`$", re.MULTILINE)
+CURRENT_TASK_RE = re.compile(r"^- Current Task: `([^`]+)`$", re.MULTILINE)
+OPEN_SPEC_TASK_RE = re.compile(r"^- \[(?P<done>[ xX])\]\s+(?P<id>\d+\.\d+)\s+(?P<title>.+)$")
 
 
 class WorkflowStateError(RuntimeError):
@@ -29,6 +32,15 @@ class TaskRecord:
     task_id: str
     task_title: str
     status: str
+    depends_on: tuple[str, ...]
+    status_line_index: int
+
+
+@dataclass(frozen=True)
+class RawOpenSpecTaskRecord:
+    task_id: str
+    task_title: str
+    done: bool
     depends_on: tuple[str, ...]
     status_line_index: int
 
@@ -131,7 +143,24 @@ def parse_backlog_document(text: str) -> ParsedBacklogDocument:
     )
 
 
-def parse_tasks(feature_text: str) -> list[TaskRecord]:
+def parse_feature_openspec_change(feature_text: str) -> str | None:
+    match = OPEN_SPEC_CHANGE_RE.search(feature_text)
+    if match:
+        return match.group(1)
+    return None
+
+
+def parse_current_task(feature_text: str) -> str | None:
+    match = CURRENT_TASK_RE.search(feature_text)
+    if not match:
+        return None
+    current_task = match.group(1)
+    if current_task == "none":
+        return None
+    return current_task
+
+
+def _parse_feature_file_tasks(feature_text: str) -> list[TaskRecord]:
     lines = feature_text.splitlines()
     tasks: list[TaskRecord] = []
 
@@ -194,6 +223,147 @@ def parse_tasks(feature_text: str) -> list[TaskRecord]:
     return tasks
 
 
+def _resolve_repo_root_from_feature_file(feature_file: Path | None, repo_root: Path | None) -> Path | None:
+    if repo_root is not None:
+        return repo_root
+    if feature_file is None:
+        return None
+    for parent in [feature_file.parent, *feature_file.parents]:
+        if (parent / ".git").exists():
+            return parent
+    return None
+
+
+def _linked_openspec_tasks_file(
+    feature_text: str,
+    *,
+    feature_file: Path | None = None,
+    repo_root: Path | None = None,
+) -> Path | None:
+    change_id = parse_feature_openspec_change(feature_text)
+    if change_id is None:
+        return None
+    resolved_repo_root = _resolve_repo_root_from_feature_file(feature_file, repo_root)
+    if resolved_repo_root is None:
+        return None
+    tasks_file = resolved_repo_root / "openspec" / "changes" / change_id / "tasks.md"
+    if not tasks_file.exists():
+        return None
+    return tasks_file
+
+
+def _parse_openspec_tasks_text(tasks_text: str) -> list[RawOpenSpecTaskRecord]:
+    lines = tasks_text.splitlines()
+    tasks: list[RawOpenSpecTaskRecord] = []
+
+    current_id: str | None = None
+    current_title: str | None = None
+    current_done = False
+    current_status_line_index = -1
+    current_depends_on: list[str] = []
+    current_field: str | None = None
+
+    def flush_task() -> None:
+        nonlocal current_id, current_title, current_done, current_status_line_index, current_depends_on, current_field
+        if current_id is None or current_title is None:
+            return
+        tasks.append(
+            RawOpenSpecTaskRecord(
+                task_id=current_id,
+                task_title=current_title,
+                done=current_done,
+                depends_on=tuple(current_depends_on),
+                status_line_index=current_status_line_index,
+            )
+        )
+        current_id = None
+        current_title = None
+        current_done = False
+        current_status_line_index = -1
+        current_depends_on = []
+        current_field = None
+
+    for line_index, line in enumerate(lines):
+        task_match = OPEN_SPEC_TASK_RE.match(line)
+        if task_match:
+            flush_task()
+            current_id = task_match.group("id")
+            current_title = task_match.group("title")
+            current_done = task_match.group("done").lower() == "x"
+            current_status_line_index = line_index
+            continue
+
+        if current_id is None:
+            continue
+
+        stripped = line.strip()
+        field_match = FIELD_HEADER_RE.match(stripped)
+        if field_match:
+            current_field = field_match.group("field")
+            if current_field == "Depends On":
+                current_depends_on.extend(TASK_REF_RE.findall(field_match.group("rest")))
+            continue
+
+        if current_field == "Depends On":
+            current_depends_on.extend(TASK_REF_RE.findall(stripped))
+
+    flush_task()
+    return tasks
+
+
+def _derive_openspec_task_statuses(
+    raw_tasks: list[RawOpenSpecTaskRecord],
+    *,
+    current_task: str | None,
+) -> list[TaskRecord]:
+    done_task_ids = {task.task_id for task in raw_tasks if task.done}
+    tasks: list[TaskRecord] = []
+    for task in raw_tasks:
+        if task.done:
+            status = "done"
+        elif current_task == task.task_id:
+            status = "in_progress"
+        else:
+            dependencies_satisfied = True
+            for dependency in task.depends_on:
+                if "/" in dependency:
+                    dependencies_satisfied = False
+                    break
+                if dependency not in done_task_ids:
+                    dependencies_satisfied = False
+                    break
+            status = "ready" if dependencies_satisfied else "todo"
+        tasks.append(
+            TaskRecord(
+                task_id=task.task_id,
+                task_title=task.task_title,
+                status=status,
+                depends_on=task.depends_on,
+                status_line_index=task.status_line_index,
+            )
+        )
+    return tasks
+
+
+def parse_tasks(
+    feature_text: str,
+    *,
+    feature_file: Path | None = None,
+    repo_root: Path | None = None,
+) -> list[TaskRecord]:
+    feature_tasks = _parse_feature_file_tasks(feature_text)
+    if feature_tasks:
+        return feature_tasks
+
+    tasks_file = _linked_openspec_tasks_file(feature_text, feature_file=feature_file, repo_root=repo_root)
+    if tasks_file is None:
+        return []
+
+    raw_tasks = _parse_openspec_tasks_text(tasks_file.read_text(encoding="utf-8"))
+    current_task = parse_current_task(feature_text)
+    return _derive_openspec_task_statuses(raw_tasks, current_task=current_task)
+
+
 def parse_feature_id(feature_text: str, *, feature_file: Path | None = None) -> str | None:
     feature_id_match = FEATURE_ID_RE.search(feature_text)
     if feature_id_match:
@@ -206,8 +376,16 @@ def parse_feature_id(feature_text: str, *, feature_file: Path | None = None) -> 
     return stem.split("-", 2)[0] + "-" + stem.split("-", 2)[1] if stem.count("-") >= 1 else stem
 
 
-def _feature_tasks_by_id(feature_text: str) -> dict[str, TaskRecord]:
-    return {task.task_id: task for task in parse_tasks(feature_text)}
+def _feature_tasks_by_id(
+    feature_text: str,
+    *,
+    feature_file: Path | None = None,
+    repo_root: Path | None = None,
+) -> dict[str, TaskRecord]:
+    return {
+        task.task_id: task
+        for task in parse_tasks(feature_text, feature_file=feature_file, repo_root=repo_root)
+    }
 
 
 def _active_features_dir(repo_root: Path) -> Path:
@@ -265,7 +443,11 @@ def _resolve_dependency(
 
     dependency_tasks_by_id = task_cache.get(dependency_feature_file)
     if dependency_tasks_by_id is None:
-        dependency_tasks_by_id = _feature_tasks_by_id(dependency_feature_file.read_text(encoding="utf-8"))
+        dependency_tasks_by_id = _feature_tasks_by_id(
+            dependency_feature_file.read_text(encoding="utf-8"),
+            feature_file=dependency_feature_file,
+            repo_root=repo_root,
+        )
         task_cache[dependency_feature_file] = dependency_tasks_by_id
 
     task = dependency_tasks_by_id.get(dependency_task_id)

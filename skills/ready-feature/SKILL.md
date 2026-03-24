@@ -30,12 +30,11 @@ It is a workflow wrapper around linked OpenSpec shaping artifacts, with optional
    - `design.md`
    - `tasks.md`
    - relevant linked spec paths
-7. Sync the execution task breakdown from the linked OpenSpec tasks into the feature file's `## 2. Tasks` section without duplicating OpenSpec proposal/design/spec prose.
-8. Run `python "${CODEX_HOME:-$HOME/.codex}/skills/_workflow/scripts/sync_task_readiness.py" --feature-file <feature-file>` and ensure at least one task has status `ready`.
-9. Update the feature file first, then move the backlog entry from `[SHAPING]` to the bottom of `[READY]`.
-10. Re-run `audit-workflow`.
-11. Commit the intentional planning-state changes when needed to leave the primary checkout clean before exiting.
-12. Confirm the primary checkout is clean before exit.
+7. Confirm at least one linked OpenSpec task is ready to execute under the workflow dependency rules.
+8. Update the feature file first, then move the backlog entry from `[SHAPING]` to the bottom of `[READY]`.
+9. Re-run `audit-workflow`.
+10. Commit the intentional planning-state changes when needed to leave the primary checkout clean before exiting.
+11. Confirm the primary checkout is clean before exit.
 
 ## Rules
 
@@ -45,7 +44,7 @@ It is a workflow wrapper around linked OpenSpec shaping artifacts, with optional
 - A clean planning exit usually means committing the intentional readiness changes, but the invariant is a clean primary checkout.
 - `brainstorming` owns any design-review gates used to strengthen the feature before planning.
 - Preserve inherited validation and review gates. OpenSpec shaping does not relax audit, review, or verification requirements.
-- Do not promote the feature to `[READY]` unless at least one task is `ready`.
+- Do not promote the feature to `[READY]` unless at least one linked OpenSpec task is `ready`.
 - Preserve the existing feature file and update only relevant sections.
 
 ## Stop Conditions

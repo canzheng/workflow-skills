@@ -1,17 +1,18 @@
 # Workflow Skills + OpenSpec
 
-This repository defines an official hybrid workflow:
+This repository defines the official workflow:
 
 - `docs/planning/` owns release planning, queue order, and feature-board state
 - `openspec/specs/` owns stable behavior specifications
 - `openspec/changes/<change-id>/` owns shaping artifacts for one feature change
-- feature files under `docs/planning/versions/<version>/features/` own execution metadata, task progress, and validation evidence
+- feature files under `docs/planning/versions/<version>/features/` own workflow metadata, validation evidence, and handoff notes
 
 The goal is to keep one source of truth per concern:
 
 - release planning truth in `BACKLOG.md`
 - shaping truth in OpenSpec
-- execution truth in the feature file
+- task-definition truth in OpenSpec `tasks.md`
+- execution evidence truth in the feature file
 - execution verification truth in task evidence and workflow validation logs
 
 ## Lifecycle
@@ -65,13 +66,12 @@ This is the shaping and readiness authority for one promoted feature.
 Owns:
 - feature metadata
 - linked OpenSpec change and spec paths
-- synchronized execution task ledger
-- current task
+- current task pointer
 - validation evidence
 - execution handoff notes
 
 Does not own:
-- duplicated proposal, design, or spec prose from OpenSpec
+- duplicated proposal, design, spec, or task prose from OpenSpec
 
 ## Official Phase Workflow
 
@@ -82,7 +82,7 @@ The feature starts as a backlog item in `BACKLOG.md`.
 Use:
 - `prioritize-backlog` to reorder eligible work when needed
 
-No OpenSpec change is required yet.
+OpenSpec is required by this workflow, but no change is required yet.
 
 ### 2. Shaping
 
@@ -97,7 +97,7 @@ Responsibilities:
 - use exploration/brainstorming as needed
 - create or link one OpenSpec change for the feature
 - ensure shaping happens in OpenSpec artifacts
-- create the thin feature file with execution metadata and OpenSpec links
+- create the thin feature file with workflow metadata and OpenSpec links
 - move the board item to `[SHAPING]`
 - leave the primary checkout clean
 
@@ -122,9 +122,7 @@ Responsibilities:
   - `design.md`
   - `tasks.md`
   - relevant linked spec paths
-- sync execution tasks into the feature file
-- run task-readiness sync
-- ensure at least one task is honestly `ready`
+- ensure the linked OpenSpec change has at least one task that is honestly `ready`
 - move the board item to `[READY]`
 - leave the primary checkout clean
 
@@ -141,7 +139,7 @@ Responsibilities:
 - enforce one repository task `in_progress`
 - create or reuse the feature worktree
 - set `Current Task`
-- mark the selected task `in_progress`
+- mark the selected OpenSpec task `in_progress`
 - move the feature to `[IN_PROGRESS]` if needed
 
 `complete-task` is the official exit for one execution task.
@@ -150,7 +148,7 @@ Responsibilities:
 - run `verification-before-completion`
 - record exact evidence
 - optionally request code review
-- update task status and downstream readiness
+- update OpenSpec task status and rely on OpenSpec dependencies for downstream readiness
 - leave the feature worktree clean
 - keep the feature in `[IN_PROGRESS]` until feature acceptance is satisfied
 
@@ -225,7 +223,8 @@ OpenSpec validation is additive:
 ## Minimal Operating Rules
 
 - Do not let users or agents independently update both OpenSpec shaping prose and feature-file shaping prose. Shaping belongs in OpenSpec.
-- Do not move a feature to `[READY]` without linked OpenSpec shaping artifacts and at least one `ready` execution task.
+- Do not let feature files become a second task ledger. Task definitions and task status belong in OpenSpec.
+- Do not move a feature to `[READY]` without linked OpenSpec shaping artifacts and at least one `ready` OpenSpec task.
 - Do not use OpenSpec archive as a substitute for `complete-task` evidence or `DONE` acceptance.
 - Do not finish the branch before the linked OpenSpec change is validated and archived.
 
@@ -236,3 +235,10 @@ This repository is both:
 - the reference implementation of the hybrid workflow itself
 
 That means workflow changes in this repo should follow the same official lifecycle documented above.
+
+## Migration Expectation
+
+This workflow assumes OpenSpec is present and authoritative for shaping and task state.
+
+- New workflow adopters should initialize `docs/planning/` and `openspec/` together.
+- Repositories using the older planning-only workflow must migrate to the OpenSpec-backed model before relying on the current global workflow skills.

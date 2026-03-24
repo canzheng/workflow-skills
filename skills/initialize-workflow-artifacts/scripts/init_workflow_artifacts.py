@@ -24,74 +24,16 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Created: `YYYY-MM-DD`
 - Last Updated: `YYYY-MM-DD`
 
-## 1. Execution Scope
-- Objective:
-  - <execution target linked to the OpenSpec change>
-- In Scope Files:
-  - `<path/to/file>`
-- Out of Scope:
-  - <out-of-scope item>
-- Constraints:
-  - <constraint>
-- Shaping Source:
-  - `openspec/changes/<change-id>/proposal.md`
-  - `openspec/changes/<change-id>/design.md`
-  - `openspec/changes/<change-id>/tasks.md`
-
-## 2. Tasks
-
-Task status lives here. OpenSpec owns shaping artifacts; this file owns execution status, readiness, and evidence.
-
-### T01: <title>
-- Status: `todo`
-- OpenSpec Task Reference:
-  - `openspec/changes/<change-id>/tasks.md#task-group`
-- Objective:
-  - <what this task changes>
-- Depends On:
-  - none
-- Scope:
-  - `<path/to/file>`
-- Constraints:
-  - <constraint>
-- Acceptance Criteria:
-  - [ ] <observable outcome>
-- Validation:
-  - Run: `<command or inspection step>`
-  - Expect: `<expected result>`
-- Evidence:
-  - Not run yet
-
----
-
-### T02: <title>
-- Status: `todo`
-- OpenSpec Task Reference:
-  - `openspec/changes/<change-id>/tasks.md#task-group`
-- Objective:
-  - <what this task changes>
-- Depends On:
-  - `T01`
-- Scope:
-  - `<path/to/file>`
-- Constraints:
-  - <constraint>
-- Acceptance Criteria:
-  - [ ] <observable outcome>
-- Validation:
-  - Run: `<command or inspection step>`
-  - Expect: `<expected result>`
-- Evidence:
-  - Not run yet
-
-## 3. Validation Log
+## 1. Validation Log
 - `<YYYY-MM-DD>` Task `<task-id>`:
   - Run: `<command or inspection step>`
   - Result: `<pass/fail and notable details>`
 
-## 4. Change Log
+## 2. Handoff Notes
 - `<YYYY-MM-DD>`:
-  - <summary of workflow state, task sync, or evidence update>
+  - Current Task: `<task-id or none>`
+  - Worktree State: `<clean/dirty>`
+  - Notes: <handoff summary>
 """
 
 
@@ -207,10 +149,15 @@ def initialize(root: Path, version: str) -> list[str]:
     planning_root = root / "docs" / "planning"
     version_root = planning_root / "versions" / version
     feature_root = version_root / "features"
+    openspec_root = root / "openspec"
     results = []
 
     feature_root.mkdir(parents=True, exist_ok=True)
     results.append(f"ENSURE {feature_root}")
+    (openspec_root / "specs").mkdir(parents=True, exist_ok=True)
+    results.append(f"ENSURE {openspec_root / 'specs'}")
+    (openspec_root / "changes" / "archive").mkdir(parents=True, exist_ok=True)
+    results.append(f"ENSURE {openspec_root / 'changes' / 'archive'}")
     results.append(ensure_text_file(planning_root / "ROADMAP.md", ROADMAP_TEMPLATE))
     results.append(ensure_text_file(planning_root / "template" / "feature-template.md", FEATURE_TEMPLATE))
     results.append(

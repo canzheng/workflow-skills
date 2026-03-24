@@ -86,7 +86,8 @@ def resolve_task(root: Path) -> dict[str, str]:
                 raise WorkflowError(
                     f"{backlog_path.relative_to(root)} section [{section_name}] links missing feature file {link}"
                 )
-            tasks = parse_tasks(feature_path.read_text(encoding="utf-8"))
+            feature_text = feature_path.read_text(encoding="utf-8")
+            tasks = parse_tasks(feature_text, feature_file=feature_path, repo_root=root)
             active_tasks += sum(1 for task in tasks if task.status == "in_progress")
             feature_tasks[(section_name, feature_id)] = (feature_path, tasks)
 

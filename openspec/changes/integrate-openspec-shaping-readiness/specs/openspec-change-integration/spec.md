@@ -16,3 +16,11 @@ OpenSpec-backed readiness SHALL be determined from the linked change artifacts r
 - **THEN** the linked OpenSpec change has `proposal.md`, `design.md`, and `tasks.md`
 - **AND** the feature file links to the affected OpenSpec capability specs
 - **AND** at least one execution task can be started without further shaping work
+
+### Requirement: OpenSpec tasks are authoritative for workflow execution
+The linked OpenSpec change SHALL be the task-definition and task-status authority for workflow execution.
+
+#### Scenario: Workflow execution reads task state from OpenSpec
+- **WHEN** workflow skills determine task readiness, start a task, or complete a task
+- **THEN** they read task definitions and checkbox status from `openspec/changes/<change-id>/tasks.md`
+- **AND** they do not require a second authored task ledger in the feature file

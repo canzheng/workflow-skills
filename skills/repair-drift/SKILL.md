@@ -7,7 +7,7 @@ description: Use when the backlog and feature files disagree or the workflow aud
 
 ## Overview
 
-This skill repairs minimal workflow-state mismatches between the active backlog and its feature files.
+This skill repairs minimal workflow-state mismatches between the active backlog, feature files, and required OpenSpec links.
 
 It is a workflow repair wrapper around `audit-workflow`.
 
@@ -23,6 +23,7 @@ It is a workflow repair wrapper around `audit-workflow`.
 3. Determine the intended source of truth from:
    - current backlog section
    - feature-file metadata
+   - linked OpenSpec change metadata
    - explicit user instruction
 4. Apply the smallest repair that restores consistency.
 5. Re-run `audit-workflow`.
@@ -32,6 +33,7 @@ It is a workflow repair wrapper around `audit-workflow`.
 - wrong backlog anchor in a feature file
 - feature entry in the wrong backlog section
 - stale `Current Task`
+- missing or stale OpenSpec change link metadata
 - illegal task-status combination
 - missing required feature sections
 

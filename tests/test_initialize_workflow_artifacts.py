@@ -27,13 +27,24 @@ class InitializeWorkflowArtifactsTests(unittest.TestCase):
 
             self.assertIn("- OpenSpec Change: `<change-id>`", template)
             self.assertIn("- OpenSpec Specs:", template)
-            self.assertIn("## 1. Execution Scope", template)
-            self.assertIn("## 2. Tasks", template)
-            self.assertIn("## 3. Validation Log", template)
-            self.assertIn("## 4. Change Log", template)
+            self.assertIn("- Current Task: `none`", template)
+            self.assertIn("## 1. Validation Log", template)
+            self.assertIn("## 2. Handoff Notes", template)
+            self.assertNotIn("## 2. Tasks", template)
+            self.assertNotIn("## 3. Validation Log", template)
+            self.assertNotIn("## 4. Change Log", template)
             self.assertNotIn("## 4. Design Spec", template)
             self.assertNotIn("## 5. Implementation Plan", template)
             self.assertNotIn("## 6. Tasks", template)
+
+    def test_initialize_creates_required_openspec_scaffold(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+
+            initialize(repo, "v1")
+
+            self.assertTrue((repo / "openspec" / "specs").is_dir())
+            self.assertTrue((repo / "openspec" / "changes" / "archive").is_dir())
 
 
 if __name__ == "__main__":

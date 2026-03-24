@@ -7,9 +7,9 @@ description: Use when a repository wants to adopt the docs/planning workflow but
 
 ## Overview
 
-Create the minimum valid `docs/planning/` scaffold for the workflow contract without overwriting existing user content.
+Create the minimum valid `docs/planning/` plus `openspec/` scaffold for the workflow contract without overwriting existing user content.
 
-Use this before `audit-workflow` if the repo does not yet have `docs/planning/current_version`, `ROADMAP.md`, or the active version directories.
+Use this before `audit-workflow` if the repo does not yet have `docs/planning/current_version`, `ROADMAP.md`, the active version directories, or the required OpenSpec scaffold.
 
 ## Run
 
@@ -25,6 +25,8 @@ python "${CODEX_HOME:-$HOME/.codex}/skills/initialize-workflow-artifacts/scripts
 - `docs/planning/versions/<version>/BACKLOG.md`
 - `docs/planning/versions/<version>/features/`
 - `docs/planning/current_version` symlink
+- `openspec/specs/`
+- `openspec/changes/archive/`
 
 ## Rules
 
