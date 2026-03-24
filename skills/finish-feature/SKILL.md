@@ -36,6 +36,7 @@ It enforces the OpenSpec validate/archive gate for the linked change before hand
 ## Rules
 
 - Do not call `finishing-a-development-branch` before the linked OpenSpec change is archived.
+- This skill must run `openspec-archive-change` when the linked change is still active.
 - Archive proof is filesystem state, not memory:
   - `openspec/changes/<change-id>/` must not exist
   - exactly one `openspec/changes/archive/*-<change-id>/` directory must exist

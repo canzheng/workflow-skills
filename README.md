@@ -95,7 +95,7 @@ Responsibilities:
 - run `audit-workflow` before and after
 - select the backlog item
 - use exploration/brainstorming as needed
-- use the OpenSpec propose flow to create or update one OpenSpec change for the feature
+- run `openspec-propose` through the wrapper to create or update one OpenSpec change for the feature
 - ensure shaping happens in OpenSpec artifacts
 - create the thin feature file with workflow metadata and OpenSpec links
 - move the board item to `[SHAPING]`
@@ -103,7 +103,7 @@ Responsibilities:
 
 OpenSpec tools used during shaping:
 - `openspec-explore` for requirements/thinking
-- `openspec-propose` through the wrapper for creating the change artifacts
+- `openspec-propose`, which `shape-backlog-item` must run through the wrapper for creating the change artifacts
 
 OpenSpec `apply` is not part of this workflow.
 
@@ -169,7 +169,7 @@ When the feature-level acceptance bar is met:
 Official sequence:
 1. Finish the last execution task with `complete-task`
 2. Run `finish-feature`
-3. Let `finish-feature` validate and archive the linked OpenSpec change
+3. Let `finish-feature` run `openspec-archive-change` after validation and archive the linked OpenSpec change
 4. Let `finish-feature` hand off to `finishing-a-development-branch`
 
 Current OpenSpec CLI note:
@@ -231,7 +231,8 @@ OpenSpec validation is additive:
 - Do not move a feature to `[READY]` without linked OpenSpec shaping artifacts and at least one `ready` OpenSpec task.
 - Do not use OpenSpec archive as a substitute for `complete-task` evidence or `DONE` acceptance.
 - Do not finish the branch before the linked OpenSpec change is validated and archived.
-- Do not run `openspec-propose` as a separate manual lane for promoted work; `shape-backlog-item` owns that step.
+- `shape-backlog-item` must run `openspec-propose` for promoted work; do not run `openspec-propose` as a separate manual lane.
+- `finish-feature` must run `openspec-archive-change` before handing off to `finishing-a-development-branch`.
 
 ## Repository State
 

@@ -16,11 +16,13 @@
 ## Workflow skill routing
 - Use `audit-workflow` before and after planning-state edits.
 - Use `shape-backlog-item` instead of raw `brainstorming` when promoting backlog work into shaped features.
+- `shape-backlog-item` must run `openspec-propose` for promoted work.
 - `shape-backlog-item` inherits the mandatory review gates from `brainstorming`.
 - Use `ready-feature` instead of raw `writing-plans` when finishing shaping and promoting a feature into `[READY]`.
 - `ready-feature` inherits the mandatory plan-review gate from `writing-plans`.
 - Use `start-task` to begin execution, `complete-task` to close the active task, and `repair-drift` to fix workflow-state inconsistencies.
 - Use `finish-feature` when a feature has reached `[DONE]` and must satisfy the OpenSpec archive gate before branch finalization.
+- `finish-feature` must run `openspec-archive-change` before handing off to `finishing-a-development-branch`.
 - Use `autonomous-backlog-loop` only when the goal is to keep advancing eligible workflow items autonomously.
 - Within the workflow wrappers, prefer `subagent-driven-development` for approved execution work and run a review pass before declaring completion.
 - Wrappers and orchestration must respect, not bypass, review and verification gates inherited from wrapped execution skills.
