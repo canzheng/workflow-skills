@@ -6,6 +6,7 @@ The current workflow has strong structural audit coverage for board state, task 
 
 - Make OpenSpec a required part of workflow initialization and an assumed dependency of the workflow skills.
 - Add an OpenSpec integration contract that maps one promoted feature to one OpenSpec change during shaping, readiness, execution, and archive work.
+- Add a workflow-owned feature-finalization gate so branch finishing only happens after the linked OpenSpec change is validated and archived.
 - Modify shaping and readiness expectations so `[SHAPING]` and `[READY]` are justified by linked OpenSpec artifacts rather than long-form design and plan prose in the feature file.
 - Reduce feature files to execution metadata, validation evidence, and links to the authoritative OpenSpec change and affected specs.
 - Make OpenSpec `tasks.md` the authoritative task definition and task-status ledger for execution.

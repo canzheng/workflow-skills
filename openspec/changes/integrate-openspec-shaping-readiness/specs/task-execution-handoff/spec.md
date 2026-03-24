@@ -39,3 +39,13 @@ Finishing a task or feature SHALL remain separate from final branch/worktree cle
 - **WHEN** a feature satisfies its feature-level acceptance bar
 - **THEN** the feature may move to `[DONE]`
 - **AND** branch/worktree finalization remains a separate downstream action
+
+### Requirement: Branch finalization requires archived OpenSpec change state
+Feature branch finalization SHALL be gated on linked OpenSpec validation and archive state.
+
+#### Scenario: Workflow finishes a done feature
+- **WHEN** a feature in `[DONE]` is handed off for branch finalization
+- **THEN** the workflow first validates the linked OpenSpec change
+- **AND** it archives that change
+- **AND** `openspec/changes/<change-id>/` no longer exists
+- **AND** exactly one `openspec/changes/archive/*-<change-id>/` directory exists before branch finalization continues

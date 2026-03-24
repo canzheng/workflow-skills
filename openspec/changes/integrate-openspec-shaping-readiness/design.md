@@ -13,6 +13,7 @@ The agreed target is narrower than a full workflow replacement. `BACKLOG.md` rem
 - Reduce feature-file content to execution-oriented metadata, evidence, and OpenSpec links.
 - Make OpenSpec `tasks.md` the authoritative task ledger used by `ready-feature`, `start-task`, and `complete-task`.
 - Extend audit so OpenSpec-backed workflow states and OpenSpec task invariants can be checked structurally rather than informally.
+- Require feature completion to pass through a workflow-owned OpenSpec validate/archive gate before generic branch finalization.
 
 **Non-Goals:**
 - Replace `BACKLOG.md` with OpenSpec as the release-planning board.
@@ -64,6 +65,12 @@ Global skills will read and validate `openspec/changes/<change-id>/` artifacts d
 Alternative considered:
 - Have global skills wrap repo-local OpenSpec skills directly. Rejected because that couples reusable workflow automation to generated, repo-local agent scaffolding.
 
+### Decision: Add a workflow-owned feature completion gate before branch finishing
+The generic branch-finishing skill should remain repo-agnostic. The workflow will therefore add its own `finish-feature` gate that validates the linked OpenSpec change, archives it, confirms filesystem-visible archive state, and only then hands off to branch finalization.
+
+Alternative considered:
+- Call `finishing-a-development-branch` directly and rely on operator discipline to archive first. Rejected because the archive gate is workflow-specific and should be enforced mechanically.
+
 ## Risks / Trade-offs
 
 - [Feature-file template churn] → Update initializer/template and wrapper expectations together so planning artifacts do not drift.
@@ -77,9 +84,9 @@ Alternative considered:
 2. Update the workflow contract, feature template, and wrapper skill docs to reflect links-plus-evidence feature files.
 3. Extend audit, repair, and task-resolution helpers to validate linked change IDs, readiness prerequisites, and OpenSpec task status.
 4. Update tests to cover OpenSpec-linked shaping/readiness and OpenSpec task parsing/execution.
-5. Adopt the new model for future promoted features; migrate existing feature files only when they are touched next.
+5. Add a workflow-owned feature completion gate that proves archive state before branch finalization.
+6. Adopt the new model for future promoted features; migrate existing feature files only when they are touched next.
 
 ## Open Questions
 
-- Should `[DONE]` require an OpenSpec archive step, or remain independent from archive/final-branch handling?
 - Should feature files retain `Current Task`, or should current-task discovery be computed entirely from OpenSpec task state?

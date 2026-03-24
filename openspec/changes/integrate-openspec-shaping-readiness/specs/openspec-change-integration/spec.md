@@ -24,3 +24,11 @@ The linked OpenSpec change SHALL be the task-definition and task-status authorit
 - **WHEN** workflow skills determine task readiness, start a task, or complete a task
 - **THEN** they read task definitions and checkbox status from `openspec/changes/<change-id>/tasks.md`
 - **AND** they do not require a second authored task ledger in the feature file
+
+### Requirement: Workflow promotion owns the OpenSpec propose step
+Promoting a backlog item into shaping SHALL create or update its linked OpenSpec change through the workflow wrapper rather than through an independent manual lane.
+
+#### Scenario: Backlog shaping creates the linked change
+- **WHEN** `shape-backlog-item` promotes work from `[BACKLOG]` into `[SHAPING]`
+- **THEN** it creates or updates the linked OpenSpec change as part of that workflow
+- **AND** the resulting feature file and backlog entry reference that same linked change

@@ -17,3 +17,4 @@
 - [x] 3.1 Add or update tests covering mandatory OpenSpec initialization, OpenSpec-linked shaping/readiness, OpenSpec task parsing, and expected audit failures
 - [x] 3.2 Validate the updated workflow and OpenSpec specs with the narrowest relevant commands
 - [x] 3.3 Document migration expectations for adopting the new model in future features
+- [x] 3.4 Add a workflow-owned feature completion gate that validates and archives the linked OpenSpec change before generic branch finalization

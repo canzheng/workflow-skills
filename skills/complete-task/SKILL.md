@@ -9,7 +9,7 @@ description: Use when closing the active task, writing verification evidence, an
 
 This skill verifies one active task, records evidence, and updates task and feature state.
 
-It does not merge or clean up the feature branch/worktree. Branch finalization is separate and should use the existing finishing skill when the feature is complete.
+It does not merge or clean up the feature branch/worktree. Branch finalization is separate and should use `finish-feature` once the feature is complete.
 
 ## Defaults
 
@@ -38,7 +38,7 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 10. Confirm the feature worktree is clean and ready for reuse on the next task.
 11. If feature acceptance is satisfied, move the feature to the bottom of `[DONE]`. Otherwise keep it in `[IN_PROGRESS]`.
 12. Re-run `audit-workflow`.
-13. Report explicitly that the feature branch/worktree still exists and is not finalized unless downstream automation is closing a feature that just reached `[DONE]`.
+13. Report explicitly that the feature branch/worktree still exists and is not finalized unless downstream automation is closing a feature that just reached `[DONE]` and is about to hand off to `finish-feature`.
 
 ## Rules
 

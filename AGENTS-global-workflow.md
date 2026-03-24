@@ -20,6 +20,7 @@
 - Use `ready-feature` instead of raw `writing-plans` when finishing shaping and promoting a feature into `[READY]`.
 - `ready-feature` inherits the mandatory plan-review gate from `writing-plans`.
 - Use `start-task` to begin execution, `complete-task` to close the active task, and `repair-drift` to fix workflow-state inconsistencies.
+- Use `finish-feature` when a feature has reached `[DONE]` and must satisfy the OpenSpec archive gate before branch finalization.
 - Use `autonomous-backlog-loop` only when the goal is to keep advancing eligible workflow items autonomously.
 - Within the workflow wrappers, prefer `subagent-driven-development` for approved execution work and run a review pass before declaring completion.
 - Wrappers and orchestration must respect, not bypass, review and verification gates inherited from wrapped execution skills.
@@ -38,6 +39,7 @@
 - `docs/planning/versions/<version>/BACKLOG.md` owns the ordered work items for that version and tracks feature-level status only through the `[BACKLOG]`, `[SHAPING]`, `[READY]`, `[IN_PROGRESS]`, `[DONE]`, and `[DEFER]` sections.
 - `openspec/specs/` owns the current behavior specification for stable capabilities.
 - `openspec/changes/<change-id>/proposal.md`, `design.md`, `tasks.md`, and delta specs own shaping, readiness intent, task definitions, and task completion state for one linked feature change.
+- `openspec/changes/archive/` owns archived completed changes after feature completion has satisfied the archive gate.
 - `[BACKLOG]` entries must use lowercase backlog IDs like `v1-b001` and follow ``### `v1-b001` [TAG] TITLE``, where `[TAG]` is optional.
 - `[SHAPING]`, `[READY]`, `[IN_PROGRESS]`, `[DONE]`, and `[DEFER]` entries must follow ``### `v1-f001` [TAG] [Title](features/v1-f001-title.md)``, where `[TAG]` is optional.
 - `docs/planning/versions/<version>/features/<feature-id>-<slug>.md` owns one feature's workflow metadata, validation evidence, handoff notes, and links to the authoritative OpenSpec change and specs.
@@ -123,6 +125,7 @@
 
 ## Workflow validation
 - `complete-task` requires `verification-before-completion` as a mandatory gate distinct from review.
+- `finish-feature` requires linked OpenSpec validation plus filesystem-visible archive state before handing off to branch finalization.
 - Record the exact validation command or inspection step and the result in the task's `Validation` or `Evidence` section.
 - A task is not `done` until validation evidence is recorded, or the feature file explicitly says why validation could not be run.
 - A task is not `done` until the active feature worktree is left clean for the next handoff.
@@ -132,6 +135,7 @@
 - Distinguish clearly between implemented, validated locally, and not verified.
 - OpenSpec shaping and archive checks are additive gates. They do not replace workflow audit, OpenSpec task readiness checks, code review, or `verification-before-completion`.
 - Before archiving a linked OpenSpec change, run the relevant OpenSpec validation command for that change and record or report the result.
+- Before branch finalization, the linked OpenSpec change must no longer exist under `openspec/changes/<change-id>/` and must exist exactly once under `openspec/changes/archive/*-<change-id>/`.
 
 ## Workflow git hygiene
 - Do not commit caches, editor artifacts, temp files, or local exports.

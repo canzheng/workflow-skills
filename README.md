@@ -95,7 +95,7 @@ Responsibilities:
 - run `audit-workflow` before and after
 - select the backlog item
 - use exploration/brainstorming as needed
-- create or link one OpenSpec change for the feature
+- use the OpenSpec propose flow to create or update one OpenSpec change for the feature
 - ensure shaping happens in OpenSpec artifacts
 - create the thin feature file with workflow metadata and OpenSpec links
 - move the board item to `[SHAPING]`
@@ -103,7 +103,7 @@ Responsibilities:
 
 OpenSpec tools used during shaping:
 - `openspec-explore` for requirements/thinking
-- `openspec-propose` for creating the change artifacts
+- `openspec-propose` through the wrapper for creating the change artifacts
 
 OpenSpec `apply` is not part of this workflow.
 
@@ -166,9 +166,9 @@ When the feature-level acceptance bar is met:
 
 Official sequence:
 1. Finish the last execution task with `complete-task`
-2. Run OpenSpec validation for the linked change
-3. Archive the OpenSpec change
-4. Run `finishing-a-development-branch`
+2. Run `finish-feature`
+3. Let `finish-feature` validate and archive the linked OpenSpec change
+4. Let `finish-feature` hand off to `finishing-a-development-branch`
 
 Current OpenSpec CLI note:
 - this workflow uses `openspec validate ...` as the verification step before archive
@@ -194,6 +194,7 @@ Official skill usage by phase:
 - Execution completion: `complete-task`
 - Drift repair: `repair-drift`
 - Feature deferral: `defer-feature`
+- Feature completion gate: `finish-feature`
 - OpenSpec change archive: `openspec-archive-change`
 - Final branch handling: `finishing-a-development-branch`
 
@@ -219,6 +220,7 @@ OpenSpec validation is additive:
 - it does not replace workflow audit
 - it does not replace task-level evidence
 - it does not replace review or branch-finish checks
+- branch finishing must be preceded by the workflow-owned archive gate
 
 ## Minimal Operating Rules
 
@@ -227,6 +229,7 @@ OpenSpec validation is additive:
 - Do not move a feature to `[READY]` without linked OpenSpec shaping artifacts and at least one `ready` OpenSpec task.
 - Do not use OpenSpec archive as a substitute for `complete-task` evidence or `DONE` acceptance.
 - Do not finish the branch before the linked OpenSpec change is validated and archived.
+- Do not run `openspec-propose` as a separate manual lane for promoted work; `shape-backlog-item` owns that step.
 
 ## Repository State
 

@@ -29,7 +29,7 @@ It is a workflow wrapper around `brainstorming` plus linked OpenSpec change crea
    - do not continue until the wrapped `brainstorming` flow has completed its required review gates for the chosen shaping output
 5. For each promoted feature:
    - assign the next feature ID
-   - create or link one OpenSpec change for the feature's shaping authority
+   - use the OpenSpec propose flow to create or update exactly one linked OpenSpec change for the feature's shaping authority
    - create the feature file under `features/`
    - write workflow metadata plus links to the authoritative OpenSpec change and affected specs
    - do not duplicate proposal, design, spec, or task prose from OpenSpec inside the feature file
@@ -47,6 +47,7 @@ It is a workflow wrapper around `brainstorming` plus linked OpenSpec change crea
 - A clean planning exit usually means committing the intentional shaping changes, but the invariant is a clean primary checkout.
 - `brainstorming` owns the design-review gates for this skill. Do not treat shaping as complete until its required approvals and review loops have passed.
 - This workflow requires OpenSpec. Do not promote a feature without a linked OpenSpec change.
+- This skill owns the OpenSpec propose step for promoted work. Do not rely on a separate manual `openspec-propose` run followed by hand-edited workflow state.
 - Preserve inherited validation and review gates. OpenSpec shaping does not relax audit, review, or verification requirements.
 - Keep a single backlog-item split below 5 features.
 - If the work appears to need 5 or more features, split it into multiple `[BACKLOG]` items first.
