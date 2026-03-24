@@ -240,16 +240,53 @@ def _linked_openspec_tasks_file(
     feature_file: Path | None = None,
     repo_root: Path | None = None,
 ) -> Path | None:
+    change_dir = linked_openspec_change_dir(feature_text, feature_file=feature_file, repo_root=repo_root)
+    if change_dir is None:
+        return None
+    tasks_file = change_dir / "tasks.md"
+    if not tasks_file.exists():
+        return None
+    return tasks_file
+
+
+def linked_openspec_change_dir(
+    feature_text: str,
+    *,
+    feature_file: Path | None = None,
+    repo_root: Path | None = None,
+) -> Path | None:
     change_id = parse_feature_openspec_change(feature_text)
     if change_id is None:
         return None
     resolved_repo_root = _resolve_repo_root_from_feature_file(feature_file, repo_root)
     if resolved_repo_root is None:
         return None
-    tasks_file = resolved_repo_root / "openspec" / "changes" / change_id / "tasks.md"
-    if not tasks_file.exists():
+    change_dir = resolved_repo_root / "openspec" / "changes" / change_id
+    if not change_dir.exists():
         return None
-    return tasks_file
+    return change_dir
+
+
+def list_openspec_change_context_files(
+    feature_text: str,
+    *,
+    feature_file: Path | None = None,
+    repo_root: Path | None = None,
+) -> list[Path]:
+    change_dir = linked_openspec_change_dir(feature_text, feature_file=feature_file, repo_root=repo_root)
+    if change_dir is None:
+        return []
+
+    primary_files = [change_dir / name for name in ("proposal.md", "design.md", "tasks.md")]
+    primary_existing = [path for path in primary_files if path.exists()]
+    primary_set = {path.resolve() for path in primary_existing}
+
+    extra_markdown = sorted(
+        path
+        for path in change_dir.rglob("*.md")
+        if path.resolve() not in primary_set
+    )
+    return [*primary_existing, *extra_markdown]
 
 
 def _parse_openspec_tasks_text(tasks_text: str) -> list[RawOpenSpecTaskRecord]:

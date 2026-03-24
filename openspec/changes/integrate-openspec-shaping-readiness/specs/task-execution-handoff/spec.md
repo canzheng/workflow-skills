@@ -32,6 +32,21 @@ The workflow SHALL read and update task status in the linked OpenSpec change dur
 - **THEN** it records validation evidence in the feature file
 - **AND** it marks the corresponding task `done` in OpenSpec
 
+### Requirement: Workflow execution provides explicit linked-change context
+Execution wrappers SHALL provide explicit linked-change context to the executor.
+
+#### Scenario: Start task surfaces authoritative change context
+- **WHEN** `start-task` selects the next executable task for a feature
+- **THEN** it provides the linked OpenSpec change directory
+- **AND** it provides the Markdown files under that change as context, including `proposal.md`, `design.md`, and `tasks.md`
+- **AND** it instructs the executor to read the files listed as context before starting work
+
+#### Scenario: Complete task reuses authoritative change context
+- **WHEN** `complete-task` resolves the active task for completion
+- **THEN** it provides the linked OpenSpec change directory
+- **AND** it provides the Markdown files under that change as context
+- **AND** it instructs the executor to read the files listed as context before closing the task
+
 ### Requirement: Feature completion is distinct from branch finalization
 Finishing a task or feature SHALL remain separate from final branch/worktree cleanup decisions.
 

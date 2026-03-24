@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 INIT_SCRIPT = REPO_ROOT / "skills" / "initialize-workflow-artifacts" / "scripts" / "init_workflow_artifacts.py"
 AUDIT_SCRIPT = REPO_ROOT / "skills" / "audit-workflow" / "scripts" / "audit_workflow.py"
 START_TASK_SCRIPT = REPO_ROOT / "skills" / "start-task" / "scripts" / "resolve_start_task.py"
+COMPLETE_TASK_SCRIPT = REPO_ROOT / "skills" / "complete-task" / "scripts" / "resolve_complete_task.py"
 
 _SPEC = importlib.util.spec_from_file_location("init_workflow_artifacts", INIT_SCRIPT)
 assert _SPEC is not None and _SPEC.loader is not None
@@ -131,6 +132,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            (change_dir / "notes.md").write_text("# Notes\n\nExtra context\n", encoding="utf-8")
 
             result = subprocess.run(
                 ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
@@ -143,6 +145,125 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             payload = json.loads(result.stdout)
             self.assertEqual(payload["feature_id"], "v1-f001")
             self.assertEqual(payload["task_id"], "1.2")
+            self.assertEqual(
+                payload["openspec_change_path"],
+                "openspec/changes/integrate-openspec-shaping-readiness",
+            )
+            self.assertEqual(
+                payload["openspec_context_files"],
+                [
+                    "openspec/changes/integrate-openspec-shaping-readiness/proposal.md",
+                    "openspec/changes/integrate-openspec-shaping-readiness/design.md",
+                    "openspec/changes/integrate-openspec-shaping-readiness/tasks.md",
+                    "openspec/changes/integrate-openspec-shaping-readiness/notes.md",
+                ],
+            )
+            self.assertIn("Read the files listed as context", payload["execution_instruction"])
+
+    def test_complete_task_resolves_active_task_with_linked_openspec_context(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    None yet.
+
+                    ## [READY]
+
+                    None yet.
+
+                    ## [IN_PROGRESS]
+
+                    ### `v1-f001` [OpenSpec integration](features/v1-f001-openspec-integration.md)
+
+                    ## [DONE]
+
+                    None yet.
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            feature_file = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-openspec-integration.md"
+            feature_file.write_text(
+                textwrap.dedent(
+                    """\
+                    # Feature: OpenSpec integration
+
+                    ## 0. Meta
+                    - Feature ID: `v1-f001`
+                    - Version: `v1`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+                    - OpenSpec Change: `integrate-openspec-shaping-readiness`
+                    - OpenSpec Specs:
+                      - `openspec/specs/workflow-board-lifecycle/spec.md`
+                    - Current Task: `1.2`
+
+                    ## 1. Validation Log
+                    - None yet.
+
+                    ## 2. Handoff Notes
+                    - None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            change_dir = repo / "openspec" / "changes" / "integrate-openspec-shaping-readiness"
+            change_dir.mkdir(parents=True, exist_ok=True)
+            (change_dir / "proposal.md").write_text("## Why\n\nTest\n", encoding="utf-8")
+            (change_dir / "design.md").write_text("## Context\n\nTest\n", encoding="utf-8")
+            (change_dir / "tasks.md").write_text(
+                textwrap.dedent(
+                    """\
+                    ## 1. Setup
+
+                    - [x] 1.1 Seed baseline
+                    - [ ] 1.2 Wire task parsing
+                      - Depends On:
+                        - `1.1`
+                    """
+                ),
+                encoding="utf-8",
+            )
+            (change_dir / "notes.md").write_text("# Notes\n\nExtra context\n", encoding="utf-8")
+
+            result = subprocess.run(
+                ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["feature_id"], "v1-f001")
+            self.assertEqual(payload["task_id"], "1.2")
+            self.assertEqual(
+                payload["openspec_context_files"],
+                [
+                    "openspec/changes/integrate-openspec-shaping-readiness/proposal.md",
+                    "openspec/changes/integrate-openspec-shaping-readiness/design.md",
+                    "openspec/changes/integrate-openspec-shaping-readiness/tasks.md",
+                    "openspec/changes/integrate-openspec-shaping-readiness/notes.md",
+                ],
+            )
+            self.assertIn("Read the files listed as context", payload["execution_instruction"])
 
 
 if __name__ == "__main__":

@@ -53,6 +53,12 @@ Alternative considered:
 Alternative considered:
 - Keep a synchronized execution task ledger in the feature file. Rejected as the steady state because it recreates a second mutable task source of truth.
 
+### Decision: Make execution context explicit from the linked change
+`start-task` and `complete-task` should not rely on an executor implicitly discovering the right OpenSpec artifacts. They will surface the linked change directory and a deterministic list of Markdown context files under that change, and instruct the executor to read those files as context before acting.
+
+Alternative considered:
+- Let the executor infer relevant change files from the feature file alone. Rejected because it makes the execution context implicit and easier to skip or partially read.
+
 ### Decision: Extend audit with structural OpenSpec checks only
 The audit should verify that required OpenSpec links and shaping/readiness artifacts exist, and that OpenSpec task status satisfies workflow invariants, but it should not attempt deep semantic analysis of spec quality. OpenSpec validation remains the semantic/spec-focused tool.
 

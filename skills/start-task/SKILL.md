@@ -26,6 +26,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 1. Run `audit-workflow`.
 2. Confirm there is no repository task already marked `in_progress`.
 3. Resolve the target feature and task.
+   - require the resolver payload to include the linked OpenSpec change directory and the Markdown context file list under that change
 4. Confirm the feature is `[IN_PROGRESS]` or `[READY]`, the linked OpenSpec task is `ready`, and the feature has no task-readiness drift against the shared dependency model.
 5. If this is the first executing task for the feature, confirm the primary checkout is clean so the worktree will be created from a clean commit. If the primary checkout is dirty, stop and resolve the changes explicitly instead of auto-committing them.
 6. Wrap `using-git-worktrees`:
@@ -47,6 +48,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
    - use `test-driven-development` when the task is implementation or bugfix work with tests in scope
 13. Execute the task work inside the selected feature worktree:
    - keep execution scoped to this one task
+   - read the files listed as context before starting work, including `proposal.md`, `design.md`, `tasks.md`, and any other Markdown files under the linked change directory
    - apply the chosen work method inside the chosen execution mode
    - stop only when the task is ready for `complete-task`, or when the task must be marked `blocked` or `cancelled`
 
@@ -56,6 +58,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 - One task means one task ID and one bounded acceptance target.
 - A feature in execution owns one feature branch/worktree reused across its sequential tasks.
 - OpenSpec is the task-definition and task-status authority for this skill.
+- Execution context must be explicit. Provide the linked OpenSpec change directory plus the Markdown context file list to the executor instead of relying on implied context.
 - Do not auto-commit dirty primary-checkout changes just to create a feature worktree.
 - For later tasks on the same feature, resume in that existing feature worktree only; never switch the task back to the primary checkout or a different feature worktree.
 - Do not start a second task while another is active.

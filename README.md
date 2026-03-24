@@ -141,6 +141,7 @@ Responsibilities:
 - set `Current Task`
 - mark the selected OpenSpec task `in_progress`
 - move the feature to `[IN_PROGRESS]` if needed
+- provide the linked OpenSpec change directory and Markdown context file list to the executor, then require the executor to read the listed context files before work begins
 
 `complete-task` is the official exit for one execution task.
 
@@ -151,6 +152,7 @@ Responsibilities:
 - update OpenSpec task status and rely on OpenSpec dependencies for downstream readiness
 - leave the feature worktree clean
 - keep the feature in `[IN_PROGRESS]` until feature acceptance is satisfied
+- provide the linked OpenSpec change directory and Markdown context file list to the executor, then require the executor to read the listed context files before task closure
 
 OpenSpec `apply` is intentionally not used here. Execution stays under workflow task control so the repo keeps:
 - one-task-at-a-time enforcement

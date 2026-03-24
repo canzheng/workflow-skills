@@ -20,6 +20,7 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 
 1. Run `audit-workflow`.
 2. Resolve the target task.
+   - require the resolver payload to include the linked OpenSpec change directory and the Markdown context file list under that change
 3. Confirm it is the only task in the repository with status `in_progress`.
 4. Wrap `verification-before-completion` and run the narrowest relevant verification.
    - do not mark the task `done` until this verification gate has passed with fresh evidence
@@ -27,6 +28,7 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
    - if the task ran through `subagent-driven-development`, confirm its required per-task reviews already passed before completion
    - if the task ran through `executing-plans`, wrap `requesting-code-review` whenever this task closes a review batch, materially completes a feature, or otherwise reaches a review checkpoint
 6. Confirm the active feature worktree contains only intended task changes and will be left clean after completion. Use repo-appropriate checks such as `git status --short` and `git diff --check`.
+   - read the files listed as context before completing the task so validation and task closure are checked against the authoritative change artifacts
 7. Update the feature file:
    - write exact validation evidence
    - clear or update `Current Task`
@@ -51,6 +53,7 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 - Do not finish, repurpose, or clean up the feature branch/worktree in this skill.
 - A task may be `done` while the feature remains `[IN_PROGRESS]`, including contract-or-test tasks whose broader feature suite is still intentionally red.
 - Use the repo feature file as the place to record evidence and handoff notes. Use OpenSpec as the task-definition and task-status authority.
+- Execution context must be explicit. Provide the linked OpenSpec change directory plus the Markdown context file list to the executor instead of relying on implied context.
 
 ## Stop Conditions
 

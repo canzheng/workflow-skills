@@ -14,8 +14,6 @@ if str(SKILLS_ROOT) not in sys.path:
 
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
-    compute_task_readiness_drift,
-    format_task_readiness_drift_messages,
     list_openspec_change_context_files,
     parse_backlog_document,
     parse_feature_openspec_change,
@@ -74,76 +72,57 @@ def read_backlog(root: Path):
     return backlog_path, parsed_backlog
 
 
-def resolve_task(root: Path) -> dict[str, object]:
+def resolve_active_task(root: Path) -> dict[str, object]:
     backlog_path, parsed_backlog = read_backlog(root)
-    feature_tasks: dict[tuple[str, str], tuple[Path, list[object]]] = {}
-    active_tasks = 0
+    active_payloads: list[dict[str, object]] = []
 
     for section_name in WORKFLOW_SECTIONS[1:]:
         for entry in parsed_backlog.feature_sections.get(section_name, []):
             feature_id = entry.feature_id
-            link = entry.link
-            feature_path = (backlog_path.parent / link).resolve()
+            feature_path = (backlog_path.parent / entry.link).resolve()
             if not feature_path.exists():
                 raise WorkflowError(
-                    f"{backlog_path.relative_to(root)} section [{section_name}] links missing feature file {link}"
+                    f"{backlog_path.relative_to(root)} section [{section_name}] links missing feature file {entry.link}"
                 )
             feature_text = feature_path.read_text(encoding="utf-8")
-            tasks = parse_tasks(feature_text, feature_file=feature_path, repo_root=root)
-            active_tasks += sum(1 for task in tasks if task.status == "in_progress")
-            feature_tasks[(section_name, feature_id)] = (feature_path, tasks)
-
-    if active_tasks:
-        raise WorkflowError("repository already has a task with status `in_progress`")
-
-    for section_name in ("IN_PROGRESS", "READY"):
-        for entry in parsed_backlog.feature_sections.get(section_name, []):
-            feature_id = entry.feature_id
-            feature_path, tasks = feature_tasks[(section_name, feature_id)]
-            readiness_drift = compute_task_readiness_drift(
-                feature_path.read_text(encoding="utf-8"),
+            change_id = parse_feature_openspec_change(feature_text)
+            if change_id is None:
+                raise WorkflowError(f"{feature_path.relative_to(root)} is missing OpenSpec Change metadata")
+            change_path = root / "openspec" / "changes" / change_id
+            context_files = list_openspec_change_context_files(
+                feature_text,
                 feature_file=feature_path,
                 repo_root=root,
             )
-            if readiness_drift.has_drift():
-                drift_messages = "; ".join(
-                    format_task_readiness_drift_messages(
-                        readiness_drift,
-                        feature_label=str(feature_path.relative_to(root)),
-                    )
-                )
-                raise WorkflowError(f"task readiness drift detected: {drift_messages}")
-            for task in tasks:
-                if task.status != "ready":
-                    continue
-                change_id = parse_feature_openspec_change(feature_text)
-                if change_id is None:
-                    raise WorkflowError(f"{feature_path.relative_to(root)} is missing OpenSpec Change metadata")
-                change_path = root / "openspec" / "changes" / change_id
-                context_files = list_openspec_change_context_files(
-                    feature_text,
-                    feature_file=feature_path,
-                    repo_root=root,
-                )
-                return {
-                    "feature_id": feature_id,
-                    "feature_path": str(feature_path.relative_to(root)),
-                    "feature_section": section_name,
-                    "openspec_change_id": change_id,
-                    "openspec_change_path": str(change_path.relative_to(root)),
-                    "openspec_context_files": [str(path.relative_to(root)) for path in context_files],
-                    "execution_instruction": "Read the files listed as context before starting work.",
-                    "task_id": task.task_id,
-                    "task_title": task.task_title,
-                }
 
-    raise WorkflowError("no startable task found in [IN_PROGRESS] or [READY]")
+            for task in parse_tasks(feature_text, feature_file=feature_path, repo_root=root):
+                if task.status != "in_progress":
+                    continue
+                active_payloads.append(
+                    {
+                        "feature_id": feature_id,
+                        "feature_path": str(feature_path.relative_to(root)),
+                        "feature_section": section_name,
+                        "openspec_change_id": change_id,
+                        "openspec_change_path": str(change_path.relative_to(root)),
+                        "openspec_context_files": [str(path.relative_to(root)) for path in context_files],
+                        "execution_instruction": "Read the files listed as context before completing the task.",
+                        "task_id": task.task_id,
+                        "task_title": task.task_title,
+                    }
+                )
+
+    if not active_payloads:
+        raise WorkflowError("repository has no task with status `in_progress`")
+    if len(active_payloads) > 1:
+        raise WorkflowError("repository has multiple tasks with status `in_progress`")
+    return active_payloads[0]
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
     try:
-        payload = resolve_task(repo_root(args.repo_root))
+        payload = resolve_active_task(repo_root(args.repo_root))
     except WorkflowError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1

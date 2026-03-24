@@ -83,6 +83,7 @@
 - Unchecked OpenSpec tasks are treated as executable `ready` work only when their dependencies and prerequisites are satisfied. Otherwise they remain `todo`.
 - `Current Task` in the feature file identifies the one task currently `in_progress`.
 - Checked OpenSpec tasks are treated as `done`.
+- `start-task` and `complete-task` must provide explicit linked-change context to the executor: the linked change directory plus the Markdown files under that change, with instructions to read the listed files as context.
 - At most one task in the repository may be `in_progress` at a time.
 - A task may move to `done` only after validation evidence is recorded in the feature file.
 - If new work is discovered during execution, add or revise OpenSpec tasks first. Do not silently expand the current task.

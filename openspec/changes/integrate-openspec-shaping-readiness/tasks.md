@@ -11,6 +11,7 @@
 - [x] 2.3 Update `start-task` and its resolver to select the next ready task from the linked OpenSpec change and mark it `in_progress`
 - [x] 2.4 Update `complete-task` expectations so task completion records evidence locally but updates task status in OpenSpec
 - [x] 2.5 Update `repair-drift` guidance so OpenSpec-linked inconsistencies are handled as minimal structural repairs
+- [x] 2.6 Make `start-task` and `complete-task` provide explicit linked-change context files to the executor
 
 ## 3. Verification and Adoption
 
