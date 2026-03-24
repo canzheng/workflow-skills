@@ -8,7 +8,7 @@
 - Treat any repo-local `AGENTS.md` as an overlay for project-specific constraints, not a second source of truth for the full workflow contract unless the repo explicitly says otherwise.
 
 ## Workflow core principle
-- One feature = one feature file = single source of truth
+- One feature = one feature file for execution state + one linked OpenSpec change for shaping truth
 - Always prefer updating existing artifacts over creating new ones
 - Keep changes minimal, scoped, and verifiable
 
@@ -25,7 +25,7 @@
 
 ## Workflow lifecycle
 - Feature lifecycle must follow `BACKLOG -> SHAPING -> READY -> IN_PROGRESS -> DONE` or `DEFER`.
-- Work inside a feature must follow `Feature -> Design Spec -> Implementation Plan -> Tasks -> Execution`.
+- Work inside a feature must follow `Feature -> OpenSpec proposal/specs/design/tasks -> Execution`.
 - Do not skip steps.
 - Do not mix levels.
 - Tasks are the only execution units.
@@ -35,9 +35,11 @@
 - `docs/planning/current_version` is a symlink to the active version directory. It is a convenience pointer, not a second source of truth.
 - `docs/planning/versions/<version>/VERSION_SCOPE.md` owns the version goal, exit criteria, explicit deferrals, and cross-feature decisions for that version.
 - `docs/planning/versions/<version>/BACKLOG.md` owns the ordered work items for that version and tracks feature-level status only through the `[BACKLOG]`, `[SHAPING]`, `[READY]`, `[IN_PROGRESS]`, `[DONE]`, and `[DEFER]` sections.
+- `openspec/specs/` owns the current behavior specification for stable capabilities.
+- `openspec/changes/<change-id>/proposal.md`, `design.md`, `tasks.md`, and delta specs own shaping and readiness intent for one linked feature change.
 - `[BACKLOG]` entries must use lowercase backlog IDs like `v1-b001` and follow ``### `v1-b001` [TAG] TITLE``, where `[TAG]` is optional.
 - `[SHAPING]`, `[READY]`, `[IN_PROGRESS]`, `[DONE]`, and `[DEFER]` entries must follow ``### `v1-f001` [TAG] [Title](features/v1-f001-title.md)``, where `[TAG]` is optional.
-- `docs/planning/versions/<version>/features/<feature-id>-<slug>.md` owns one feature's problem, goal, scope, design spec, implementation plan, tasks, task status, and validation evidence.
+- `docs/planning/versions/<version>/features/<feature-id>-<slug>.md` owns one feature's execution metadata, synchronized execution tasks, task status, validation evidence, and links to the authoritative OpenSpec change and specs.
 - Keep feature-board status in `BACKLOG.md`. Keep task-level tracking and validation evidence in the feature file.
 
 ## Workflow directory convention
@@ -52,14 +54,15 @@
 - Feature IDs must be stable and unique within the repository. Use lowercase IDs like `v1-f001`.
 - Assign the feature ID when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Once created, a feature ID must never be reused for a different feature.
-- The feature file contains `Meta`, `Problem`, `Goal`, `Scope`, `Design Spec`, `Implementation Plan`, and `Tasks`.
-- Do not create separate files for design, spec, plan, or tasks.
+- The feature file contains `Meta`, `Execution Scope`, `Tasks`, `Validation Log`, and `Change Log`.
+- The feature file must record one linked OpenSpec change plus the affected OpenSpec spec paths.
+- Do not duplicate OpenSpec proposal, design, or spec prose inside the feature file.
 - Always update the existing feature file in-place before updating any derived summary elsewhere.
 
 ## Workflow feature status model
 - `BACKLOG`: an idea-level work item that is still unclear or not yet shaped into a ready feature. No feature ID or feature file is required yet.
-- `SHAPING`: a real feature exists, its feature ID is assigned, its feature file exists, and active shaping work is in progress. This covers design-spec work, implementation-plan work, and task breakdown work before execution begins.
-- `READY`: shaping is complete, the task breakdown is sufficiently defined for execution, and no task execution has started yet. `READY` means at least one task exists and has status `ready`.
+- `SHAPING`: a real feature exists, its feature ID is assigned, its feature file exists, and one linked OpenSpec change owns active proposal/spec/design/task shaping work before execution begins.
+- `READY`: shaping is complete, the linked OpenSpec change has the required shaping artifacts, the execution task breakdown has been synchronized into the feature file, and at least one task has status `ready`.
 - `IN_PROGRESS`: execution has started on at least one task for the feature, and the feature is not yet complete or deferred. Once a feature enters `IN_PROGRESS`, keep it there until the feature reaches `DONE` or `DEFER`, even if there is a handoff gap where no task is currently `in_progress`.
 - `DONE`: feature-level acceptance is satisfied.
 - `DEFER`: the work is intentionally postponed or dropped from the current version.
@@ -125,6 +128,8 @@
 - For docs or process-only changes, validate structure, links, symlinks, and relevant git status instead of pretending runtime tests prove the change.
 - If validation cannot be run, say so explicitly.
 - Distinguish clearly between implemented, validated locally, and not verified.
+- OpenSpec shaping and archive checks are additive gates. They do not replace workflow audit, task readiness checks, code review, or `verification-before-completion`.
+- Before archiving a linked OpenSpec change, run the relevant OpenSpec validation command for that change and record or report the result.
 
 ## Workflow git hygiene
 - Do not commit caches, editor artifacts, temp files, or local exports.

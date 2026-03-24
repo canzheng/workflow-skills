@@ -1,8 +1,8 @@
 ## 1. Contract and Templates
 
-- [ ] 1.1 Update the managed workflow contract to define OpenSpec-backed shaping/readiness ownership and thin feature files
-- [ ] 1.2 Update the workflow initializer/template so new feature files store execution metadata and OpenSpec links instead of embedded design and plan prose
-- [ ] 1.3 Update the wrapper skill docs for `shape-backlog-item` and `ready-feature` to treat OpenSpec artifacts as their shaping/readiness inputs
+- [x] 1.1 Update the managed workflow contract to define OpenSpec-backed shaping/readiness ownership and thin feature files
+- [x] 1.2 Update the workflow initializer/template so new feature files store execution metadata and OpenSpec links instead of embedded design and plan prose
+- [x] 1.3 Update the wrapper skill docs for `shape-backlog-item` and `ready-feature` to treat OpenSpec artifacts as their shaping/readiness inputs
 
 ## 2. Audit and Repair
 

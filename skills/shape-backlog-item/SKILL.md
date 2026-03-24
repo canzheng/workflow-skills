@@ -9,7 +9,7 @@ description: Use when taking a backlog item and turning it into one or more shap
 
 This skill promotes one backlog item into one or more features in `[SHAPING]`, or rewrites it into smaller backlog items first.
 
-It is a workflow wrapper around `brainstorming`. It owns target selection, feature ID assignment, file creation, and backlog updates.
+It is a workflow wrapper around `brainstorming` plus linked OpenSpec change creation. It owns target selection, feature ID assignment, OpenSpec linkage, feature-file creation, and backlog updates.
 
 ## Defaults
 
@@ -29,9 +29,11 @@ It is a workflow wrapper around `brainstorming`. It owns target selection, featu
    - do not continue until the wrapped `brainstorming` flow has completed its required review gates for the chosen shaping output
 5. For each promoted feature:
    - assign the next feature ID
+   - create or link one OpenSpec change for the feature's shaping authority
    - create the feature file under `features/`
-   - write `Problem`, `Goal`, `Scope`, and `Design Spec`
-   - seed `Implementation Plan` and `Tasks` only if the design already justifies them
+   - write execution metadata plus links to the authoritative OpenSpec change and affected specs
+   - do not duplicate proposal, design, or spec prose from OpenSpec inside the feature file
+   - seed execution tasks only if the linked OpenSpec tasks already justify them
 6. Update feature files first, then update `BACKLOG.md`.
 7. Place promoted features at the bottom of `[SHAPING]`, preserving the existing top-to-bottom order of earlier items.
 8. Re-run `audit-workflow`.
@@ -45,6 +47,7 @@ It is a workflow wrapper around `brainstorming`. It owns target selection, featu
 - Leave the primary checkout clean before exiting this skill.
 - A clean planning exit usually means committing the intentional shaping changes, but the invariant is a clean primary checkout.
 - `brainstorming` owns the design-review gates for this skill. Do not treat shaping as complete until its required approvals and review loops have passed.
+- Preserve inherited validation and review gates. OpenSpec shaping does not relax audit, review, or verification requirements.
 - Keep a single backlog-item split below 5 features.
 - If the work appears to need 5 or more features, split it into multiple `[BACKLOG]` items first.
 - Do not mark any feature `[READY]` in this skill.

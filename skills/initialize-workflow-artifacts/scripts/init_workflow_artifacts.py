@@ -16,51 +16,36 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Feature ID: `v1-f001`
 - Version: `v1`
 - Backlog Reference: `<link or anchor>`
+- OpenSpec Change: `<change-id>`
+- OpenSpec Specs:
+  - `openspec/specs/<capability>/spec.md`
 - Current Task: `none`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
 - Created: `YYYY-MM-DD`
 - Last Updated: `YYYY-MM-DD`
 
-## 1. Problem
-- Current problem / what is missing
-
-## 2. Goal
-- Success criteria
-
-## 3. Scope
-- Included:
-  - <scope item>
-- Not included:
-  - <out-of-scope item>
-
----
-
-## 4. Design Spec
-- Context:
-  - <why this feature exists>
-- Approach:
-  - <design summary>
-- Risks / open questions:
-  - <risk or TBD>
-
----
-
-## 5. Implementation Plan
-- Sequence:
-  - <ordered implementation step>
-- Files expected in scope:
+## 1. Execution Scope
+- Objective:
+  - <execution target linked to the OpenSpec change>
+- In Scope Files:
   - `<path/to/file>`
-- Validation strategy:
-  - `<command or inspection>`
+- Out of Scope:
+  - <out-of-scope item>
+- Constraints:
+  - <constraint>
+- Shaping Source:
+  - `openspec/changes/<change-id>/proposal.md`
+  - `openspec/changes/<change-id>/design.md`
+  - `openspec/changes/<change-id>/tasks.md`
 
----
+## 2. Tasks
 
-## 6. Tasks
-
-Task status lives here. `BACKLOG.md` tracks feature-board status only.
+Task status lives here. OpenSpec owns shaping artifacts; this file owns execution status, readiness, and evidence.
 
 ### T01: <title>
 - Status: `todo`
+- OpenSpec Task Reference:
+  - `openspec/changes/<change-id>/tasks.md#task-group`
 - Objective:
   - <what this task changes>
 - Depends On:
@@ -81,6 +66,8 @@ Task status lives here. `BACKLOG.md` tracks feature-board status only.
 
 ### T02: <title>
 - Status: `todo`
+- OpenSpec Task Reference:
+  - `openspec/changes/<change-id>/tasks.md#task-group`
 - Objective:
   - <what this task changes>
 - Depends On:
@@ -96,6 +83,15 @@ Task status lives here. `BACKLOG.md` tracks feature-board status only.
   - Expect: `<expected result>`
 - Evidence:
   - Not run yet
+
+## 3. Validation Log
+- `<YYYY-MM-DD>` Task `<task-id>`:
+  - Run: `<command or inspection step>`
+  - Result: `<pass/fail and notable details>`
+
+## 4. Change Log
+- `<YYYY-MM-DD>`:
+  - <summary of workflow state, task sync, or evidence update>
 """
 
 
