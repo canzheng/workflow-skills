@@ -2,17 +2,18 @@ from __future__ import annotations
 
 import os
 import subprocess
+import tempfile
+import unittest
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INSTALL_SCRIPT = REPO_ROOT / "install.sh"
+MANAGED_WORKFLOW = REPO_ROOT / "AGENTS-global-workflow.md"
 
 
-def test_install_script_copies_workflow_skills_to_codex_home(tmp_path: Path) -> None:
-    codex_home = tmp_path / "codex-home"
-
-    result = subprocess.run(
+def _run_install(codex_home: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
         ["bash", str(INSTALL_SCRIPT)],
         cwd=REPO_ROOT,
         env={**os.environ, "CODEX_HOME": str(codex_home)},
@@ -21,9 +22,69 @@ def test_install_script_copies_workflow_skills_to_codex_home(tmp_path: Path) -> 
         check=False,
     )
 
-    assert result.returncode == 0, result.stdout + result.stderr
 
-    skills_root = codex_home / "skills"
-    assert (skills_root / "audit-workflow" / "SKILL.md").is_file()
-    assert (skills_root / "_workflow" / "workflow_state.py").is_file()
-    assert not (skills_root / "_workflow" / "tests").exists()
+class InstallScriptTests(unittest.TestCase):
+    def test_install_script_copies_workflow_skills_and_patches_agents(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            codex_home = Path(tmpdir) / "codex-home"
+            agents_path = codex_home / "AGENTS.md"
+            agents_path.parent.mkdir(parents=True, exist_ok=True)
+            agents_path.write_text(
+                "\n".join(
+                    [
+                        "# Global Instructions",
+                        "",
+                        "User-managed header",
+                        "",
+                        "<!-- Beginning of Workflow Section -->",
+                        "OLD WORKFLOW CONTENT",
+                        "<!-- End of Workflow Section -->",
+                        "",
+                        "User-managed footer",
+                        "",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            result = _run_install(codex_home)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+            skills_root = codex_home / "skills"
+            self.assertTrue((skills_root / "audit-workflow" / "SKILL.md").is_file())
+            self.assertTrue((skills_root / "_workflow" / "workflow_state.py").is_file())
+            self.assertFalse((skills_root / "_workflow" / "tests").exists())
+
+            installed_agents = agents_path.read_text(encoding="utf-8")
+            managed_workflow = MANAGED_WORKFLOW.read_text(encoding="utf-8")
+            self.assertIn(managed_workflow, installed_agents)
+            self.assertNotIn("OLD WORKFLOW CONTENT", installed_agents)
+            self.assertIn("User-managed header", installed_agents)
+            self.assertIn("User-managed footer", installed_agents)
+
+    def test_install_script_fails_when_agents_markers_are_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            codex_home = Path(tmpdir) / "codex-home"
+            agents_path = codex_home / "AGENTS.md"
+            agents_path.parent.mkdir(parents=True, exist_ok=True)
+            agents_path.write_text(
+                "\n".join(
+                    [
+                        "# Global Instructions",
+                        "",
+                        "No managed workflow markers here.",
+                        "",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            result = _run_install(codex_home)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Workflow section markers", result.stdout + result.stderr)
+
+
+if __name__ == "__main__":
+    unittest.main()

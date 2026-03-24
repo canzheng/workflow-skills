@@ -7,21 +7,18 @@ This repository is the source-controlled home for global workflow skills. Keep s
 Use narrow verification first.
 
 - `pytest skills/_workflow/tests -q` runs the shared workflow helper and script tests.
-- `pytest tests/test_install_script.py -q` verifies `install.sh` can install this repo into a target `CODEX_HOME`.
-- `bash install.sh` syncs the workflow skills from this repo into `${CODEX_HOME:-$HOME/.codex}/skills` without installing repo-only tests.
+- `python3 -m unittest tests.test_install_script -v` verifies `install.sh` syncs the skills and patches only the managed workflow section in global `AGENTS.md`.
+- `bash install.sh` syncs the workflow skills from this repo into `${CODEX_HOME:-$HOME/.codex}/skills`, patches the managed workflow section in `${CODEX_HOME:-$HOME/.codex}/AGENTS.md`, and does not install repo-only tests.
 - `git status --short` and `git diff --check` confirm you only changed intended files and did not introduce patch-format issues.
 
 ## Coding Style & Naming Conventions
 Keep mirrored skill directories layout-compatible with Codex’s `skills/` root; many scripts resolve sibling paths relative to `skills/`. Prefer small, reversible edits. Use ASCII unless a file already requires Unicode. For Python helpers and tests, follow existing style: 4-space indentation, standard-library-first imports, and focused pytest cases.
 
 ## Testing Guidelines
-When changing workflow Python code or mirrored tests, run the smallest relevant pytest target first, then broaden only if needed. Tests under `skills/_workflow/tests/` only need to run from this repo, but they must use relative path discovery so contributors can clone the repo anywhere. If you add install behavior, cover it in `tests/test_install_script.py`.
-
-## Workflow Notes
-Planning-only wrappers such as `shape-backlog-item` and `ready-feature` should start from a clean primary checkout and leave that primary checkout clean before they exit, usually by committing the intentional planning-state changes. The first `start-task` for a feature should create the worktree from that clean primary checkout, and every later task on the same feature should resume in the same feature worktree, not in the primary checkout or a different worktree. `complete-task` should leave the feature worktree clean for the next handoff, usually by committing the task's intended changes before the task is reported done.
+When changing workflow Python code or mirrored tests, run the smallest relevant target first, then broaden only if needed. Tests under `skills/_workflow/tests/` only need to run from this repo, but they must use relative path discovery so contributors can clone the repo anywhere. If you add install behavior, cover it in `tests/test_install_script.py`.
 
 ## Commit & Pull Request Guidelines
 This repo started without inherited git history, so use short imperative commit subjects scoped to one change, for example `test: make workflow script tests path-relative`. In pull requests, summarize which skill directories changed, note whether the change must also be installed with `bash install.sh`, and list the exact verification commands you ran.
 
 ## Installation Notes
-The repo is the development source of truth. After editing `skills/`, run `bash install.sh` to copy the tracked workflow skills back into the global Codex skills directory. The installer performs a one-way sync for the mirrored workflow skills and `_workflow/`, excluding repo-only tests and generated Python cache files.
+The repo is the development source of truth. Keep the global workflow contract in [AGENTS-global-workflow.md](/Users/canzheng/Work/sandbox/workflow-skills/AGENTS-global-workflow.md); the installer patches only that marked section inside `${CODEX_HOME:-$HOME/.codex}/AGENTS.md`. After editing `skills/` or the managed workflow block, run `bash install.sh` to copy the tracked workflow skills back into the global Codex skills directory and update the managed workflow section. The installer fails hard if the target `AGENTS.md` is missing the expected workflow markers, and it excludes repo-only tests and generated Python cache files from the installed skills.

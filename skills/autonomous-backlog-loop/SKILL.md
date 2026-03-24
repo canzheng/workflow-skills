@@ -113,6 +113,7 @@ Do not infer solo mode from the word "autonomous" alone. When the user asks to r
    - otherwise, inside the same backlog-process sub-agent:
      - call `start-task` for the named feature/task so execution stays on the selected feature and feature worktree
      - if the task finishes cleanly, call `complete-task`
+     - do not bypass any review or verification gates owned by the wrapped execution skill or by `complete-task`
      - if the feature reaches `DONE`, perform the default finishing behavior equivalent to local merge plus branch/worktree cleanup, then stop the feature loop and return control
      - if the feature remains `IN_PROGRESS`, continue the feature loop on the same feature branch/worktree
      - if the task ends `blocked` or `cancelled`, leave the feature branch/worktree in place, then stop the feature loop and return control
@@ -137,6 +138,7 @@ Do not infer solo mode from the word "autonomous" alone. When the user asks to r
 - Never start a new step before the previous step agent finishes.
 - Let the selected feature's backlog-process sub-agent own all sequential tasks for that feature.
 - Reuse one feature branch/worktree across the sequential tasks of the same feature.
+- Respect review and verification gates inherited from wrapped skills instead of short-circuiting them in the loop controller.
 - Do not auto-defer blocked work.
 - Pass the run-log path into every spawned backlog-process sub-agent and require it to append to the same file.
 - Record every design choice presented during autonomous execution, not only the ones whose recommendations are accepted.

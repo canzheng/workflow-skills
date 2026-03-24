@@ -22,8 +22,11 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 2. Resolve the target task.
 3. Confirm it is the only task in the repository with status `in_progress`.
 4. Wrap `verification-before-completion` and run the narrowest relevant verification.
-5. Confirm the active feature worktree contains only intended task changes and will be left clean after completion. Use repo-appropriate checks such as `git status --short` and `git diff --check`.
-6. Optionally wrap `requesting-code-review` if review tooling is available and the task changed code materially.
+   - do not mark the task `done` until this verification gate has passed with fresh evidence
+5. Confirm the execution-path review expectation has been satisfied:
+   - if the task ran through `subagent-driven-development`, confirm its required per-task reviews already passed before completion
+   - if the task ran through `executing-plans`, wrap `requesting-code-review` whenever this task closes a review batch, materially completes a feature, or otherwise reaches a review checkpoint
+6. Confirm the active feature worktree contains only intended task changes and will be left clean after completion. Use repo-appropriate checks such as `git status --short` and `git diff --check`.
 7. Update the feature file:
    - write exact validation evidence
    - mark the task `done`
@@ -37,7 +40,10 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 
 ## Rules
 
+- `verification-before-completion` is a mandatory gate for this skill, not an optional check.
 - No completion claim without fresh verification evidence.
+- Verification and review are separate requirements: verification proves the completion claim, while review satisfies the execution-path quality gate.
+- Do not bypass review requirements inherited from the execution method that produced the task changes.
 - Leave the feature worktree clean before handing off to the next task.
 - A clean handoff usually means committing the task's intended changes, but the invariant is a clean feature worktree, not a fixed number of commits.
 - Do not finish, repurpose, or clean up the feature branch/worktree in this skill.
@@ -49,6 +55,7 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 - Zero or multiple tasks are `in_progress`
 - Verification fails
 - Evidence cannot be recorded cleanly
+- The required execution-path review has not been satisfied
 - The feature worktree cannot be left clean for the next handoff
 - The target task is not `in_progress`
 - `audit-workflow` reports an invalid workflow state

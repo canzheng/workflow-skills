@@ -26,6 +26,7 @@ It is a workflow wrapper around `brainstorming`. It owns target selection, featu
    - one feature
    - multiple features below the 5-feature split limit
    - or smaller backlog items first
+   - do not continue until the wrapped `brainstorming` flow has completed its required review gates for the chosen shaping output
 5. For each promoted feature:
    - assign the next feature ID
    - create the feature file under `features/`
@@ -43,6 +44,7 @@ It is a workflow wrapper around `brainstorming`. It owns target selection, featu
 - This skill is planning-only. Run it from a clean primary checkout and do not create or reuse a feature worktree here.
 - Leave the primary checkout clean before exiting this skill.
 - A clean planning exit usually means committing the intentional shaping changes, but the invariant is a clean primary checkout.
+- `brainstorming` owns the design-review gates for this skill. Do not treat shaping as complete until its required approvals and review loops have passed.
 - Keep a single backlog-item split below 5 features.
 - If the work appears to need 5 or more features, split it into multiple `[BACKLOG]` items first.
 - Do not mark any feature `[READY]` in this skill.
