@@ -181,9 +181,10 @@ def _write_autonomous_repo_fixture(
     return repo
 
 
-def test_sync_task_readiness_promotes_eligible_tasks_in_place(tmp_path: Path) -> None:
+def test_sync_task_readiness_reports_eligible_tasks_without_mutating_feature_file(tmp_path: Path) -> None:
     repo = _write_repo_fixture(tmp_path, task_statuses={"T01": "done", "T02": "todo"})
     feature_file = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f999-example.md"
+    original_text = feature_file.read_text(encoding="utf-8")
 
     result = subprocess.run(
         ["python", str(SYNC_SCRIPT), "--feature-file", str(feature_file)],
@@ -193,7 +194,11 @@ def test_sync_task_readiness_promotes_eligible_tasks_in_place(tmp_path: Path) ->
     )
 
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "- Status: `ready`" in feature_file.read_text(encoding="utf-8")
+    payload = json.loads(result.stdout)
+    assert payload["promotable_task_ids"] == ["T02"]
+    assert payload["invalid_ready_task_ids"] == []
+    assert payload["unknown_dependency_errors"] == []
+    assert feature_file.read_text(encoding="utf-8") == original_text
 
 
 def test_audit_workflow_reports_ready_drift_for_promotable_todo_tasks(tmp_path: Path) -> None:

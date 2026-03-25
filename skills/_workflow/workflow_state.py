@@ -572,37 +572,6 @@ def compute_task_readiness_drift(
     )
 
 
-def promote_ready_tasks(
-    feature_text: str,
-    *,
-    feature_file: Path | None = None,
-    repo_root: Path | None = None,
-) -> tuple[str, list[str]]:
-    if not _parse_feature_file_tasks(feature_text):
-        raise WorkflowStateError("cannot promote task readiness in-place for OpenSpec-backed feature files")
-
-    tasks = parse_tasks(feature_text, feature_file=feature_file, repo_root=repo_root)
-    drift = compute_task_readiness_drift(feature_text, feature_file=feature_file, repo_root=repo_root)
-    if drift.has_errors():
-        raise WorkflowStateError("; ".join(format_task_readiness_drift_messages(drift)))
-
-    promotable_task_ids = set(drift.promotable_task_ids)
-    if not promotable_task_ids:
-        return feature_text, []
-
-    lines = feature_text.splitlines()
-    for task in tasks:
-        if task.task_id in promotable_task_ids:
-            if task.status_line_index < 0:
-                raise WorkflowStateError(f"{task.task_id} is missing a Status line")
-            lines[task.status_line_index] = "- Status: `ready`"
-
-    updated_text = "\n".join(lines)
-    if feature_text.endswith("\n"):
-        updated_text += "\n"
-    return updated_text, drift.promotable_task_ids
-
-
 def format_task_readiness_drift_messages(
     drift: TaskReadinessDrift,
     *,

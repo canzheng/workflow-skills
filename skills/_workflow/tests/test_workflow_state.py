@@ -3,7 +3,7 @@ from __future__ import annotations
 import textwrap
 from pathlib import Path
 
-from _workflow.workflow_state import compute_task_readiness_drift, parse_backlog_document, promote_ready_tasks
+from _workflow.workflow_state import compute_task_readiness_drift, parse_backlog_document
 
 
 def _feature_text() -> str:
@@ -53,17 +53,6 @@ def test_compute_task_readiness_drift_reports_all_eligible_todo_and_invalid_read
     assert drift.promotable_task_ids == ["T02", "T04"]
     assert drift.invalid_ready_task_ids == ["T05"]
     assert drift.unknown_dependency_errors == []
-
-
-def test_promote_ready_tasks_marks_all_eligible_todo_tasks_ready_without_touching_blocked_tasks() -> None:
-    feature_text = _feature_text().replace("- Status: `ready`\n", "- Status: `todo`\n", 1)
-
-    updated_text, promoted_task_ids = promote_ready_tasks(feature_text)
-
-    assert promoted_task_ids == ["T02", "T04"]
-    assert "### T02: Second task\n- Status: `ready`" in updated_text
-    assert "### T04: Parallel task\n- Status: `ready`" in updated_text
-    assert "### T03: Third task\n- Status: `todo`" in updated_text
 
 
 def test_compute_task_readiness_drift_accepts_done_cross_feature_dependencies(tmp_path: Path) -> None:
