@@ -33,6 +33,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `Passed for docs/planning/versions/v1 before and after task-state updates.`
   - Run: `git diff --check`
   - Result: `Passed with no patch-format issues.`
+- `2026-03-26` Task `1`:
+  - Run: `python3 -m unittest tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_complete_task_resolves_active_task_with_linked_openspec_context tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_complete_task_rejects_active_top_level_task_with_open_nested_checklist_items -v`
+  - Result: `2 tests passed, covering both the closable-task path and the rejection path when the active top-level task still has open nested checklist items.`
+  - Inspection: `python3` one-off assertion against a temporary repo fixture for `list_open_openspec_nested_items(...)`
+  - Result: `Passed, returning ['1.2'] for an active top-level task with one open nested item.`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `Passed for docs/planning/versions/v1 before and after task-state updates.`
+  - Run: `git diff --check`
+  - Result: `Passed with no patch-format issues before and after task-state updates.`
 
 ## 2. Handoff Notes
 - `2026-03-26`:
@@ -55,3 +64,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `dirty`
   - Notes: The approved design changed after that attempt. OpenSpec task `2` is reopened under the revised contract where `finish-feature` owns the `[IN_PROGRESS] -> [DONE]` transition and `complete-task` must validate nested checklist closure before top-level task closure.
+- `2026-03-26`:
+  - Current Task: `1`
+  - Worktree State: `dirty`
+  - Notes: Task `1` restarted under the revised contract. The remaining execution scope is item `1.3`: block top-level task closure when any nested checklist item under that task is still open.
+- `2026-03-26`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Task `1` completed under the revised contract. `complete-task` now refuses to close a top-level OpenSpec task while any nested checklist item under that task remains open, and top-level task `2` is the next ready task for this feature.

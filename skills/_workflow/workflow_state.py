@@ -22,6 +22,9 @@ OPEN_SPEC_CHANGE_RE = re.compile(r"^- OpenSpec Change: `([^`]+)`$", re.MULTILINE
 OPEN_SPEC_STATUS_RE = re.compile(r"^- OpenSpec Status: `([^`]+)`$", re.MULTILINE)
 CURRENT_TASK_RE = re.compile(r"^- Current Task: `([^`]+)`$", re.MULTILINE)
 OPEN_SPEC_TASK_RE = re.compile(r"^- \[(?P<done>[ xX])\]\s+(?P<id>\d+)\s+(?P<title>.+)$")
+OPEN_SPEC_NESTED_TASK_RE = re.compile(
+    r"^\s+- \[(?P<done>[ xX])\]\s+(?P<id>\d+\.\d+(?:\.\d+)*)\s+(?P<title>.+)$"
+)
 HEADING_RE = re.compile(r"^##(?:\s+\d+(?:\.\d+)*)?\.?\s+(?P<name>.+?)\s*$", re.MULTILINE)
 LEGACY_INLINE_SECTION_NAMES = {
     "problem",
@@ -409,6 +412,32 @@ def _parse_openspec_tasks_text(tasks_text: str) -> list[RawOpenSpecTaskRecord]:
     return tasks
 
 
+def _parse_openspec_open_nested_items(tasks_text: str) -> dict[str, list[str]]:
+    open_nested_items: dict[str, list[str]] = {}
+    current_top_level_task_id: str | None = None
+
+    for line in tasks_text.splitlines():
+        task_match = OPEN_SPEC_TASK_RE.match(line)
+        if task_match:
+            current_top_level_task_id = task_match.group("id")
+            open_nested_items.setdefault(current_top_level_task_id, [])
+            continue
+
+        if current_top_level_task_id is None:
+            continue
+
+        nested_match = OPEN_SPEC_NESTED_TASK_RE.match(line)
+        if not nested_match:
+            continue
+        if nested_match.group("done").lower() == "x":
+            continue
+        nested_task_id = nested_match.group("id")
+        if nested_task_id.startswith(f"{current_top_level_task_id}."):
+            open_nested_items.setdefault(current_top_level_task_id, []).append(nested_task_id)
+
+    return open_nested_items
+
+
 def _derive_openspec_task_statuses(
     raw_tasks: list[RawOpenSpecTaskRecord],
     *,
@@ -460,6 +489,20 @@ def parse_tasks(
     raw_tasks = _parse_openspec_tasks_text(tasks_file.read_text(encoding="utf-8"))
     current_task = parse_current_task(feature_text)
     return _derive_openspec_task_statuses(raw_tasks, current_task=current_task)
+
+
+def list_open_openspec_nested_items(
+    feature_text: str,
+    task_id: str,
+    *,
+    feature_file: Path | None = None,
+    repo_root: Path | None = None,
+) -> list[str]:
+    tasks_file = _linked_openspec_tasks_file(feature_text, feature_file=feature_file, repo_root=repo_root)
+    if tasks_file is None:
+        return []
+    nested_items_by_task = _parse_openspec_open_nested_items(tasks_file.read_text(encoding="utf-8"))
+    return nested_items_by_task.get(task_id, [])
 
 
 def parse_feature_id(feature_text: str, *, feature_file: Path | None = None) -> str | None:
