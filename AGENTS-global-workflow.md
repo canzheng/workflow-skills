@@ -60,7 +60,7 @@
 - Assign the feature ID when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Once created, a feature ID must never be reused for a different feature.
 - The feature file contains `Meta`, `Validation Log`, and `Handoff Notes`.
-- The feature file must record one linked OpenSpec change plus the affected OpenSpec spec paths.
+- The feature file must record one linked OpenSpec change plus the affected OpenSpec spec paths, except for historical `[DONE]` features explicitly marked `OpenSpec Status: legacy-exempt` during midstream adoption.
 - Do not duplicate OpenSpec proposal, design, spec, or task prose inside the feature file.
 - Always update the existing feature file in-place before updating any derived summary elsewhere.
 
@@ -70,6 +70,7 @@
 - `READY`: shaping is complete, the linked OpenSpec change has the required shaping artifacts, and at least one linked OpenSpec task is ready to execute.
 - `IN_PROGRESS`: execution has started on at least one task for the feature, and the feature is not yet complete or deferred. Once a feature enters `IN_PROGRESS`, keep it there until the feature reaches `DONE` or `DEFER`, even if there is a handoff gap where no task is currently `in_progress`.
 - `DONE`: feature-level acceptance is satisfied.
+- Historical `[DONE]` features that predate OpenSpec adoption may remain valid when explicitly marked `OpenSpec Status: legacy-exempt`.
 - `DEFER`: the work is intentionally postponed or dropped from the current version.
 - Every `BACKLOG.md` file must use the sections `[BACKLOG]`, `[SHAPING]`, `[READY]`, `[IN_PROGRESS]`, `[DONE]`, and `[DEFER]` in that order.
 - Moving an item from `[BACKLOG]` to `[SHAPING]` is the moment the feature ID is assigned and the feature file is created.
@@ -129,6 +130,7 @@
 ## Workflow validation
 - `complete-task` requires `verification-before-completion` as a mandatory gate distinct from review.
 - `finish-feature` requires linked OpenSpec validation plus filesystem-visible archive state before handing off to branch finalization.
+- Midstream OpenSpec adoption should create baseline specs from current main-checkout behavior and keep planned-but-unimplemented work in roadmap/backlog artifacts rather than backfilling it into the baseline specs.
 - Record the exact validation command or inspection step and the result in the task's `Validation` or `Evidence` section.
 - A task is not `done` until validation evidence is recorded, or the feature file explicitly says why validation could not be run.
 - A task is not `done` until the active feature worktree is left clean for the next handoff.

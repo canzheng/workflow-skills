@@ -25,7 +25,7 @@ None yet.
 
 ## [DONE]
 
-None yet.
+### `v1-f001` [Legacy OpenSpec Audit Migration](features/v1-f001-legacy-openspec-audit-migration.md)
 
 ## [DEFER]
 

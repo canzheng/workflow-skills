@@ -17,6 +17,7 @@ from _workflow.workflow_state import (
     compute_task_readiness_drift,
     format_task_readiness_drift_messages,
     parse_backlog_document,
+    parse_feature_openspec_status,
     parse_tasks,
     parse_feature_openspec_change,
 )
@@ -142,20 +143,58 @@ def main(argv: list[str] | None = None) -> int:
                 )
 
             change_id = parse_feature_openspec_change(feature_text)
-            if change_id is None:
-                errors.append(f"{feature_path.relative_to(root)} is missing OpenSpec Change metadata")
-            else:
-                change_dir = root / "openspec" / "changes" / change_id
-                if not change_dir.exists():
+            openspec_status = parse_feature_openspec_status(feature_text)
+
+            if section_name in {"SHAPING", "READY", "IN_PROGRESS"}:
+                if openspec_status == "legacy-exempt":
                     errors.append(
-                        f"{feature_path.relative_to(root)} links missing OpenSpec change openspec/changes/{change_id}"
+                        f"{feature_path.relative_to(root)} uses OpenSpec Status `legacy-exempt` outside [DONE]"
                     )
-                if section_name == "READY":
-                    for required_name in ("proposal.md", "design.md", "tasks.md"):
-                        if not (change_dir / required_name).exists():
+                if change_id is None:
+                    errors.append(f"{feature_path.relative_to(root)} is missing OpenSpec Change metadata")
+                else:
+                    change_dir = root / "openspec" / "changes" / change_id
+                    if not change_dir.exists():
+                        errors.append(
+                            f"{feature_path.relative_to(root)} links missing OpenSpec change openspec/changes/{change_id}"
+                        )
+                    if section_name == "READY":
+                        for required_name in ("proposal.md", "design.md", "tasks.md"):
+                            if not (change_dir / required_name).exists():
+                                errors.append(
+                                    f"{feature_path.relative_to(root)} is in [READY] but linked OpenSpec change is missing {required_name}"
+                                )
+            elif section_name == "DONE":
+                if openspec_status == "legacy-exempt":
+                    if change_id is not None:
+                        errors.append(
+                            f"{feature_path.relative_to(root)} is marked `legacy-exempt` but still records OpenSpec Change {change_id}"
+                        )
+                else:
+                    if change_id is None:
+                        errors.append(
+                            f"{feature_path.relative_to(root)} is in [DONE] but has neither archived OpenSpec change metadata nor OpenSpec Status `legacy-exempt`"
+                        )
+                    else:
+                        active_change_dir = root / "openspec" / "changes" / change_id
+                        archive_matches = sorted((root / "openspec" / "changes" / "archive").glob(f"*-{change_id}"))
+                        if active_change_dir.exists():
                             errors.append(
-                                f"{feature_path.relative_to(root)} is in [READY] but linked OpenSpec change is missing {required_name}"
+                                f"{feature_path.relative_to(root)} is in [DONE] but linked OpenSpec change is still active at openspec/changes/{change_id}"
                             )
+                        if len(archive_matches) != 1:
+                            errors.append(
+                                f"{feature_path.relative_to(root)} is in [DONE] but expected exactly one archived OpenSpec change for {change_id}"
+                            )
+            else:
+                if change_id is None:
+                    errors.append(f"{feature_path.relative_to(root)} is missing OpenSpec Change metadata")
+                else:
+                    change_dir = root / "openspec" / "changes" / change_id
+                    if not change_dir.exists():
+                        errors.append(
+                            f"{feature_path.relative_to(root)} links missing OpenSpec change openspec/changes/{change_id}"
+                        )
 
             task_statuses = [
                 task.status

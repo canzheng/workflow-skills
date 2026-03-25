@@ -73,6 +73,9 @@ Owns:
 Does not own:
 - duplicated proposal, design, spec, or task prose from OpenSpec
 
+Migration note:
+- historical `[DONE]` features from before OpenSpec adoption may instead record `OpenSpec Status: legacy-exempt`
+
 ## Official Phase Workflow
 
 ### 1. Backlog
@@ -83,6 +86,12 @@ Use:
 - `prioritize-backlog` to reorder eligible work when needed
 
 OpenSpec is required by this workflow, but no change is required yet.
+
+For a legacy repo adopting OpenSpec midstream:
+- baseline specs should describe current main-checkout behavior
+- planned but unimplemented work stays in backlog and roadmap artifacts
+- historical completed features may be marked `OpenSpec Status: legacy-exempt`
+- current `[SHAPING]`, `[READY]`, and `[IN_PROGRESS]` work should get active OpenSpec changes for the remaining work
 
 ### 2. Shaping
 
@@ -233,6 +242,7 @@ OpenSpec validation is additive:
 - Do not finish the branch before the linked OpenSpec change is validated and archived.
 - `shape-backlog-item` must run `openspec-propose` for promoted work; do not run `openspec-propose` as a separate manual lane.
 - `finish-feature` must run `openspec-archive-change` before handing off to `finishing-a-development-branch`.
+- Historical `[DONE]` features are exempt from OpenSpec change checks only when explicitly marked `OpenSpec Status: legacy-exempt`.
 
 ## Repository State
 

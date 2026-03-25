@@ -1,8 +1,6 @@
 ## Purpose
 Define how promoted features are tracked during execution, including where task state, current-task metadata, and validation evidence live.
-
 ## Requirements
-
 ### Requirement: Feature files own task-level execution state
 Each promoted feature SHALL maintain a feature file that records task-level execution state and evidence.
 
@@ -38,3 +36,12 @@ Task completion SHALL be supported by recorded validation evidence.
 - **WHEN** a task is marked `done`
 - **THEN** the feature file includes the exact validation command or inspection step and its result
 - **AND** the recorded evidence explains why the task is considered complete
+
+### Requirement: Feature files support historical completed-feature exemptions
+Feature metadata SHALL support an explicit exemption marker for historical completed features that predate OpenSpec adoption.
+
+#### Scenario: Historical completed feature is exempt from OpenSpec change linkage
+- **WHEN** a repository adopts OpenSpec after a feature already reached `[DONE]`
+- **THEN** the feature file may record `OpenSpec Status` as `legacy-exempt`
+- **AND** the feature is not required to record a linked OpenSpec change
+- **AND** the exemption does not apply to active shaping or execution states

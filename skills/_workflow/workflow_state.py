@@ -19,6 +19,7 @@ FIELD_HEADER_RE = re.compile(r"^- (?P<field>[^:]+):(?P<rest>.*)$")
 TASK_REF_RE = re.compile(r"`([^`]+)`")
 FEATURE_ID_RE = re.compile(r"^- Feature ID: `([^`]+)`$", re.MULTILINE)
 OPEN_SPEC_CHANGE_RE = re.compile(r"^- OpenSpec Change: `([^`]+)`$", re.MULTILINE)
+OPEN_SPEC_STATUS_RE = re.compile(r"^- OpenSpec Status: `([^`]+)`$", re.MULTILINE)
 CURRENT_TASK_RE = re.compile(r"^- Current Task: `([^`]+)`$", re.MULTILINE)
 OPEN_SPEC_TASK_RE = re.compile(r"^- \[(?P<done>[ xX])\]\s+(?P<id>\d+\.\d+)\s+(?P<title>.+)$")
 
@@ -145,6 +146,13 @@ def parse_backlog_document(text: str) -> ParsedBacklogDocument:
 
 def parse_feature_openspec_change(feature_text: str) -> str | None:
     match = OPEN_SPEC_CHANGE_RE.search(feature_text)
+    if match:
+        return match.group(1)
+    return None
+
+
+def parse_feature_openspec_status(feature_text: str) -> str | None:
+    match = OPEN_SPEC_STATUS_RE.search(feature_text)
     if match:
         return match.group(1)
     return None
