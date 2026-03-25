@@ -1,8 +1,8 @@
 ## 1. Feature Completion Handoff
 
-- [x] 1 Feature Completion Handoff
-- [x] 1.1 Define the completion-time conditions that allow a feature to move from `[IN_PROGRESS]` to `[DONE]`
-- [x] 1.2 Update task-completion helpers or resolver outputs so the handoff into `[DONE]` is operationally explicit
+- [ ] 1 Feature Completion Handoff
+- [x] 1.1 Define the completion-time conditions that make the final task hand off from `complete-task` into `finish-feature`
+- [x] 1.2 Update task-completion helpers or resolver outputs so the final-task handoff is operationally explicit without moving the feature to `[DONE]`
 - [ ] 1.3 Make `complete-task` verify that all nested checklist items under the selected top-level task are already closed before it marks that top-level task done
 
 ## 2. Finish-Feature Alignment
