@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f002`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
 - OpenSpec Change: `integrate-openspec-shaping-readiness`
 - OpenSpec Specs:
   - `openspec/specs/openspec-change-integration/spec.md`
@@ -13,11 +13,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - `openspec/specs/feature-execution-tracking/spec.md`
   - `openspec/specs/workflow-audit-and-repair/spec.md`
   - `openspec/specs/task-execution-handoff/spec.md`
-- Current Task: `none`
+- Current Task: `4`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
 - Created: `2026-03-25`
-- Last Updated: `2026-03-25`
+- Last Updated: `2026-03-26`
 
 ## 1. Validation Log
 - None yet.
@@ -27,3 +27,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `n/a`
   - Notes: Shaping artifacts are complete for `integrate-openspec-shaping-readiness`. Top-level OpenSpec task `4` remains unchecked while tasks `1` through `3` are complete, so the feature is ready for execution.
+- `2026-03-26`:
+  - Current Task: `4`
+  - Worktree State: `dirty`
+  - Notes: Task `4` entered execution on branch `v1-f002-integrate-openspec-shaping-readiness`. Execution is following the implemented workflow model where `Current Task` marks `in_progress` and `tasks.md` remains the checked/unchecked task ledger.

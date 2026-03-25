@@ -21,11 +21,11 @@ This file tracks feature-board status only.
 
 ## [READY]
 
-### `v1-f002` [Integrate OpenSpec Shaping Readiness](features/v1-f002-integrate-openspec-shaping-readiness.md)
+None yet.
 
 ## [IN_PROGRESS]
 
-None yet.
+### `v1-f002` [Integrate OpenSpec Shaping Readiness](features/v1-f002-integrate-openspec-shaping-readiness.md)
 
 ## [DONE]
 
