@@ -9,7 +9,7 @@ This file tracks feature-board status only.
 
 ## [BACKLOG]
 
-None yet.
+### `v1-b001` Clarify workflow-derived task readiness convention
 
 ## [SHAPING]
 
