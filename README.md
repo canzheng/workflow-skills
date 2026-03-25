@@ -57,6 +57,7 @@ Owns:
 - `proposal.md`
 - `design.md`
 - `tasks.md`
+- `implementation-plans/<task-id>.md`
 - spec deltas for the change
 
 This is the shaping and readiness authority for one promoted feature.
@@ -166,6 +167,7 @@ Responsibilities:
 - create or reuse the feature worktree
 - set `Current Task`
 - mark the selected OpenSpec task `in_progress`
+- write or update the selected task's implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution begins
 - move the feature to `[IN_PROGRESS]` if needed
 - provide the linked OpenSpec change directory and Markdown context file list to the executor, then require the executor to read the listed context files before work begins
 
@@ -257,7 +259,9 @@ OpenSpec validation is additive:
 
 - Do not let users or agents independently update both OpenSpec shaping prose and feature-file shaping prose. Shaping belongs in OpenSpec.
 - Do not let feature files become a second task ledger. Task definitions and task status belong in OpenSpec.
+- Use top-level OpenSpec task IDs like `1`, `2`, and `3` as execution units. Nested checklist items like `1.1` and `1.2` are supporting detail, not separate workflow tasks.
 - Do not move a feature to `[READY]` without linked OpenSpec shaping artifacts and at least one `ready` OpenSpec task.
+- Before executing a task, write or update its implementation plan under the linked OpenSpec change and feed that plan back into execution context.
 - Do not use OpenSpec archive as a substitute for `complete-task` evidence or `DONE` acceptance.
 - Do not finish the branch before the linked OpenSpec change is validated and archived.
 - `shape-backlog-item` must run `openspec-propose` for promoted work; do not run `openspec-propose` as a separate manual lane.

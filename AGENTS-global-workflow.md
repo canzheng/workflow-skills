@@ -42,6 +42,7 @@
 - `docs/planning/versions/<version>/BACKLOG.md` owns the ordered work items for that version and tracks feature-level status only through the `[BACKLOG]`, `[SHAPING]`, `[READY]`, `[IN_PROGRESS]`, `[DONE]`, and `[DEFER]` sections.
 - `openspec/specs/` owns the current behavior specification for stable capabilities.
 - `openspec/changes/<change-id>/proposal.md`, `design.md`, `tasks.md`, and delta specs own shaping, readiness intent, task definitions, and task completion state for one linked feature change.
+- `openspec/changes/<change-id>/implementation-plans/<task-id>.md` owns the task-scoped implementation plan for one executable OpenSpec task.
 - `openspec/changes/archive/` owns archived completed changes after feature completion has satisfied the archive gate.
 - `[BACKLOG]` entries must use lowercase backlog IDs like `v1-b001` and follow ``### `v1-b001` [TAG] TITLE``, where `[TAG]` is optional.
 - `[SHAPING]`, `[READY]`, `[IN_PROGRESS]`, `[DONE]`, and `[DEFER]` entries must follow ``### `v1-f001` [TAG] [Title](features/v1-f001-title.md)``, where `[TAG]` is optional.
@@ -85,9 +86,11 @@
 
 ## Workflow task status model
 - OpenSpec `tasks.md` is the task-definition and task-completion authority.
-- Unchecked OpenSpec tasks are treated as executable `ready` work only when their dependencies and prerequisites are satisfied. Otherwise they remain `todo`.
-- `Current Task` in the feature file identifies the one task currently `in_progress`.
+- Executable OpenSpec tasks use top-level task IDs like `1`, `2`, and `3`. Nested checklist items like `1.1` and `1.2` may exist as implementation detail, but they are not separate execution units.
+- Unchecked top-level OpenSpec tasks are treated as executable `ready` work only when their dependencies and prerequisites are satisfied. Otherwise they remain `todo`.
+- `Current Task` in the feature file identifies the one top-level OpenSpec task currently `in_progress`.
 - Checked OpenSpec tasks are treated as `done`.
+- Before code execution begins for a task, write or update its task-scoped implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` using the linked change context.
 - `start-task` and `complete-task` must provide explicit linked-change context to the executor: the linked change directory plus the Markdown files under that change, with instructions to read the listed files as context.
 - At most one task in the repository may be `in_progress` at a time.
 - A task may move to `done` only after validation evidence is recorded in the feature file.
@@ -102,7 +105,7 @@
 
 ## Workflow task execution rules
 - Only execute one task at a time across the entire repository.
-- One task means one task ID and one bounded acceptance target.
+- One task means one top-level OpenSpec task ID and one bounded acceptance target.
 - A feature in execution owns one feature branch/worktree reused across its sequential tasks.
 - After the first task starts, later tasks on that feature must resume in that same feature worktree until the feature reaches `[DONE]` or `[DEFER]`.
 - A feature must be in `[READY]` before its first task execution starts.

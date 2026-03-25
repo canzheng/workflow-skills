@@ -97,6 +97,7 @@ def _feature_summary(
     current_task = parse_current_task(feature_text)
     task_records = parse_tasks(feature_text, feature_file=feature_path, repo_root=root)
     task_counts = dict(sorted(Counter(task.status for task in task_records).items()))
+    active_task_ids = [task.task_id for task in task_records if task.status == "in_progress"]
 
     legacy_inline_sections = find_legacy_inline_planning_sections(feature_text)
     if legacy_inline_sections and openspec_status != "legacy-exempt":
@@ -229,6 +230,7 @@ def _feature_summary(
         "openspec_change_id": change_id,
         "openspec_status": openspec_status,
         "current_task": current_task,
+        "active_task_ids": active_task_ids,
         "task_counts": task_counts,
     }
 
@@ -335,22 +337,37 @@ def diagnose(root: Path) -> dict[str, object]:
                 path="openspec/changes",
             )
 
-    finding_counts = dict(sorted(Counter(finding["severity"] for finding in findings).items()))
-    for severity in ("error", "warning", "info"):
-        finding_counts.setdefault(severity, 0)
+    active_tasks: list[dict[str, object]] = []
+    for feature in features:
+        for task_id in feature["active_task_ids"]:
+            active_tasks.append(
+                {
+                    "feature_id": feature["feature_id"],
+                    "feature_path": feature["feature_path"],
+                    "task_id": task_id,
+                }
+            )
 
-    active_tasks = [
-        {
-            "feature_id": feature["feature_id"],
-            "feature_path": feature["feature_path"],
-            "task_id": feature["current_task"],
-        }
-        for feature in features
-        if feature["current_task"] is not None
-    ]
+    if len(active_tasks) > 1:
+        add_finding(
+            findings,
+            severity="error",
+            code="multiple_in_progress_tasks",
+            message="repository has multiple tasks with status in_progress",
+            details={"active_tasks": active_tasks},
+        )
+        finding_counts = dict(sorted(Counter(finding["severity"] for finding in findings).items()))
+        for severity in ("error", "warning", "info"):
+            finding_counts.setdefault(severity, 0)
+        status = "issues_found"
+    else:
+        finding_counts = dict(sorted(Counter(finding["severity"] for finding in findings).items()))
+        for severity in ("error", "warning", "info"):
+            finding_counts.setdefault(severity, 0)
+        status = "ok" if not findings else "issues_found"
 
     return {
-        "status": "ok" if not findings else "issues_found",
+        "status": status,
         "repo_root": str(root),
         "active_version": active_version_name,
         "backlog_path": backlog_relative,

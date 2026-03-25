@@ -16,6 +16,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - `openspec/specs/<capability>/spec.md`
 - Current Task: `none`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
+  - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
 - Created: `YYYY-MM-DD`
 - Last Updated: `YYYY-MM-DD`
 
@@ -26,7 +27,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 
 ## 2. Handoff Notes
 - `<YYYY-MM-DD>`:
-  - Current Task: `<task-id or none>`
+  - Current Task: `<task-id like 1 or none>`
   - Worktree State: `<clean/dirty>`
   - Notes: <handoff summary>
 """
@@ -62,6 +63,7 @@ def render_feature_file(
         {spec_lines}
         - Current Task: `none`
           - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
+          - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
         - Created: `{created}`
         - Last Updated: `{last_updated}`
 

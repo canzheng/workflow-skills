@@ -151,10 +151,12 @@ def test_compute_task_readiness_drift_uses_openspec_tasks_with_feature_context(t
             """\
             ## 1. Work
 
-            - [x] 1.1 Baseline
-            - [ ] 1.2 Next step
+            - [x] 1 Baseline
+              - [x] 1.1 Capture current behavior
+            - [ ] 2 Next step
+              - [ ] 2.1 Update helper code
               - Depends On:
-                - `1.1`
+                - `1`
             """
         ),
         encoding="utf-8",

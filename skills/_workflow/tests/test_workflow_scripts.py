@@ -184,7 +184,7 @@ def test_audit_workflow_reports_ready_drift_for_promotable_todo_tasks(tmp_path: 
     repo = _write_repo_fixture(tmp_path, task_statuses={"T01": "done", "T02": "todo"})
 
     result = subprocess.run(
-        ["python", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+        ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
         capture_output=True,
         text=True,
         check=False,
@@ -198,7 +198,7 @@ def test_resolve_start_task_fails_when_feature_has_task_readiness_drift(tmp_path
     repo = _write_repo_fixture(tmp_path, feature_section="READY", task_statuses={"T01": "done", "T02": "todo"})
 
     result = subprocess.run(
-        ["python", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
+        ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
         capture_output=True,
         text=True,
         check=False,
@@ -273,17 +273,19 @@ def test_autonomous_resolver_uses_openspec_backed_tasks_for_ready_features(tmp_p
             """\
             ## 1. Work
 
-            - [x] 1.1 Baseline
-            - [ ] 1.2 Execute task
+            - [x] 1 Baseline
+              - [x] 1.1 Capture current behavior
+            - [ ] 2 Execute task
+              - [ ] 2.1 Run the workflow
               - Depends On:
-                - `1.1`
+                - `1`
             """
         ),
         encoding="utf-8",
     )
 
     result = subprocess.run(
-        ["python", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo)],
+        ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo)],
         capture_output=True,
         text=True,
         check=False,
@@ -293,7 +295,7 @@ def test_autonomous_resolver_uses_openspec_backed_tasks_for_ready_features(tmp_p
     payload = json.loads(result.stdout)
     assert payload["action"] == "run_task_loop"
     assert payload["feature_id"] == "v1-f001"
-    assert payload["task_id"] == "1.2"
+    assert payload["task_id"] == "2"
 
 
 def test_audit_workflow_accepts_resolvable_cross_feature_dependencies(tmp_path: Path) -> None:
@@ -378,7 +380,7 @@ def test_audit_workflow_accepts_resolvable_cross_feature_dependencies(tmp_path: 
     (feature_dir / "v1-f001-external.md").write_text(external_feature, encoding="utf-8")
 
     result = subprocess.run(
-        ["python", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+        ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
         capture_output=True,
         text=True,
         check=False,
@@ -424,7 +426,7 @@ def test_audit_workflow_reports_malformed_canonical_backlog_entries(tmp_path: Pa
     )
 
     result = subprocess.run(
-        ["python", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+        ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
         capture_output=True,
         text=True,
         check=False,
@@ -450,7 +452,7 @@ def test_resolve_autonomous_backlog_action_preserves_normal_precedence(tmp_path:
     )
 
     result = subprocess.run(
-        ["python", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo)],
+        ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo)],
         capture_output=True,
         text=True,
         check=False,
@@ -481,7 +483,7 @@ def test_resolve_autonomous_backlog_action_design_mode_skips_ready_and_selects_s
     )
 
     result = subprocess.run(
-        ["python", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo), "--design-mode"],
+        ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo), "--design-mode"],
         capture_output=True,
         text=True,
         check=False,
@@ -507,7 +509,7 @@ def test_resolve_autonomous_backlog_action_design_mode_falls_back_to_backlog(tmp
     )
 
     result = subprocess.run(
-        ["python", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo), "--design-mode"],
+        ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo), "--design-mode"],
         capture_output=True,
         text=True,
         check=False,
@@ -533,7 +535,7 @@ def test_resolve_autonomous_backlog_action_design_mode_reports_feature_exhausted
     )
 
     result = subprocess.run(
-        ["python", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo), "--design-mode"],
+        ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo), "--design-mode"],
         capture_output=True,
         text=True,
         check=False,

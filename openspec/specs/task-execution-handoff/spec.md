@@ -22,6 +22,16 @@ Executing features SHALL use one feature-scoped worktree reused across sequentia
 - **THEN** execution resumes in the same feature worktree
 - **AND** that worktree is clean before the next task begins
 
+### Requirement: Task execution uses top-level OpenSpec task IDs and a task-scoped implementation plan
+Executable workflow tasks SHALL be top-level OpenSpec task IDs, and each task SHALL be executed with a task-scoped implementation plan stored under the linked change.
+
+#### Scenario: Starting a task prepares implementation context
+- **WHEN** `start-task` selects the next executable task for a feature
+- **THEN** the task is identified by its top-level OpenSpec task ID such as `1`, `2`, or `3`
+- **AND** `start-task` provides the linked OpenSpec change context for that task
+- **AND** the workflow writes or updates `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution begins
+- **AND** that implementation plan becomes part of the execution context for the task
+
 ### Requirement: Task completion leaves a clean handoff
 Completing a task SHALL leave the feature ready for the next handoff.
 

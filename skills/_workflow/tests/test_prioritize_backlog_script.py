@@ -60,10 +60,12 @@ def _write_feature(
             f"""\
             ## 1. Work
 
-            - [{"x" if first_done else " "}] 1.1 First task
-            - [ ] 1.2 Second task
+            - [{"x" if first_done else " "}] 1 First task
+              - [{"x" if first_done else " "}] 1.1 Prepare context
+            - [ ] 2 Second task
+              - [ ] 2.1 Execute the change
               - Depends On:
-                - `1.1`
+                - `1`
             """
         ),
         encoding="utf-8",
@@ -164,7 +166,7 @@ def test_prioritize_backlog_list_returns_only_eligible_items_with_openspec_conte
     repo = _write_repo_fixture(tmp_path)
 
     result = subprocess.run(
-        ["python", str(PRIORITIZE_SCRIPT), "--repo-root", str(repo), "list"],
+        ["python3", str(PRIORITIZE_SCRIPT), "--repo-root", str(repo), "list"],
         capture_output=True,
         text=True,
         check=False,
@@ -186,7 +188,7 @@ def test_prioritize_backlog_list_returns_only_eligible_items_with_openspec_conte
     ]
     assert feature_item["proposal"] == "Improve clarify workflow prioritization context."
     assert feature_item["design"] == "Use OpenSpec context for clarify workflow."
-    assert feature_item["tasks_summary"] == "- [ ] 1.1 First task - [ ] 1.2 Second task - Depends On: - `1.1`"
+    assert feature_item["tasks_summary"] == "- [ ] 1 First task - [ ] 1.1 Prepare context - [ ] 2 Second task - [ ] 2.1 Execute the change - Depends On: - `1`"
     assert feature_item["task_counts"] == {"ready": 1, "todo": 1}
 
 
@@ -196,7 +198,7 @@ def test_prioritize_backlog_apply_reorders_each_eligible_section_from_global_ord
 
     result = subprocess.run(
         [
-            "python",
+            "python3",
             str(PRIORITIZE_SCRIPT),
             "--repo-root",
             str(repo),

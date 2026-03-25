@@ -21,7 +21,7 @@ FEATURE_ID_RE = re.compile(r"^- Feature ID: `([^`]+)`$", re.MULTILINE)
 OPEN_SPEC_CHANGE_RE = re.compile(r"^- OpenSpec Change: `([^`]+)`$", re.MULTILINE)
 OPEN_SPEC_STATUS_RE = re.compile(r"^- OpenSpec Status: `([^`]+)`$", re.MULTILINE)
 CURRENT_TASK_RE = re.compile(r"^- Current Task: `([^`]+)`$", re.MULTILINE)
-OPEN_SPEC_TASK_RE = re.compile(r"^- \[(?P<done>[ xX])\]\s+(?P<id>\d+\.\d+)\s+(?P<title>.+)$")
+OPEN_SPEC_TASK_RE = re.compile(r"^- \[(?P<done>[ xX])\]\s+(?P<id>\d+)\s+(?P<title>.+)$")
 HEADING_RE = re.compile(r"^##(?:\s+\d+(?:\.\d+)*)?\.?\s+(?P<name>.+?)\s*$", re.MULTILINE)
 LEGACY_INLINE_SECTION_NAMES = {
     "problem",
@@ -277,6 +277,19 @@ def _linked_openspec_tasks_file(
     return tasks_file
 
 
+def linked_openspec_implementation_plan_path(
+    feature_text: str,
+    task_id: str,
+    *,
+    feature_file: Path | None = None,
+    repo_root: Path | None = None,
+) -> Path | None:
+    change_dir = linked_openspec_change_dir(feature_text, feature_file=feature_file, repo_root=repo_root)
+    if change_dir is None:
+        return None
+    return change_dir / "implementation-plans" / f"{task_id}.md"
+
+
 def linked_openspec_change_dir(
     feature_text: str,
     *,
@@ -298,6 +311,7 @@ def linked_openspec_change_dir(
 def list_openspec_change_context_files(
     feature_text: str,
     *,
+    task_id: str | None = None,
     feature_file: Path | None = None,
     repo_root: Path | None = None,
 ) -> list[Path]:
@@ -308,13 +322,24 @@ def list_openspec_change_context_files(
     primary_files = [change_dir / name for name in ("proposal.md", "design.md", "tasks.md")]
     primary_existing = [path for path in primary_files if path.exists()]
     primary_set = {path.resolve() for path in primary_existing}
+    implementation_plans_dir = change_dir / "implementation-plans"
 
     extra_markdown = sorted(
         path
         for path in change_dir.rglob("*.md")
-        if path.resolve() not in primary_set
+        if path.resolve() not in primary_set and implementation_plans_dir not in path.parents
     )
-    return [*primary_existing, *extra_markdown]
+    context_files = [*primary_existing, *extra_markdown]
+    if task_id is not None:
+        task_plan = linked_openspec_implementation_plan_path(
+            feature_text,
+            task_id,
+            feature_file=feature_file,
+            repo_root=repo_root,
+        )
+        if task_plan is not None and task_plan.exists():
+            context_files.append(task_plan)
+    return context_files
 
 
 def _parse_openspec_tasks_text(tasks_text: str) -> list[RawOpenSpecTaskRecord]:

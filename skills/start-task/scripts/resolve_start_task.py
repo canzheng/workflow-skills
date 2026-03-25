@@ -16,6 +16,7 @@ from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
     compute_task_readiness_drift,
     format_task_readiness_drift_messages,
+    linked_openspec_implementation_plan_path,
     list_openspec_change_context_files,
     parse_backlog_document,
     parse_feature_openspec_change,
@@ -76,7 +77,7 @@ def read_backlog(root: Path):
 
 def resolve_task(root: Path) -> dict[str, object]:
     backlog_path, parsed_backlog = read_backlog(root)
-    feature_tasks: dict[tuple[str, str], tuple[Path, list[object]]] = {}
+    feature_tasks: dict[tuple[str, str], tuple[Path, str, list[object]]] = {}
     active_tasks = 0
 
     for section_name in WORKFLOW_SECTIONS[1:]:
@@ -91,7 +92,7 @@ def resolve_task(root: Path) -> dict[str, object]:
             feature_text = feature_path.read_text(encoding="utf-8")
             tasks = parse_tasks(feature_text, feature_file=feature_path, repo_root=root)
             active_tasks += sum(1 for task in tasks if task.status == "in_progress")
-            feature_tasks[(section_name, feature_id)] = (feature_path, tasks)
+            feature_tasks[(section_name, feature_id)] = (feature_path, feature_text, tasks)
 
     if active_tasks:
         raise WorkflowError("repository already has a task with status `in_progress`")
@@ -99,9 +100,9 @@ def resolve_task(root: Path) -> dict[str, object]:
     for section_name in ("IN_PROGRESS", "READY"):
         for entry in parsed_backlog.feature_sections.get(section_name, []):
             feature_id = entry.feature_id
-            feature_path, tasks = feature_tasks[(section_name, feature_id)]
+            feature_path, feature_text, tasks = feature_tasks[(section_name, feature_id)]
             readiness_drift = compute_task_readiness_drift(
-                feature_path.read_text(encoding="utf-8"),
+                feature_text,
                 feature_file=feature_path,
                 repo_root=root,
             )
@@ -120,8 +121,15 @@ def resolve_task(root: Path) -> dict[str, object]:
                 if change_id is None:
                     raise WorkflowError(f"{feature_path.relative_to(root)} is missing OpenSpec Change metadata")
                 change_path = root / "openspec" / "changes" / change_id
+                implementation_plan_path = linked_openspec_implementation_plan_path(
+                    feature_text,
+                    task.task_id,
+                    feature_file=feature_path,
+                    repo_root=root,
+                )
                 context_files = list_openspec_change_context_files(
                     feature_text,
+                    task_id=task.task_id,
                     feature_file=feature_path,
                     repo_root=root,
                 )
@@ -131,8 +139,14 @@ def resolve_task(root: Path) -> dict[str, object]:
                     "feature_section": section_name,
                     "openspec_change_id": change_id,
                     "openspec_change_path": str(change_path.relative_to(root)),
+                    "implementation_plan_path": (
+                        str(implementation_plan_path.relative_to(root)) if implementation_plan_path is not None else None
+                    ),
                     "openspec_context_files": [str(path.relative_to(root)) for path in context_files],
-                    "execution_instruction": "Read the files listed as context before starting work.",
+                    "execution_instruction": (
+                        "Read the files listed as context, then write or update the implementation plan at the "
+                        "provided path before executing the task."
+                    ),
                     "task_id": task.task_id,
                     "task_title": task.task_title,
                 }

@@ -121,6 +121,92 @@ class DiagnoseWorkflowTests(unittest.TestCase):
             self.assertIn("legacy_inline_planning_sections", finding_codes)
             self.assertIn("no_ready_task", finding_codes)
 
+    def test_diagnose_workflow_reports_multiple_active_tasks_as_an_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    None yet.
+
+                    ## [READY]
+
+                    None yet.
+
+                    ## [IN_PROGRESS]
+
+                    ### `v1-f001` [One](features/v1-f001-one.md)
+                    ### `v1-f002` [Two](features/v1-f002-two.md)
+
+                    ## [DONE]
+
+                    None yet.
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            for feature_id, slug in (("v1-f001", "one"), ("v1-f002", "two")):
+                feature_path = repo / "docs" / "planning" / "versions" / "v1" / "features" / f"{feature_id}-{slug}.md"
+                feature_path.write_text(
+                    textwrap.dedent(
+                        f"""\
+                        # Feature: {slug}
+
+                        ## 0. Meta
+                        - Feature ID: `{feature_id}`
+                        - Version: `v1`
+                        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+                        - OpenSpec Change: `{feature_id}-change`
+                        - OpenSpec Specs:
+                          - `openspec/specs/workflow-board-lifecycle/spec.md`
+                        - Current Task: `1`
+
+                        ## 1. Validation Log
+                        - None yet.
+
+                        ## 2. Handoff Notes
+                        - None yet.
+                        """
+                    ),
+                    encoding="utf-8",
+                )
+
+                change_dir = repo / "openspec" / "changes" / f"{feature_id}-change"
+                change_dir.mkdir(parents=True, exist_ok=True)
+                (change_dir / "proposal.md").write_text("proposal", encoding="utf-8")
+                (change_dir / "design.md").write_text("design", encoding="utf-8")
+                (change_dir / "tasks.md").write_text("- [ ] 1 Execute work\n", encoding="utf-8")
+
+            result = subprocess.run(
+                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "issues_found")
+            self.assertEqual(payload["active_task_count"], 2)
+            finding_codes = {finding["code"] for finding in payload["findings"]}
+            self.assertIn("multiple_in_progress_tasks", finding_codes)
+
 
 if __name__ == "__main__":
     unittest.main()

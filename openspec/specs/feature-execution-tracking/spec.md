@@ -2,12 +2,14 @@
 Define how promoted features are tracked during execution, including where task state, current-task metadata, and validation evidence live.
 ## Requirements
 ### Requirement: Feature files own task-level execution state
-Each promoted feature SHALL maintain a feature file that records task-level execution state and evidence.
+Each promoted feature SHALL maintain a feature file that records execution metadata and evidence.
 
 #### Scenario: Feature file carries task execution state
 - **WHEN** a backlog item has been promoted into a feature
 - **THEN** the feature has a single feature file under `docs/planning/versions/<version>/features/`
-- **AND** the feature file owns task statuses, task dependencies, current-task tracking, and validation evidence
+- **AND** the feature file records the linked OpenSpec change and affected OpenSpec specs
+- **AND** the feature file stores current-task tracking, validation evidence, and handoff notes
+- **AND** task definitions, task dependencies, and task completion state remain in OpenSpec
 
 ### Requirement: Board state and task state are separated
 The backlog board SHALL track feature-level state without duplicating task-level execution details.
@@ -15,7 +17,7 @@ The backlog board SHALL track feature-level state without duplicating task-level
 #### Scenario: Feature board remains high level
 - **WHEN** feature progress is updated on the board
 - **THEN** `BACKLOG.md` records only the feature’s board section and linked summary entry
-- **AND** task-by-task detail remains in the feature file
+- **AND** task definition and task status remain in OpenSpec
 
 ### Requirement: Current task reflects active execution
 Feature metadata SHALL identify whether a task is currently executing.
@@ -26,7 +28,7 @@ Feature metadata SHALL identify whether a task is currently executing.
 
 #### Scenario: A task is actively executing
 - **WHEN** execution starts on a task for a feature
-- **THEN** the feature file records that task as the current task
+- **THEN** the feature file records that task's top-level OpenSpec task ID as the current task
 - **AND** the executing task is marked `in_progress`
 
 ### Requirement: Completed tasks include evidence

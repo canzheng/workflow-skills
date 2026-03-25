@@ -25,6 +25,7 @@ The workflow SHALL read and update task status in the linked OpenSpec change dur
 #### Scenario: Start task marks OpenSpec task in progress
 - **WHEN** `start-task` selects the next executable task for a feature
 - **THEN** it selects that task from the linked OpenSpec `tasks.md`
+- **AND** the task is identified by its top-level OpenSpec task ID such as `1`, `2`, or `3`
 - **AND** it records the task as `in_progress` in OpenSpec
 
 #### Scenario: Complete task marks OpenSpec task done
@@ -39,6 +40,8 @@ Execution wrappers SHALL provide explicit linked-change context to the executor.
 - **WHEN** `start-task` selects the next executable task for a feature
 - **THEN** it provides the linked OpenSpec change directory
 - **AND** it provides the Markdown files under that change as context, including `proposal.md`, `design.md`, and `tasks.md`
+- **AND** it writes or updates `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution begins
+- **AND** it feeds that task implementation plan back into execution context for the task
 - **AND** it instructs the executor to read the files listed as context before starting work
 
 #### Scenario: Complete task reuses authoritative change context

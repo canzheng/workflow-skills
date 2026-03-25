@@ -20,7 +20,7 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 
 1. Run `audit-workflow`.
 2. Resolve the target task.
-   - require the resolver payload to include the linked OpenSpec change directory and the Markdown context file list under that change
+   - require the resolver payload to include the linked OpenSpec change directory, the Markdown context file list under that change, and the task implementation-plan path
 3. Confirm it is the only task in the repository with status `in_progress`.
 4. Wrap `verification-before-completion` and run the narrowest relevant verification.
    - do not mark the task `done` until this verification gate has passed with fresh evidence

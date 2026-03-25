@@ -14,6 +14,7 @@ if str(SKILLS_ROOT) not in sys.path:
 
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
+    linked_openspec_implementation_plan_path,
     list_openspec_change_context_files,
     parse_backlog_document,
     parse_feature_openspec_change,
@@ -98,6 +99,18 @@ def resolve_active_task(root: Path) -> dict[str, object]:
             for task in parse_tasks(feature_text, feature_file=feature_path, repo_root=root):
                 if task.status != "in_progress":
                     continue
+                implementation_plan_path = linked_openspec_implementation_plan_path(
+                    feature_text,
+                    task.task_id,
+                    feature_file=feature_path,
+                    repo_root=root,
+                )
+                context_files = list_openspec_change_context_files(
+                    feature_text,
+                    task_id=task.task_id,
+                    feature_file=feature_path,
+                    repo_root=root,
+                )
                 active_payloads.append(
                     {
                         "feature_id": feature_id,
@@ -105,6 +118,11 @@ def resolve_active_task(root: Path) -> dict[str, object]:
                         "feature_section": section_name,
                         "openspec_change_id": change_id,
                         "openspec_change_path": str(change_path.relative_to(root)),
+                        "implementation_plan_path": (
+                            str(implementation_plan_path.relative_to(root))
+                            if implementation_plan_path is not None
+                            else None
+                        ),
                         "openspec_context_files": [str(path.relative_to(root)) for path in context_files],
                         "execution_instruction": "Read the files listed as context before completing the task.",
                         "task_id": task.task_id,
