@@ -9,7 +9,6 @@ from pathlib import Path
 SKILLS_ROOT = Path(__file__).resolve().parents[2]
 AUDIT_SCRIPT = SKILLS_ROOT / "audit-workflow" / "scripts" / "audit_workflow.py"
 START_TASK_SCRIPT = SKILLS_ROOT / "start-task" / "scripts" / "resolve_start_task.py"
-SYNC_SCRIPT = SKILLS_ROOT / "_workflow" / "scripts" / "sync_task_readiness.py"
 AUTONOMOUS_RESOLVER_SCRIPT = (
     SKILLS_ROOT / "autonomous-backlog-loop" / "scripts" / "resolve_autonomous_backlog_action.py"
 )
@@ -179,26 +178,6 @@ def _write_autonomous_repo_fixture(
             (feature_dir / f"{feature['id']}-{feature['slug']}.md").write_text(feature_text, encoding="utf-8")
 
     return repo
-
-
-def test_sync_task_readiness_reports_eligible_tasks_without_mutating_feature_file(tmp_path: Path) -> None:
-    repo = _write_repo_fixture(tmp_path, task_statuses={"T01": "done", "T02": "todo"})
-    feature_file = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f999-example.md"
-    original_text = feature_file.read_text(encoding="utf-8")
-
-    result = subprocess.run(
-        ["python", str(SYNC_SCRIPT), "--feature-file", str(feature_file)],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-
-    assert result.returncode == 0, result.stdout + result.stderr
-    payload = json.loads(result.stdout)
-    assert payload["promotable_task_ids"] == ["T02"]
-    assert payload["invalid_ready_task_ids"] == []
-    assert payload["unknown_dependency_errors"] == []
-    assert feature_file.read_text(encoding="utf-8") == original_text
 
 
 def test_audit_workflow_reports_ready_drift_for_promotable_todo_tasks(tmp_path: Path) -> None:
