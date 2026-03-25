@@ -9,13 +9,14 @@ This file tracks feature-board status only.
 
 ## [BACKLOG]
 
-### `v1-b001` Clarify workflow-derived task readiness convention
+None yet.
 
 ## [SHAPING]
 
 ### `v1-f004` [Detect Orphan OpenSpec Changes](features/v1-f004-detect-orphan-openspec-changes.md)
 ### `v1-f005` [Harden Autonomous Backlog Loop Eligibility](features/v1-f005-harden-autonomous-backlog-loop-eligibility.md)
 ### `v1-f007` [Enforce Top-Level Current Task IDs](features/v1-f007-enforce-top-level-current-task-ids.md)
+### `v1-f008` [Clarify Workflow-Owned Task Readiness](features/v1-f008-clarify-workflow-owned-task-readiness.md)
 
 ## [READY]
 
