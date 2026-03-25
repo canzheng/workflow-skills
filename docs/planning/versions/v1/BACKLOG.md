@@ -25,11 +25,12 @@ None yet.
 
 ## [IN_PROGRESS]
 
-### `v1-f002` [Integrate OpenSpec Shaping Readiness](features/v1-f002-integrate-openspec-shaping-readiness.md)
+None yet.
 
 ## [DONE]
 
 ### `v1-f001` [Legacy OpenSpec Audit Migration](features/v1-f001-legacy-openspec-audit-migration.md)
+### `v1-f002` [Integrate OpenSpec Shaping Readiness](features/v1-f002-integrate-openspec-shaping-readiness.md)
 
 ## [DEFER]
 

@@ -19,36 +19,25 @@ Executing features SHALL use one feature-scoped worktree reused across sequentia
 - **THEN** execution resumes in the same feature worktree
 - **AND** that worktree is clean before the next task begins
 
-### Requirement: Workflow execution uses OpenSpec task status
-The workflow SHALL read and update task status in the linked OpenSpec change during execution.
+### Requirement: Task execution uses top-level OpenSpec task IDs and a task-scoped implementation plan
+Executable workflow tasks SHALL be top-level OpenSpec task IDs, and each task SHALL be executed with a task-scoped implementation plan stored under the linked change.
 
-#### Scenario: Start task marks OpenSpec task in progress
+#### Scenario: Starting a task prepares implementation context
 - **WHEN** `start-task` selects the next executable task for a feature
-- **THEN** it selects that task from the linked OpenSpec `tasks.md`
-- **AND** the task is identified by its top-level OpenSpec task ID such as `1`, `2`, or `3`
-- **AND** it records the task as `in_progress` in OpenSpec
-
-#### Scenario: Complete task marks OpenSpec task done
-- **WHEN** `complete-task` finishes a task successfully
-- **THEN** it records validation evidence in the feature file
-- **AND** it marks the corresponding task `done` in OpenSpec
-
-### Requirement: Workflow execution provides explicit linked-change context
-Execution wrappers SHALL provide explicit linked-change context to the executor.
-
-#### Scenario: Start task surfaces authoritative change context
-- **WHEN** `start-task` selects the next executable task for a feature
-- **THEN** it provides the linked OpenSpec change directory
-- **AND** it provides the Markdown files under that change as context, including `proposal.md`, `design.md`, and `tasks.md`
+- **THEN** the task is identified by its top-level OpenSpec task ID such as `1`, `2`, or `3`
+- **AND** `start-task` provides the linked OpenSpec change context for that task
 - **AND** it writes or updates `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution begins
-- **AND** it feeds that task implementation plan back into execution context for the task
-- **AND** it instructs the executor to read the files listed as context before starting work
+- **AND** that implementation plan becomes part of the execution context for the task
+- **AND** active execution is represented by `Current Task` in the feature file while OpenSpec `tasks.md` remains the checked/unchecked task ledger
 
-#### Scenario: Complete task reuses authoritative change context
-- **WHEN** `complete-task` resolves the active task for completion
-- **THEN** it provides the linked OpenSpec change directory
-- **AND** it provides the Markdown files under that change as context
-- **AND** it instructs the executor to read the files listed as context before closing the task
+### Requirement: Task completion leaves a clean handoff
+Completing a task SHALL leave the feature ready for the next handoff.
+
+#### Scenario: Task is completed successfully
+- **WHEN** `complete-task` finishes a task
+- **THEN** verification is run and evidence is recorded before completion is claimed
+- **AND** intended task changes are committed when needed to leave the feature worktree clean
+- **AND** downstream task readiness is synchronized from checkbox completion state plus any workflow `Depends On` references
 
 ### Requirement: Feature completion is distinct from branch finalization
 Finishing a task or feature SHALL remain separate from final branch/worktree cleanup decisions.
@@ -57,6 +46,8 @@ Finishing a task or feature SHALL remain separate from final branch/worktree cle
 - **WHEN** a feature satisfies its feature-level acceptance bar
 - **THEN** the feature may move to `[DONE]`
 - **AND** branch/worktree finalization remains a separate downstream action
+
+## ADDED Requirements
 
 ### Requirement: Branch finalization requires archived OpenSpec change state
 Feature branch finalization SHALL be gated on linked OpenSpec validation and archive state.

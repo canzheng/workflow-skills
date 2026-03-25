@@ -1,8 +1,6 @@
 ## Purpose
 Define how task execution starts, how feature worktrees are reused across tasks, what a clean completion handoff requires, and how task completion differs from branch finalization.
-
 ## Requirements
-
 ### Requirement: Only one repository task executes at a time
 Task execution SHALL remain globally serialized at the repository level.
 
@@ -29,7 +27,7 @@ Executable workflow tasks SHALL be top-level OpenSpec task IDs, and each task SH
 - **WHEN** `start-task` selects the next executable task for a feature
 - **THEN** the task is identified by its top-level OpenSpec task ID such as `1`, `2`, or `3`
 - **AND** `start-task` provides the linked OpenSpec change context for that task
-- **AND** the workflow writes or updates `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution begins
+- **AND** it writes or updates `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution begins
 - **AND** that implementation plan becomes part of the execution context for the task
 - **AND** active execution is represented by `Current Task` in the feature file while OpenSpec `tasks.md` remains the checked/unchecked task ledger
 
@@ -59,3 +57,13 @@ Finishing a task or feature SHALL remain separate from final branch/worktree cle
 - **WHEN** a feature satisfies its feature-level acceptance bar
 - **THEN** the feature may move to `[DONE]`
 - **AND** branch/worktree finalization remains a separate downstream action
+
+### Requirement: Branch finalization requires archived OpenSpec change state
+Feature branch finalization SHALL be gated on linked OpenSpec validation and archive state.
+
+#### Scenario: Workflow finishes a done feature
+- **WHEN** a feature in `[DONE]` is handed off for branch finalization
+- **THEN** the workflow first validates the linked OpenSpec change
+- **AND** it archives that change
+- **AND** `openspec/changes/<change-id>/` no longer exists
+- **AND** exactly one `openspec/changes/archive/*-<change-id>/` directory exists before branch finalization continues

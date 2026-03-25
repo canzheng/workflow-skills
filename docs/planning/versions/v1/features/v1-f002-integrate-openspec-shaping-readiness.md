@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f002`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `integrate-openspec-shaping-readiness`
 - OpenSpec Specs:
   - `openspec/specs/openspec-change-integration/spec.md`
@@ -31,6 +31,10 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass (2 tests)`
   - Run: `bash install.sh`
   - Result: `pass with rsync warning about non-empty installed _workflow/scripts directory; workflow skills installed successfully`
+  - Run: `openspec validate integrate-openspec-shaping-readiness --type change --json --no-interactive`
+  - Result: `pass`
+  - Run: `openspec archive integrate-openspec-shaping-readiness -y`
+  - Result: `pass; archived as openspec/changes/archive/2026-03-25-integrate-openspec-shaping-readiness`
 
 ## 2. Handoff Notes
 - `2026-03-25`:
@@ -45,3 +49,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `clean`
   - Notes: Task `4` completed the contract follow-through wording updates and left the feature worktree clean. The feature remains `[IN_PROGRESS]` pending the separate archive gate owned by `finish-feature`; the branch/worktree still exists and is not finalized.
+- `2026-03-26`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Manual `[DONE]` transition was applied to work around the current finish-feature sequencing break, the linked OpenSpec change was archived, and the feature is ready for branch-finalization handling. The branch/worktree still exists and is not finalized.
