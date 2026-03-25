@@ -41,7 +41,7 @@
 - `docs/planning/versions/<version>/VERSION_SCOPE.md` owns the version goal, exit criteria, explicit deferrals, and cross-feature decisions for that version.
 - `docs/planning/versions/<version>/BACKLOG.md` owns the ordered work items for that version and tracks feature-level status only through the `[BACKLOG]`, `[SHAPING]`, `[READY]`, `[IN_PROGRESS]`, `[DONE]`, and `[DEFER]` sections.
 - `openspec/specs/` owns the current behavior specification for stable capabilities.
-- `openspec/changes/<change-id>/proposal.md`, `design.md`, `tasks.md`, and delta specs own shaping, readiness intent, task definitions, and task completion state for one linked feature change.
+- `openspec/changes/<change-id>/proposal.md`, `design.md`, `tasks.md`, and delta specs own shaping, readiness intent, task definitions, checkbox completion state, and any workflow dependency-convention references for one linked feature change.
 - `openspec/changes/<change-id>/implementation-plans/<task-id>.md` owns the task-scoped implementation plan for one executable OpenSpec task.
 - `openspec/changes/archive/` owns archived completed changes after feature completion has satisfied the archive gate.
 - `[BACKLOG]` entries must use lowercase backlog IDs like `v1-b001` and follow ``### `v1-b001` [TAG] TITLE``, where `[TAG]` is optional.
@@ -70,7 +70,7 @@
 ## Workflow feature status model
 - `BACKLOG`: an idea-level work item that is still unclear or not yet shaped into a ready feature. No feature ID or feature file is required yet.
 - `SHAPING`: a real feature exists, its feature ID is assigned, its feature file exists, and one linked OpenSpec change owns active proposal/spec/design/task shaping work before execution begins.
-- `READY`: shaping is complete, the linked OpenSpec change has the required shaping artifacts, and at least one linked OpenSpec task is ready to execute.
+- `READY`: shaping is complete, the linked OpenSpec change has the required shaping artifacts, and at least one linked OpenSpec task resolves to executable `ready` under the workflow task-status rules.
 - `IN_PROGRESS`: execution has started on at least one task for the feature, and the feature is not yet complete or deferred. Once a feature enters `IN_PROGRESS`, keep it there until the feature reaches `DONE` or `DEFER`, even if there is a handoff gap where no task is currently `in_progress`.
 - `DONE`: feature-level acceptance is satisfied.
 - Historical `[DONE]` features that predate OpenSpec adoption may remain valid when explicitly marked `OpenSpec Status: legacy-exempt`.
@@ -85,10 +85,11 @@
 - Do not add a feature-level `BLOCKED` section. If work stalls during shaping, keep the feature in `[SHAPING]` and record the reason in the feature file. If work stalls during execution, keep the feature in `[IN_PROGRESS]` and mark the active task as `blocked` in the feature file.
 
 ## Workflow task status model
-- OpenSpec `tasks.md` is the task-definition and task-completion authority.
+- OpenSpec `tasks.md` is the task-definition authority and checkbox completion ledger.
 - Executable OpenSpec tasks use top-level task IDs like `1`, `2`, and `3`. Nested checklist items like `1.1` and `1.2` may exist as implementation detail, but they are not separate execution units.
-- Unchecked top-level OpenSpec tasks are treated as executable `ready` work only when their dependencies and prerequisites are satisfied. Otherwise they remain `todo`.
-- `Current Task` in the feature file identifies the one top-level OpenSpec task currently `in_progress`.
+- Optional `Depends On` blocks under top-level tasks are a workflow-layer markdown convention interpreted by this repository's helpers; they are not native OpenSpec task semantics.
+- Unchecked top-level OpenSpec tasks are treated as workflow-`ready` work only when their workflow prerequisites and any `Depends On` references are satisfied. Otherwise they remain `todo`.
+- `Current Task` in the feature file identifies the one top-level OpenSpec task currently `in_progress`; this feature-file field is the active execution marker in the implemented workflow.
 - Checked OpenSpec tasks are treated as `done`.
 - Before code execution begins for a task, write or update its task-scoped implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` using the linked change context.
 - `start-task` and `complete-task` must provide explicit linked-change context to the executor: the linked change directory plus the Markdown files under that change, with instructions to read the listed files as context.

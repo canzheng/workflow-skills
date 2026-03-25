@@ -27,8 +27,9 @@ The workflow audit SHALL confirm that backlog entries and feature files agree on
 The workflow audit SHALL detect illegal task-readiness states.
 
 #### Scenario: Audit checks task readiness and dependency integrity
-- **WHEN** the workflow audit inspects tasks in the linked OpenSpec change
-- **THEN** it detects tasks that are marked ready for execution without satisfied dependencies
+- **WHEN** the workflow audit inspects workflow-derived task state for a promoted feature
+- **THEN** it validates the optional `Depends On` references interpreted by the workflow dependency convention
+- **AND** it detects tasks that are marked `ready` without satisfied workflow prerequisites
 - **AND** it detects tasks that could be promoted to `ready` but remain stale
 - **AND** it detects references to unknown dependency IDs
 - **AND** it enforces that at most one repository task is `in_progress`

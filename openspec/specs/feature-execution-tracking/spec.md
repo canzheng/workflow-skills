@@ -9,7 +9,8 @@ Each promoted feature SHALL maintain a feature file that records execution metad
 - **THEN** the feature has a single feature file under `docs/planning/versions/<version>/features/`
 - **AND** the feature file records the linked OpenSpec change and affected OpenSpec specs
 - **AND** the feature file stores current-task tracking, validation evidence, and handoff notes
-- **AND** task definitions, task dependencies, and task completion state remain in OpenSpec
+- **AND** task definitions and checkbox completion state remain in OpenSpec
+- **AND** any optional `Depends On` references are interpreted through the workflow's markdown dependency convention rather than a native OpenSpec task model
 
 ### Requirement: Board state and task state are separated
 The backlog board SHALL track feature-level state without duplicating task-level execution details.
@@ -29,7 +30,8 @@ Feature metadata SHALL identify whether a task is currently executing.
 #### Scenario: A task is actively executing
 - **WHEN** execution starts on a task for a feature
 - **THEN** the feature file records that task's top-level OpenSpec task ID as the current task
-- **AND** the executing task is marked `in_progress`
+- **AND** that `Current Task` field is the active `in_progress` marker used by the implemented workflow
+- **AND** the linked OpenSpec `tasks.md` remains the checked/unchecked task ledger
 
 ### Requirement: Completed tasks include evidence
 Task completion SHALL be supported by recorded validation evidence.

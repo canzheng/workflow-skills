@@ -1,0 +1,38 @@
+# openspec-change-integration Specification
+
+## Purpose
+TBD - created by archiving change integrate-openspec-shaping-readiness. Update Purpose after archive.
+## Requirements
+### Requirement: Promoted features link to one OpenSpec change
+Each feature promoted out of `[BACKLOG]` SHALL record exactly one linked OpenSpec change as the authority for shaping and readiness artifacts.
+
+#### Scenario: Feature enters shaping with an OpenSpec change
+- **WHEN** a backlog item is promoted into a feature for shaping
+- **THEN** the feature is assigned one OpenSpec change ID
+- **AND** the linked change directory exists under `openspec/changes/`
+
+### Requirement: OpenSpec change artifacts justify readiness
+OpenSpec-backed readiness SHALL be determined from the linked change artifacts rather than from long-form design and plan prose embedded in the feature file.
+
+#### Scenario: Feature becomes ready from linked OpenSpec artifacts
+- **WHEN** a shaped feature is evaluated for promotion to `[READY]`
+- **THEN** the linked OpenSpec change has `proposal.md`, `design.md`, and `tasks.md`
+- **AND** the feature file links to the affected OpenSpec capability specs
+- **AND** at least one execution task can be started without further shaping work
+
+### Requirement: OpenSpec tasks are authoritative for workflow execution
+The linked OpenSpec change SHALL be the task-definition and task-status authority for workflow execution.
+
+#### Scenario: Workflow execution reads task state from OpenSpec
+- **WHEN** workflow skills determine task readiness, start a task, or complete a task
+- **THEN** they read task definitions and checkbox status from `openspec/changes/<change-id>/tasks.md`
+- **AND** they do not require a second authored task ledger in the feature file
+
+### Requirement: Workflow promotion owns the OpenSpec propose step
+Promoting a backlog item into shaping SHALL create or update its linked OpenSpec change through the workflow wrapper rather than through an independent manual lane.
+
+#### Scenario: Backlog shaping creates the linked change
+- **WHEN** `shape-backlog-item` promotes work from `[BACKLOG]` into `[SHAPING]`
+- **THEN** it creates or updates the linked OpenSpec change as part of that workflow
+- **AND** the resulting feature file and backlog entry reference that same linked change
+

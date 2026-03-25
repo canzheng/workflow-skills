@@ -25,7 +25,7 @@
 
 ## 4. Contract Follow-Through
 
-- [ ] 4 Contract Follow-Through
-  - [ ] 4.1 Promote the still-active integration change onto the workflow board with a linked feature record so board state and OpenSpec state agree
-  - [ ] 4.2 Align stable specs and completed-feature evidence with the task and archive model documented by the workflow
-  - [ ] 4.3 Clean up generated planning artifacts and tracked docs so rendered feature metadata and path examples match the current contract
+- [x] 4 Contract Follow-Through
+  - [x] 4.1 Promote the still-active integration change onto the workflow board with a linked feature record so board state and OpenSpec state agree
+  - [x] 4.2 Align stable specs and completed-feature evidence with the task and archive model documented by the workflow
+  - [x] 4.3 Clean up generated planning artifacts and tracked docs so rendered feature metadata and path examples match the current contract

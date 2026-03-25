@@ -12,6 +12,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Current Task: `none`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
+  - This field is the active execution marker for the implemented workflow; OpenSpec `tasks.md` remains the checked/unchecked task ledger.
 - Created: `YYYY-MM-DD`
 - Last Updated: `YYYY-MM-DD`
 

@@ -12,6 +12,7 @@ The goal is to keep one source of truth per concern:
 - release planning truth in `BACKLOG.md`
 - shaping truth in OpenSpec
 - task-definition truth in OpenSpec `tasks.md`
+- task-readiness truth in the workflow parser over top-level OpenSpec tasks, checkbox state, `Current Task`, and the optional `Depends On` markdown convention
 - execution evidence truth in the feature file
 - execution verification truth in task evidence and workflow validation logs
 
@@ -60,7 +61,7 @@ Owns:
 - `implementation-plans/<task-id>.md`
 - spec deltas for the change
 
-This is the shaping and readiness authority for one promoted feature.
+This is the shaping authority for one promoted feature, and the source material from which workflow task readiness is derived.
 
 ### `docs/planning/versions/<version>/features/<feature-id>-<slug>.md`
 
@@ -149,7 +150,7 @@ Responsibilities:
   - `design.md`
   - `tasks.md`
   - relevant linked spec paths
-- ensure the linked OpenSpec change has at least one task that is honestly `ready`
+- ensure the linked OpenSpec change has at least one top-level task that resolves honestly to workflow-`ready`
 - move the board item to `[READY]`
 - leave the primary checkout clean
 
@@ -165,8 +166,8 @@ Responsibilities:
 - run `audit-workflow`
 - enforce one repository task `in_progress`
 - create or reuse the feature worktree
-- set `Current Task`
-- mark the selected OpenSpec task `in_progress`
+- set `Current Task` to the selected top-level task ID
+- treat that feature-file field as the active `in_progress` marker while `tasks.md` remains the checked/unchecked task ledger
 - write or update the selected task's implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution begins
 - move the feature to `[IN_PROGRESS]` if needed
 - provide the linked OpenSpec change directory and Markdown context file list to the executor, then require the executor to read the listed context files before work begins
@@ -177,7 +178,7 @@ Responsibilities:
 - run `verification-before-completion`
 - record exact evidence
 - optionally request code review
-- update OpenSpec task status and rely on OpenSpec dependencies for downstream readiness
+- update OpenSpec checkbox status and rely on the workflow `Depends On` convention for downstream readiness
 - leave the feature worktree clean
 - keep the feature in `[IN_PROGRESS]` until feature acceptance is satisfied
 - provide the linked OpenSpec change directory and Markdown context file list to the executor, then require the executor to read the listed context files before task closure
