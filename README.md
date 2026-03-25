@@ -94,6 +94,22 @@ For a legacy repo adopting OpenSpec midstream:
 - historical completed features may be marked `OpenSpec Status: legacy-exempt`
 - current `[SHAPING]`, `[READY]`, and `[IN_PROGRESS]` work should get active OpenSpec changes for the remaining work
 
+### 1. Workflow Diagnosis
+
+Use:
+- `diagnose-workflow`
+
+`diagnose-workflow` is the operator-facing health report for this workflow.
+
+Use it when you want:
+- a read-only summary of workflow state
+- structured findings without failing fast
+- a quick distinction between healthy, repairable, and ambiguous workflow states
+
+It complements, but does not replace:
+- `audit-workflow` for pass/fail gating
+- `repair-drift` for minimal structural fixes
+
 ### 2. Shaping
 
 Use:
@@ -197,6 +213,7 @@ This moves a feature to `[DEFER]` and records why it was postponed or dropped.
 
 Official skill usage by phase:
 
+- Workflow diagnosis: `diagnose-workflow`
 - Backlog ordering: `prioritize-backlog`
 - Backlog to shaping: `shape-backlog-item`
 - Shaping exploration: `openspec-explore`
@@ -219,6 +236,7 @@ Not used for execution in this workflow:
 This workflow does not weaken existing gates.
 
 Always preserve:
+- `diagnose-workflow` as read-only diagnosis only
 - `audit-workflow` before and after planning-state edits
 - at most one repository task `in_progress`
 - task-scoped verification before completion claims
@@ -228,6 +246,7 @@ Always preserve:
 - exact validation evidence in the feature file
 
 OpenSpec validation is additive:
+- `diagnose-workflow` helps explain workflow health, but it is not a gate
 - it validates shaping/change artifacts
 - it does not replace workflow audit
 - it does not replace task-level evidence

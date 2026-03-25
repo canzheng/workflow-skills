@@ -14,6 +14,7 @@
 - Keep changes minimal, scoped, and verifiable
 
 ## Workflow skill routing
+- Use `diagnose-workflow` when you need a non-blocking sanity report of workflow health before deciding whether to audit, repair, defer, or continue.
 - Use `audit-workflow` before and after planning-state edits.
 - Use `shape-backlog-item` instead of raw `brainstorming` when promoting backlog work into shaped features.
 - `shape-backlog-item` must run `openspec-propose` for promoted work.
@@ -140,6 +141,7 @@
 - If validation cannot be run, say so explicitly.
 - Distinguish clearly between implemented, validated locally, and not verified.
 - OpenSpec shaping and archive checks are additive gates. They do not replace workflow audit, OpenSpec task readiness checks, code review, or `verification-before-completion`.
+- `diagnose-workflow` is read-only and advisory. It does not replace `audit-workflow` or authorize state changes on its own.
 - Before archiving a linked OpenSpec change, run the relevant OpenSpec validation command for that change and record or report the result.
 - Before branch finalization, the linked OpenSpec change must no longer exist under `openspec/changes/<change-id>/` and must exist exactly once under `openspec/changes/archive/*-<change-id>/`.
 
