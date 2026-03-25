@@ -22,3 +22,10 @@
   - [x] 3.2 Validate the updated workflow and OpenSpec specs with the narrowest relevant commands
   - [x] 3.3 Document migration expectations for adopting the new model in future features
   - [x] 3.4 Add a workflow-owned feature completion gate that validates and archives the linked OpenSpec change before generic branch finalization
+
+## 4. Contract Follow-Through
+
+- [ ] 4 Contract Follow-Through
+  - [ ] 4.1 Promote the still-active integration change onto the workflow board with a linked feature record so board state and OpenSpec state agree
+  - [ ] 4.2 Align stable specs and completed-feature evidence with the task and archive model documented by the workflow
+  - [ ] 4.3 Clean up generated planning artifacts and tracked docs so rendered feature metadata and path examples match the current contract

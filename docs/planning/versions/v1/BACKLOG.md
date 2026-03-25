@@ -9,11 +9,14 @@ This file tracks feature-board status only.
 
 ## [BACKLOG]
 
-### `v1-b001` Integrate OpenSpec shaping/readiness with workflow wrappers
+None yet.
 
 ## [SHAPING]
 
-None yet.
+### `v1-f002` [Integrate OpenSpec Shaping Readiness](features/v1-f002-integrate-openspec-shaping-readiness.md)
+### `v1-f003` [Resolve Cross-Feature Task Readiness](features/v1-f003-resolve-cross-feature-task-readiness.md)
+### `v1-f004` [Detect Orphan OpenSpec Changes](features/v1-f004-detect-orphan-openspec-changes.md)
+### `v1-f005` [Harden Autonomous Backlog Loop Eligibility](features/v1-f005-harden-autonomous-backlog-loop-eligibility.md)
 
 ## [READY]
 
