@@ -31,6 +31,12 @@ Feature metadata SHALL identify whether a task is currently executing.
 - **THEN** the feature file records that task's top-level OpenSpec task ID as the current task
 - **AND** the executing task is marked `in_progress`
 
+#### Scenario: Final task is closed before feature completion
+- **WHEN** the final top-level task is closed for a feature
+- **THEN** the feature may still remain `[IN_PROGRESS]`
+- **AND** the feature file records `Current Task` as `none`
+- **AND** the handoff notes state whether the feature is ready for `finish-feature`
+
 ### Requirement: Completed tasks include evidence
 Task completion SHALL be supported by recorded validation evidence.
 
@@ -38,6 +44,14 @@ Task completion SHALL be supported by recorded validation evidence.
 - **WHEN** a task is marked `done`
 - **THEN** the feature file includes the exact validation command or inspection step and its result
 - **AND** the recorded evidence explains why the task is considered complete
+
+### Requirement: Feature completion is a finish-feature outcome
+Feature metadata SHALL treat the `[IN_PROGRESS] -> [DONE]` transition as a feature-completion action, not a task-completion side effect.
+
+#### Scenario: Finish-feature completes the feature
+- **WHEN** `finish-feature` verifies acceptance and archives the linked OpenSpec change
+- **THEN** the feature file records evidence for the feature-level completion decision
+- **AND** the feature is moved to `[DONE]`
 
 ### Requirement: Feature files support historical completed-feature exemptions
 Feature metadata SHALL support an explicit exemption marker for historical completed features that predate OpenSpec adoption.
