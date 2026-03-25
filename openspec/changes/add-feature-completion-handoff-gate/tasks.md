@@ -6,6 +6,6 @@
 
 ## 2. Finish-Feature Alignment
 
-- [ ] 2 Finish-Feature Alignment
-- [ ] 2.1 Confirm `finish-feature` remains strict on `[DONE]` and document the expected handoff path from `complete-task`
-- [ ] 2.2 Add regression coverage for final-task completion that does and does not make the feature startable for `finish-feature`
+- [x] 2 Finish-Feature Alignment
+- [x] 2.1 Confirm `finish-feature` remains strict on `[DONE]` and document the expected handoff path from `complete-task`
+- [x] 2.2 Add regression coverage for final-task completion that does and does not make the feature startable for `finish-feature`

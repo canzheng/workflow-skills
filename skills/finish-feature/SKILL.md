@@ -11,6 +11,8 @@ This skill is the workflow-owned preflight for feature completion.
 
 It enforces the OpenSpec validate/archive gate for the linked change before handing off to the generic `finishing-a-development-branch` skill.
 
+`finish-feature` is intentionally strict: completing the final task is not enough on its own. The expected handoff is that `complete-task` first makes the final-task outcome explicit, and only a feature that has actually been moved to `[DONE]` is startable here.
+
 ## Defaults
 
 - If the user names a feature ID, use it.
@@ -41,6 +43,7 @@ It enforces the OpenSpec validate/archive gate for the linked change before hand
   - `openspec/changes/<change-id>/` must not exist
   - exactly one `openspec/changes/archive/*-<change-id>/` directory must exist
 - If the feature is not in `[DONE]`, stop instead of trying to finish the branch early.
+- A feature whose final task completed but still remains `[IN_PROGRESS]` is not startable here; that handoff must stay with `complete-task` until feature acceptance is confirmed.
 - OpenSpec archive is additive. It does not replace task-level verification or feature-level acceptance.
 - Keep the generic branch-finishing workflow generic; this skill owns the OpenSpec-specific gate.
 

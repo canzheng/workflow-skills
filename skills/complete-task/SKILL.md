@@ -39,6 +39,9 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 9. Commit the intended task changes, including the task-state updates that live on the feature branch, whenever needed to leave the feature worktree clean for the next handoff.
 10. Confirm the feature worktree is clean and ready for reuse on the next task.
 11. If feature acceptance is satisfied, move the feature to the bottom of `[DONE]`. Otherwise keep it in `[IN_PROGRESS]`.
+   - treat the final-task handoff as an explicit decision point:
+     - if the completed task was the last top-level OpenSpec task but feature acceptance is not yet confirmed, the feature still remains `[IN_PROGRESS]` and `finish-feature` is not startable
+     - only after feature acceptance is confirmed and the feature is moved to `[DONE]` does `finish-feature` become startable
 12. Re-run `audit-workflow`.
 13. Report explicitly that the feature branch/worktree still exists and is not finalized unless downstream automation is closing a feature that just reached `[DONE]` and is about to hand off to `finish-feature`.
 
@@ -52,6 +55,7 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 - A clean handoff usually means committing the task's intended changes, but the invariant is a clean feature worktree, not a fixed number of commits.
 - Do not finish, repurpose, or clean up the feature branch/worktree in this skill.
 - A task may be `done` while the feature remains `[IN_PROGRESS]`, including contract-or-test tasks whose broader feature suite is still intentionally red.
+- Completing the final top-level task does not automatically make `finish-feature` startable; the feature must still satisfy acceptance and be moved to `[DONE]`.
 - Use the repo feature file as the place to record evidence and handoff notes. Use OpenSpec as the task-definition and task-status authority.
 - Execution context must be explicit. Provide the linked OpenSpec change directory plus the Markdown context file list to the executor instead of relying on implied context.
 
