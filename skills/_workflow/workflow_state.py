@@ -412,6 +412,11 @@ def _parse_openspec_tasks_text(tasks_text: str) -> list[RawOpenSpecTaskRecord]:
     return tasks
 
 
+def parse_openspec_tasks_file(tasks_file: Path, *, current_task: str | None = None) -> list[TaskRecord]:
+    raw_tasks = _parse_openspec_tasks_text(tasks_file.read_text(encoding="utf-8"))
+    return _derive_openspec_task_statuses(raw_tasks, current_task=current_task)
+
+
 def _parse_openspec_open_nested_items(tasks_text: str) -> dict[str, list[str]]:
     open_nested_items: dict[str, list[str]] = {}
     current_top_level_task_id: str | None = None
@@ -486,9 +491,8 @@ def parse_tasks(
     if tasks_file is None:
         return []
 
-    raw_tasks = _parse_openspec_tasks_text(tasks_file.read_text(encoding="utf-8"))
     current_task = parse_current_task(feature_text)
-    return _derive_openspec_task_statuses(raw_tasks, current_task=current_task)
+    return parse_openspec_tasks_file(tasks_file, current_task=current_task)
 
 
 def list_open_openspec_nested_items(

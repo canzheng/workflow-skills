@@ -7,7 +7,7 @@
 
 ## 2. Finish-Feature Alignment
 
-- [ ] 2 Finish-Feature Alignment
-- [ ] 2.1 Shift feature-state ownership so `finish-feature`, not `complete-task`, moves a feature from `[IN_PROGRESS]` to `[DONE]`
-- [ ] 2.2 Require `finish-feature` to run only when all top-level OpenSpec tasks are done and `Current Task` is `none`
-- [ ] 2.3 Update workflow audit and regression coverage for the new final-task-to-finish-feature boundary
+- [x] 2 Finish-Feature Alignment
+- [x] 2.1 Shift feature-state ownership so `finish-feature`, not `complete-task`, moves a feature from `[IN_PROGRESS]` to `[DONE]`
+- [x] 2.2 Require `finish-feature` to run only when all top-level OpenSpec tasks are done and `Current Task` is `none`
+- [x] 2.3 Update workflow audit and regression coverage for the new final-task-to-finish-feature boundary

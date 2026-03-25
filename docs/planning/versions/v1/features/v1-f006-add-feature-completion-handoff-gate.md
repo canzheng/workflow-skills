@@ -42,6 +42,17 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `Passed for docs/planning/versions/v1 before and after task-state updates.`
   - Run: `git diff --check`
   - Result: `Passed with no patch-format issues before and after task-state updates.`
+- `2026-03-26` Task `2`:
+  - Run: `python3 -m unittest tests.test_finish_feature -v`
+  - Result: `5 tests passed, covering the new [IN_PROGRESS]-based finish-feature resolver boundary plus the rejection paths for open top-level tasks and uncleared Current Task.`
+  - Run: `python3 -m unittest tests.test_workflow_openspec_integration -v`
+  - Result: `13 tests passed, including the new audit and workflow handoff regressions for a feature that stays [IN_PROGRESS] but becomes ready for finish-feature.`
+  - Run: `python3 skills/finish-feature/scripts/resolve_finish_feature.py --feature-id v1-f006`
+  - Result: `Passed, resolving v1-f006 directly from [IN_PROGRESS] with active_change_path = openspec/changes/add-feature-completion-handoff-gate and requires_archive = true.`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `Passed for docs/planning/versions/v1 before and after task-state updates.`
+  - Run: `git diff --check`
+  - Result: `Passed with no patch-format issues before and after task-state updates.`
 
 ## 2. Handoff Notes
 - `2026-03-26`:
@@ -72,3 +83,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `clean`
   - Notes: Task `1` completed under the revised contract. `complete-task` now refuses to close a top-level OpenSpec task while any nested checklist item under that task remains open, and top-level task `2` is the next ready task for this feature.
+- `2026-03-26`:
+  - Current Task: `2`
+  - Worktree State: `dirty`
+  - Notes: Task `2` started under the approved completion model. The execution focus is moving the `[IN_PROGRESS] -> [DONE]` ownership into `finish-feature`, tightening its start preconditions to “all top-level tasks done and Current Task: none,” and keeping `[DONE]` reserved for post-acceptance, post-archive state.
+- `2026-03-26`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Task `2` completed under the revised contract. All top-level OpenSpec tasks are now done, the feature remains in `[IN_PROGRESS]`, and the handoff target is now `finish-feature` because `Current Task` is cleared and the feature is ready for acceptance plus OpenSpec archive gating.

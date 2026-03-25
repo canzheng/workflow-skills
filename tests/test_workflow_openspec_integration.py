@@ -615,7 +615,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 },
             )
 
-    def test_final_task_handoff_does_not_make_finish_feature_startable_while_feature_stays_in_progress(self) -> None:
+    def test_final_task_handoff_makes_finish_feature_startable_while_feature_stays_in_progress(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"
             initialize(repo, "v1")
@@ -708,6 +708,23 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             self.assertEqual(complete_result.returncode, 0, complete_result.stdout + complete_result.stderr)
             complete_payload = json.loads(complete_result.stdout)
             self.assertEqual(complete_payload["completion_handoff"]["decision"], "confirm_feature_acceptance")
+            feature_file.write_text(
+                feature_file.read_text(encoding="utf-8").replace("- Current Task: `2`", "- Current Task: `none`"),
+                encoding="utf-8",
+            )
+            (change_dir / "tasks.md").write_text(
+                textwrap.dedent(
+                    """\
+                    ## 1. Setup
+
+                    - [x] 1 Seed baseline
+                    - [x] 2 Final integration
+                      - Depends On:
+                        - `1`
+                    """
+                ),
+                encoding="utf-8",
+            )
 
             finish_result = subprocess.run(
                 ["python3", str(FINISH_FEATURE_SCRIPT), "--repo-root", str(repo), "--feature-id", "v1-f001"],
@@ -716,10 +733,16 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 check=False,
             )
 
-            self.assertNotEqual(finish_result.returncode, 0)
-            self.assertIn("feature v1-f001 is not in [DONE]", finish_result.stderr)
+            self.assertEqual(finish_result.returncode, 0, finish_result.stdout + finish_result.stderr)
+            finish_payload = json.loads(finish_result.stdout)
+            self.assertEqual(finish_payload["feature_id"], "v1-f001")
+            self.assertTrue(finish_payload["requires_archive"])
+            self.assertEqual(
+                finish_payload["active_change_path"],
+                "openspec/changes/integrate-openspec-shaping-readiness",
+            )
 
-    def test_final_task_handoff_becomes_finish_feature_startable_after_feature_moves_to_done(self) -> None:
+    def test_finish_feature_rejects_in_progress_feature_when_current_task_is_not_none(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"
             initialize(repo, "v1")
@@ -744,11 +767,11 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
 
                     ## [IN_PROGRESS]
 
-                    None yet.
+                    ### `v1-f001` [OpenSpec integration](features/v1-f001-openspec-integration.md)
 
                     ## [DONE]
 
-                    ### `v1-f001` [OpenSpec integration](features/v1-f001-openspec-integration.md)
+                    None yet.
 
                     ## [DEFER]
 
@@ -767,17 +790,17 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                     ## 0. Meta
                     - Feature ID: `v1-f001`
                     - Version: `v1`
-                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
                     - OpenSpec Change: `integrate-openspec-shaping-readiness`
                     - OpenSpec Specs:
                       - `openspec/specs/workflow-board-lifecycle/spec.md`
-                    - Current Task: `none`
+                    - Current Task: `2`
 
                     ## 1. Validation Log
-                    - `2026-03-26` Task `2`: feature acceptance satisfied after the final task handoff.
+                    - `2026-03-26` Task `2`: final task closed but task handoff is still active.
 
                     ## 2. Handoff Notes
-                    - `2026-03-26`: Ready for `finish-feature`.
+                    - `2026-03-26`: Final task closed, but the current task marker was not cleared.
                     """
                 ),
                 encoding="utf-8",
@@ -808,14 +831,99 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 check=False,
             )
 
-            self.assertEqual(finish_result.returncode, 0, finish_result.stdout + finish_result.stderr)
-            finish_payload = json.loads(finish_result.stdout)
-            self.assertEqual(finish_payload["feature_id"], "v1-f001")
-            self.assertTrue(finish_payload["requires_archive"])
-            self.assertEqual(
-                finish_payload["active_change_path"],
-                "openspec/changes/integrate-openspec-shaping-readiness",
+            self.assertNotEqual(finish_result.returncode, 0)
+            self.assertIn("Current Task must be `none`", finish_result.stderr)
+
+    def test_audit_accepts_in_progress_feature_ready_for_finish_feature(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    None yet.
+
+                    ## [READY]
+
+                    None yet.
+
+                    ## [IN_PROGRESS]
+
+                    ### `v1-f001` [OpenSpec integration](features/v1-f001-openspec-integration.md)
+
+                    ## [DONE]
+
+                    None yet.
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
             )
+
+            feature_file = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-openspec-integration.md"
+            feature_file.write_text(
+                textwrap.dedent(
+                    """\
+                    # Feature: OpenSpec integration
+
+                    ## 0. Meta
+                    - Feature ID: `v1-f001`
+                    - Version: `v1`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+                    - OpenSpec Change: `integrate-openspec-shaping-readiness`
+                    - OpenSpec Specs:
+                      - `openspec/specs/workflow-board-lifecycle/spec.md`
+                    - Current Task: `none`
+
+                    ## 1. Validation Log
+                    - `2026-03-26` Task `2`: all top-level task work completed; feature is ready for `finish-feature`.
+
+                    ## 2. Handoff Notes
+                    - `2026-03-26`: Ready for `finish-feature`.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            change_dir = repo / "openspec" / "changes" / "integrate-openspec-shaping-readiness"
+            change_dir.mkdir(parents=True, exist_ok=True)
+            (change_dir / "proposal.md").write_text("proposal", encoding="utf-8")
+            (change_dir / "design.md").write_text("design", encoding="utf-8")
+            (change_dir / "tasks.md").write_text(
+                textwrap.dedent(
+                    """\
+                    ## 1. Setup
+
+                    - [x] 1 Seed baseline
+                    - [x] 2 Final integration
+                      - Depends On:
+                        - `1`
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_audit_accepts_legacy_exempt_done_feature_without_openspec_change(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
