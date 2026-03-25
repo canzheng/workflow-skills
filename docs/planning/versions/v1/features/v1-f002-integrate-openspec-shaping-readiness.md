@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f002`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#shaping`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
 - OpenSpec Change: `integrate-openspec-shaping-readiness`
 - OpenSpec Specs:
   - `openspec/specs/openspec-change-integration/spec.md`
@@ -23,4 +23,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - None yet.
 
 ## 2. Handoff Notes
-- None yet.
+- `2026-03-25`:
+  - Current Task: `none`
+  - Worktree State: `n/a`
+  - Notes: Shaping artifacts are complete for `integrate-openspec-shaping-readiness`. Top-level OpenSpec task `4` remains unchecked while tasks `1` through `3` are complete, so the feature is ready for execution.
