@@ -15,6 +15,7 @@ if str(SKILLS_ROOT) not in sys.path:
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
     compute_task_readiness_drift,
+    find_legacy_inline_planning_sections,
     format_task_readiness_drift_messages,
     parse_backlog_document,
     parse_feature_openspec_status,
@@ -144,6 +145,13 @@ def main(argv: list[str] | None = None) -> int:
 
             change_id = parse_feature_openspec_change(feature_text)
             openspec_status = parse_feature_openspec_status(feature_text)
+            legacy_inline_sections = find_legacy_inline_planning_sections(feature_text)
+
+            if legacy_inline_sections and openspec_status != "legacy-exempt":
+                errors.append(
+                    f"{feature_path.relative_to(root)} uses legacy inline planning sections: "
+                    + ", ".join(legacy_inline_sections)
+                )
 
             if section_name in {"SHAPING", "READY", "IN_PROGRESS"}:
                 if openspec_status == "legacy-exempt":

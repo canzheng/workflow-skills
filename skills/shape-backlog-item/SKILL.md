@@ -30,8 +30,8 @@ It is a workflow wrapper around `brainstorming` plus linked OpenSpec change crea
 5. For each promoted feature:
    - assign the next feature ID
    - run `openspec-propose` to create or update exactly one linked OpenSpec change for the feature's shaping authority
-   - create the feature file under `features/`
-   - write workflow metadata plus links to the authoritative OpenSpec change and affected specs
+   - create the feature file under `features/` by running `python "${CODEX_HOME:-$HOME/.codex}/skills/shape-backlog-item/scripts/render_feature_file.py"`
+   - pass the authoritative OpenSpec change and affected spec paths as explicit inputs to the renderer
    - do not duplicate proposal, design, spec, or task prose from OpenSpec inside the feature file
 6. Update feature files first, then update `BACKLOG.md`.
 7. Place promoted features at the bottom of `[SHAPING]`, preserving the existing top-to-bottom order of earlier items.
@@ -48,6 +48,7 @@ It is a workflow wrapper around `brainstorming` plus linked OpenSpec change crea
 - `brainstorming` owns the design-review gates for this skill. Do not treat shaping as complete until its required approvals and review loops have passed.
 - This workflow requires OpenSpec. Do not promote a feature without a linked OpenSpec change.
 - This skill must run `openspec-propose` for promoted work. Do not rely on a separate manual `openspec-propose` run followed by hand-edited workflow state.
+- This skill must create feature files through the renderer script, not by freehand authoring.
 - Preserve inherited validation and review gates. OpenSpec shaping does not relax audit, review, or verification requirements.
 - Keep a single backlog-item split below 5 features.
 - If the work appears to need 5 or more features, split it into multiple `[BACKLOG]` items first.

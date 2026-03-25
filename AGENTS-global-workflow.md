@@ -61,6 +61,7 @@
 - Once created, a feature ID must never be reused for a different feature.
 - The feature file contains `Meta`, `Validation Log`, and `Handoff Notes`.
 - The feature file must record one linked OpenSpec change plus the affected OpenSpec spec paths, except for historical `[DONE]` features explicitly marked `OpenSpec Status: legacy-exempt` during midstream adoption.
+- Active workflow feature files must use the thin execution-record format. Legacy inline planning sections such as `Problem`, `Goal`, `Design Spec`, `Implementation Plan`, or embedded `Tasks` are invalid unless the feature is an explicitly marked `legacy-exempt` historical completed feature.
 - Do not duplicate OpenSpec proposal, design, spec, or task prose inside the feature file.
 - Always update the existing feature file in-place before updating any derived summary elsewhere.
 

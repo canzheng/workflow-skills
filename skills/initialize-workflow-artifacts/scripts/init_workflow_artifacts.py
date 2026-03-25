@@ -7,34 +7,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+SKILLS_ROOT = Path(__file__).resolve().parents[2]
+if str(SKILLS_ROOT) not in sys.path:
+    sys.path.insert(0, str(SKILLS_ROOT))
 
-FEATURE_TEMPLATE = """# Feature: <title>
-
-Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
-
-## 0. Meta
-- Feature ID: `v1-f001`
-- Version: `v1`
-- Backlog Reference: `<link or anchor>`
-- OpenSpec Change: `<change-id>`
-- OpenSpec Specs:
-  - `openspec/specs/<capability>/spec.md`
-- Current Task: `none`
-  - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
-- Created: `YYYY-MM-DD`
-- Last Updated: `YYYY-MM-DD`
-
-## 1. Validation Log
-- `<YYYY-MM-DD>` Task `<task-id>`:
-  - Run: `<command or inspection step>`
-  - Result: `<pass/fail and notable details>`
-
-## 2. Handoff Notes
-- `<YYYY-MM-DD>`:
-  - Current Task: `<task-id or none>`
-  - Worktree State: `<clean/dirty>`
-  - Notes: <handoff summary>
-"""
+from _workflow.feature_file import FEATURE_TEMPLATE
 
 
 ROADMAP_TEMPLATE = """# Roadmap

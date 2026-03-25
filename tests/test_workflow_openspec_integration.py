@@ -484,6 +484,84 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("legacy-exempt", result.stdout)
 
+    def test_audit_rejects_old_format_active_feature_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    None yet.
+
+                    ## [READY]
+
+                    ### `v1-f001` [Legacy formatted feature](features/v1-f001-legacy-formatted-feature.md)
+
+                    ## [IN_PROGRESS]
+
+                    None yet.
+
+                    ## [DONE]
+
+                    None yet.
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            feature_file = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-legacy-formatted-feature.md"
+            feature_file.write_text(
+                textwrap.dedent(
+                    """\
+                    # Feature: Legacy formatted feature
+
+                    ## 0. Meta
+                    - Feature ID: `v1-f001`
+                    - Version: `v1`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+                    - OpenSpec Change: `legacy-formatted-feature`
+                    - Current Task: `none`
+
+                    ## 1. Problem
+                    - Old feature layout still present.
+
+                    ## 2. Goal
+                    - Should be rejected by audit.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            change_dir = repo / "openspec" / "changes" / "legacy-formatted-feature"
+            change_dir.mkdir(parents=True, exist_ok=True)
+            (change_dir / "proposal.md").write_text("proposal", encoding="utf-8")
+            (change_dir / "design.md").write_text("design", encoding="utf-8")
+            (change_dir / "tasks.md").write_text("- [ ] 1.1 Do it\n", encoding="utf-8")
+
+            result = subprocess.run(
+                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("legacy inline planning sections", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

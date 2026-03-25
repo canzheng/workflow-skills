@@ -75,6 +75,7 @@ Does not own:
 
 Migration note:
 - historical `[DONE]` features from before OpenSpec adoption may instead record `OpenSpec Status: legacy-exempt`
+- active workflow feature files must use the thin execution-record format rather than legacy inline planning sections
 
 ## Official Phase Workflow
 
@@ -241,6 +242,7 @@ OpenSpec validation is additive:
 - Do not use OpenSpec archive as a substitute for `complete-task` evidence or `DONE` acceptance.
 - Do not finish the branch before the linked OpenSpec change is validated and archived.
 - `shape-backlog-item` must run `openspec-propose` for promoted work; do not run `openspec-propose` as a separate manual lane.
+- `shape-backlog-item` must create feature files through the renderer script rather than freehand authoring.
 - `finish-feature` must run `openspec-archive-change` before handing off to `finishing-a-development-branch`.
 - Historical `[DONE]` features are exempt from OpenSpec change checks only when explicitly marked `OpenSpec Status: legacy-exempt`.
 

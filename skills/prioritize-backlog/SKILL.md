@@ -32,8 +32,9 @@ It is a workflow wrapper around `audit-workflow` plus the helper script at `pyth
 python "${CODEX_HOME:-$HOME/.codex}/skills/prioritize-backlog/scripts/prioritize_backlog.py" list
 ```
 
-4. Review the returned eligible items and linked feature files:
-   - for `[SHAPING]` and `[READY]`, read the linked feature files as needed
+4. Review the returned eligible items and linked OpenSpec context:
+   - for `[SHAPING]` and `[READY]`, read the linked OpenSpec change context as needed
+   - prefer `proposal.md`, `design.md`, `tasks.md`, and linked change spec markdown over old feature-file sections
    - for `[BACKLOG]`, inspect any surrounding notes in `BACKLOG.md`
 5. Rank all eligible items using these heuristics in this exact order:
    - items that do not depend on other items

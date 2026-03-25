@@ -6,7 +6,6 @@ import json
 import os
 import subprocess
 import sys
-import re
 from collections import Counter
 from pathlib import Path
 
@@ -14,13 +13,16 @@ SKILLS_ROOT = Path(__file__).resolve().parents[2]
 if str(SKILLS_ROOT) not in sys.path:
     sys.path.insert(0, str(SKILLS_ROOT))
 
-from _workflow.workflow_state import WORKFLOW_SECTIONS, parse_backlog_document, parse_tasks
+from _workflow.workflow_state import (
+    WORKFLOW_SECTIONS,
+    list_openspec_change_context_files,
+    parse_backlog_document,
+    parse_feature_openspec_change,
+    parse_tasks,
+)
 
 
 ELIGIBLE_SECTIONS = ("BACKLOG", "SHAPING", "READY")
-HEADING_RE = re.compile(r"^##(?:\s+\d+(?:\.\d+)*)?\.?\s+(?P<name>.+?)\s*$")
-
-
 class WorkflowError(RuntimeError):
     pass
 
@@ -90,34 +92,42 @@ def read_backlog(root: Path) -> tuple[Path, str, object]:
     return backlog_path, backlog_text, parsed_backlog
 
 
-def summarize_markdown_section(feature_text: str, section_name: str) -> str | None:
-    target = section_name.lower()
-    lines = feature_text.splitlines()
-    capture = False
+def summarize_markdown_file(path: Path) -> str | None:
     collected: list[str] = []
-
-    for line in lines:
-        heading = HEADING_RE.match(line)
-        if heading:
-            normalized = heading.group("name").strip().lower()
-            if normalized == target:
-                capture = True
-                collected = []
-                continue
-            if capture:
-                break
-
-        if capture:
-            stripped = line.strip()
-            if stripped:
-                collected.append(stripped)
-
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("#"):
+            continue
+        collected.append(stripped)
     if not collected:
         return None
     summary = " ".join(collected)
     if len(summary) > 280:
         return summary[:277].rstrip() + "..."
     return summary
+
+
+def summarize_context_files(root: Path, context_files: list[Path]) -> tuple[str | None, str | None, str | None, list[dict[str, str]]]:
+    proposal = None
+    design = None
+    tasks = None
+    spec_context: list[dict[str, str]] = []
+
+    for path in context_files:
+        summary = summarize_markdown_file(path)
+        relative_path = str(path.relative_to(root))
+        if path.name == "proposal.md":
+            proposal = summary
+        elif path.name == "design.md":
+            design = summary
+        elif path.name == "tasks.md":
+            tasks = summary
+        else:
+            spec_context.append({"path": relative_path, "summary": summary or ""})
+
+    return proposal, design, tasks, spec_context
 
 
 def feature_payload(root: Path, backlog_path: Path, entry: object, *, section_name: str, global_rank: int, section_rank: int) -> dict[str, object]:
@@ -127,8 +137,11 @@ def feature_payload(root: Path, backlog_path: Path, entry: object, *, section_na
             f"{backlog_path.relative_to(root)} section [{section_name}] links missing feature file {entry.link}"
         )
     feature_text = feature_path.read_text(encoding="utf-8")
-    tasks = parse_tasks(feature_text)
+    tasks = parse_tasks(feature_text, feature_file=feature_path, repo_root=root)
     task_counts = dict(sorted(Counter(task.status for task in tasks).items()))
+    change_id = parse_feature_openspec_change(feature_text)
+    context_files = list_openspec_change_context_files(feature_text, feature_file=feature_path, repo_root=root)
+    proposal, design, tasks_summary, spec_context = summarize_context_files(root, context_files)
 
     return {
         "id": entry.feature_id,
@@ -140,9 +153,12 @@ def feature_payload(root: Path, backlog_path: Path, entry: object, *, section_na
         "tag": entry.tag,
         "link": entry.link,
         "feature_path": str(feature_path.relative_to(root)),
-        "problem": summarize_markdown_section(feature_text, "Problem"),
-        "goal": summarize_markdown_section(feature_text, "Goal"),
-        "scope": summarize_markdown_section(feature_text, "Scope"),
+        "openspec_change_id": change_id,
+        "openspec_context_files": [str(path.relative_to(root)) for path in context_files],
+        "proposal": proposal,
+        "design": design,
+        "tasks_summary": tasks_summary,
+        "spec_context": spec_context,
         "task_counts": task_counts,
     }
 

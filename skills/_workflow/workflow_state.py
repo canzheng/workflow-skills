@@ -22,6 +22,15 @@ OPEN_SPEC_CHANGE_RE = re.compile(r"^- OpenSpec Change: `([^`]+)`$", re.MULTILINE
 OPEN_SPEC_STATUS_RE = re.compile(r"^- OpenSpec Status: `([^`]+)`$", re.MULTILINE)
 CURRENT_TASK_RE = re.compile(r"^- Current Task: `([^`]+)`$", re.MULTILINE)
 OPEN_SPEC_TASK_RE = re.compile(r"^- \[(?P<done>[ xX])\]\s+(?P<id>\d+\.\d+)\s+(?P<title>.+)$")
+HEADING_RE = re.compile(r"^##(?:\s+\d+(?:\.\d+)*)?\.?\s+(?P<name>.+?)\s*$", re.MULTILINE)
+LEGACY_INLINE_SECTION_NAMES = {
+    "problem",
+    "goal",
+    "scope",
+    "design spec",
+    "implementation plan",
+    "tasks",
+}
 
 
 class WorkflowStateError(RuntimeError):
@@ -166,6 +175,17 @@ def parse_current_task(feature_text: str) -> str | None:
     if current_task == "none":
         return None
     return current_task
+
+
+def find_legacy_inline_planning_sections(feature_text: str) -> list[str]:
+    found: list[str] = []
+    seen: set[str] = set()
+    for match in HEADING_RE.finditer(feature_text):
+        normalized = match.group("name").strip().lower()
+        if normalized in LEGACY_INLINE_SECTION_NAMES and normalized not in seen:
+            seen.add(normalized)
+            found.append(match.group("name").strip())
+    return found
 
 
 def _parse_feature_file_tasks(feature_text: str) -> list[TaskRecord]:
