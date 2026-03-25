@@ -23,11 +23,12 @@ This file tracks feature-board status only.
 ### `v1-f002` [Integrate OpenSpec Shaping Readiness](features/v1-f002-integrate-openspec-shaping-readiness.md)
 ## [IN_PROGRESS]
 
-### `v1-f006` [Add Feature Completion Handoff Gate](features/v1-f006-add-feature-completion-handoff-gate.md)
+None yet.
 
 ## [DONE]
 
 ### `v1-f001` [Legacy OpenSpec Audit Migration](features/v1-f001-legacy-openspec-audit-migration.md)
+### `v1-f006` [Add Feature Completion Handoff Gate](features/v1-f006-add-feature-completion-handoff-gate.md)
 
 ## [DEFER]
 

@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f006`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `add-feature-completion-handoff-gate`
 - OpenSpec Specs:
   - `openspec/specs/task-execution-handoff/spec.md`
@@ -53,6 +53,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `Passed for docs/planning/versions/v1 before and after task-state updates.`
   - Run: `git diff --check`
   - Result: `Passed with no patch-format issues before and after task-state updates.`
+- `2026-03-26` Feature Completion:
+  - Run: `openspec validate add-feature-completion-handoff-gate`
+  - Result: `Passed; OpenSpec reported "Change 'add-feature-completion-handoff-gate' is valid".`
+  - Run: `openspec archive add-feature-completion-handoff-gate -y`
+  - Result: `Passed; OpenSpec updated the stable specs and archived the change as openspec/changes/archive/2026-03-25-add-feature-completion-handoff-gate.`
+  - Run: `python3 skills/finish-feature/scripts/resolve_finish_feature.py --feature-id v1-f006`
+  - Result: `Passed after archive, resolving v1-f006 with archive_path = openspec/changes/archive/2026-03-25-add-feature-completion-handoff-gate and requires_archive = false.`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `Passed after moving the feature to [DONE].`
 
 ## 2. Handoff Notes
 - `2026-03-26`:
@@ -91,3 +100,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `clean`
   - Notes: Task `2` completed under the revised contract. All top-level OpenSpec tasks are now done, the feature remains in `[IN_PROGRESS]`, and the handoff target is now `finish-feature` because `Current Task` is cleared and the feature is ready for acceptance plus OpenSpec archive gating.
+- `2026-03-26`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: `finish-feature` validated and archived the linked OpenSpec change at `openspec/changes/archive/2026-03-25-add-feature-completion-handoff-gate`, then moved the feature to `[DONE]`. The remaining downstream decision is only generic branch/worktree finalization.

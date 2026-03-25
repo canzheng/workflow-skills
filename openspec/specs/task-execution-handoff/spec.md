@@ -1,8 +1,6 @@
 ## Purpose
 Define how task execution starts, how feature worktrees are reused across tasks, what a clean completion handoff requires, and how task completion differs from branch finalization.
-
 ## Requirements
-
 ### Requirement: Only one repository task executes at a time
 Task execution SHALL remain globally serialized at the repository level.
 
@@ -61,3 +59,27 @@ Finishing a task or feature SHALL remain separate from final branch/worktree cle
 - **AND** `finish-feature` verifies the linked OpenSpec change and archive requirements
 - **THEN** `finish-feature` moves the feature to `[DONE]`
 - **AND** branch/worktree finalization remains a separate downstream action
+
+### Requirement: Task completion makes the finish-feature handoff explicit
+Completing the active task SHALL make it explicit whether the feature still has more task work remaining or is now ready for `finish-feature`.
+
+#### Scenario: Final accepted task completes but feature still remains in progress
+- **WHEN** `complete-task` finishes the active task
+- **AND** feature-level acceptance is not yet satisfied
+- **THEN** the feature remains in `[IN_PROGRESS]`
+- **AND** the workflow reports that `finish-feature` is not yet startable
+
+#### Scenario: Final task completion makes finish-feature startable
+- **WHEN** `complete-task` finishes the active task
+- **AND** all top-level OpenSpec tasks are done
+- **THEN** the feature remains in `[IN_PROGRESS]`
+- **AND** the workflow reports that `finish-feature` is startable
+
+### Requirement: Top-level task closure requires closed nested checklist items
+`complete-task` SHALL refuse to close a top-level OpenSpec task while any nested checklist item under that task remains unchecked.
+
+#### Scenario: Nested implementation detail remains open
+- **WHEN** `complete-task` is asked to close a top-level OpenSpec task
+- **AND** at least one nested checklist item under that task is still unchecked
+- **THEN** the top-level task is not marked done
+- **AND** the workflow reports that the task closure preconditions are not yet satisfied
