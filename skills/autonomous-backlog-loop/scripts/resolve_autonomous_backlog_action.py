@@ -96,7 +96,11 @@ def read_backlog(root: Path) -> tuple[Path, dict[str, list[FeatureRecord]], list
                     feature_id=feature_id,
                     feature_path=feature_path,
                     feature_section=section_name,
-                    tasks=parse_tasks(feature_path.read_text(encoding="utf-8")),
+                    tasks=parse_tasks(
+                        feature_path.read_text(encoding="utf-8"),
+                        feature_file=feature_path,
+                        repo_root=root,
+                    ),
                 )
             )
 

@@ -224,6 +224,94 @@ def test_resolve_start_task_fails_when_feature_has_task_readiness_drift(tmp_path
     assert "task readiness drift" in result.stderr.lower()
 
 
+def test_autonomous_resolver_uses_openspec_backed_tasks_for_ready_features(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    (repo / "docs" / "planning").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "planning" / "current_version").symlink_to(Path("versions/v1"))
+    (repo / "openspec" / "changes" / "ready-feature-change").mkdir(parents=True, exist_ok=True)
+
+    backlog = textwrap.dedent(
+        """\
+        # V1 Backlog
+
+        ## [BACKLOG]
+
+        None yet.
+
+        ## [SHAPING]
+
+        None yet.
+
+        ## [READY]
+
+        ### `v1-f001` [Ready Feature](features/v1-f001-ready-feature.md)
+
+        ## [IN_PROGRESS]
+
+        None yet.
+
+        ## [DONE]
+
+        None yet.
+
+        ## [DEFER]
+
+        None yet.
+        """
+    )
+    (repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md").write_text(backlog, encoding="utf-8")
+
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Ready Feature
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+        - OpenSpec Change: `ready-feature-change`
+        - OpenSpec Specs:
+          - `openspec/specs/workflow-board-lifecycle/spec.md`
+        - Current Task: `none`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - None yet.
+        """
+    )
+    (feature_dir / "v1-f001-ready-feature.md").write_text(feature_text, encoding="utf-8")
+    (repo / "openspec" / "changes" / "ready-feature-change" / "tasks.md").write_text(
+        textwrap.dedent(
+            """\
+            ## 1. Work
+
+            - [x] 1.1 Baseline
+            - [ ] 1.2 Execute task
+              - Depends On:
+                - `1.1`
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        ["python", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["action"] == "run_task_loop"
+    assert payload["feature_id"] == "v1-f001"
+    assert payload["task_id"] == "1.2"
+
+
 def test_audit_workflow_accepts_resolvable_cross_feature_dependencies(tmp_path: Path) -> None:
     repo = _write_repo_fixture(tmp_path, task_statuses={"T01": "done", "T02": "done"})
     feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"

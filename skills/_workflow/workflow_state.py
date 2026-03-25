@@ -527,7 +527,7 @@ def compute_task_readiness_drift(
     feature_file: Path | None = None,
     repo_root: Path | None = None,
 ) -> TaskReadinessDrift:
-    tasks = parse_tasks(feature_text)
+    tasks = parse_tasks(feature_text, feature_file=feature_file, repo_root=repo_root)
     local_tasks_by_id = {task.task_id: task for task in tasks}
     local_feature_id = parse_feature_id(feature_text, feature_file=feature_file)
     feature_file_cache: dict[str, Path | None] = {}
@@ -578,7 +578,10 @@ def promote_ready_tasks(
     feature_file: Path | None = None,
     repo_root: Path | None = None,
 ) -> tuple[str, list[str]]:
-    tasks = parse_tasks(feature_text)
+    if not _parse_feature_file_tasks(feature_text):
+        raise WorkflowStateError("cannot promote task readiness in-place for OpenSpec-backed feature files")
+
+    tasks = parse_tasks(feature_text, feature_file=feature_file, repo_root=repo_root)
     drift = compute_task_readiness_drift(feature_text, feature_file=feature_file, repo_root=repo_root)
     if drift.has_errors():
         raise WorkflowStateError("; ".join(format_task_readiness_drift_messages(drift)))

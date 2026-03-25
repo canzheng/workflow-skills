@@ -127,6 +127,57 @@ def test_compute_task_readiness_drift_accepts_done_cross_feature_dependencies(tm
     assert drift.unknown_dependency_errors == []
 
 
+def test_compute_task_readiness_drift_uses_openspec_tasks_with_feature_context(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    (repo / "docs" / "planning").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "planning" / "current_version").symlink_to(Path("versions/v1"))
+    (repo / "openspec" / "changes" / "sample-change").mkdir(parents=True, exist_ok=True)
+
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Sample
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+        - OpenSpec Change: `sample-change`
+        - OpenSpec Specs:
+          - `openspec/specs/workflow-board-lifecycle/spec.md`
+        - Current Task: `none`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - None yet.
+        """
+    )
+    feature_path = feature_dir / "v1-f001-sample.md"
+    feature_path.write_text(feature_text, encoding="utf-8")
+    (repo / "openspec" / "changes" / "sample-change" / "tasks.md").write_text(
+        textwrap.dedent(
+            """\
+            ## 1. Work
+
+            - [x] 1.1 Baseline
+            - [ ] 1.2 Next step
+              - Depends On:
+                - `1.1`
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    drift = compute_task_readiness_drift(feature_text, feature_file=feature_path, repo_root=repo)
+
+    assert drift.promotable_task_ids == []
+    assert drift.invalid_ready_task_ids == []
+    assert drift.unknown_dependency_errors == []
+
+
 def test_parse_backlog_document_accepts_optional_tags_and_flexible_spacing() -> None:
     backlog_text = textwrap.dedent(
         """\
