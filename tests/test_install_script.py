@@ -53,6 +53,8 @@ class InstallScriptTests(unittest.TestCase):
 
             skills_root = codex_home / "skills"
             self.assertTrue((skills_root / "audit-workflow" / "SKILL.md").is_file())
+            self.assertTrue((skills_root / "diagnose-workflow" / "SKILL.md").is_file())
+            self.assertTrue((skills_root / "finish-feature" / "SKILL.md").is_file())
             self.assertTrue((skills_root / "_workflow" / "workflow_state.py").is_file())
             self.assertFalse((skills_root / "_workflow" / "tests").exists())
 

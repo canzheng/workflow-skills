@@ -11,11 +11,13 @@ WORKFLOW_END_MARKER='<!-- End of Workflow Section -->'
 
 SKILLS=(
   audit-workflow
+  diagnose-workflow
   initialize-workflow-artifacts
   shape-backlog-item
   ready-feature
   start-task
   complete-task
+  finish-feature
   repair-drift
   defer-feature
   prioritize-backlog
