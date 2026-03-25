@@ -22,6 +22,9 @@ OPEN_SPEC_CHANGE_RE = re.compile(r"^- OpenSpec Change: `([^`]+)`$", re.MULTILINE
 OPEN_SPEC_STATUS_RE = re.compile(r"^- OpenSpec Status: `([^`]+)`$", re.MULTILINE)
 CURRENT_TASK_RE = re.compile(r"^- Current Task: `([^`]+)`$", re.MULTILINE)
 OPEN_SPEC_TASK_RE = re.compile(r"^- \[(?P<done>[ xX])\]\s+(?P<id>\d+)\s+(?P<title>.+)$")
+OPEN_SPEC_NESTED_TASK_RE = re.compile(
+    r"^\s+- \[(?P<done>[ xX])\]\s+(?P<id>\d+\.\d+(?:\.\d+)*)\s+(?P<title>.+)$"
+)
 HEADING_RE = re.compile(r"^##(?:\s+\d+(?:\.\d+)*)?\.?\s+(?P<name>.+?)\s*$", re.MULTILINE)
 LEGACY_INLINE_SECTION_NAMES = {
     "problem",
@@ -66,6 +69,14 @@ class TaskReadinessDrift:
 
     def has_drift(self) -> bool:
         return bool(self.promotable_task_ids or self.invalid_ready_task_ids or self.unknown_dependency_errors)
+
+
+@dataclass(frozen=True)
+class CompletionHandoff:
+    all_top_level_tasks_complete: bool
+    decision: str
+    next_ready_task_ids: list[str]
+    remaining_open_task_ids: list[str]
 
 
 @dataclass(frozen=True)
@@ -401,6 +412,37 @@ def _parse_openspec_tasks_text(tasks_text: str) -> list[RawOpenSpecTaskRecord]:
     return tasks
 
 
+def parse_openspec_tasks_file(tasks_file: Path, *, current_task: str | None = None) -> list[TaskRecord]:
+    raw_tasks = _parse_openspec_tasks_text(tasks_file.read_text(encoding="utf-8"))
+    return _derive_openspec_task_statuses(raw_tasks, current_task=current_task)
+
+
+def _parse_openspec_open_nested_items(tasks_text: str) -> dict[str, list[str]]:
+    open_nested_items: dict[str, list[str]] = {}
+    current_top_level_task_id: str | None = None
+
+    for line in tasks_text.splitlines():
+        task_match = OPEN_SPEC_TASK_RE.match(line)
+        if task_match:
+            current_top_level_task_id = task_match.group("id")
+            open_nested_items.setdefault(current_top_level_task_id, [])
+            continue
+
+        if current_top_level_task_id is None:
+            continue
+
+        nested_match = OPEN_SPEC_NESTED_TASK_RE.match(line)
+        if not nested_match:
+            continue
+        if nested_match.group("done").lower() == "x":
+            continue
+        nested_task_id = nested_match.group("id")
+        if nested_task_id.startswith(f"{current_top_level_task_id}."):
+            open_nested_items.setdefault(current_top_level_task_id, []).append(nested_task_id)
+
+    return open_nested_items
+
+
 def _derive_openspec_task_statuses(
     raw_tasks: list[RawOpenSpecTaskRecord],
     *,
@@ -449,9 +491,22 @@ def parse_tasks(
     if tasks_file is None:
         return []
 
-    raw_tasks = _parse_openspec_tasks_text(tasks_file.read_text(encoding="utf-8"))
     current_task = parse_current_task(feature_text)
-    return _derive_openspec_task_statuses(raw_tasks, current_task=current_task)
+    return parse_openspec_tasks_file(tasks_file, current_task=current_task)
+
+
+def list_open_openspec_nested_items(
+    feature_text: str,
+    task_id: str,
+    *,
+    feature_file: Path | None = None,
+    repo_root: Path | None = None,
+) -> list[str]:
+    tasks_file = _linked_openspec_tasks_file(feature_text, feature_file=feature_file, repo_root=repo_root)
+    if tasks_file is None:
+        return []
+    nested_items_by_task = _parse_openspec_open_nested_items(tasks_file.read_text(encoding="utf-8"))
+    return nested_items_by_task.get(task_id, [])
 
 
 def parse_feature_id(feature_text: str, *, feature_file: Path | None = None) -> str | None:
@@ -594,6 +649,69 @@ def compute_task_readiness_drift(
         promotable_task_ids=promotable_task_ids,
         invalid_ready_task_ids=invalid_ready_task_ids,
         unknown_dependency_errors=unknown_dependency_errors,
+    )
+
+
+def compute_completion_handoff(
+    feature_text: str,
+    completed_task_id: str,
+    *,
+    feature_file: Path | None = None,
+    repo_root: Path | None = None,
+) -> CompletionHandoff:
+    tasks = parse_tasks(feature_text, feature_file=feature_file, repo_root=repo_root)
+    local_tasks_by_id = {task.task_id: task for task in tasks}
+    local_feature_id = parse_feature_id(feature_text, feature_file=feature_file)
+    feature_file_cache: dict[str, Path | None] = {}
+    task_cache: dict[Path, dict[str, TaskRecord]] = {}
+    done_task_ids = {task.task_id for task in tasks if task.status == "done"}
+    done_task_ids.add(completed_task_id)
+
+    next_ready_task_ids: list[str] = []
+    remaining_open_task_ids: list[str] = []
+
+    for task in tasks:
+        if task.task_id in done_task_ids:
+            continue
+
+        dependencies_satisfied = True
+        for dependency in task.depends_on:
+            if "/" not in dependency:
+                if dependency not in done_task_ids:
+                    dependencies_satisfied = False
+                    break
+                continue
+
+            dependency_feature_id, dependency_task_id = dependency.split("/", 1)
+            if local_feature_id is not None and dependency_feature_id == local_feature_id:
+                if dependency_task_id not in done_task_ids:
+                    dependencies_satisfied = False
+                    break
+                continue
+
+            resolved = _resolve_dependency(
+                dependency,
+                local_feature_id=local_feature_id,
+                local_tasks_by_id=local_tasks_by_id,
+                repo_root=repo_root,
+                feature_file_cache=feature_file_cache,
+                task_cache=task_cache,
+            )
+            if resolved.status != "done":
+                dependencies_satisfied = False
+                break
+
+        remaining_open_task_ids.append(task.task_id)
+        if dependencies_satisfied:
+            next_ready_task_ids.append(task.task_id)
+
+    all_top_level_tasks_complete = not remaining_open_task_ids
+    decision = "confirm_feature_acceptance" if all_top_level_tasks_complete else "stay_in_progress"
+    return CompletionHandoff(
+        all_top_level_tasks_complete=all_top_level_tasks_complete,
+        decision=decision,
+        next_ready_task_ids=next_ready_task_ids,
+        remaining_open_task_ids=remaining_open_task_ids,
     )
 
 

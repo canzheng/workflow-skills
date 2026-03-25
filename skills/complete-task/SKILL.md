@@ -38,9 +38,12 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
    - rely on the workflow `Depends On` convention parsed from the linked OpenSpec task file to expose downstream ready work
 9. Commit the intended task changes, including the task-state updates that live on the feature branch, whenever needed to leave the feature worktree clean for the next handoff.
 10. Confirm the feature worktree is clean and ready for reuse on the next task.
-11. If feature acceptance is satisfied, move the feature to the bottom of `[DONE]`. Otherwise keep it in `[IN_PROGRESS]`.
+11. Keep the feature in `[IN_PROGRESS]` after task closure.
+   - treat the final-task handoff as an explicit decision point:
+     - if the completed task was not the last top-level OpenSpec task, the feature stays `[IN_PROGRESS]` and the next ready task becomes the handoff target
+     - if the completed task was the last top-level OpenSpec task, the feature still remains `[IN_PROGRESS]` and `finish-feature` becomes the handoff target once `Current Task` is cleared
 12. Re-run `audit-workflow`.
-13. Report explicitly that the feature branch/worktree still exists and is not finalized unless downstream automation is closing a feature that just reached `[DONE]` and is about to hand off to `finish-feature`.
+13. Report explicitly that the feature branch/worktree still exists and is not finalized.
 
 ## Rules
 
@@ -52,7 +55,8 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 - A clean handoff usually means committing the task's intended changes, but the invariant is a clean feature worktree, not a fixed number of commits.
 - Do not finish, repurpose, or clean up the feature branch/worktree in this skill.
 - A task may be `done` while the feature remains `[IN_PROGRESS]`, including contract-or-test tasks whose broader feature suite is still intentionally red.
-- Use the repo feature file as the place to record evidence and handoff notes. Use OpenSpec as the task-definition authority and checkbox completion ledger.
+- Completing the final top-level task does not make the feature `[DONE]`; it only hands off from task execution into `finish-feature`.
+- Use the repo feature file as the place to record evidence and handoff notes. Use OpenSpec as the task-definition and task-status authority, with `tasks.md` as the checked/unchecked ledger.
 - Execution context must be explicit. Provide the linked OpenSpec change directory plus the Markdown context file list to the executor instead of relying on implied context.
 
 ## Stop Conditions

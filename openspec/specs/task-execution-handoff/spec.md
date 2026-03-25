@@ -50,12 +50,25 @@ Completing a task SHALL leave the feature ready for the next handoff.
 - **AND** intended task changes are committed when needed to leave the feature worktree clean
 - **AND** downstream task readiness is synchronized from checkbox completion state plus any workflow `Depends On` references
 
+#### Scenario: Final task completes but feature completion remains downstream
+- **WHEN** `complete-task` closes the final top-level task for a feature
+- **THEN** the feature remains `[IN_PROGRESS]`
+- **AND** `Current Task` is `none`
+- **AND** the workflow reports whether `finish-feature` is now startable
+
+#### Scenario: Top-level task closure is blocked by open nested checklist items
+- **WHEN** `complete-task` attempts to close a top-level OpenSpec task
+- **AND** any nested checklist item under that task is still unchecked
+- **THEN** the top-level task is not closed
+- **AND** the workflow reports that nested checklist closure is required first
+
 ### Requirement: Feature completion is distinct from branch finalization
 Finishing a task or feature SHALL remain separate from final branch/worktree cleanup decisions.
 
-#### Scenario: Feature reaches acceptance before branch finalization
+#### Scenario: Finish-feature owns the transition into done
 - **WHEN** a feature satisfies its feature-level acceptance bar
-- **THEN** the feature may move to `[DONE]`
+- **AND** `finish-feature` verifies the linked OpenSpec change and archive requirements
+- **THEN** `finish-feature` moves the feature to `[DONE]`
 - **AND** branch/worktree finalization remains a separate downstream action
 
 ### Requirement: Branch finalization requires archived OpenSpec change state
@@ -67,3 +80,27 @@ Feature branch finalization SHALL be gated on linked OpenSpec validation and arc
 - **AND** it archives that change
 - **AND** `openspec/changes/<change-id>/` no longer exists
 - **AND** exactly one `openspec/changes/archive/*-<change-id>/` directory exists before branch finalization continues
+
+### Requirement: Task completion makes the finish-feature handoff explicit
+Completing the active task SHALL make it explicit whether the feature still has more task work remaining or is now ready for `finish-feature`.
+
+#### Scenario: Final accepted task completes but feature still remains in progress
+- **WHEN** `complete-task` finishes the active task
+- **AND** feature-level acceptance is not yet satisfied
+- **THEN** the feature remains in `[IN_PROGRESS]`
+- **AND** the workflow reports that `finish-feature` is not yet startable
+
+#### Scenario: Final task completion makes finish-feature startable
+- **WHEN** `complete-task` finishes the active task
+- **AND** all top-level OpenSpec tasks are done
+- **THEN** the feature remains in `[IN_PROGRESS]`
+- **AND** the workflow reports that `finish-feature` is startable
+
+### Requirement: Top-level task closure requires closed nested checklist items
+`complete-task` SHALL refuse to close a top-level OpenSpec task while any nested checklist item under that task remains unchecked.
+
+#### Scenario: Nested implementation detail remains open
+- **WHEN** `complete-task` is asked to close a top-level OpenSpec task
+- **AND** at least one nested checklist item under that task is still unchecked
+- **THEN** the top-level task is not marked done
+- **AND** the workflow reports that the task closure preconditions are not yet satisfied

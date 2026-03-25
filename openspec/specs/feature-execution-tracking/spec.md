@@ -33,6 +33,12 @@ Feature metadata SHALL identify whether a task is currently executing.
 - **AND** that `Current Task` field is the active `in_progress` marker used by the implemented workflow
 - **AND** the linked OpenSpec `tasks.md` remains the checked/unchecked task ledger
 
+#### Scenario: Final task is closed before feature completion
+- **WHEN** the final top-level task is closed for a feature
+- **THEN** the feature may still remain `[IN_PROGRESS]`
+- **AND** the feature file records `Current Task` as `none`
+- **AND** the handoff notes state whether the feature is ready for `finish-feature`
+
 ### Requirement: Completed tasks include evidence
 Task completion SHALL be supported by recorded validation evidence.
 
@@ -40,6 +46,14 @@ Task completion SHALL be supported by recorded validation evidence.
 - **WHEN** a task is marked `done`
 - **THEN** the feature file includes the exact validation command or inspection step and its result
 - **AND** the recorded evidence explains why the task is considered complete
+
+### Requirement: Feature completion is a finish-feature outcome
+Feature metadata SHALL treat the `[IN_PROGRESS] -> [DONE]` transition as a feature-completion action, not a task-completion side effect.
+
+#### Scenario: Finish-feature completes the feature
+- **WHEN** `finish-feature` verifies acceptance and archives the linked OpenSpec change
+- **THEN** the feature file records evidence for the feature-level completion decision
+- **AND** the feature is moved to `[DONE]`
 
 ### Requirement: Feature files support historical completed-feature exemptions
 Feature metadata SHALL support an explicit exemption marker for historical completed features that predate OpenSpec adoption.
@@ -49,3 +63,11 @@ Feature metadata SHALL support an explicit exemption marker for historical compl
 - **THEN** the feature file may record `OpenSpec Status` as `legacy-exempt`
 - **AND** the feature is not required to record a linked OpenSpec change
 - **AND** the exemption does not apply to active shaping or execution states
+
+### Requirement: Feature completion evidence supports the move to done
+Feature metadata SHALL make the transition from `[IN_PROGRESS]` to `[DONE]` evidence-based rather than implicit.
+
+#### Scenario: Finish-feature moves a feature to done after acceptance passes
+- **WHEN** `finish-feature` moves a feature from `[IN_PROGRESS]` to `[DONE]`
+- **THEN** the feature file records completion evidence consistent with the accepted task work
+- **AND** the handoff state makes it clear that branch finalization is still a downstream `finish-feature` action

@@ -20,7 +20,13 @@ _SPEC.loader.exec_module(_MODULE)
 initialize = _MODULE.initialize
 
 
-def _write_done_feature(repo: Path, *, feature_id: str = "v1-f001", change_id: str = "finish-feature-gate") -> Path:
+def _write_finishable_feature(
+    repo: Path,
+    *,
+    feature_id: str = "v1-f001",
+    change_id: str = "finish-feature-gate",
+    current_task: str = "none",
+) -> Path:
     backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
     feature_slug = "finish-feature-gate"
     backlog_path.write_text(
@@ -42,11 +48,11 @@ def _write_done_feature(repo: Path, *, feature_id: str = "v1-f001", change_id: s
 
             ## [IN_PROGRESS]
 
-            None yet.
+            ### `{feature_id}` [Finish feature gate](features/{feature_id}-{feature_slug}.md)
 
             ## [DONE]
 
-            ### `{feature_id}` [Finish feature gate](features/{feature_id}-{feature_slug}.md)
+            None yet.
 
             ## [DEFER]
 
@@ -65,11 +71,11 @@ def _write_done_feature(repo: Path, *, feature_id: str = "v1-f001", change_id: s
             ## 0. Meta
             - Feature ID: `{feature_id}`
             - Version: `v1`
-            - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
+            - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
             - OpenSpec Change: `{change_id}`
             - OpenSpec Specs:
               - `openspec/specs/task-execution-handoff/spec.md`
-            - Current Task: `none`
+            - Current Task: `{current_task}`
 
             ## 1. Validation Log
             - 2026-03-25: task evidence recorded
@@ -88,11 +94,22 @@ class FinishFeatureResolverTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"
             initialize(repo, "v1")
-            _write_done_feature(repo)
+            _write_finishable_feature(repo)
 
             change_dir = repo / "openspec" / "changes" / "finish-feature-gate"
             change_dir.mkdir(parents=True, exist_ok=True)
             (change_dir / "proposal.md").write_text("proposal", encoding="utf-8")
+            (change_dir / "tasks.md").write_text(
+                textwrap.dedent(
+                    """\
+                    ## 1. Work
+
+                    - [x] 1 Complete task
+                    - [x] 2 Final verification
+                    """
+                ),
+                encoding="utf-8",
+            )
 
             result = subprocess.run(
                 ["python3", str(FINISH_RESOLVER), "--repo-root", str(repo)],
@@ -112,11 +129,12 @@ class FinishFeatureResolverTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"
             initialize(repo, "v1")
-            _write_done_feature(repo)
+            _write_finishable_feature(repo)
 
             archive_dir = repo / "openspec" / "changes" / "archive" / "2026-03-25-finish-feature-gate"
             archive_dir.mkdir(parents=True, exist_ok=True)
             (archive_dir / "proposal.md").write_text("proposal", encoding="utf-8")
+            (archive_dir / "tasks.md").write_text("- [x] 1 Wrapped up\n", encoding="utf-8")
 
             result = subprocess.run(
                 ["python3", str(FINISH_RESOLVER), "--repo-root", str(repo)],
@@ -131,12 +149,12 @@ class FinishFeatureResolverTests(unittest.TestCase):
             self.assertIsNone(payload["active_change_path"])
             self.assertEqual(payload["archive_path"], "openspec/changes/archive/2026-03-25-finish-feature-gate")
 
-    def test_resolver_requires_explicit_feature_when_multiple_done_features_exist(self) -> None:
+    def test_resolver_requires_explicit_feature_when_multiple_finishable_features_exist(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"
             initialize(repo, "v1")
-            _write_done_feature(repo, feature_id="v1-f001", change_id="change-one")
-            _write_done_feature(repo, feature_id="v1-f002", change_id="change-two")
+            _write_finishable_feature(repo, feature_id="v1-f001", change_id="change-one")
+            _write_finishable_feature(repo, feature_id="v1-f002", change_id="change-two")
 
             backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
             backlog_path.write_text(
@@ -158,12 +176,12 @@ class FinishFeatureResolverTests(unittest.TestCase):
 
                     ## [IN_PROGRESS]
 
-                    None yet.
+                    ### `v1-f001` [Finish feature gate](features/v1-f001-finish-feature-gate.md)
+                    ### `v1-f002` [Finish feature gate](features/v1-f002-finish-feature-gate.md)
 
                     ## [DONE]
 
-                    ### `v1-f001` [Finish feature gate](features/v1-f001-finish-feature-gate.md)
-                    ### `v1-f002` [Finish feature gate](features/v1-f002-finish-feature-gate.md)
+                    None yet.
 
                     ## [DEFER]
 
@@ -173,8 +191,12 @@ class FinishFeatureResolverTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            (repo / "openspec" / "changes" / "change-one").mkdir(parents=True, exist_ok=True)
-            (repo / "openspec" / "changes" / "change-two").mkdir(parents=True, exist_ok=True)
+            change_one_dir = repo / "openspec" / "changes" / "change-one"
+            change_two_dir = repo / "openspec" / "changes" / "change-two"
+            change_one_dir.mkdir(parents=True, exist_ok=True)
+            change_two_dir.mkdir(parents=True, exist_ok=True)
+            (change_one_dir / "tasks.md").write_text("- [x] 1 Done\n", encoding="utf-8")
+            (change_two_dir / "tasks.md").write_text("- [x] 1 Done\n", encoding="utf-8")
 
             result = subprocess.run(
                 ["python3", str(FINISH_RESOLVER), "--repo-root", str(repo)],
@@ -184,7 +206,47 @@ class FinishFeatureResolverTests(unittest.TestCase):
             )
 
             self.assertNotEqual(result.returncode, 0)
-            self.assertIn("expected exactly one feature in [DONE]", result.stderr)
+            self.assertIn("expected exactly one finishable feature in [IN_PROGRESS]", result.stderr)
+
+    def test_resolver_rejects_feature_when_current_task_is_still_active(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+            _write_finishable_feature(repo, current_task="2")
+
+            change_dir = repo / "openspec" / "changes" / "finish-feature-gate"
+            change_dir.mkdir(parents=True, exist_ok=True)
+            (change_dir / "tasks.md").write_text("- [x] 1 Done\n- [x] 2 Done\n", encoding="utf-8")
+
+            result = subprocess.run(
+                ["python3", str(FINISH_RESOLVER), "--repo-root", str(repo), "--feature-id", "v1-f001"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Current Task must be `none`", result.stderr)
+
+    def test_resolver_rejects_feature_when_top_level_tasks_remain_open(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+            _write_finishable_feature(repo)
+
+            change_dir = repo / "openspec" / "changes" / "finish-feature-gate"
+            change_dir.mkdir(parents=True, exist_ok=True)
+            (change_dir / "tasks.md").write_text("- [x] 1 Done\n- [ ] 2 Still open\n", encoding="utf-8")
+
+            result = subprocess.run(
+                ["python3", str(FINISH_RESOLVER), "--repo-root", str(repo), "--feature-id", "v1-f001"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("top-level OpenSpec tasks are not all done", result.stderr)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,11 @@ from __future__ import annotations
 import textwrap
 from pathlib import Path
 
-from _workflow.workflow_state import compute_task_readiness_drift, parse_backlog_document
+from _workflow.workflow_state import (
+    compute_task_readiness_drift,
+    list_open_openspec_nested_items,
+    parse_backlog_document,
+)
 
 
 def _feature_text() -> str:
@@ -167,6 +171,61 @@ def test_compute_task_readiness_drift_uses_openspec_tasks_with_feature_context(t
     assert drift.promotable_task_ids == []
     assert drift.invalid_ready_task_ids == []
     assert drift.unknown_dependency_errors == []
+
+
+def test_list_open_openspec_nested_items_returns_unchecked_nested_items_for_top_level_task(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    (repo / "docs" / "planning").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "planning" / "current_version").symlink_to(Path("versions/v1"))
+    (repo / "openspec" / "changes" / "sample-change").mkdir(parents=True, exist_ok=True)
+
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Sample
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+        - OpenSpec Change: `sample-change`
+        - OpenSpec Specs:
+          - `openspec/specs/workflow-board-lifecycle/spec.md`
+        - Current Task: `1`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - None yet.
+        """
+    )
+    feature_path = feature_dir / "v1-f001-sample.md"
+    feature_path.write_text(feature_text, encoding="utf-8")
+    (repo / "openspec" / "changes" / "sample-change" / "tasks.md").write_text(
+        textwrap.dedent(
+            """\
+            ## 1. Work
+
+            - [ ] 1 Parent task
+              - [x] 1.1 Closed nested item
+              - [ ] 1.2 Open nested item
+            - [ ] 2 Next task
+              - [ ] 2.1 Another open nested item
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    open_nested_items = list_open_openspec_nested_items(
+        feature_text,
+        "1",
+        feature_file=feature_path,
+        repo_root=repo,
+    )
+
+    assert open_nested_items == ["1.2"]
 
 
 def test_parse_backlog_document_accepts_optional_tags_and_flexible_spacing() -> None:
