@@ -16,12 +16,12 @@ This file tracks feature-board status only.
 ### `v1-f003` [Resolve Cross-Feature Task Readiness](features/v1-f003-resolve-cross-feature-task-readiness.md)
 ### `v1-f004` [Detect Orphan OpenSpec Changes](features/v1-f004-detect-orphan-openspec-changes.md)
 ### `v1-f005` [Harden Autonomous Backlog Loop Eligibility](features/v1-f005-harden-autonomous-backlog-loop-eligibility.md)
-### `v1-f006` [Add Feature Completion Handoff Gate](features/v1-f006-add-feature-completion-handoff-gate.md)
 ### `v1-f007` [Enforce Top-Level Current Task IDs](features/v1-f007-enforce-top-level-current-task-ids.md)
 
 ## [READY]
 
 ### `v1-f002` [Integrate OpenSpec Shaping Readiness](features/v1-f002-integrate-openspec-shaping-readiness.md)
+### `v1-f006` [Add Feature Completion Handoff Gate](features/v1-f006-add-feature-completion-handoff-gate.md)
 
 ## [IN_PROGRESS]
 
