@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import asdict
 import json
 import os
 import subprocess
@@ -14,6 +15,7 @@ if str(SKILLS_ROOT) not in sys.path:
 
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
+    compute_completion_handoff,
     linked_openspec_implementation_plan_path,
     list_openspec_change_context_files,
     parse_backlog_document,
@@ -116,6 +118,14 @@ def resolve_active_task(root: Path) -> dict[str, object]:
                         "feature_id": feature_id,
                         "feature_path": str(feature_path.relative_to(root)),
                         "feature_section": section_name,
+                        "completion_handoff": asdict(
+                            compute_completion_handoff(
+                                feature_text,
+                                task.task_id,
+                                feature_file=feature_path,
+                                repo_root=root,
+                            )
+                        ),
                         "openspec_change_id": change_id,
                         "openspec_change_path": str(change_path.relative_to(root)),
                         "implementation_plan_path": (

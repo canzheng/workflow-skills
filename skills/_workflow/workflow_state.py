@@ -69,6 +69,14 @@ class TaskReadinessDrift:
 
 
 @dataclass(frozen=True)
+class CompletionHandoff:
+    all_top_level_tasks_complete: bool
+    decision: str
+    next_ready_task_ids: list[str]
+    remaining_open_task_ids: list[str]
+
+
+@dataclass(frozen=True)
 class DependencyResolution:
     status: str | None
     error: str | None = None
@@ -594,6 +602,69 @@ def compute_task_readiness_drift(
         promotable_task_ids=promotable_task_ids,
         invalid_ready_task_ids=invalid_ready_task_ids,
         unknown_dependency_errors=unknown_dependency_errors,
+    )
+
+
+def compute_completion_handoff(
+    feature_text: str,
+    completed_task_id: str,
+    *,
+    feature_file: Path | None = None,
+    repo_root: Path | None = None,
+) -> CompletionHandoff:
+    tasks = parse_tasks(feature_text, feature_file=feature_file, repo_root=repo_root)
+    local_tasks_by_id = {task.task_id: task for task in tasks}
+    local_feature_id = parse_feature_id(feature_text, feature_file=feature_file)
+    feature_file_cache: dict[str, Path | None] = {}
+    task_cache: dict[Path, dict[str, TaskRecord]] = {}
+    done_task_ids = {task.task_id for task in tasks if task.status == "done"}
+    done_task_ids.add(completed_task_id)
+
+    next_ready_task_ids: list[str] = []
+    remaining_open_task_ids: list[str] = []
+
+    for task in tasks:
+        if task.task_id in done_task_ids:
+            continue
+
+        dependencies_satisfied = True
+        for dependency in task.depends_on:
+            if "/" not in dependency:
+                if dependency not in done_task_ids:
+                    dependencies_satisfied = False
+                    break
+                continue
+
+            dependency_feature_id, dependency_task_id = dependency.split("/", 1)
+            if local_feature_id is not None and dependency_feature_id == local_feature_id:
+                if dependency_task_id not in done_task_ids:
+                    dependencies_satisfied = False
+                    break
+                continue
+
+            resolved = _resolve_dependency(
+                dependency,
+                local_feature_id=local_feature_id,
+                local_tasks_by_id=local_tasks_by_id,
+                repo_root=repo_root,
+                feature_file_cache=feature_file_cache,
+                task_cache=task_cache,
+            )
+            if resolved.status != "done":
+                dependencies_satisfied = False
+                break
+
+        remaining_open_task_ids.append(task.task_id)
+        if dependencies_satisfied:
+            next_ready_task_ids.append(task.task_id)
+
+    all_top_level_tasks_complete = not remaining_open_task_ids
+    decision = "confirm_feature_acceptance" if all_top_level_tasks_complete else "stay_in_progress"
+    return CompletionHandoff(
+        all_top_level_tasks_complete=all_top_level_tasks_complete,
+        decision=decision,
+        next_ready_task_ids=next_ready_task_ids,
+        remaining_open_task_ids=remaining_open_task_ids,
     )
 
 

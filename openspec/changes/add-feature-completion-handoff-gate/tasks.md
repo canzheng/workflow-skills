@@ -1,8 +1,8 @@
 ## 1. Feature Completion Handoff
 
-- [ ] 1 Feature Completion Handoff
-- [ ] 1.1 Define the completion-time conditions that allow a feature to move from `[IN_PROGRESS]` to `[DONE]`
-- [ ] 1.2 Update task-completion helpers or resolver outputs so the handoff into `[DONE]` is operationally explicit
+- [x] 1 Feature Completion Handoff
+- [x] 1.1 Define the completion-time conditions that allow a feature to move from `[IN_PROGRESS]` to `[DONE]`
+- [x] 1.2 Update task-completion helpers or resolver outputs so the handoff into `[DONE]` is operationally explicit
 
 ## 2. Finish-Feature Alignment
 
