@@ -35,7 +35,7 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
    - record any handoff notes needed for the next task
 8. Update the linked OpenSpec change:
    - mark the completed task `done`
-   - rely on OpenSpec task dependencies to expose downstream ready work
+   - rely on the workflow `Depends On` convention parsed from the linked OpenSpec task file to expose downstream ready work
 9. Commit the intended task changes, including the task-state updates that live on the feature branch, whenever needed to leave the feature worktree clean for the next handoff.
 10. Confirm the feature worktree is clean and ready for reuse on the next task.
 11. If feature acceptance is satisfied, move the feature to the bottom of `[DONE]`. Otherwise keep it in `[IN_PROGRESS]`.
@@ -52,7 +52,7 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 - A clean handoff usually means committing the task's intended changes, but the invariant is a clean feature worktree, not a fixed number of commits.
 - Do not finish, repurpose, or clean up the feature branch/worktree in this skill.
 - A task may be `done` while the feature remains `[IN_PROGRESS]`, including contract-or-test tasks whose broader feature suite is still intentionally red.
-- Use the repo feature file as the place to record evidence and handoff notes. Use OpenSpec as the task-definition and task-status authority.
+- Use the repo feature file as the place to record evidence and handoff notes. Use OpenSpec as the task-definition authority and checkbox completion ledger.
 - Execution context must be explicit. Provide the linked OpenSpec change directory plus the Markdown context file list to the executor instead of relying on implied context.
 
 ## Stop Conditions

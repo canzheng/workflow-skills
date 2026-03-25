@@ -38,8 +38,9 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
    - if reusing an existing feature worktree, stop unless that worktree is already clean and ready for the next task
 8. Update the feature file:
    - set `Current Task`
-9. Update the linked OpenSpec change:
-   - mark the selected task `in_progress`
+9. Record active execution using the implemented workflow state model:
+   - set `Current Task` to the selected top-level task ID
+   - keep OpenSpec `tasks.md` as the checked/unchecked task ledger rather than inventing a separate native `in_progress` syntax
 10. If the feature is currently `[READY]`, move the backlog entry to the bottom of `[IN_PROGRESS]`. If the feature is already `[IN_PROGRESS]`, leave the backlog entry there.
 11. Re-run `audit-workflow`.
 12. Choose execution mode:
@@ -59,7 +60,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 - Only one repository task may be `in_progress`.
 - One task means one top-level OpenSpec task ID and one bounded acceptance target.
 - A feature in execution owns one feature branch/worktree reused across its sequential tasks.
-- OpenSpec is the task-definition and task-status authority for this skill.
+- OpenSpec is the task-definition authority and checkbox completion ledger for this skill; active execution is represented by `Current Task` in the feature file.
 - Task implementation plans live under the linked OpenSpec change and are execution aids, not a second source of truth over `tasks.md`.
 - Execution context must be explicit. Provide the linked OpenSpec change directory plus the Markdown context file list to the executor instead of relying on implied context.
 - Do not auto-commit dirty primary-checkout changes just to create a feature worktree.

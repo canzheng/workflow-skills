@@ -27,11 +27,11 @@ python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow
 - feature backlog anchors match the owning backlog section
 - every promoted feature links to an existing OpenSpec change
 - every `[READY]` feature links to an OpenSpec change with `proposal.md`, `design.md`, and `tasks.md`
-- every `[READY]` feature has at least one OpenSpec task with status `ready`
+- every `[READY]` feature has at least one top-level OpenSpec task that resolves to workflow status `ready`
 - no feature has task-readiness drift such as:
-  - an OpenSpec task reference that points at an unknown dependency id
+  - a workflow `Depends On` reference that points at an unknown dependency id
   - inconsistent OpenSpec-backed task readiness
-  - a task that references an unknown dependency id
+  - a task that references an unknown dependency id through the workflow dependency convention
 - at most one repository task is `in_progress`
 
 ## How To Use It

@@ -31,6 +31,17 @@ Executable workflow tasks SHALL be top-level OpenSpec task IDs, and each task SH
 - **AND** `start-task` provides the linked OpenSpec change context for that task
 - **AND** the workflow writes or updates `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution begins
 - **AND** that implementation plan becomes part of the execution context for the task
+- **AND** active execution is represented by `Current Task` in the feature file while OpenSpec `tasks.md` remains the checked/unchecked task ledger
+
+### Requirement: Workflow task readiness is derived from checklist state plus the dependency convention
+Workflow task readiness SHALL be derived by repository helpers from top-level OpenSpec checklist state, feature-file current-task metadata, and any optional `Depends On` markdown blocks.
+
+#### Scenario: Workflow derives a ready task from OpenSpec task markdown
+- **WHEN** workflow skills evaluate whether a top-level OpenSpec task is executable
+- **THEN** checked tasks are treated as `done`
+- **AND** the task named by `Current Task` is treated as `in_progress`
+- **AND** an unchecked task with satisfied workflow prerequisites and `Depends On` references is treated as `ready`
+- **AND** those dependency references are interpreted by the workflow layer rather than by a native OpenSpec task dependency model
 
 ### Requirement: Task completion leaves a clean handoff
 Completing a task SHALL leave the feature ready for the next handoff.
@@ -39,7 +50,7 @@ Completing a task SHALL leave the feature ready for the next handoff.
 - **WHEN** `complete-task` finishes a task
 - **THEN** verification is run and evidence is recorded before completion is claimed
 - **AND** intended task changes are committed when needed to leave the feature worktree clean
-- **AND** downstream task readiness is synchronized after completion
+- **AND** downstream task readiness is synchronized from checkbox completion state plus any workflow `Depends On` references
 
 ### Requirement: Feature completion is distinct from branch finalization
 Finishing a task or feature SHALL remain separate from final branch/worktree cleanup decisions.
