@@ -6,6 +6,6 @@
 
 ## 2. Regression Coverage
 
-- [ ] 2 Regression Coverage
-  - [ ] 2.1 Add an integration fixture with one active task and one `legacy-exempt` completed feature missing `OpenSpec Change`
-  - [ ] 2.2 Prove `complete-task` resolves the active task in that mixed repository state without weakening active-state validation
+- [x] 2 Regression Coverage
+  - [x] 2.1 Add an integration fixture with one active task and one `legacy-exempt` completed feature missing `OpenSpec Change`
+  - [x] 2.2 Prove `complete-task` resolves the active task in that mixed repository state without weakening active-state validation

@@ -166,6 +166,114 @@ def _write_cross_feature_start_task_fixture(repo: Path, *, archived_upstream: bo
         (upstream_change_dir / "tasks.md").write_text(upstream_tasks, encoding="utf-8")
 
 
+def _write_complete_task_legacy_exempt_fixture(repo: Path, *, missing_active_change: bool = False) -> None:
+    backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+
+    backlog_path.write_text(
+        textwrap.dedent(
+            """\
+            # V1 Backlog
+
+            ## [BACKLOG]
+
+            None yet.
+
+            ## [SHAPING]
+
+            None yet.
+
+            ## [READY]
+
+            None yet.
+
+            ## [IN_PROGRESS]
+
+            ### `v1-f002` [Active feature](features/v1-f002-active-feature.md)
+
+            ## [DONE]
+
+            ### `v1-f001` [Historical feature](features/v1-f001-historical-feature.md)
+
+            ## [DEFER]
+
+            None yet.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    active_feature_file = feature_dir / "v1-f002-active-feature.md"
+    active_feature_lines = [
+        "# Feature: Active feature",
+        "",
+        "## 0. Meta",
+        "- Feature ID: `v1-f002`",
+        "- Version: `v1`",
+        "- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`",
+    ]
+    if not missing_active_change:
+        active_feature_lines.append("- OpenSpec Change: `active-feature-change`")
+    active_feature_lines.extend(
+        [
+            "- OpenSpec Specs:",
+            "  - `openspec/specs/task-execution-handoff/spec.md`",
+            "- Current Task: `1`",
+            "",
+            "## 1. Validation Log",
+            "- None yet.",
+            "",
+            "## 2. Handoff Notes",
+            "- None yet.",
+            "",
+        ]
+    )
+    active_feature_file.write_text("\n".join(active_feature_lines), encoding="utf-8")
+
+    historical_feature_file = feature_dir / "v1-f001-historical-feature.md"
+    historical_feature_file.write_text(
+        textwrap.dedent(
+            """\
+            # Feature: Historical feature
+
+            ## 0. Meta
+            - Feature ID: `v1-f001`
+            - Version: `v1`
+            - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
+            - OpenSpec Status: `legacy-exempt`
+            - Current Task: `none`
+
+            ## 1. Validation Log
+            - Historical feature predates OpenSpec adoption.
+
+            ## 2. Handoff Notes
+            - None yet.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    if missing_active_change:
+        return
+
+    active_change_dir = repo / "openspec" / "changes" / "active-feature-change"
+    active_change_dir.mkdir(parents=True, exist_ok=True)
+    (active_change_dir / "proposal.md").write_text("## Why\n\nActive\n", encoding="utf-8")
+    (active_change_dir / "design.md").write_text("## Context\n\nActive\n", encoding="utf-8")
+    (active_change_dir / "tasks.md").write_text(
+        textwrap.dedent(
+            """\
+            ## 1. Active task
+
+            - [ ] 1 Finish active task
+              - [x] 1.1 Existing task work is complete
+            """
+        ),
+        encoding="utf-8",
+    )
+    _write_implementation_plan(active_change_dir, "1")
+
+
 class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
     def test_repo_sample_change_task_files_use_parent_top_level_structure(self) -> None:
         invalid_task_files: dict[str, list[str]] = {}
@@ -538,6 +646,51 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 ],
             )
             self.assertIn("Read the files listed as context", payload["execution_instruction"])
+
+    def test_complete_task_ignores_done_legacy_exempt_feature_during_active_resolution(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+            _write_complete_task_legacy_exempt_fixture(repo)
+
+            result = subprocess.run(
+                ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["feature_id"], "v1-f002")
+            self.assertEqual(payload["feature_section"], "IN_PROGRESS")
+            self.assertEqual(payload["task_id"], "1")
+            self.assertEqual(payload["openspec_change_id"], "active-feature-change")
+            self.assertEqual(
+                payload["openspec_context_files"],
+                [
+                    "openspec/changes/active-feature-change/proposal.md",
+                    "openspec/changes/active-feature-change/design.md",
+                    "openspec/changes/active-feature-change/tasks.md",
+                    "openspec/changes/active-feature-change/implementation-plans/1.md",
+                ],
+            )
+
+    def test_complete_task_still_rejects_active_feature_missing_change_with_done_legacy_exempt_feature(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+            _write_complete_task_legacy_exempt_fixture(repo, missing_active_change=True)
+
+            result = subprocess.run(
+                ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("v1-f002-active-feature.md is missing OpenSpec Change metadata", result.stderr)
 
     def test_complete_task_rejects_active_top_level_task_with_open_nested_checklist_items(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

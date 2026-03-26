@@ -39,6 +39,18 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `reviewed locally; no blocking issues found in the task-scoped diff`
   - Run: `git diff --check`
   - Result: `pass`
+- `2026-03-27` Task `2`:
+  - Run: `python3 skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass with the feature in [IN_PROGRESS] and task 2 active`
+  - Run: `python3 -m unittest tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_complete_task_resolves_active_task_with_linked_openspec_context tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_complete_task_ignores_done_legacy_exempt_feature_during_active_resolution tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_complete_task_still_rejects_active_feature_missing_change_with_done_legacy_exempt_feature tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_complete_task_rejects_active_top_level_task_with_open_nested_checklist_items tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_complete_task_reports_in_progress_handoff_when_more_work_remains tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_complete_task_reports_explicit_done_handoff_when_final_task_completes -v`
+  - Result: `6 tests passed, covering the new mixed active-plus-historical legacy-exempt regression plus the related complete-task resolver paths`
+  - Run: `python3 skills/complete-task/scripts/resolve_complete_task.py`
+  - Result: `pass after closing nested items 2.1 and 2.2; completion_handoff reports decision confirm_feature_acceptance with no remaining open top-level tasks`
+  - Inspection: `git diff -- tests/test_workflow_openspec_integration.py docs/planning/versions/v1/features/v1-f009-respect-legacy-exempt-features-in-resolver-scans.md openspec/changes/handle-legacy-exempt-resolver-scan/implementation-plans/2.md openspec/changes/handle-legacy-exempt-resolver-scan/tasks.md`
+  - Result: `reviewed locally; task-scoped changes are limited to regression coverage and workflow bookkeeping`
+  - Review: `Focused task review by a gpt-5.4-mini subagent reported no findings.`
+  - Run: `git diff --check`
+  - Result: `pass`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -53,3 +65,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `clean`
   - Notes: Completed task `1`. `skills/complete-task/scripts/resolve_complete_task.py` now ignores unrelated `[DONE]` `legacy-exempt` features during active-task resolution while preserving strict active-state linkage failures. Feature remains `[IN_PROGRESS]`; next ready task is `2` (`Regression Coverage`).
+- `2026-03-27`:
+  - Current Task: `2`
+  - Worktree State: `dirty`
+  - Notes: Started task `2` in the existing feature worktree `v1-f009-legacy-exempt-resolver-scan` after writing `openspec/changes/handle-legacy-exempt-resolver-scan/implementation-plans/2.md`. Execution is scoped to regression coverage for the mixed active-plus-historical `legacy-exempt` repository state.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Completed task `2`. Added committed integration coverage for the mixed active-task plus unrelated `[DONE]` `legacy-exempt` feature case, kept strict active-state linkage rejection intact, and cleared `Current Task`. All top-level OpenSpec tasks are now done, but the feature remains `[IN_PROGRESS]`; next handoff target is `finish-feature`.
