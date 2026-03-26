@@ -22,7 +22,7 @@ None yet.
 None yet.
 ## [IN_PROGRESS]
 
-### `v1-f009` [Respect Legacy-Exempt Features in Resolver Scans](features/v1-f009-respect-legacy-exempt-features-in-resolver-scans.md)
+None yet.
 
 ## [DONE]
 
@@ -31,6 +31,7 @@ None yet.
 ### `v1-f003` [Resolve Cross-Feature Task Readiness](features/v1-f003-resolve-cross-feature-task-readiness.md)
 ### `v1-f006` [Add Feature Completion Handoff Gate](features/v1-f006-add-feature-completion-handoff-gate.md)
 ### `v1-f008` [Clarify Workflow-Owned Task Readiness](features/v1-f008-clarify-workflow-owned-task-readiness.md)
+### `v1-f009` [Respect Legacy-Exempt Features in Resolver Scans](features/v1-f009-respect-legacy-exempt-features-in-resolver-scans.md)
 
 ## [DEFER]
 

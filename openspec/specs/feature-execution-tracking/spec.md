@@ -71,3 +71,12 @@ Feature metadata SHALL make the transition from `[IN_PROGRESS]` to `[DONE]` evid
 - **WHEN** `finish-feature` moves a feature from `[IN_PROGRESS]` to `[DONE]`
 - **THEN** the feature file records completion evidence consistent with the accepted task work
 - **AND** the handoff state makes it clear that branch finalization is still a downstream `finish-feature` action
+
+### Requirement: Historical legacy-exempt metadata remains valid during resolver scans
+Historical completed-feature exemptions SHALL remain valid when repository-wide workflow resolvers inspect promoted feature files.
+
+#### Scenario: Resolver inspects completed migrated feature metadata
+- **WHEN** a workflow resolver reads a promoted feature in `[DONE]`
+- **AND** that feature records `OpenSpec Status` as `legacy-exempt`
+- **THEN** the resolver treats the feature as a valid historical completed record
+- **AND** it does not require `OpenSpec Change` metadata unless the feature is being processed under an active-state rule

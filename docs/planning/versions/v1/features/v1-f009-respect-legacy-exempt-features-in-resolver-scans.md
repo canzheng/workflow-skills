@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f009`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `handle-legacy-exempt-resolver-scan`
 - OpenSpec Specs:
   - `openspec/specs/task-execution-handoff/spec.md`
@@ -51,6 +51,13 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review: `Focused task review by a gpt-5.4-mini subagent reported no findings.`
   - Run: `git diff --check`
   - Result: `pass`
+- `2026-03-27` Feature Completion:
+  - Run: `openspec validate handle-legacy-exempt-resolver-scan --type change --json --no-interactive`
+  - Result: `pass; summary totals report 1 passed, 0 failed`
+  - Run: `openspec archive handle-legacy-exempt-resolver-scan -y`
+  - Result: `pass; change archived as openspec/changes/archive/2026-03-26-handle-legacy-exempt-resolver-scan and main specs updated with the accepted requirements`
+  - Run: `python3 skills/finish-feature/scripts/resolve_finish_feature.py`
+  - Result: `pass; requires_archive=false, active_change_path=null, archive_path=openspec/changes/archive/2026-03-26-handle-legacy-exempt-resolver-scan`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -73,3 +80,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `clean`
   - Notes: Completed task `2`. Added committed integration coverage for the mixed active-task plus unrelated `[DONE]` `legacy-exempt` feature case, kept strict active-state linkage rejection intact, and cleared `Current Task`. All top-level OpenSpec tasks are now done, but the feature remains `[IN_PROGRESS]`; next handoff target is `finish-feature`.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: `finish-feature` archived `handle-legacy-exempt-resolver-scan`, updated the stable OpenSpec specs, and moved the feature to `[DONE]`. The feature branch/worktree remains available for downstream branch finalization.
