@@ -212,7 +212,7 @@ def _feature_summary(
             findings,
             severity="error",
             code="task_readiness_drift",
-            message="feature has task readiness drift",
+            message="feature has workflow-derived task readiness drift",
             path=relative_path,
             feature_id=feature_id,
             section=section_name,

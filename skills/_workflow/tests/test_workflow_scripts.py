@@ -205,7 +205,7 @@ def test_resolve_start_task_fails_when_feature_has_task_readiness_drift(tmp_path
     )
 
     assert result.returncode == 1
-    assert "task readiness drift" in result.stderr.lower()
+    assert "workflow-derived task readiness drift" in result.stderr.lower()
 
 
 def test_autonomous_resolver_uses_openspec_backed_tasks_for_ready_features(tmp_path: Path) -> None:

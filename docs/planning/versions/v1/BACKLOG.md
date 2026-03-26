@@ -20,10 +20,9 @@ None yet.
 ## [READY]
 
 ### `v1-f003` [Resolve Cross-Feature Task Readiness](features/v1-f003-resolve-cross-feature-task-readiness.md)
-### `v1-f008` [Clarify Workflow-Owned Task Readiness](features/v1-f008-clarify-workflow-owned-task-readiness.md)
 ## [IN_PROGRESS]
 
-None yet.
+### `v1-f008` [Clarify Workflow-Owned Task Readiness](features/v1-f008-clarify-workflow-owned-task-readiness.md)
 
 ## [DONE]
 

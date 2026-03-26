@@ -25,7 +25,7 @@ The workflow audit SHALL confirm that backlog entries and feature files agree on
 - **AND** it verifies that the feature file records linked OpenSpec capability specs for OpenSpec-backed shaping states
 
 ### Requirement: Workflow audit validates task readiness invariants
-The workflow audit SHALL detect illegal task-readiness states.
+The workflow audit SHALL detect illegal workflow-derived task-readiness states.
 
 #### Scenario: Audit checks task readiness and dependency integrity
 - **WHEN** the workflow audit inspects workflow-derived task state for a promoted feature
@@ -35,9 +35,16 @@ The workflow audit SHALL detect illegal task-readiness states.
 - **AND** it detects references to unknown dependency IDs
 - **AND** it enforces that at most one repository task is `in_progress`
 
-#### Scenario: Audit checks OpenSpec-backed ready prerequisites
+#### Scenario: Audit rejects nested-only OpenSpec task structures
+- **WHEN** a linked OpenSpec `tasks.md` contains nested checklist items for a task group
+- **AND** the corresponding parent top-level checklist item is missing
+- **THEN** the workflow audit fails
+- **AND** it reports that the linked change does not expose a valid top-level executable task structure
+
+#### Scenario: Audit checks workflow-ready prerequisites from linked change artifacts
 - **WHEN** the workflow audit inspects a feature in `[READY]`
 - **THEN** it verifies that the linked OpenSpec change includes `proposal.md`, `design.md`, and `tasks.md`
+- **AND** it verifies that the linked change exposes at least one valid top-level task that resolves to workflow status `ready`
 
 #### Scenario: Audit fails when mandatory OpenSpec structure is missing
 - **WHEN** a repository adopts the workflow without the required `openspec/` structure

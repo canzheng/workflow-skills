@@ -30,7 +30,7 @@ python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow
 - every `[READY]` feature has at least one top-level OpenSpec task that resolves to workflow status `ready`
 - no feature has task-readiness drift such as:
   - a workflow `Depends On` reference that points at an unknown dependency id
-  - inconsistent OpenSpec-backed task readiness
+  - inconsistent workflow-derived task readiness
   - a task that references an unknown dependency id through the workflow dependency convention
 - at most one repository task is `in_progress`
 

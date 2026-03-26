@@ -12,7 +12,7 @@ The goal is to keep one source of truth per concern:
 - release planning truth in `BACKLOG.md`
 - shaping truth in OpenSpec
 - task-definition truth in OpenSpec `tasks.md`
-- task-readiness truth in the workflow parser over top-level OpenSpec tasks, checkbox state, `Current Task`, and the optional `Depends On` markdown convention
+- workflow-derived task-readiness truth in the workflow parser over top-level OpenSpec tasks, checkbox state, `Current Task`, and the optional `Depends On` markdown convention
 - execution evidence truth in the feature file
 - execution verification truth in task evidence and workflow validation logs
 
@@ -61,7 +61,9 @@ Owns:
 - `implementation-plans/<task-id>.md`
 - spec deltas for the change
 
-This is the shaping authority for one promoted feature, and the source material from which workflow task readiness is derived.
+This is the shaping authority for one promoted feature, and the source material from which workflow-derived task readiness is computed.
+
+Prefer linked change ids that reuse the feature-style prefix when practical, for example `v1-f008-clarify-workflow-owned-task-readiness`. This convention is guidance only; audit and readiness checks must not fail solely because a valid change uses a different name.
 
 ### `docs/planning/versions/<version>/features/<feature-id>-<slug>.md`
 
@@ -124,6 +126,7 @@ Responsibilities:
 - select the backlog item
 - use exploration/brainstorming as needed
 - run `openspec-propose` through the wrapper to create or update one OpenSpec change for the feature
+- prefer linked change ids that reuse the feature-style prefix when practical, while treating that naming convention as non-gating guidance
 - ensure shaping happens in OpenSpec artifacts
 - create the thin feature file with workflow metadata and OpenSpec links
 - move the board item to `[SHAPING]`
@@ -261,7 +264,7 @@ OpenSpec validation is additive:
 - Do not let users or agents independently update both OpenSpec shaping prose and feature-file shaping prose. Shaping belongs in OpenSpec.
 - Do not let feature files become a second task ledger. Task definitions and task status belong in OpenSpec.
 - Use top-level OpenSpec task IDs like `1`, `2`, and `3` as execution units. Nested checklist items like `1.1` and `1.2` are supporting detail, not separate workflow tasks.
-- Do not move a feature to `[READY]` without linked OpenSpec shaping artifacts and at least one `ready` OpenSpec task.
+- Do not move a feature to `[READY]` without linked OpenSpec shaping artifacts and at least one top-level OpenSpec task that resolves to workflow status `ready`.
 - Before executing a task, write or update its implementation plan under the linked OpenSpec change and feed that plan back into execution context.
 - Do not use OpenSpec archive as a substitute for `complete-task` evidence or `DONE` acceptance.
 - Do not finish the branch before the linked OpenSpec change is validated and archived.

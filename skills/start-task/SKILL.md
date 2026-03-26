@@ -28,7 +28,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 2. Confirm there is no repository task already marked `in_progress`.
 3. Resolve the target feature and task.
    - require the resolver payload to include the linked OpenSpec change directory, the Markdown context file list under that change, and the task implementation-plan path
-4. Confirm the feature is `[IN_PROGRESS]` or `[READY]`, the linked top-level OpenSpec task is `ready`, and the feature has no task-readiness drift against the shared dependency model.
+4. Confirm the feature is `[IN_PROGRESS]` or `[READY]`, the linked top-level OpenSpec task resolves to workflow status `ready`, and the feature has no workflow-derived task-readiness drift against the shared dependency model.
 5. Write or update the task implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` using the linked change context before code execution starts.
 6. If this is the first executing task for the feature, confirm the primary checkout is clean so the worktree will be created from a clean commit. If the primary checkout is dirty, stop and resolve the changes explicitly instead of auto-committing them.
 7. Wrap `using-git-worktrees`:

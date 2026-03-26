@@ -30,6 +30,7 @@ It is a workflow wrapper around `brainstorming` plus linked OpenSpec change crea
 5. For each promoted feature:
    - assign the next feature ID
    - run `openspec-propose` to create or update exactly one linked OpenSpec change for the feature's shaping authority
+   - prefer linked change ids that reuse the feature-style prefix when practical, while keeping that naming convention non-gating
    - create the feature file under `features/` by running `python "${CODEX_HOME:-$HOME/.codex}/skills/shape-backlog-item/scripts/render_feature_file.py"`
    - pass the authoritative OpenSpec change and affected spec paths as explicit inputs to the renderer
    - do not duplicate proposal, design, spec, or task prose from OpenSpec inside the feature file

@@ -21,7 +21,7 @@ Executing features SHALL use one feature-scoped worktree reused across sequentia
 - **AND** that worktree is clean before the next task begins
 
 ### Requirement: Task execution uses top-level OpenSpec task IDs and a task-scoped implementation plan
-Executable workflow tasks SHALL be top-level OpenSpec task IDs, and each task SHALL be executed with a task-scoped implementation plan stored under the linked change.
+Executable workflow tasks SHALL be represented by top-level checklist items in the linked OpenSpec `tasks.md`, and each task SHALL be executed with a task-scoped implementation plan stored under the linked change.
 
 #### Scenario: Starting a task prepares implementation context
 - **WHEN** `start-task` selects the next executable task for a feature
@@ -31,8 +31,13 @@ Executable workflow tasks SHALL be top-level OpenSpec task IDs, and each task SH
 - **AND** that implementation plan becomes part of the execution context for the task
 - **AND** active execution is represented by `Current Task` in the feature file while OpenSpec `tasks.md` remains the checked/unchecked task ledger
 
+#### Scenario: Nested checklist items remain implementation detail
+- **WHEN** a linked OpenSpec `tasks.md` contains nested checklist items such as `1.1` or `1.2`
+- **THEN** those nested items are treated as implementation detail under their parent top-level task
+- **AND** they are not treated as standalone executable workflow tasks
+
 ### Requirement: Workflow task readiness is derived from checklist state plus the dependency convention
-Workflow task readiness SHALL be derived by repository helpers from top-level OpenSpec checklist state, feature-file current-task metadata, and any optional `Depends On` markdown blocks.
+Workflow task readiness SHALL be derived by repository helpers from top-level OpenSpec checklist state, feature-file current-task metadata, and any optional `Depends On` markdown blocks interpreted by the workflow layer.
 
 #### Scenario: Workflow derives a ready task from OpenSpec task markdown
 - **WHEN** workflow skills evaluate whether a top-level OpenSpec task is executable
@@ -48,7 +53,7 @@ Completing a task SHALL leave the feature ready for the next handoff.
 - **WHEN** `complete-task` finishes a task
 - **THEN** verification is run and evidence is recorded before completion is claimed
 - **AND** intended task changes are committed when needed to leave the feature worktree clean
-- **AND** downstream task readiness is synchronized from checkbox completion state plus any workflow `Depends On` references
+- **AND** downstream workflow-derived task readiness is synchronized from checkbox completion state plus any workflow `Depends On` references
 
 #### Scenario: Final task completes but feature completion remains downstream
 - **WHEN** `complete-task` closes the final top-level task for a feature
