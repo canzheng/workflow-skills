@@ -19,10 +19,10 @@ None yet.
 
 ## [READY]
 
-### `v1-f009` [Respect Legacy-Exempt Features in Resolver Scans](features/v1-f009-respect-legacy-exempt-features-in-resolver-scans.md)
+None yet.
 ## [IN_PROGRESS]
 
-None yet.
+### `v1-f009` [Respect Legacy-Exempt Features in Resolver Scans](features/v1-f009-respect-legacy-exempt-features-in-resolver-scans.md)
 
 ## [DONE]
 

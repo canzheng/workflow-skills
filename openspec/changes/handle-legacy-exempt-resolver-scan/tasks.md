@@ -1,8 +1,8 @@
 ## 1. Resolver Update
 
-- [ ] 1 Resolver Update
-  - [ ] 1.1 Update `complete-task` to tolerate `[DONE]` `legacy-exempt` features that omit `OpenSpec Change` while scanning for active work
-  - [ ] 1.2 Preserve strict OpenSpec linkage failures for active feature states that actually need change context
+- [x] 1 Resolver Update
+  - [x] 1.1 Update `complete-task` to tolerate `[DONE]` `legacy-exempt` features that omit `OpenSpec Change` while scanning for active work
+  - [x] 1.2 Preserve strict OpenSpec linkage failures for active feature states that actually need change context
 
 ## 2. Regression Coverage
 

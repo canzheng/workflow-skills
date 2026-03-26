@@ -21,6 +21,7 @@ from _workflow.workflow_state import (
     list_openspec_change_context_files,
     parse_backlog_document,
     parse_feature_openspec_change,
+    parse_feature_openspec_status,
     parse_tasks,
 )
 
@@ -89,6 +90,9 @@ def resolve_active_task(root: Path) -> dict[str, object]:
                     f"{backlog_path.relative_to(root)} section [{section_name}] links missing feature file {entry.link}"
                 )
             feature_text = feature_path.read_text(encoding="utf-8")
+            if section_name == "DONE" and parse_feature_openspec_status(feature_text) == "legacy-exempt":
+                # Historical completed features do not participate in active task resolution.
+                continue
             change_id = parse_feature_openspec_change(feature_text)
             if change_id is None:
                 raise WorkflowError(f"{feature_path.relative_to(root)} is missing OpenSpec Change metadata")
