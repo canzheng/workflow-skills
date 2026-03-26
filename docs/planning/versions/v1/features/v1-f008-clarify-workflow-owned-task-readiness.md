@@ -38,6 +38,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `Passed with no patch-format issues.`
   - Inspection: `rg -n "/Users/canzheng|/Users/|/home/" ...`
   - Result: `No local absolute path leakage found in the tracked task changes.`
+- `2026-03-26` Task `2`:
+  - Run: `python3` one-off assertions for `find_openspec_task_structure_errors(...)`
+  - Result: `Passed; nested-only task structures report missing parent top-level task IDs, while valid parent-task structures produce no errors.`
+  - Run: `python3 -m unittest tests.test_workflow_openspec_integration -v`
+  - Result: `Passed; 15 integration tests green, including malformed nested-only task rejection for both [SHAPING] and [READY] features.`
+  - Run: `python3 skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `Passed for docs/planning/versions/v1 after shared task-structure validation was added to the workflow audit.`
+  - Run: `git diff --check`
+  - Result: `Passed with no patch-format issues.`
 
 ## 2. Handoff Notes
 - `2026-03-26`:
@@ -48,3 +57,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `clean`
   - Notes: Task `1` completed. The completion handoff resolves to `stay_in_progress`, and top-level tasks `2` and `3` are both ready for the next execution decision on this feature branch.
+- `2026-03-26`:
+  - Current Task: `2`
+  - Worktree State: `dirty`
+  - Notes: Task `2` started in the existing feature worktree `../worktrees/workflow-skills/v1-f008-clarify-workflow-owned-task-readiness`. The execution focus is rejecting malformed linked `tasks.md` files that use nested checklist items without a parent top-level executable task and surfacing that validation through workflow readiness checks.
+- `2026-03-26`:
+  - Current Task: `none`
+  - Worktree State: `dirty`
+  - Notes: Task `2` completed. Shared workflow validation now rejects nested-only OpenSpec task structures, audit blocks malformed [SHAPING] and [READY] features, and the completion handoff resolves to `stay_in_progress` with task `3` as the next ready execution unit.

@@ -7,9 +7,9 @@
 
 ## 2. Top-Level Task Structure Enforcement
 
-- [ ] 2 Enforce top-level executable task structure
-  - [ ] 2.1 Add shared validation that rejects linked `tasks.md` files that use nested checklist items without the required parent top-level executable task entry
-  - [ ] 2.2 Surface that validation through `audit-workflow`, `ready-feature`, and the shaping path so malformed task structure is blocked before execution
+- [x] 2 Enforce top-level executable task structure
+  - [x] 2.1 Add shared validation that rejects linked `tasks.md` files that use nested checklist items without the required parent top-level executable task entry
+  - [x] 2.2 Surface that validation through `audit-workflow`, `ready-feature`, and the shaping path so malformed task structure is blocked before execution
 
 ## 3. Coverage and Fixture Repair
 

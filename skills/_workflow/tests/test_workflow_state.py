@@ -5,6 +5,7 @@ from pathlib import Path
 
 from _workflow.workflow_state import (
     compute_task_readiness_drift,
+    find_openspec_task_structure_errors,
     list_open_openspec_nested_items,
     parse_backlog_document,
 )
@@ -171,6 +172,41 @@ def test_compute_task_readiness_drift_uses_openspec_tasks_with_feature_context(t
     assert drift.promotable_task_ids == []
     assert drift.invalid_ready_task_ids == []
     assert drift.unknown_dependency_errors == []
+
+
+def test_find_openspec_task_structure_errors_reports_nested_only_tasks() -> None:
+    errors = find_openspec_task_structure_errors(
+        textwrap.dedent(
+            """\
+            ## 1. Work
+
+              - [ ] 1.1 Missing parent executable task
+              - [ ] 1.2 Another nested item
+            """
+        )
+    )
+
+    assert errors == [
+        "nested checklist item `1.1` is missing parent top-level executable task `1`",
+        "nested checklist item `1.2` is missing parent top-level executable task `1`",
+    ]
+
+
+def test_find_openspec_task_structure_errors_accepts_parent_task_structure() -> None:
+    errors = find_openspec_task_structure_errors(
+        textwrap.dedent(
+            """\
+            ## 1. Work
+
+            - [ ] 1 Parent executable task
+              - [ ] 1.1 Nested implementation detail
+            - [ ] 2 Another task
+              - [ ] 2.1 Another nested item
+            """
+        )
+    )
+
+    assert errors == []
 
 
 def test_list_open_openspec_nested_items_returns_unchecked_nested_items_for_top_level_task(tmp_path: Path) -> None:

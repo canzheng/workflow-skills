@@ -417,6 +417,30 @@ def parse_openspec_tasks_file(tasks_file: Path, *, current_task: str | None = No
     return _derive_openspec_task_statuses(raw_tasks, current_task=current_task)
 
 
+def find_openspec_task_structure_errors(tasks_text: str) -> list[str]:
+    top_level_task_ids = {
+        task.task_id
+        for task in _parse_openspec_tasks_text(tasks_text)
+    }
+    errors: list[str] = []
+
+    for line in tasks_text.splitlines():
+        nested_match = OPEN_SPEC_NESTED_TASK_RE.match(line)
+        if not nested_match:
+            continue
+
+        nested_task_id = nested_match.group("id")
+        parent_task_id = nested_task_id.split(".", 1)[0]
+        if parent_task_id in top_level_task_ids:
+            continue
+
+        errors.append(
+            f"nested checklist item `{nested_task_id}` is missing parent top-level executable task `{parent_task_id}`"
+        )
+
+    return errors
+
+
 def _parse_openspec_open_nested_items(tasks_text: str) -> dict[str, list[str]]:
     open_nested_items: dict[str, list[str]] = {}
     current_top_level_task_id: str | None = None
