@@ -43,6 +43,7 @@
 - `openspec/specs/` owns the current behavior specification for stable capabilities.
 - `openspec/changes/<change-id>/proposal.md`, `design.md`, `tasks.md`, and delta specs own shaping, readiness intent, task definitions, checkbox completion state, and any workflow dependency-convention references for one linked feature change.
 - `openspec/changes/<change-id>/implementation-plans/<task-id>.md` owns the task-scoped implementation plan for one executable OpenSpec task.
+- Prefer linked change IDs that reuse the feature-style prefix when practical, for example `v1-f008-...`; this naming convention is guidance only and must not be used as an audit or readiness gate.
 - `openspec/changes/archive/` owns archived completed changes after feature completion has satisfied the archive gate.
 - `[BACKLOG]` entries must use lowercase backlog IDs like `v1-b001` and follow ``### `v1-b001` [TAG] TITLE``, where `[TAG]` is optional.
 - `[SHAPING]`, `[READY]`, `[IN_PROGRESS]`, `[DONE]`, and `[DEFER]` entries must follow ``### `v1-f001` [TAG] [Title](features/v1-f001-title.md)``, where `[TAG]` is optional.
@@ -70,7 +71,7 @@
 ## Workflow feature status model
 - `BACKLOG`: an idea-level work item that is still unclear or not yet shaped into a ready feature. No feature ID or feature file is required yet.
 - `SHAPING`: a real feature exists, its feature ID is assigned, its feature file exists, and one linked OpenSpec change owns active proposal/spec/design/task shaping work before execution begins.
-- `READY`: shaping is complete, the linked OpenSpec change has the required shaping artifacts, and at least one linked OpenSpec task resolves to executable `ready` under the workflow task-status rules.
+- `READY`: shaping is complete, the linked OpenSpec change has the required shaping artifacts, and at least one linked top-level OpenSpec task resolves to workflow status `ready` under the workflow task-status rules.
 - `IN_PROGRESS`: execution has started on at least one task for the feature, and the feature is not yet complete or deferred. Once a feature enters `IN_PROGRESS`, keep it there until the feature reaches `DONE` or `DEFER`, even if there is a handoff gap where no task is currently `in_progress`.
 - `DONE`: feature-level acceptance is satisfied.
 - Historical `[DONE]` features that predate OpenSpec adoption may remain valid when explicitly marked `OpenSpec Status: legacy-exempt`.
@@ -144,7 +145,7 @@
 - For docs or process-only changes, validate structure, links, symlinks, and relevant git status instead of pretending runtime tests prove the change.
 - If validation cannot be run, say so explicitly.
 - Distinguish clearly between implemented, validated locally, and not verified.
-- OpenSpec shaping and archive checks are additive gates. They do not replace workflow audit, OpenSpec task readiness checks, code review, or `verification-before-completion`.
+- OpenSpec shaping and archive checks are additive gates. They do not replace workflow audit, workflow-derived task readiness checks, code review, or `verification-before-completion`.
 - `diagnose-workflow` is read-only and advisory. It does not replace `audit-workflow` or authorize state changes on its own.
 - Before archiving a linked OpenSpec change, run the relevant OpenSpec validation command for that change and record or report the result.
 - Before branch finalization, the linked OpenSpec change must no longer exist under `openspec/changes/<change-id>/` and must exist exactly once under `openspec/changes/archive/*-<change-id>/`.

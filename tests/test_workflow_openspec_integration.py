@@ -8,6 +8,8 @@ import textwrap
 import unittest
 from pathlib import Path
 
+from skills._workflow.workflow_state import find_openspec_task_structure_errors
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INIT_SCRIPT = REPO_ROOT / "skills" / "initialize-workflow-artifacts" / "scripts" / "init_workflow_artifacts.py"
@@ -33,6 +35,19 @@ def _write_implementation_plan(change_dir: Path, task_id: str) -> None:
 
 
 class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
+    def test_repo_sample_change_task_files_use_parent_top_level_structure(self) -> None:
+        invalid_task_files: dict[str, list[str]] = {}
+        archive_root = REPO_ROOT / "openspec" / "changes" / "archive"
+
+        for tasks_path in sorted((REPO_ROOT / "openspec" / "changes").rglob("tasks.md")):
+            if archive_root in tasks_path.parents:
+                continue
+            errors = find_openspec_task_structure_errors(tasks_path.read_text(encoding="utf-8"))
+            if errors:
+                invalid_task_files[str(tasks_path.relative_to(REPO_ROOT))] = errors
+
+        self.assertEqual(invalid_task_files, {})
+
     def test_audit_workflow_fails_when_openspec_scaffold_is_missing(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"
@@ -1221,6 +1236,186 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("legacy inline planning sections", result.stdout)
+
+    def test_audit_rejects_shaping_feature_with_nested_only_openspec_tasks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    ### `v1-f001` [Malformed OpenSpec tasks](features/v1-f001-malformed-openspec-tasks.md)
+
+                    ## [READY]
+
+                    None yet.
+
+                    ## [IN_PROGRESS]
+
+                    None yet.
+
+                    ## [DONE]
+
+                    None yet.
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            feature_file = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-malformed-openspec-tasks.md"
+            feature_file.write_text(
+                textwrap.dedent(
+                    """\
+                    # Feature: Malformed OpenSpec tasks
+
+                    ## 0. Meta
+                    - Feature ID: `v1-f001`
+                    - Version: `v1`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#shaping`
+                    - OpenSpec Change: `malformed-openspec-tasks`
+                    - OpenSpec Specs:
+                      - `openspec/specs/workflow-board-lifecycle/spec.md`
+                    - Current Task: `none`
+
+                    ## 1. Validation Log
+                    - None yet.
+
+                    ## 2. Handoff Notes
+                    - None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            change_dir = repo / "openspec" / "changes" / "malformed-openspec-tasks"
+            change_dir.mkdir(parents=True, exist_ok=True)
+            (change_dir / "proposal.md").write_text("proposal", encoding="utf-8")
+            (change_dir / "design.md").write_text("design", encoding="utf-8")
+            (change_dir / "tasks.md").write_text(
+                textwrap.dedent(
+                    """\
+                    ## 1. Work
+
+                      - [ ] 1.1 Missing parent executable task
+                      - [ ] 1.2 Another nested item
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("nested checklist item `1.1` is missing parent top-level executable task `1`", result.stdout)
+
+    def test_audit_rejects_ready_feature_with_nested_only_openspec_tasks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    None yet.
+
+                    ## [READY]
+
+                    ### `v1-f001` [Malformed OpenSpec tasks](features/v1-f001-malformed-openspec-tasks.md)
+
+                    ## [IN_PROGRESS]
+
+                    None yet.
+
+                    ## [DONE]
+
+                    None yet.
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            feature_file = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-malformed-openspec-tasks.md"
+            feature_file.write_text(
+                textwrap.dedent(
+                    """\
+                    # Feature: Malformed OpenSpec tasks
+
+                    ## 0. Meta
+                    - Feature ID: `v1-f001`
+                    - Version: `v1`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+                    - OpenSpec Change: `malformed-openspec-tasks`
+                    - OpenSpec Specs:
+                      - `openspec/specs/workflow-board-lifecycle/spec.md`
+                    - Current Task: `none`
+
+                    ## 1. Validation Log
+                    - None yet.
+
+                    ## 2. Handoff Notes
+                    - None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            change_dir = repo / "openspec" / "changes" / "malformed-openspec-tasks"
+            change_dir.mkdir(parents=True, exist_ok=True)
+            (change_dir / "proposal.md").write_text("proposal", encoding="utf-8")
+            (change_dir / "design.md").write_text("design", encoding="utf-8")
+            (change_dir / "tasks.md").write_text(
+                textwrap.dedent(
+                    """\
+                    ## 1. Work
+
+                      - [ ] 1.1 Missing parent executable task
+                      - [ ] 1.2 Another nested item
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("nested checklist item `1.1` is missing parent top-level executable task `1`", result.stdout)
 
 
 if __name__ == "__main__":

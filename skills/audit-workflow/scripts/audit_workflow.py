@@ -15,6 +15,7 @@ if str(SKILLS_ROOT) not in sys.path:
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
     compute_task_readiness_drift,
+    find_openspec_task_structure_errors,
     find_legacy_inline_planning_sections,
     format_task_readiness_drift_messages,
     parse_backlog_document,
@@ -172,6 +173,13 @@ def main(argv: list[str] | None = None) -> int:
                                 errors.append(
                                     f"{feature_path.relative_to(root)} is in [READY] but linked OpenSpec change is missing {required_name}"
                                 )
+                    tasks_file = change_dir / "tasks.md"
+                    if tasks_file.exists():
+                        structure_errors = find_openspec_task_structure_errors(
+                            tasks_file.read_text(encoding="utf-8")
+                        )
+                        for structure_error in structure_errors:
+                            errors.append(f"{feature_path.relative_to(root)} {structure_error}")
             elif section_name == "DONE":
                 if openspec_status == "legacy-exempt":
                     if change_id is not None:

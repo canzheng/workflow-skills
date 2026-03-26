@@ -113,7 +113,7 @@ def resolve_task(root: Path) -> dict[str, object]:
                         feature_label=str(feature_path.relative_to(root)),
                     )
                 )
-                raise WorkflowError(f"task readiness drift detected: {drift_messages}")
+                raise WorkflowError(f"workflow-derived task readiness drift detected: {drift_messages}")
             for task in tasks:
                 if task.status != "ready":
                     continue
