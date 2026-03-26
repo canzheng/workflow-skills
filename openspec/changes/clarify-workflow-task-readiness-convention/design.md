@@ -11,7 +11,7 @@ The current gap is both semantic and structural. Semantically, user-facing docs 
 - Define the required top-level executable task structure in workflow-managed `tasks.md` files.
 - Surface malformed nested-only task structures through shared validation used by readiness promotion and audit.
 - Update workflow docs and user-facing skill language so they describe readiness consistently.
-- Document a preferred version/feature-prefixed change naming convention without turning naming into an audit gate.
+- Document a preferred change naming convention that follows the feature file prefix pattern, such as `v1-f008-...`, without turning naming into an audit gate.
 
 **Non-Goals:**
 - Change the underlying execution model for valid task files.
@@ -46,7 +46,7 @@ Alternative considered:
 - Rely on docs updates only. Rejected because the repo already showed that wording alone is not enough to prevent malformed task files.
 
 ### Decision: Treat change naming as guidance rather than a gate
-The workflow docs can recommend naming linked OpenSpec changes with a version/feature prefix so the relationship is easier to scan, but audit and readiness validation should not fail solely because an existing change name does not match that convention.
+The workflow docs can recommend naming linked OpenSpec changes with the same feature-style prefix convention used by feature files so the relationship is easier to scan, but audit and readiness validation should not fail solely because an existing change name does not match that convention.
 
 Alternative considered:
 - Make the naming convention mandatory in audit immediately. Rejected because that would create unrelated workflow failures for existing valid changes and is separable from the readiness contract itself.
@@ -62,7 +62,7 @@ Alternative considered:
 
 1. Update stable specs to separate OpenSpec checkbox authority from workflow-derived readiness and to require top-level executable task entries.
 2. Update shared workflow validation so malformed nested-only task structures fail readiness checks clearly.
-3. Update shaping/readiness workflow docs and skill text to use the new wording consistently and to recommend the non-gating change naming convention.
+3. Update shaping/readiness workflow docs and skill text to use the new wording consistently and to recommend the non-gating feature-prefix change naming convention.
 4. Repair affected fixtures and sample task files, then re-run the narrow workflow tests.
 
 ## Open Questions

@@ -9,7 +9,7 @@ The repository currently talks about "OpenSpec task readiness" in several places
 - Treat optional `Depends On` markdown blocks as a workflow parser convention rather than an OpenSpec feature.
 - Require workflow-managed `openspec/changes/<change-id>/tasks.md` files to include explicit top-level checklist items for each executable task group, with nested checklist items remaining implementation detail.
 - Make shaping and readiness validation fail clearly when `tasks.md` uses nested checklist items without the required parent top-level executable task entry.
-- Recommend naming linked OpenSpec changes with a version/feature prefix when workflow shaping creates them, while keeping naming guidance non-gating for audit and readiness checks.
+- Recommend naming linked OpenSpec changes with the same feature-style prefix convention used by feature files, for example `v1-f008-...`, while keeping naming guidance non-gating for audit and readiness checks.
 
 ## Capabilities
 
