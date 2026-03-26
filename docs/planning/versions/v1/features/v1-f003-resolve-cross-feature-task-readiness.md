@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f003`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `fix-cross-feature-openspec-task-readiness`
 - OpenSpec Specs:
   - `openspec/specs/task-execution-handoff/spec.md`
@@ -17,6 +17,21 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Last Updated: `2026-03-27`
 
 ## 1. Validation Log
+- `2026-03-27` Feature Completion:
+  - Run: `openspec validate fix-cross-feature-openspec-task-readiness --type change --json --no-interactive`
+  - Result: `Passed with 1 change item valid and 0 failures.`
+  - Run: `openspec status --change fix-cross-feature-openspec-task-readiness --json`
+  - Result: `Passed with schemaName = spec-driven, isComplete = true, and all change artifacts reported as done.`
+  - Inspection: `openspec/changes/fix-cross-feature-openspec-task-readiness/specs/task-execution-handoff/spec.md`, `openspec/specs/task-execution-handoff/spec.md`, `openspec/changes/fix-cross-feature-openspec-task-readiness/specs/workflow-audit-and-repair/spec.md`, and `openspec/specs/workflow-audit-and-repair/spec.md`
+  - Result: `The linked delta specs still described unsynced cross-feature readiness changes, so archive had to apply those updates into the stable specs instead of using a skip-specs path.`
+  - Run: `openspec archive fix-cross-feature-openspec-task-readiness -y`
+  - Result: `Passed; OpenSpec archived the change as openspec/changes/archive/2026-03-26-fix-cross-feature-openspec-task-readiness and updated the stable specs.`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/finish-feature/scripts/resolve_finish_feature.py" --feature-id v1-f003`
+  - Result: `Passed after archive with archive_path = openspec/changes/archive/2026-03-26-fix-cross-feature-openspec-task-readiness and requires_archive = false.`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `Passed after moving the feature to [DONE].`
+  - Run: `git diff --check`
+  - Result: `Passed after removing archive-introduced EOF blank lines from the stable spec files.`
 - `2026-03-27` Task `3`:
   - Run: `pytest skills/_workflow/tests/test_workflow_state.py -q`
   - Result: `12 tests passed in a disposable local virtualenv because pytest is not installed on the base shell PATH in this environment.`
@@ -63,6 +78,10 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass`
 
 ## 2. Handoff Notes
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: `finish-feature` validated and archived the linked OpenSpec change at `openspec/changes/archive/2026-03-26-fix-cross-feature-openspec-task-readiness`, then moved the feature to `[DONE]`. The remaining downstream decision is only generic branch and worktree finalization.
 - `2026-03-27`:
   - Current Task: `none`
   - Worktree State: `clean`
