@@ -8,6 +8,8 @@ import textwrap
 import unittest
 from pathlib import Path
 
+from skills._workflow.workflow_state import find_openspec_task_structure_errors
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INIT_SCRIPT = REPO_ROOT / "skills" / "initialize-workflow-artifacts" / "scripts" / "init_workflow_artifacts.py"
@@ -33,6 +35,19 @@ def _write_implementation_plan(change_dir: Path, task_id: str) -> None:
 
 
 class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
+    def test_repo_sample_change_task_files_use_parent_top_level_structure(self) -> None:
+        invalid_task_files: dict[str, list[str]] = {}
+        archive_root = REPO_ROOT / "openspec" / "changes" / "archive"
+
+        for tasks_path in sorted((REPO_ROOT / "openspec" / "changes").rglob("tasks.md")):
+            if archive_root in tasks_path.parents:
+                continue
+            errors = find_openspec_task_structure_errors(tasks_path.read_text(encoding="utf-8"))
+            if errors:
+                invalid_task_files[str(tasks_path.relative_to(REPO_ROOT))] = errors
+
+        self.assertEqual(invalid_task_files, {})
+
     def test_audit_workflow_fails_when_openspec_scaffold_is_missing(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"

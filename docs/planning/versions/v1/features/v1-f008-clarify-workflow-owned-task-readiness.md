@@ -47,6 +47,17 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `Passed for docs/planning/versions/v1 after shared task-structure validation was added to the workflow audit.`
   - Run: `git diff --check`
   - Result: `Passed with no patch-format issues.`
+- `2026-03-26` Task `3`:
+  - Run: `python3` repo scan over active `openspec/changes/**/tasks.md` using `find_openspec_task_structure_errors(...)`
+  - Result: `Passed; no active tracked OpenSpec change task file violates the parent top-level executable task structure contract.`
+  - Run: `python3 -m unittest tests.test_workflow_openspec_integration -v`
+  - Result: `Passed; 16 integration tests green, including malformed nested-only rejection coverage plus a regression that active tracked change task files keep the required parent-task structure.`
+  - Run: `python3 skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `Passed for docs/planning/versions/v1 with task 3 in progress and after task-3 implementation verification.`
+  - Run: `git diff --check`
+  - Result: `Passed with no patch-format issues.`
+  - Review: `gpt-5.4-mini` code-review subagent on the task-3 diff
+  - Result: `One medium issue found: the new regression initially scanned archived changes too. Fixed by excluding \`openspec/changes/archive/\` from the active-change fixture sweep; no remaining findings after re-verification.`
 
 ## 2. Handoff Notes
 - `2026-03-26`:
@@ -65,3 +76,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `dirty`
   - Notes: Task `2` completed. Shared workflow validation now rejects nested-only OpenSpec task structures, audit blocks malformed [SHAPING] and [READY] features, and the completion handoff resolves to `stay_in_progress` with task `3` as the next ready execution unit.
+- `2026-03-26`:
+  - Current Task: `3`
+  - Worktree State: `dirty`
+  - Notes: Task `3` started in the existing feature worktree `../worktrees/workflow-skills/v1-f008-clarify-workflow-owned-task-readiness`. The execution focus is repairing valid workflow fixtures and sample task files so they use explicit top-level executable tasks while preserving malformed nested-only cases only for rejection coverage.
+- `2026-03-26`:
+  - Current Task: `none`
+  - Worktree State: `dirty`
+  - Notes: Task `3` completed. Active tracked OpenSpec change task files now have explicit parent top-level executable tasks, malformed nested-only fixtures remain only as rejection coverage, and the completion handoff resolves to `confirm_feature_acceptance`, so `finish-feature` is the next workflow step.

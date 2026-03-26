@@ -13,6 +13,6 @@
 
 ## 3. Coverage and Fixture Repair
 
-- [ ] 3 Add coverage and repair malformed task fixtures
-  - [ ] 3.1 Update affected fixtures and sample change/task files to include required top-level checklist items where appropriate
-  - [ ] 3.2 Add regression coverage for both malformed nested-only task structures and valid workflow-compatible parent-task structures
+- [x] 3 Add coverage and repair malformed task fixtures
+  - [x] 3.1 Update affected fixtures and sample change/task files to include required top-level checklist items where appropriate
+  - [x] 3.2 Add regression coverage for both malformed nested-only task structures and valid workflow-compatible parent-task structures
