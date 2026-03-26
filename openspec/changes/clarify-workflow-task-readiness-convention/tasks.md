@@ -3,6 +3,7 @@
 - [ ] 1 Clarify workflow-owned readiness contract
   - [ ] 1.1 Update stable specs and repository docs to state that OpenSpec owns task definitions and checkbox completion state while workflow readiness is derived by repository rules
   - [ ] 1.2 Update workflow skill text and user-facing messages to use precise terms such as `workflow-derived readiness` and `workflow task dependency convention`
+  - [ ] 1.3 Document the preferred version/feature-prefixed linked change naming convention while keeping it non-gating for audit and readiness checks
 
 ## 2. Top-Level Task Structure Enforcement
 
