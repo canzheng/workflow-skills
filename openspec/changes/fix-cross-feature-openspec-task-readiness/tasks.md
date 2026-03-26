@@ -6,9 +6,9 @@
 
 ## 2. Resolver Alignment
 
-- [ ] 2 Resolver Alignment
-  - [ ] 2.1 Update start-task and related task-selection helpers to rely on the unified readiness result
-  - [ ] 2.2 Confirm diagnostics and drift reporting stay consistent when upstream work is active versus archived
+- [x] 2 Resolver Alignment
+  - [x] 2.1 Update start-task and related task-selection helpers to rely on the unified readiness result
+  - [x] 2.2 Confirm diagnostics and drift reporting stay consistent when upstream work is active versus archived
 
 ## 3. Regression Coverage
 

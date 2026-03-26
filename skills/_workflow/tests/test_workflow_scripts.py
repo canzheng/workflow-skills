@@ -180,6 +180,136 @@ def _write_autonomous_repo_fixture(
     return repo
 
 
+def _write_cross_feature_openspec_repo_fixture(tmp_path: Path, *, archived_upstream: bool) -> Path:
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    (repo / "docs" / "planning").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "planning" / "current_version").symlink_to(Path("versions/v1"))
+    (repo / "openspec" / "specs").mkdir(parents=True, exist_ok=True)
+
+    upstream_section = "DONE" if archived_upstream else "IN_PROGRESS"
+    backlog = textwrap.dedent(
+        f"""\
+        # V1 Backlog
+
+        ## [BACKLOG]
+
+        None yet.
+
+        ## [SHAPING]
+
+        None yet.
+
+        ## [READY]
+
+        ### `v1-f002` [Downstream](features/v1-f002-downstream.md)
+        {"### `v1-f001` [Upstream](features/v1-f001-upstream.md)" if upstream_section == "READY" else ""}
+
+        ## [IN_PROGRESS]
+
+        {"### `v1-f001` [Upstream](features/v1-f001-upstream.md)" if upstream_section == "IN_PROGRESS" else "None yet."}
+
+        ## [DONE]
+
+        {"### `v1-f001` [Upstream](features/v1-f001-upstream.md)" if upstream_section == "DONE" else "None yet."}
+
+        ## [DEFER]
+
+        None yet.
+        """
+    )
+    (repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md").write_text(backlog, encoding="utf-8")
+
+    upstream_feature_text = textwrap.dedent(
+        f"""\
+        # Feature: Upstream
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#{upstream_section.lower()}`
+        - OpenSpec Change: `upstream-change`
+        - OpenSpec Specs:
+          - `openspec/specs/task-execution-handoff/spec.md`
+        - Current Task: `none`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - None yet.
+        """
+    )
+    (feature_dir / "v1-f001-upstream.md").write_text(upstream_feature_text, encoding="utf-8")
+
+    downstream_feature_text = textwrap.dedent(
+        """\
+        # Feature: Downstream
+
+        ## 0. Meta
+        - Feature ID: `v1-f002`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+        - OpenSpec Change: `downstream-change`
+        - OpenSpec Specs:
+          - `openspec/specs/task-execution-handoff/spec.md`
+        - Current Task: `none`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - None yet.
+        """
+    )
+    (feature_dir / "v1-f002-downstream.md").write_text(downstream_feature_text, encoding="utf-8")
+
+    downstream_change_dir = repo / "openspec" / "changes" / "downstream-change"
+    downstream_change_dir.mkdir(parents=True, exist_ok=True)
+    (downstream_change_dir / "proposal.md").write_text("## Why\n\nTest\n", encoding="utf-8")
+    (downstream_change_dir / "design.md").write_text("## Context\n\nTest\n", encoding="utf-8")
+    (downstream_change_dir / "tasks.md").write_text(
+        textwrap.dedent(
+            """\
+            ## 1. Downstream work
+
+            - [ ] 1 Resolve downstream task
+              - [ ] 1.1 Execute the downstream work
+              - Depends On:
+                - `v1-f001/1`
+            - [ ] 2 Follow-up task
+              - [ ] 2.1 Finish later work
+              - Depends On:
+                - `1`
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    upstream_tasks_text = textwrap.dedent(
+        """\
+        ## 1. Upstream work
+
+        - [x] 1 Complete upstream task
+          - [x] 1.1 Land prerequisite work
+        """
+    )
+    if archived_upstream:
+        archive_dir = repo / "openspec" / "changes" / "archive" / "20260327-upstream-change"
+        archive_dir.mkdir(parents=True, exist_ok=True)
+        (archive_dir / "proposal.md").write_text("## Why\n\nArchived\n", encoding="utf-8")
+        (archive_dir / "tasks.md").write_text(upstream_tasks_text, encoding="utf-8")
+    else:
+        upstream_change_dir = repo / "openspec" / "changes" / "upstream-change"
+        upstream_change_dir.mkdir(parents=True, exist_ok=True)
+        (upstream_change_dir / "proposal.md").write_text("## Why\n\nUpstream\n", encoding="utf-8")
+        (upstream_change_dir / "design.md").write_text("## Context\n\nUpstream\n", encoding="utf-8")
+        (upstream_change_dir / "tasks.md").write_text(upstream_tasks_text, encoding="utf-8")
+
+    return repo
+
+
 def test_audit_workflow_reports_ready_drift_for_promotable_todo_tasks(tmp_path: Path) -> None:
     repo = _write_repo_fixture(tmp_path, task_statuses={"T01": "done", "T02": "todo"})
 
@@ -299,94 +429,87 @@ def test_autonomous_resolver_uses_openspec_backed_tasks_for_ready_features(tmp_p
 
 
 def test_audit_workflow_accepts_resolvable_cross_feature_dependencies(tmp_path: Path) -> None:
-    repo = _write_repo_fixture(tmp_path, task_statuses={"T01": "done", "T02": "done"})
-    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    for fixture_name, archived_upstream in (("active", False), ("archived", True)):
+        repo = _write_cross_feature_openspec_repo_fixture(tmp_path / fixture_name, archived_upstream=archived_upstream)
 
-    local_feature = textwrap.dedent(
-        """\
-        # Feature: Local
+        result = subprocess.run(
+            ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
 
-        ## 0. Meta
-        - Feature ID: `v1-f002`
-        - Version: `v1`
-        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
-        - Current Task: `none`
+        assert result.returncode == 0, result.stdout + result.stderr
 
-        ## 6. Tasks
 
-        ### T01: First task
-        - Status: `done`
-        - Depends On:
-          - none
-
-        ### T02: Cross-feature dependent task
-        - Status: `done`
-        - Depends On:
-          - `T01`
-          - `v1-f001/T03`
-        """
-    )
-    (feature_dir / "v1-f002-local.md").write_text(local_feature, encoding="utf-8")
-
-    backlog = textwrap.dedent(
-        """\
-        # V1 Backlog
-
-        ## [BACKLOG]
-
-        None yet.
-
-        ## [SHAPING]
-
-        None yet.
-
-        ## [READY]
-
-        None yet.
-
-        ## [IN_PROGRESS]
-
-        ### `v1-f002` [Local](features/v1-f002-local.md)
-
-        ## [DONE]
-
-        ### `v1-f001` [External](features/v1-f001-external.md)
-
-        ## [DEFER]
-
-        None yet.
-        """
-    )
-    (repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md").write_text(backlog, encoding="utf-8")
-
-    external_feature = textwrap.dedent(
-        """\
-        # Feature: External
-
-        ## 0. Meta
-        - Feature ID: `v1-f001`
-        - Version: `v1`
-        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
-        - Current Task: `none`
-
-        ## 6. Tasks
-
-        ### T03: External task
-        - Status: `done`
-        - Depends On:
-          - none
-        """
-    )
-    (feature_dir / "v1-f001-external.md").write_text(external_feature, encoding="utf-8")
+def test_resolve_start_task_selects_cross_feature_ready_task_with_active_upstream_change(tmp_path: Path) -> None:
+    repo = _write_cross_feature_openspec_repo_fixture(tmp_path, archived_upstream=False)
 
     result = subprocess.run(
-        ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+        ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
         capture_output=True,
         text=True,
         check=False,
     )
 
     assert result.returncode == 0, result.stdout + result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["feature_id"] == "v1-f002"
+    assert payload["feature_section"] == "READY"
+    assert payload["task_id"] == "1"
+    assert payload["task_title"] == "Resolve downstream task"
+
+
+def test_autonomous_resolver_selects_cross_feature_ready_task_with_archived_upstream_change(tmp_path: Path) -> None:
+    repo = _write_cross_feature_openspec_repo_fixture(tmp_path, archived_upstream=True)
+
+    result = subprocess.run(
+        ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    payload = json.loads(result.stdout)
+    assert payload == {
+        "action": "run_task_loop",
+        "feature_id": "v1-f002",
+        "feature_path": "docs/planning/versions/v1/features/v1-f002-downstream.md",
+        "feature_section": "READY",
+        "task_id": "1",
+        "task_title": "Resolve downstream task",
+    }
+
+
+def test_resolve_autonomous_backlog_action_fails_when_feature_has_task_readiness_drift(tmp_path: Path) -> None:
+    repo = _write_repo_fixture(tmp_path, feature_section="READY", task_statuses={"T01": "done", "T02": "todo"})
+
+    result = subprocess.run(
+        ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "workflow-derived task readiness drift" in result.stderr.lower()
+
+
+def test_resolve_autonomous_backlog_action_feature_id_path_fails_when_feature_has_task_readiness_drift(
+    tmp_path: Path,
+) -> None:
+    repo = _write_repo_fixture(tmp_path, feature_section="READY", task_statuses={"T01": "done", "T02": "todo"})
+
+    result = subprocess.run(
+        ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo), "--feature-id", "v1-f999"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "workflow-derived task readiness drift" in result.stderr.lower()
 
 
 def test_audit_workflow_reports_malformed_canonical_backlog_entries(tmp_path: Path) -> None:

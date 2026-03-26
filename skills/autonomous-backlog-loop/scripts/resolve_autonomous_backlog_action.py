@@ -13,7 +13,13 @@ SKILLS_ROOT = Path(__file__).resolve().parents[2]
 if str(SKILLS_ROOT) not in sys.path:
     sys.path.insert(0, str(SKILLS_ROOT))
 
-from _workflow.workflow_state import WORKFLOW_SECTIONS, parse_backlog_document, parse_tasks
+from _workflow.workflow_state import (
+    WORKFLOW_SECTIONS,
+    compute_task_readiness_drift,
+    format_task_readiness_drift_messages,
+    parse_backlog_document,
+    parse_tasks,
+)
 
 
 class WorkflowError(RuntimeError):
@@ -25,6 +31,7 @@ class FeatureRecord:
     feature_id: str
     feature_path: Path
     feature_section: str
+    feature_text: str
     tasks: list[object]
 
 
@@ -91,13 +98,15 @@ def read_backlog(root: Path) -> tuple[Path, dict[str, list[FeatureRecord]], list
                 raise WorkflowError(
                     f"{backlog_path.relative_to(root)} section [{section_name}] links missing feature file {link}"
                 )
+            feature_text = feature_path.read_text(encoding="utf-8")
             feature_sections[section_name].append(
                 FeatureRecord(
                     feature_id=feature_id,
                     feature_path=feature_path,
                     feature_section=section_name,
+                    feature_text=feature_text,
                     tasks=parse_tasks(
-                        feature_path.read_text(encoding="utf-8"),
+                        feature_text,
                         feature_file=feature_path,
                         repo_root=root,
                     ),
@@ -120,6 +129,23 @@ def first_ready_task(tasks: list[object]):
         if task.status == "ready":
             return task
     return None
+
+
+def validated_first_ready_task(root: Path, feature: FeatureRecord):
+    readiness_drift = compute_task_readiness_drift(
+        feature.feature_text,
+        feature_file=feature.feature_path,
+        repo_root=root,
+    )
+    if readiness_drift.has_drift():
+        drift_messages = "; ".join(
+            format_task_readiness_drift_messages(
+                readiness_drift,
+                feature_label=str(feature.feature_path.relative_to(root)),
+            )
+        )
+        raise WorkflowError(f"workflow-derived task readiness drift detected: {drift_messages}")
+    return first_ready_task(feature.tasks)
 
 
 def build_task_payload(root: Path, feature: FeatureRecord, task) -> dict[str, str]:
@@ -170,7 +196,7 @@ def resolve_action(
         for feature in all_features:
             if feature.feature_id != feature_id:
                 continue
-            task = first_ready_task(feature.tasks)
+            task = validated_first_ready_task(root, feature)
             if task is None:
                 return build_feature_payload(root, "feature_exhausted", feature)
             return build_task_payload(root, feature, task)
@@ -179,7 +205,7 @@ def resolve_action(
     if not design_mode:
         for section_name in ("IN_PROGRESS", "READY"):
             for feature in feature_sections[section_name]:
-                task = first_ready_task(feature.tasks)
+                task = validated_first_ready_task(root, feature)
                 if task is not None:
                     return build_task_payload(root, feature, task)
 

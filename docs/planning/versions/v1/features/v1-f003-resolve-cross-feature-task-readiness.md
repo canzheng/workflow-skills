@@ -14,9 +14,20 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
 - Created: `2026-03-25`
-- Last Updated: `2026-03-26`
+- Last Updated: `2026-03-27`
 
 ## 1. Validation Log
+- `2026-03-27` Task `2`:
+  - Run: `pytest skills/_workflow/tests/test_workflow_scripts.py -q`
+  - Result: `13 tests passed in a disposable local virtualenv because pytest is not installed on the base shell PATH in this environment.`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/complete-task/scripts/resolve_complete_task.py"`
+  - Result: `Passed after closing nested checklist items 2.1 and 2.2; completion_handoff.decision = stay_in_progress and next_ready_task_ids = [3].`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `Passed before task-state updates and again after them.`
+  - Run: `git diff --check`
+  - Result: `Passed before task completion and again after task-state updates.`
+  - Review: `Spec-compliance review approved by a gpt-5.4-mini subagent after the active-upstream fixture was corrected to use the canonical [IN_PROGRESS] board state.`
+  - Review: `Code-quality review approved by a gpt-5.4-mini subagent after adding coverage for the autonomous resolver --feature-id drift path.`
 - `2026-03-26` Task `1`:
   - Run: `pytest skills/_workflow/tests/test_workflow_state.py -q`
   - Result: `10 tests passed in a disposable local virtualenv because pytest is not installed on the base shell PATH in this environment.`
@@ -37,6 +48,14 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass`
 
 ## 2. Handoff Notes
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Task `2` completed. `skills/autonomous-backlog-loop/scripts/resolve_autonomous_backlog_action.py` now applies the same readiness-drift guard as `start-task`, and the resolver-facing OpenSpec tests cover active-upstream selection, archived-upstream selection, audit acceptance, and both default and `--feature-id` drift failures. `completion_handoff.next_ready_task_ids` is `[3]`, so task `3` is the next handoff target.
+- `2026-03-26`:
+  - Current Task: `2`
+  - Worktree State: `dirty`
+  - Notes: Task `2` started in the existing feature worktree `../worktrees/workflow-skills/v1-f003-resolve-cross-feature-task-readiness`. The execution focus is resolver alignment: keep `start-task` and autonomous backlog selection on the same cross-feature readiness result for active and archived upstream dependencies.
 - `2026-03-26`:
   - Current Task: `none`
   - Worktree State: `clean`
