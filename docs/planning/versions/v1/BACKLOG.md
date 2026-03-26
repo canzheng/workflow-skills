@@ -19,10 +19,10 @@ None yet.
 
 ## [READY]
 
-### `v1-f003` [Resolve Cross-Feature Task Readiness](features/v1-f003-resolve-cross-feature-task-readiness.md)
+None yet.
 ## [IN_PROGRESS]
 
-None yet.
+### `v1-f003` [Resolve Cross-Feature Task Readiness](features/v1-f003-resolve-cross-feature-task-readiness.md)
 
 ## [DONE]
 

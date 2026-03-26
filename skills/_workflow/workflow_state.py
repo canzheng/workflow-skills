@@ -288,6 +288,21 @@ def _linked_openspec_tasks_file(
     return tasks_file
 
 
+def _find_openspec_change_dir(repo_root: Path, change_id: str) -> Path | None:
+    active_change_dir = repo_root / "openspec" / "changes" / change_id
+    if active_change_dir.exists():
+        return active_change_dir
+
+    archive_root = repo_root / "openspec" / "changes" / "archive"
+    if not archive_root.exists():
+        return None
+
+    archived_matches = sorted(archive_root.glob(f"*-{change_id}"))
+    if len(archived_matches) != 1:
+        return None
+    return archived_matches[0]
+
+
 def linked_openspec_implementation_plan_path(
     feature_text: str,
     task_id: str,
@@ -313,10 +328,7 @@ def linked_openspec_change_dir(
     resolved_repo_root = _resolve_repo_root_from_feature_file(feature_file, repo_root)
     if resolved_repo_root is None:
         return None
-    change_dir = resolved_repo_root / "openspec" / "changes" / change_id
-    if not change_dir.exists():
-        return None
-    return change_dir
+    return _find_openspec_change_dir(resolved_repo_root, change_id)
 
 
 def list_openspec_change_context_files(
@@ -471,24 +483,42 @@ def _derive_openspec_task_statuses(
     raw_tasks: list[RawOpenSpecTaskRecord],
     *,
     current_task: str | None,
+    local_feature_id: str | None = None,
+    repo_root: Path | None = None,
 ) -> list[TaskRecord]:
-    done_task_ids = {task.task_id for task in raw_tasks if task.done}
+    local_tasks_by_id = {
+        task.task_id: TaskRecord(
+            task_id=task.task_id,
+            task_title=task.task_title,
+            status="done" if task.done else ("in_progress" if current_task == task.task_id else "todo"),
+            depends_on=task.depends_on,
+            status_line_index=task.status_line_index,
+        )
+        for task in raw_tasks
+    }
+    feature_file_cache: dict[str, Path | None] = {}
+    task_cache: dict[Path, dict[str, TaskRecord]] = {}
     tasks: list[TaskRecord] = []
+
     for task in raw_tasks:
-        if task.done:
-            status = "done"
-        elif current_task == task.task_id:
-            status = "in_progress"
-        else:
+        status = local_tasks_by_id[task.task_id].status
+        if status == "todo":
             dependencies_satisfied = True
             for dependency in task.depends_on:
-                if "/" in dependency:
+                resolved = _resolve_dependency(
+                    dependency,
+                    local_feature_id=local_feature_id,
+                    local_tasks_by_id=local_tasks_by_id,
+                    repo_root=repo_root,
+                    feature_file_cache=feature_file_cache,
+                    task_cache=task_cache,
+                )
+                if resolved.status != "done":
                     dependencies_satisfied = False
                     break
-                if dependency not in done_task_ids:
-                    dependencies_satisfied = False
-                    break
-            status = "ready" if dependencies_satisfied else "todo"
+            if dependencies_satisfied:
+                status = "ready"
+
         tasks.append(
             TaskRecord(
                 task_id=task.task_id,
@@ -511,12 +541,18 @@ def parse_tasks(
     if feature_tasks:
         return feature_tasks
 
-    tasks_file = _linked_openspec_tasks_file(feature_text, feature_file=feature_file, repo_root=repo_root)
+    resolved_repo_root = _resolve_repo_root_from_feature_file(feature_file, repo_root)
+    tasks_file = _linked_openspec_tasks_file(feature_text, feature_file=feature_file, repo_root=resolved_repo_root)
     if tasks_file is None:
         return []
 
     current_task = parse_current_task(feature_text)
-    return parse_openspec_tasks_file(tasks_file, current_task=current_task)
+    return _derive_openspec_task_statuses(
+        _parse_openspec_tasks_text(tasks_file.read_text(encoding="utf-8")),
+        current_task=current_task,
+        local_feature_id=parse_feature_id(feature_text, feature_file=feature_file),
+        repo_root=resolved_repo_root,
+    )
 
 
 def list_open_openspec_nested_items(

@@ -1,8 +1,8 @@
 ## 1. Shared Dependency Resolution
 
-- [ ] 1 Shared Dependency Resolution
-  - [ ] 1.1 Refactor OpenSpec-backed task status derivation to resolve cross-feature dependencies through the shared dependency model
-  - [ ] 1.2 Extend linked-change lookup so completed archived features can still satisfy downstream dependencies
+- [x] 1 Shared Dependency Resolution
+  - [x] 1.1 Refactor OpenSpec-backed task status derivation to resolve cross-feature dependencies through the shared dependency model
+  - [x] 1.2 Extend linked-change lookup so completed archived features can still satisfy downstream dependencies
 
 ## 2. Resolver Alignment
 
