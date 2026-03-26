@@ -14,6 +14,7 @@ if str(SKILLS_ROOT) not in sys.path:
 
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
+    collect_openspec_change_linkage,
     compute_task_readiness_drift,
     find_openspec_task_structure_errors,
     find_legacy_inline_planning_sections,
@@ -232,6 +233,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if in_progress_tasks > 1:
         errors.append(f"repository has {in_progress_tasks} tasks with status `in_progress`, expected at most 1")
+
+    if current_path is not None and (openspec_root / "changes").is_dir():
+        linkage = collect_openspec_change_linkage(root)
+        for change_id in linkage.orphan_active_change_ids:
+            errors.append(f"orphan active OpenSpec change {change_id} is not linked from any promoted feature")
 
     if errors:
         for error in errors:

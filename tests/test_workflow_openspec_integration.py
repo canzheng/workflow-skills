@@ -1774,6 +1774,92 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("nested checklist item `1.1` is missing parent top-level executable task `1`", result.stdout)
 
+    def test_audit_rejects_orphan_active_change_not_linked_from_promoted_feature(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    ### `v1-f001` [Linked feature](features/v1-f001-linked-feature.md)
+
+                    ## [READY]
+
+                    None yet.
+
+                    ## [IN_PROGRESS]
+
+                    None yet.
+
+                    ## [DONE]
+
+                    None yet.
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            feature_file = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-linked-feature.md"
+            feature_file.write_text(
+                textwrap.dedent(
+                    """\
+                    # Feature: Linked feature
+
+                    ## 0. Meta
+                    - Feature ID: `v1-f001`
+                    - Version: `v1`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#shaping`
+                    - OpenSpec Change: `linked-change`
+                    - OpenSpec Specs:
+                      - `openspec/specs/workflow-audit-and-repair/spec.md`
+                    - Current Task: `none`
+
+                    ## 1. Validation Log
+                    - None yet.
+
+                    ## 2. Handoff Notes
+                    - None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            linked_change = repo / "openspec" / "changes" / "linked-change"
+            linked_change.mkdir(parents=True, exist_ok=True)
+            (linked_change / "proposal.md").write_text("proposal", encoding="utf-8")
+            (linked_change / "design.md").write_text("design", encoding="utf-8")
+            (linked_change / "tasks.md").write_text("- [ ] 1 Do linked work\n", encoding="utf-8")
+
+            orphan_change = repo / "openspec" / "changes" / "orphan-change"
+            orphan_change.mkdir(parents=True, exist_ok=True)
+            (orphan_change / "proposal.md").write_text("proposal", encoding="utf-8")
+            (orphan_change / "design.md").write_text("design", encoding="utf-8")
+            (orphan_change / "tasks.md").write_text("- [ ] 1 Orphan work\n", encoding="utf-8")
+
+            result = subprocess.run(
+                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("orphan active OpenSpec change orphan-change is not linked from any promoted feature", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

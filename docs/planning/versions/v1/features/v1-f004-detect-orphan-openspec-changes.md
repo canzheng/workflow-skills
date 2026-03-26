@@ -37,6 +37,17 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `reviewed locally; task-scoped changes are limited to shared change-linkage enumeration, narrow tests, and workflow bookkeeping`
   - Run: `git diff --check`
   - Result: `pass`
+- `2026-03-27` Task `2`:
+  - Run: `python3 -m unittest tests.test_diagnose_workflow tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_audit_workflow_fails_when_openspec_scaffold_is_missing tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_audit_accepts_in_progress_feature_ready_for_finish_feature tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_audit_accepts_legacy_exempt_done_feature_without_openspec_change tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_audit_accepts_done_feature_with_archived_openspec_change tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_audit_rejects_done_feature_without_archived_change_or_legacy_exemption tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_audit_rejects_old_format_active_feature_file tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_audit_rejects_shaping_feature_with_nested_only_openspec_tasks tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_audit_rejects_ready_feature_with_nested_only_openspec_tasks tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_audit_rejects_orphan_active_change_not_linked_from_promoted_feature -v`
+  - Result: `13 tests passed, covering the new diagnose orphan-active-change finding plus the related audit acceptance and rejection paths`
+  - Run: `python3 skills/complete-task/scripts/resolve_complete_task.py`
+  - Result: `pass after closing nested items 2.1 and 2.2; completion_handoff reports decision stay_in_progress with next_ready_task_ids ['3']`
+  - Run: `python3 skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass with the feature in [IN_PROGRESS] and task 2 active`
+  - Inspection: `git diff -- skills/diagnose-workflow/scripts/diagnose_workflow.py skills/audit-workflow/scripts/audit_workflow.py tests/test_diagnose_workflow.py tests/test_workflow_openspec_integration.py docs/planning/versions/v1/features/v1-f004-detect-orphan-openspec-changes.md openspec/changes/detect-orphan-openspec-changes/implementation-plans/2.md openspec/changes/detect-orphan-openspec-changes/tasks.md`
+  - Result: `reviewed locally; task-scoped changes are limited to orphan active-change diagnosis/audit integration, focused tests, and workflow bookkeeping`
+  - Run: `git diff --check`
+  - Result: `pass`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -51,3 +62,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `clean`
   - Notes: Completed task `1`. Shared helper logic now enumerates active-versus-linked OpenSpec changes while excluding archived directories and preserving completed-feature archived-linkage behavior. The feature remains `[IN_PROGRESS]`; next ready tasks are `2` and `3`.
+- `2026-03-27`:
+  - Current Task: `2`
+  - Worktree State: `dirty`
+  - Notes: Started task `2` in the existing feature worktree `v1-f004-detect-orphan-openspec-changes` after writing `openspec/changes/detect-orphan-openspec-changes/implementation-plans/2.md`. Execution is scoped to diagnosis/audit integration for orphan active changes.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Completed task `2`. `diagnose-workflow` now reports orphan active changes as structured findings, `audit-workflow` now fails on orphan active changes, and task `3` is the next ready execution target while the feature remains `[IN_PROGRESS]`.

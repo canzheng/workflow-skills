@@ -6,9 +6,9 @@
 
 ## 2. Health Check Integration
 
-- [ ] 2 Health Check Integration
-  - [ ] 2.1 Add structured orphan-change findings to diagnose-workflow
-  - [ ] 2.2 Fail audit-workflow when active changes are not linked from promoted features
+- [x] 2 Health Check Integration
+  - [x] 2.1 Add structured orphan-change findings to diagnose-workflow
+  - [x] 2.2 Fail audit-workflow when active changes are not linked from promoted features
 
 ## 3. Coverage
 

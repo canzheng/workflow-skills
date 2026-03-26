@@ -15,6 +15,7 @@ if str(SKILLS_ROOT) not in sys.path:
 
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
+    collect_openspec_change_linkage,
     compute_task_readiness_drift,
     find_legacy_inline_planning_sections,
     parse_backlog_document,
@@ -336,6 +337,17 @@ def diagnose(root: Path) -> dict[str, object]:
                 message="openspec/changes is missing",
                 path="openspec/changes",
             )
+        else:
+            linkage = collect_openspec_change_linkage(root)
+            for change_id in linkage.orphan_active_change_ids:
+                add_finding(
+                    findings,
+                    severity="error",
+                    code="orphan_active_change",
+                    message=f"active OpenSpec change {change_id} is not linked from any promoted feature",
+                    path=f"openspec/changes/{change_id}",
+                    details={"change_id": change_id},
+                )
 
     active_tasks: list[dict[str, object]] = []
     for feature in features:
