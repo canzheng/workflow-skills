@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f008`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `clarify-workflow-task-readiness-convention`
 - OpenSpec Specs:
   - `openspec/specs/task-execution-handoff/spec.md`
@@ -58,6 +58,17 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `Passed with no patch-format issues.`
   - Review: `gpt-5.4-mini` code-review subagent on the task-3 diff
   - Result: `One medium issue found: the new regression initially scanned archived changes too. Fixed by excluding \`openspec/changes/archive/\` from the active-change fixture sweep; no remaining findings after re-verification.`
+- `2026-03-26` Feature Completion:
+  - Run: `openspec validate clarify-workflow-task-readiness-convention --type change --json --no-interactive`
+  - Result: `Passed with 1 change item, 1 passed, 0 failed.`
+  - Run: `openspec archive clarify-workflow-task-readiness-convention -y`
+  - Result: `Aborted cleanly because the delta spec headers already existed in the main specs, indicating the change was already synced.`
+  - Run: `openspec archive clarify-workflow-task-readiness-convention -y --skip-specs`
+  - Result: `Passed; archived as openspec/changes/archive/2026-03-26-clarify-workflow-task-readiness-convention after confirming spec sync was already present.`
+  - Run: `python3 skills/finish-feature/scripts/resolve_finish_feature.py --feature-id v1-f008`
+  - Result: `Passed; active change path is gone and archive_path resolves to openspec/changes/archive/2026-03-26-clarify-workflow-task-readiness-convention.`
+  - Run: `python3 skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `Passed after feature completion state updates.`
 
 ## 2. Handoff Notes
 - `2026-03-26`:
@@ -84,3 +95,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `dirty`
   - Notes: Task `3` completed. Active tracked OpenSpec change task files now have explicit parent top-level executable tasks, malformed nested-only fixtures remain only as rejection coverage, and the completion handoff resolves to `confirm_feature_acceptance`, so `finish-feature` is the next workflow step.
+- `2026-03-26`:
+  - Current Task: `none`
+  - Worktree State: `dirty`
+  - Notes: Feature completion accepted. The linked OpenSpec change is archived at `openspec/changes/archive/2026-03-26-clarify-workflow-task-readiness-convention`, the feature now belongs in `[DONE]`, and the remaining handoff is generic branch finalization.
