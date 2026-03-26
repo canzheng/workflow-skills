@@ -4,6 +4,7 @@ import textwrap
 from pathlib import Path
 
 from _workflow.workflow_state import (
+    collect_openspec_change_linkage,
     compute_task_readiness_drift,
     find_openspec_task_structure_errors,
     list_open_openspec_nested_items,
@@ -525,6 +526,199 @@ def test_compute_task_readiness_drift_accepts_openspec_cross_feature_dependency_
     assert drift.promotable_task_ids == []
     assert drift.invalid_ready_task_ids == []
     assert drift.unknown_dependency_errors == []
+
+
+def test_collect_openspec_change_linkage_reports_orphan_active_change(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    (repo / "docs" / "planning").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "planning" / "current_version").symlink_to(Path("versions/v1"))
+    (repo / "openspec" / "changes").mkdir(parents=True, exist_ok=True)
+
+    backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+    backlog_path.write_text(
+        textwrap.dedent(
+            """\
+            # V1 Backlog
+
+            ## [BACKLOG]
+
+            None yet.
+
+            ## [SHAPING]
+
+            ### `v1-f001` [Linked feature](features/v1-f001-linked-feature.md)
+
+            ## [READY]
+
+            None yet.
+
+            ## [IN_PROGRESS]
+
+            None yet.
+
+            ## [DONE]
+
+            None yet.
+
+            ## [DEFER]
+
+            None yet.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Linked feature
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#shaping`
+        - OpenSpec Change: `linked-change`
+        - Current Task: `none`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - None yet.
+        """
+    )
+    (feature_dir / "v1-f001-linked-feature.md").write_text(feature_text, encoding="utf-8")
+
+    (repo / "openspec" / "changes" / "linked-change").mkdir()
+    (repo / "openspec" / "changes" / "orphan-change").mkdir()
+    (repo / "openspec" / "changes" / "archive").mkdir()
+
+    linkage = collect_openspec_change_linkage(repo)
+
+    assert linkage.active_change_ids == ["linked-change", "orphan-change"]
+    assert linkage.linked_promoted_change_ids == ["linked-change"]
+    assert linkage.orphan_active_change_ids == ["orphan-change"]
+
+
+def test_collect_openspec_change_linkage_excludes_archived_changes_from_active_set(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    (repo / "docs" / "planning").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "planning" / "current_version").symlink_to(Path("versions/v1"))
+    version_dir = repo / "docs" / "planning" / "versions" / "v1"
+    version_dir.mkdir(parents=True, exist_ok=True)
+    (version_dir / "features").mkdir()
+    (version_dir / "BACKLOG.md").write_text(
+        textwrap.dedent(
+            """\
+            # V1 Backlog
+
+            ## [BACKLOG]
+
+            None yet.
+
+            ## [SHAPING]
+
+            None yet.
+
+            ## [READY]
+
+            None yet.
+
+            ## [IN_PROGRESS]
+
+            None yet.
+
+            ## [DONE]
+
+            None yet.
+
+            ## [DEFER]
+
+            None yet.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    archive_dir = repo / "openspec" / "changes" / "archive" / "2026-03-27-archived-change"
+    archive_dir.mkdir(parents=True, exist_ok=True)
+
+    linkage = collect_openspec_change_linkage(repo)
+
+    assert linkage.active_change_ids == []
+    assert linkage.linked_promoted_change_ids == []
+    assert linkage.orphan_active_change_ids == []
+
+
+def test_collect_openspec_change_linkage_keeps_done_feature_linked_to_archived_change(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    (repo / "docs" / "planning").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "planning" / "current_version").symlink_to(Path("versions/v1"))
+    (repo / "openspec" / "changes" / "archive").mkdir(parents=True, exist_ok=True)
+
+    backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+    backlog_path.write_text(
+        textwrap.dedent(
+            """\
+            # V1 Backlog
+
+            ## [BACKLOG]
+
+            None yet.
+
+            ## [SHAPING]
+
+            None yet.
+
+            ## [READY]
+
+            None yet.
+
+            ## [IN_PROGRESS]
+
+            None yet.
+
+            ## [DONE]
+
+            ### `v1-f001` [Archived feature](features/v1-f001-archived-feature.md)
+
+            ## [DEFER]
+
+            None yet.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Archived feature
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
+        - OpenSpec Change: `archived-change`
+        - Current Task: `none`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - None yet.
+        """
+    )
+    (feature_dir / "v1-f001-archived-feature.md").write_text(feature_text, encoding="utf-8")
+    (repo / "openspec" / "changes" / "archive" / "2026-03-27-archived-change").mkdir(parents=True, exist_ok=True)
+
+    linkage = collect_openspec_change_linkage(repo)
+
+    assert linkage.active_change_ids == []
+    assert linkage.linked_promoted_change_ids == ["archived-change"]
+    assert linkage.orphan_active_change_ids == []
 
 
 def test_find_openspec_task_structure_errors_reports_nested_only_tasks() -> None:

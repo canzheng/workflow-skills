@@ -108,6 +108,13 @@ class ParsedBacklogDocument:
     malformed_entries: list[str]
 
 
+@dataclass(frozen=True)
+class OpenSpecChangeLinkage:
+    active_change_ids: list[str]
+    linked_promoted_change_ids: list[str]
+    orphan_active_change_ids: list[str]
+
+
 def parse_backlog_document(text: str) -> ParsedBacklogDocument:
     feature_sections: dict[str, list[BacklogFeatureEntry]] = {name: [] for name in WORKFLOW_SECTIONS}
     backlog_items: list[BacklogItemEntry] = []
@@ -161,6 +168,45 @@ def parse_backlog_document(text: str) -> ParsedBacklogDocument:
         feature_sections=feature_sections,
         backlog_items=backlog_items,
         malformed_entries=malformed_entries,
+    )
+
+
+def collect_openspec_change_linkage(repo_root: Path) -> OpenSpecChangeLinkage:
+    current_version = repo_root / "docs" / "planning" / "current_version"
+    if not current_version.exists():
+        raise WorkflowStateError("docs/planning/current_version is missing")
+    if not current_version.is_symlink():
+        raise WorkflowStateError("docs/planning/current_version is not a symlink")
+
+    version_root = current_version.resolve()
+    backlog_path = version_root / "BACKLOG.md"
+    if not backlog_path.exists():
+        raise WorkflowStateError(f"{backlog_path.relative_to(repo_root)} is missing")
+
+    linked_change_ids: set[str] = set()
+    parsed_backlog = parse_backlog_document(backlog_path.read_text(encoding="utf-8"))
+    for section_name in WORKFLOW_SECTIONS[1:]:
+        for entry in parsed_backlog.feature_sections.get(section_name, []):
+            feature_path = (backlog_path.parent / entry.link).resolve()
+            if not feature_path.exists():
+                continue
+            change_id = parse_feature_openspec_change(feature_path.read_text(encoding="utf-8"))
+            if change_id is not None:
+                linked_change_ids.add(change_id)
+
+    changes_root = repo_root / "openspec" / "changes"
+    active_change_ids = sorted(
+        path.name
+        for path in changes_root.iterdir()
+        if path.is_dir() and path.name != "archive"
+    ) if changes_root.exists() else []
+    linked_promoted_change_ids = sorted(linked_change_ids)
+    orphan_active_change_ids = sorted(set(active_change_ids) - linked_change_ids)
+
+    return OpenSpecChangeLinkage(
+        active_change_ids=active_change_ids,
+        linked_promoted_change_ids=linked_promoted_change_ids,
+        orphan_active_change_ids=orphan_active_change_ids,
     )
 
 

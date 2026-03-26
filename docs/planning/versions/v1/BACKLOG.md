@@ -18,10 +18,10 @@ None yet.
 
 ## [READY]
 
-### `v1-f004` [Detect Orphan OpenSpec Changes](features/v1-f004-detect-orphan-openspec-changes.md)
+None yet.
 ## [IN_PROGRESS]
 
-None yet.
+### `v1-f004` [Detect Orphan OpenSpec Changes](features/v1-f004-detect-orphan-openspec-changes.md)
 
 ## [DONE]
 

@@ -1,8 +1,8 @@
 ## 1. Active Change Enumeration
 
-- [ ] 1 Active Change Enumeration
-  - [ ] 1.1 Add helper logic that lists active unarchived change IDs and compares them against promoted-feature links
-  - [ ] 1.2 Exclude archive directories and preserve the existing completed-feature rules
+- [x] 1 Active Change Enumeration
+  - [x] 1.1 Add helper logic that lists active unarchived change IDs and compares them against promoted-feature links
+  - [x] 1.2 Exclude archive directories and preserve the existing completed-feature rules
 
 ## 2. Health Check Integration
 
