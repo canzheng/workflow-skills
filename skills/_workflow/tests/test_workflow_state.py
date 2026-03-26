@@ -345,6 +345,188 @@ def test_parse_tasks_marks_openspec_cross_feature_dependency_ready_from_archived
     assert [(task.task_id, task.status) for task in tasks] == [("1", "ready")]
 
 
+def test_compute_task_readiness_drift_accepts_openspec_cross_feature_dependency_from_active_change(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    (repo / "docs" / "planning").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "planning" / "current_version").symlink_to(Path("versions/v1"))
+
+    upstream_feature_text = textwrap.dedent(
+        """\
+        # Feature: Upstream
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+        - OpenSpec Change: `upstream-change`
+        - OpenSpec Specs:
+          - `openspec/specs/task-execution-handoff/spec.md`
+        - Current Task: `none`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - None yet.
+        """
+    )
+    (feature_dir / "v1-f001-upstream.md").write_text(upstream_feature_text, encoding="utf-8")
+
+    upstream_change_dir = repo / "openspec" / "changes" / "upstream-change"
+    upstream_change_dir.mkdir(parents=True, exist_ok=True)
+    (upstream_change_dir / "tasks.md").write_text(
+        textwrap.dedent(
+            """\
+            ## 1. Upstream work
+
+            - [x] 1 Completed upstream task
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    downstream_feature_text = textwrap.dedent(
+        """\
+        # Feature: Downstream
+
+        ## 0. Meta
+        - Feature ID: `v1-f002`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+        - OpenSpec Change: `downstream-change`
+        - OpenSpec Specs:
+          - `openspec/specs/task-execution-handoff/spec.md`
+        - Current Task: `none`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - None yet.
+        """
+    )
+    downstream_feature_path = feature_dir / "v1-f002-downstream.md"
+    downstream_feature_path.write_text(downstream_feature_text, encoding="utf-8")
+
+    downstream_change_dir = repo / "openspec" / "changes" / "downstream-change"
+    downstream_change_dir.mkdir(parents=True, exist_ok=True)
+    (downstream_change_dir / "tasks.md").write_text(
+        textwrap.dedent(
+            """\
+            ## 1. Downstream work
+
+            - [ ] 1 Resolve downstream task
+              - Depends On:
+                - `v1-f001/1`
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    drift = compute_task_readiness_drift(
+        downstream_feature_text,
+        feature_file=downstream_feature_path,
+        repo_root=repo,
+    )
+
+    assert drift.promotable_task_ids == []
+    assert drift.invalid_ready_task_ids == []
+    assert drift.unknown_dependency_errors == []
+
+
+def test_compute_task_readiness_drift_accepts_openspec_cross_feature_dependency_from_archived_change(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    (repo / "docs" / "planning").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "planning" / "current_version").symlink_to(Path("versions/v1"))
+
+    upstream_feature_text = textwrap.dedent(
+        """\
+        # Feature: Upstream
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
+        - OpenSpec Change: `upstream-change`
+        - OpenSpec Specs:
+          - `openspec/specs/task-execution-handoff/spec.md`
+        - Current Task: `none`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - None yet.
+        """
+    )
+    (feature_dir / "v1-f001-upstream.md").write_text(upstream_feature_text, encoding="utf-8")
+
+    archive_dir = repo / "openspec" / "changes" / "archive" / "2026-03-27-upstream-change"
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    (archive_dir / "tasks.md").write_text(
+        textwrap.dedent(
+            """\
+            ## 1. Upstream work
+
+            - [x] 1 Completed upstream task
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    downstream_feature_text = textwrap.dedent(
+        """\
+        # Feature: Downstream
+
+        ## 0. Meta
+        - Feature ID: `v1-f002`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+        - OpenSpec Change: `downstream-change`
+        - OpenSpec Specs:
+          - `openspec/specs/task-execution-handoff/spec.md`
+        - Current Task: `none`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - None yet.
+        """
+    )
+    downstream_feature_path = feature_dir / "v1-f002-downstream.md"
+    downstream_feature_path.write_text(downstream_feature_text, encoding="utf-8")
+
+    downstream_change_dir = repo / "openspec" / "changes" / "downstream-change"
+    downstream_change_dir.mkdir(parents=True, exist_ok=True)
+    (downstream_change_dir / "tasks.md").write_text(
+        textwrap.dedent(
+            """\
+            ## 1. Downstream work
+
+            - [ ] 1 Resolve downstream task
+              - Depends On:
+                - `v1-f001/1`
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    drift = compute_task_readiness_drift(
+        downstream_feature_text,
+        feature_file=downstream_feature_path,
+        repo_root=repo,
+    )
+
+    assert drift.promotable_task_ids == []
+    assert drift.invalid_ready_task_ids == []
+    assert drift.unknown_dependency_errors == []
+
+
 def test_find_openspec_task_structure_errors_reports_nested_only_tasks() -> None:
     errors = find_openspec_task_structure_errors(
         textwrap.dedent(

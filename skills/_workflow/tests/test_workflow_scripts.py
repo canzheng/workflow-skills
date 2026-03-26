@@ -460,6 +460,46 @@ def test_resolve_start_task_selects_cross_feature_ready_task_with_active_upstrea
     assert payload["task_title"] == "Resolve downstream task"
 
 
+def test_resolve_start_task_selects_cross_feature_ready_task_with_archived_upstream_change(tmp_path: Path) -> None:
+    repo = _write_cross_feature_openspec_repo_fixture(tmp_path, archived_upstream=True)
+
+    result = subprocess.run(
+        ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["feature_id"] == "v1-f002"
+    assert payload["feature_section"] == "READY"
+    assert payload["task_id"] == "1"
+    assert payload["task_title"] == "Resolve downstream task"
+
+
+def test_autonomous_resolver_selects_cross_feature_ready_task_with_active_upstream_change(tmp_path: Path) -> None:
+    repo = _write_cross_feature_openspec_repo_fixture(tmp_path, archived_upstream=False)
+
+    result = subprocess.run(
+        ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    payload = json.loads(result.stdout)
+    assert payload == {
+        "action": "run_task_loop",
+        "feature_id": "v1-f002",
+        "feature_path": "docs/planning/versions/v1/features/v1-f002-downstream.md",
+        "feature_section": "READY",
+        "task_id": "1",
+        "task_title": "Resolve downstream task",
+    }
+
+
 def test_autonomous_resolver_selects_cross_feature_ready_task_with_archived_upstream_change(tmp_path: Path) -> None:
     repo = _write_cross_feature_openspec_repo_fixture(tmp_path, archived_upstream=True)
 

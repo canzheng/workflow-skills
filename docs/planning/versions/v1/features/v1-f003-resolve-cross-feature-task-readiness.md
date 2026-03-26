@@ -17,6 +17,21 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Last Updated: `2026-03-27`
 
 ## 1. Validation Log
+- `2026-03-27` Task `3`:
+  - Run: `pytest skills/_workflow/tests/test_workflow_state.py -q`
+  - Result: `12 tests passed in a disposable local virtualenv because pytest is not installed on the base shell PATH in this environment.`
+  - Run: `pytest skills/_workflow/tests/test_workflow_scripts.py -q`
+  - Result: `15 tests passed in the same disposable local virtualenv.`
+  - Run: `python3 -m unittest tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_start_task_resolves_cross_feature_ready_task_with_active_upstream_change tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_start_task_resolves_cross_feature_ready_task_with_archived_upstream_change -v`
+  - Result: `2 tests passed, covering repo-level start-task resolution for both active and archived upstream feature states.`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/complete-task/scripts/resolve_complete_task.py"`
+  - Result: `Passed after closing nested checklist items 3.1 and 3.2; completion_handoff.decision = confirm_feature_acceptance and all_top_level_tasks_complete = true.`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `Passed before task-state updates and again after them.`
+  - Run: `git diff --check`
+  - Result: `Passed before task completion and again after task-state updates.`
+  - Review: `Local spec-compliance review found the task-3 regression matrix aligned with the change requirements after the dedicated review agent stalled.`
+  - Review: `Local code-quality review found no correctness, fixture, or maintainability issues in the task-3 test-only diff.`
 - `2026-03-27` Task `2`:
   - Run: `pytest skills/_workflow/tests/test_workflow_scripts.py -q`
   - Result: `13 tests passed in a disposable local virtualenv because pytest is not installed on the base shell PATH in this environment.`
@@ -48,6 +63,14 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass`
 
 ## 2. Handoff Notes
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Task `3` completed. The regression matrix now covers shared-helper active and archived cross-feature drift handling, both symmetric resolver-script cases, and repo-level `start-task` resolution for active and archived upstream feature states. All top-level OpenSpec tasks are now done, so the next handoff target is `finish-feature`.
+- `2026-03-27`:
+  - Current Task: `3`
+  - Worktree State: `dirty`
+  - Notes: Task `3` started in the existing feature worktree `../worktrees/workflow-skills/v1-f003-resolve-cross-feature-task-readiness`. The remaining execution scope is regression coverage: shared-helper and resolver-script coverage already exist from tasks `1` and `2`, so task `3` is focused on integration-level proof that cross-feature work becomes startable through `start-task` in both active and archived upstream scenarios.
 - `2026-03-27`:
   - Current Task: `none`
   - Worktree State: `clean`

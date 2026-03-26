@@ -34,6 +34,138 @@ def _write_implementation_plan(change_dir: Path, task_id: str) -> None:
     )
 
 
+def _write_cross_feature_start_task_fixture(repo: Path, *, archived_upstream: bool) -> None:
+    backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+
+    backlog_path.write_text(
+        textwrap.dedent(
+            f"""\
+            # V1 Backlog
+
+            ## [BACKLOG]
+
+            None yet.
+
+            ## [SHAPING]
+
+            None yet.
+
+            ## [READY]
+
+            ### `v1-f002` [Downstream feature](features/v1-f002-downstream-feature.md)
+
+            ## [IN_PROGRESS]
+
+            {"### `v1-f001` [Upstream feature](features/v1-f001-upstream-feature.md)" if not archived_upstream else "None yet."}
+
+            ## [DONE]
+
+            {"### `v1-f001` [Upstream feature](features/v1-f001-upstream-feature.md)" if archived_upstream else "None yet."}
+
+            ## [DEFER]
+
+            None yet.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    upstream_section = "done" if archived_upstream else "in_progress"
+    upstream_feature_file = feature_dir / "v1-f001-upstream-feature.md"
+    upstream_feature_file.write_text(
+        textwrap.dedent(
+            f"""\
+            # Feature: Upstream feature
+
+            ## 0. Meta
+            - Feature ID: `v1-f001`
+            - Version: `v1`
+            - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#{upstream_section}`
+            - OpenSpec Change: `upstream-feature-change`
+            - OpenSpec Specs:
+              - `openspec/specs/task-execution-handoff/spec.md`
+            - Current Task: `none`
+
+            ## 1. Validation Log
+            - None yet.
+
+            ## 2. Handoff Notes
+            - None yet.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    downstream_feature_file = feature_dir / "v1-f002-downstream-feature.md"
+    downstream_feature_file.write_text(
+        textwrap.dedent(
+            """\
+            # Feature: Downstream feature
+
+            ## 0. Meta
+            - Feature ID: `v1-f002`
+            - Version: `v1`
+            - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+            - OpenSpec Change: `downstream-feature-change`
+            - OpenSpec Specs:
+              - `openspec/specs/task-execution-handoff/spec.md`
+            - Current Task: `none`
+
+            ## 1. Validation Log
+            - None yet.
+
+            ## 2. Handoff Notes
+            - None yet.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    downstream_change_dir = repo / "openspec" / "changes" / "downstream-feature-change"
+    downstream_change_dir.mkdir(parents=True, exist_ok=True)
+    (downstream_change_dir / "proposal.md").write_text("## Why\n\nDownstream\n", encoding="utf-8")
+    (downstream_change_dir / "design.md").write_text("## Context\n\nDownstream\n", encoding="utf-8")
+    (downstream_change_dir / "tasks.md").write_text(
+        textwrap.dedent(
+            """\
+            ## 1. Downstream work
+
+            - [ ] 1 Resolve downstream task
+              - [ ] 1.1 Execute downstream work
+              - Depends On:
+                - `v1-f001/1`
+            - [ ] 2 Follow-up work
+              - [ ] 2.1 Finish later
+              - Depends On:
+                - `1`
+            """
+        ),
+        encoding="utf-8",
+    )
+    _write_implementation_plan(downstream_change_dir, "1")
+
+    upstream_tasks = textwrap.dedent(
+        """\
+        ## 1. Upstream work
+
+        - [x] 1 Completed upstream task
+          - [x] 1.1 Land prerequisite work
+        """
+    )
+    if archived_upstream:
+        archive_dir = repo / "openspec" / "changes" / "archive" / "2026-03-27-upstream-feature-change"
+        archive_dir.mkdir(parents=True, exist_ok=True)
+        (archive_dir / "proposal.md").write_text("## Why\n\nArchived upstream\n", encoding="utf-8")
+        (archive_dir / "tasks.md").write_text(upstream_tasks, encoding="utf-8")
+    else:
+        upstream_change_dir = repo / "openspec" / "changes" / "upstream-feature-change"
+        upstream_change_dir.mkdir(parents=True, exist_ok=True)
+        (upstream_change_dir / "proposal.md").write_text("## Why\n\nUpstream\n", encoding="utf-8")
+        (upstream_change_dir / "design.md").write_text("## Context\n\nUpstream\n", encoding="utf-8")
+        (upstream_change_dir / "tasks.md").write_text(upstream_tasks, encoding="utf-8")
+
+
 class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
     def test_repo_sample_change_task_files_use_parent_top_level_structure(self) -> None:
         invalid_task_files: dict[str, list[str]] = {}
@@ -222,6 +354,78 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 ],
             )
             self.assertIn("write or update the implementation plan", payload["execution_instruction"])
+
+    def test_start_task_resolves_cross_feature_ready_task_with_active_upstream_change(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+            _write_cross_feature_start_task_fixture(repo, archived_upstream=False)
+
+            result = subprocess.run(
+                ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["feature_id"], "v1-f002")
+            self.assertEqual(payload["feature_section"], "READY")
+            self.assertEqual(payload["task_id"], "1")
+            self.assertEqual(
+                payload["openspec_change_path"],
+                "openspec/changes/downstream-feature-change",
+            )
+            self.assertEqual(
+                payload["implementation_plan_path"],
+                "openspec/changes/downstream-feature-change/implementation-plans/1.md",
+            )
+            self.assertEqual(
+                payload["openspec_context_files"],
+                [
+                    "openspec/changes/downstream-feature-change/proposal.md",
+                    "openspec/changes/downstream-feature-change/design.md",
+                    "openspec/changes/downstream-feature-change/tasks.md",
+                    "openspec/changes/downstream-feature-change/implementation-plans/1.md",
+                ],
+            )
+
+    def test_start_task_resolves_cross_feature_ready_task_with_archived_upstream_change(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+            _write_cross_feature_start_task_fixture(repo, archived_upstream=True)
+
+            result = subprocess.run(
+                ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["feature_id"], "v1-f002")
+            self.assertEqual(payload["feature_section"], "READY")
+            self.assertEqual(payload["task_id"], "1")
+            self.assertEqual(
+                payload["openspec_change_path"],
+                "openspec/changes/downstream-feature-change",
+            )
+            self.assertEqual(
+                payload["implementation_plan_path"],
+                "openspec/changes/downstream-feature-change/implementation-plans/1.md",
+            )
+            self.assertEqual(
+                payload["openspec_context_files"],
+                [
+                    "openspec/changes/downstream-feature-change/proposal.md",
+                    "openspec/changes/downstream-feature-change/design.md",
+                    "openspec/changes/downstream-feature-change/tasks.md",
+                    "openspec/changes/downstream-feature-change/implementation-plans/1.md",
+                ],
+            )
 
     def test_complete_task_resolves_active_task_with_linked_openspec_context(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

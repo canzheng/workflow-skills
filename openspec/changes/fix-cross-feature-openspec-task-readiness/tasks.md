@@ -12,6 +12,6 @@
 
 ## 3. Regression Coverage
 
-- [ ] 3 Regression Coverage
-  - [ ] 3.1 Add shared-helper tests for active and archived cross-feature dependencies
-  - [ ] 3.2 Add resolver-level fixture coverage proving valid cross-feature work becomes startable
+- [x] 3 Regression Coverage
+  - [x] 3.1 Add shared-helper tests for active and archived cross-feature dependencies
+  - [x] 3.2 Add resolver-level fixture coverage proving valid cross-feature work becomes startable
