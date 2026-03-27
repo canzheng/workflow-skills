@@ -9,8 +9,8 @@
   - Depends On:
     - `1`
 
-- [ ] 3 Add regression coverage
-  - [ ] 3.1 Cover the managed-environment assumptions used by the wrapper and tests
+- [x] 3 Add regression coverage
+  - [x] 3.1 Cover the managed-environment assumptions used by the wrapper and tests
   - Depends On:
     - `1`
     - `2`

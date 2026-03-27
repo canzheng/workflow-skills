@@ -19,6 +19,17 @@ def _write_executable(path: Path, content: str) -> None:
     path.chmod(0o755)
 
 
+def _default_fixture_environment_yml(env_name: str) -> str:
+    lines = (REPO_ROOT / "environment.yml").read_text(encoding="utf-8").splitlines()
+
+    for index, line in enumerate(lines):
+        if line.startswith("name:"):
+            lines[index] = f"name: {env_name}"
+            return "\n".join(lines) + "\n"
+
+    raise AssertionError("repo environment.yml must declare a top-level name:")
+
+
 def _create_toolchain(
     tmpdir: Path,
     *,
@@ -115,16 +126,7 @@ def _write_fixture_repo(
     repo.mkdir()
     (repo / "bin").mkdir()
     shutil.copy2(WRAPPER_SOURCE, repo / "bin" / "run-python.sh")
-    env_text = environment_yml_text or textwrap.dedent(
-        f"""\
-        name: {env_name}
-        dependencies:
-          - python
-          - pip
-          - pip:
-              - -r requirements.txt
-        """
-    )
+    env_text = environment_yml_text or _default_fixture_environment_yml(env_name)
     (repo / "environment.yml").write_text(env_text, encoding="utf-8")
     (repo / "requirements.txt").write_text("pytest\n", encoding="utf-8")
 
@@ -201,6 +203,23 @@ def _run_wrapper(
 
 
 class RunPythonWrapperTests(unittest.TestCase):
+    def test_repo_environment_declares_python_floor_and_channels(self) -> None:
+        environment_yml = (REPO_ROOT / "environment.yml").read_text(encoding="utf-8")
+
+        self.assertIn("channels:\n  - conda-forge\n  - defaults\n", environment_yml)
+        self.assertIn("  - python>=3.10\n", environment_yml)
+
+    def test_fixture_repo_defaults_match_managed_environment_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            repo = _write_fixture_repo(tmp, env_name="fixture-env")
+
+            environment_yml = (repo / "environment.yml").read_text(encoding="utf-8")
+
+            self.assertIn("name: fixture-env\n", environment_yml)
+            self.assertIn("channels:\n  - conda-forge\n  - defaults\n", environment_yml)
+            self.assertIn("  - python>=3.10\n", environment_yml)
+
     def test_script_mode_runs_repo_relative_scripts_from_outside_repo_root(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)

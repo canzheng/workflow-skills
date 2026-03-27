@@ -50,6 +50,22 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/complete-task/scripts/resolve_complete_task.py"`
   - Result: `pass after closing nested checklist items 2.1 and 2.2 while task 2 remained active; completion_handoff.decision = stay_in_progress, next_ready_task_ids = ['3'], and remaining_open_task_ids = ['3']`
   - Review: `Focused local spec-compliance and code-quality review found no correctness, reproducibility, or scope-drift issues in the task-2 diff.`
+- `2026-03-28` Task `3`:
+  - Run: `bin/run-python.sh -m unittest tests.test_run_python_wrapper.RunPythonWrapperTests.test_repo_environment_declares_python_floor_and_channels tests.test_run_python_wrapper.RunPythonWrapperTests.test_fixture_repo_defaults_match_managed_environment_contract -v`
+  - Result: `the repo-environment contract test passed immediately, while the fixture-parity test failed before the helper change because the default fixture environment.yml omitted explicit channels and the python floor; both tests passed after updating the fixture helper to inherit the tracked environment definition`
+  - Run: `python3 - <<'PY' ...`
+  - Result: `pass: repo environment contract still declares python>=3.10 and explicit channels`
+  - Run: `bin/run-python.sh -m unittest tests.test_run_python_wrapper -v`
+  - Result: `21 tests ran and all passed after adding the managed-environment regression coverage`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass with the feature in [IN_PROGRESS] and task 3 active`
+  - Inspection: `git diff -- tests/test_run_python_wrapper.py docs/planning/versions/v1/features/v1-f013-harden-installer-and-dev-environment.md openspec/changes/v1-f013-harden-installer-and-dev-environment/implementation-plans/3.md`
+  - Result: `reviewed locally; task-scoped changes are limited to wrapper regression coverage, the task implementation plan, and workflow bookkeeping`
+  - Run: `git diff --check`
+  - Result: `pass`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/complete-task/scripts/resolve_complete_task.py"`
+  - Result: `pass after closing nested checklist item 3.1 while task 3 remained active; completion_handoff.decision = confirm_feature_acceptance, all_top_level_tasks_complete = true, and remaining_open_task_ids = []`
+  - Review: `Focused local spec-compliance and code-quality review found no correctness, regression, or scope-drift issues in the task-3 diff.`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -72,3 +88,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `task-2 changes ready to commit on branch v1-f013-harden-installer-and-dev-environment in ../worktrees/workflow-skills/v1-f013-harden-installer-and-dev-environment`
   - Notes: Completed task `2`. `environment.yml` now declares `python>=3.10` and the explicit Conda channels `conda-forge` and `defaults`, and task `3` is the next ready execution unit for the remaining managed-environment regression coverage.
+- `2026-03-28`:
+  - Current Task: `3`
+  - Worktree State: `clean feature worktree at ../worktrees/workflow-skills/v1-f013-harden-installer-and-dev-environment on branch v1-f013-harden-installer-and-dev-environment`
+  - Notes: Task `3` entered active execution after `resolve_start_task.py --repo-root .` confirmed it as the next ready top-level OpenSpec task and the task implementation plan was updated at `openspec/changes/v1-f013-harden-installer-and-dev-environment/implementation-plans/3.md`.
+- `2026-03-28`:
+  - Current Task: `none`
+  - Worktree State: `task-3 changes ready to commit on branch v1-f013-harden-installer-and-dev-environment in ../worktrees/workflow-skills/v1-f013-harden-installer-and-dev-environment`
+  - Notes: Completed task `3`. All top-level OpenSpec tasks are now complete, the resolver reports `confirm_feature_acceptance`, and the next workflow handoff is `finish-feature` while the feature remains in `[IN_PROGRESS]`.
