@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f013`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `v1-f013-harden-installer-and-dev-environment`
 - OpenSpec Specs:
   - `openspec/specs/repo-development-tooling/spec.md`
@@ -66,6 +66,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/complete-task/scripts/resolve_complete_task.py"`
   - Result: `pass after closing nested checklist item 3.1 while task 3 remained active; completion_handoff.decision = confirm_feature_acceptance, all_top_level_tasks_complete = true, and remaining_open_task_ids = []`
   - Review: `Focused local spec-compliance and code-quality review found no correctness, regression, or scope-drift issues in the task-3 diff.`
+- `2026-03-28` Feature Completion:
+  - Run: `openspec validate v1-f013-harden-installer-and-dev-environment --type change --json --no-interactive`
+  - Result: `pass; summary totals report 1 passed and 0 failed`
+  - Run: `openspec archive v1-f013-harden-installer-and-dev-environment -y`
+  - Result: `pass; created openspec/specs/repo-development-tooling/spec.md and archived the change as openspec/changes/archive/2026-03-27-v1-f013-harden-installer-and-dev-environment`
+  - Run: `python skills/finish-feature/scripts/resolve_finish_feature.py --feature-id v1-f013`
+  - Result: `pass; active change path is gone and archive_path resolves to openspec/changes/archive/2026-03-27-v1-f013-harden-installer-and-dev-environment`
+  - Run: `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass after moving the feature to [DONE]`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -96,3 +105,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `task-3 changes ready to commit on branch v1-f013-harden-installer-and-dev-environment in ../worktrees/workflow-skills/v1-f013-harden-installer-and-dev-environment`
   - Notes: Completed task `3`. All top-level OpenSpec tasks are now complete, the resolver reports `confirm_feature_acceptance`, and the next workflow handoff is `finish-feature` while the feature remains in `[IN_PROGRESS]`.
+- `2026-03-28`:
+  - Current Task: `none`
+  - Worktree State: `task-archive changes ready to commit on branch v1-f013-harden-installer-and-dev-environment in ../worktrees/workflow-skills/v1-f013-harden-installer-and-dev-environment`
+  - Notes: Feature completion was recorded after the linked OpenSpec change was archived at `openspec/changes/archive/2026-03-27-v1-f013-harden-installer-and-dev-environment` and the stable `openspec/specs/repo-development-tooling/spec.md` was created. The feature now belongs in `[DONE]`, and the remaining handoff is generic branch finalization.

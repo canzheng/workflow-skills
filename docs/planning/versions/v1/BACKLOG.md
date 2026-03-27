@@ -21,10 +21,11 @@ None yet.
 
 ## [IN_PROGRESS]
 
-### `v1-f013` [REVIEW] [Harden Installer And Dev Environment](features/v1-f013-harden-installer-and-dev-environment.md)
+None yet.
 
 ## [DONE]
 
+### `v1-f013` [REVIEW] [Harden Installer And Dev Environment](features/v1-f013-harden-installer-and-dev-environment.md)
 ### `v1-f011` [REVIEW] [Harden Workflow Validation](features/v1-f011-harden-workflow-validation.md)
 ### `v1-f012` [REVIEW] [Align Workflow Contract And Templates](features/v1-f012-align-workflow-contract-and-templates.md)
 ### `v1-f010` [Close Workflow Review Gaps](features/v1-f010-close-workflow-review-gaps.md)
