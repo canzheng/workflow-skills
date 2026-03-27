@@ -1,0 +1,6 @@
+name: workflow
+dependencies:
+  - python
+  - pip
+  - pip:
+      - -r requirements.txt
