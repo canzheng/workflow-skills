@@ -8,10 +8,10 @@
   - Depends On:
     - `1`
 
-- [ ] 3 Add validation coverage for all implementation findings
-  - [ ] 3.1 Add audit coverage for extra sections after `[DEFER]`
-  - [ ] 3.2 Add audit and diagnosis coverage for missing promoted-feature `OpenSpec Specs`
-  - [ ] 3.3 Add diagnosis coverage proving malformed workflow states are not reported as healthy
+- [x] 3 Add validation coverage for all implementation findings
+  - [x] 3.1 Add audit coverage for extra sections after `[DEFER]`
+  - [x] 3.2 Add audit and diagnosis coverage for missing promoted-feature `OpenSpec Specs`
+  - [x] 3.3 Add diagnosis coverage proving malformed workflow states are not reported as healthy
   - Depends On:
     - `1`
     - `2`
