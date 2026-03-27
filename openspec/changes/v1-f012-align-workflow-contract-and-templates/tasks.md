@@ -1,6 +1,6 @@
-- [ ] 1 Align workflow gating language
-  - [ ] 1.1 Update `finish-feature` metadata to describe the accepted `[IN_PROGRESS]` handoff
-  - [ ] 1.2 Update autonomous-loop guidance to route completed features through `finish-feature`
+- [x] 1 Align workflow gating language
+  - [x] 1.1 Update `finish-feature` metadata to describe the accepted `[IN_PROGRESS]` handoff
+  - [x] 1.2 Update autonomous-loop guidance to route completed features through `finish-feature`
 
 - [ ] 2 Clarify design-mode wording without changing behavior
   - [ ] 2.1 Rewrite `design-mode` language to mean "does not act on active execution work"

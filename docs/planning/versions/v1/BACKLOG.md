@@ -18,11 +18,11 @@ None yet.
 
 ## [READY]
 
-### `v1-f012` [REVIEW] [Align Workflow Contract And Templates](features/v1-f012-align-workflow-contract-and-templates.md)
+None yet.
 
 ## [IN_PROGRESS]
 
-None yet.
+### `v1-f012` [REVIEW] [Align Workflow Contract And Templates](features/v1-f012-align-workflow-contract-and-templates.md)
 
 ## [DONE]
 

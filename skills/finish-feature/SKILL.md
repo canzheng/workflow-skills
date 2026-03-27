@@ -1,15 +1,15 @@
 ---
 name: finish-feature
-description: Use when a feature has reached done and branch finalization must be gated on linked OpenSpec validation and archive state
+description: Use when a feature in `[IN_PROGRESS]` has satisfied its feature-level acceptance bar and branch finalization must be gated on linked OpenSpec validation and archive state
 ---
 
 # Finish Feature
 
 ## Overview
 
-This skill is the workflow-owned preflight for feature completion.
+This skill is the workflow-owned preflight for moving a feature from `[IN_PROGRESS]` to `[DONE]`.
 
-It enforces the acceptance-plus-OpenSpec validate/archive gate for the linked change before handing off to the generic `finishing-a-development-branch` skill.
+It enforces the acceptance-plus-OpenSpec validate/archive gate for the linked change after task execution is complete, before handing off to the generic `finishing-a-development-branch` skill.
 
 `finish-feature` is intentionally strict: completing the final task is not enough on its own. The expected handoff is that `complete-task` leaves the feature in `[IN_PROGRESS]`, and only a feature whose top-level OpenSpec tasks are all done and whose `Current Task` is `none` is startable here.
 
