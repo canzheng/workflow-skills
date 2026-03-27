@@ -15,10 +15,10 @@ if str(SKILLS_ROOT) not in sys.path:
 
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
-    compute_task_readiness_drift,
-    format_task_readiness_drift_messages,
     parse_backlog_document,
     parse_tasks,
+    validate_active_feature_execution,
+    WorkflowStateError,
 )
 
 
@@ -132,19 +132,14 @@ def first_ready_task(tasks: list[object]):
 
 
 def validated_first_ready_task(root: Path, feature: FeatureRecord):
-    readiness_drift = compute_task_readiness_drift(
-        feature.feature_text,
-        feature_file=feature.feature_path,
-        repo_root=root,
-    )
-    if readiness_drift.has_drift():
-        drift_messages = "; ".join(
-            format_task_readiness_drift_messages(
-                readiness_drift,
-                feature_label=str(feature.feature_path.relative_to(root)),
-            )
+    try:
+        validate_active_feature_execution(
+            feature.feature_text,
+            feature_file=feature.feature_path,
+            repo_root=root,
         )
-        raise WorkflowError(f"workflow-derived task readiness drift detected: {drift_messages}")
+    except WorkflowStateError as exc:
+        raise WorkflowError(str(exc)) from exc
     return first_ready_task(feature.tasks)
 
 
@@ -192,11 +187,15 @@ def resolve_action(
     if active_tasks:
         raise WorkflowError("repository already has a task with status `in_progress`")
 
+    for section_name in ("IN_PROGRESS", "READY"):
+        for feature in feature_sections[section_name]:
+            validated_first_ready_task(root, feature)
+
     if feature_id is not None:
         for feature in all_features:
             if feature.feature_id != feature_id:
                 continue
-            task = validated_first_ready_task(root, feature)
+            task = first_ready_task(feature.tasks)
             if task is None:
                 return build_feature_payload(root, "feature_exhausted", feature)
             return build_task_payload(root, feature, task)

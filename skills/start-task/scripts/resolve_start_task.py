@@ -14,13 +14,12 @@ if str(SKILLS_ROOT) not in sys.path:
 
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
-    compute_task_readiness_drift,
-    format_task_readiness_drift_messages,
+    WorkflowStateError,
     linked_openspec_implementation_plan_path,
     list_openspec_change_context_files,
     parse_backlog_document,
-    parse_feature_openspec_change,
     parse_tasks,
+    validate_active_feature_execution,
 )
 
 
@@ -101,26 +100,17 @@ def resolve_task(root: Path) -> dict[str, object]:
         for entry in parsed_backlog.feature_sections.get(section_name, []):
             feature_id = entry.feature_id
             feature_path, feature_text, tasks = feature_tasks[(section_name, feature_id)]
-            readiness_drift = compute_task_readiness_drift(
-                feature_text,
-                feature_file=feature_path,
-                repo_root=root,
-            )
-            if readiness_drift.has_drift():
-                drift_messages = "; ".join(
-                    format_task_readiness_drift_messages(
-                        readiness_drift,
-                        feature_label=str(feature_path.relative_to(root)),
-                    )
+            try:
+                change_id, active_change_dir = validate_active_feature_execution(
+                    feature_text,
+                    feature_file=feature_path,
+                    repo_root=root,
                 )
-                raise WorkflowError(f"workflow-derived task readiness drift detected: {drift_messages}")
+            except WorkflowStateError as exc:
+                raise WorkflowError(str(exc)) from exc
             for task in tasks:
                 if task.status != "ready":
                     continue
-                change_id = parse_feature_openspec_change(feature_text)
-                if change_id is None:
-                    raise WorkflowError(f"{feature_path.relative_to(root)} is missing OpenSpec Change metadata")
-                change_path = root / "openspec" / "changes" / change_id
                 implementation_plan_path = linked_openspec_implementation_plan_path(
                     feature_text,
                     task.task_id,
@@ -138,7 +128,7 @@ def resolve_task(root: Path) -> dict[str, object]:
                     "feature_path": str(feature_path.relative_to(root)),
                     "feature_section": section_name,
                     "openspec_change_id": change_id,
-                    "openspec_change_path": str(change_path.relative_to(root)),
+                    "openspec_change_path": str(active_change_dir.relative_to(root)),
                     "implementation_plan_path": (
                         str(implementation_plan_path.relative_to(root)) if implementation_plan_path is not None else None
                     ),

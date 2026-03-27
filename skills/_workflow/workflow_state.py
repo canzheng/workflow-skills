@@ -382,6 +382,41 @@ def linked_openspec_change_dir(
     return _find_openspec_change_dir(resolved_repo_root, change_id)
 
 
+def validate_active_feature_execution(
+    feature_text: str,
+    *,
+    feature_file: Path,
+    repo_root: Path,
+) -> tuple[str, Path]:
+    feature_label = str(feature_file.relative_to(repo_root))
+    change_id = parse_feature_openspec_change(feature_text)
+    if change_id is None:
+        raise WorkflowStateError(f"{feature_label} is missing OpenSpec Change metadata")
+
+    active_change_dir = repo_root / "openspec" / "changes" / change_id
+    if not active_change_dir.exists():
+        raise WorkflowStateError(
+            f"{feature_label} links missing active OpenSpec change directory "
+            f"{active_change_dir.relative_to(repo_root)}"
+        )
+
+    readiness_drift = compute_task_readiness_drift(
+        feature_text,
+        feature_file=feature_file,
+        repo_root=repo_root,
+    )
+    if readiness_drift.has_drift():
+        drift_messages = "; ".join(
+            format_task_readiness_drift_messages(
+                readiness_drift,
+                feature_label=feature_label,
+            )
+        )
+        raise WorkflowStateError(f"workflow-derived task readiness drift detected: {drift_messages}")
+
+    return change_id, active_change_dir
+
+
 def list_openspec_change_context_files(
     feature_text: str,
     *,
