@@ -13,11 +13,11 @@ None yet.
 
 ## [SHAPING]
 
-### `v1-f013` [REVIEW] [Harden Installer And Dev Environment](features/v1-f013-harden-installer-and-dev-environment.md)
+None yet.
 
 ## [READY]
 
-None yet.
+### `v1-f013` [REVIEW] [Harden Installer And Dev Environment](features/v1-f013-harden-installer-and-dev-environment.md)
 
 ## [IN_PROGRESS]
 
