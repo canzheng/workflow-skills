@@ -14,6 +14,7 @@ SKILLS=(
   audit-workflow
   diagnose-workflow
   initialize-workflow-artifacts
+  fastlane
   shape-backlog-item
   ready-feature
   start-task

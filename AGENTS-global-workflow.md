@@ -2,6 +2,23 @@
 
 <!-- DO NOT EDIT BELOW SECTION MANUALLY. It is maintained by automated script -->
 
+## Task routing
+
+Classify each task as micro or non-micro.
+
+A micro task is:
+- wording / typo / comment / docs-only edit
+- tiny non-behavioral rename
+- small, localized diff
+- no behavior / API / schema / config semantic / test-contract change
+
+For micro tasks:
+- prefer explicit use of `$fastlane`
+- do not enter heavyweight workflow unless the skill rejects the task
+
+For non-micro tasks:
+- follow repository workflow and local instructions
+
 ## Workflow Applicability
 - Apply the workflow rules below to repositories that adopt the planning artifact structure under `docs/planning/`.
 - This workflow requires `openspec/` and assumes OpenSpec artifacts are available once the workflow is adopted.
