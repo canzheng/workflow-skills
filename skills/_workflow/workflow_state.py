@@ -172,6 +172,18 @@ def parse_backlog_document(text: str) -> ParsedBacklogDocument:
     )
 
 
+def find_backlog_section_order_errors(text: str) -> list[str]:
+    found_sections = [
+        match.group("name")
+        for line in text.splitlines()
+        for match in [SECTION_RE.match(line)]
+        if match
+    ]
+    if found_sections != WORKFLOW_SECTIONS:
+        return [f"has section order {found_sections}, expected {WORKFLOW_SECTIONS}"]
+    return []
+
+
 def collect_openspec_change_linkage(repo_root: Path) -> OpenSpecChangeLinkage:
     current_version = repo_root / "docs" / "planning" / "current_version"
     if not current_version.exists():
@@ -223,6 +235,36 @@ def parse_feature_openspec_status(feature_text: str) -> str | None:
     if match:
         return match.group(1)
     return None
+
+
+def parse_feature_openspec_specs(feature_text: str) -> list[str]:
+    specs: list[str] = []
+    current_field: str | None = None
+
+    for line in feature_text.splitlines():
+        field_match = FIELD_HEADER_RE.match(line)
+        if field_match:
+            current_field = field_match.group("field")
+            if current_field == "OpenSpec Specs":
+                specs.extend(TASK_REF_RE.findall(field_match.group("rest")))
+            continue
+
+        if line.startswith("## "):
+            current_field = None
+            continue
+
+        if current_field == "OpenSpec Specs":
+            specs.extend(TASK_REF_RE.findall(line))
+
+    return specs
+
+
+def validate_promoted_feature_openspec_specs(feature_text: str, *, section_name: str) -> list[str]:
+    if section_name == "DONE" and parse_feature_openspec_status(feature_text) == "legacy-exempt":
+        return []
+    if section_name in {"SHAPING", "READY", "IN_PROGRESS", "DONE"} and not parse_feature_openspec_specs(feature_text):
+        return ["feature is missing OpenSpec Specs metadata"]
+    return []
 
 
 def parse_current_task(feature_text: str) -> str | None:
@@ -392,6 +434,9 @@ def validate_active_feature_execution(
     change_id = parse_feature_openspec_change(feature_text)
     if change_id is None:
         raise WorkflowStateError(f"{feature_label} is missing OpenSpec Change metadata")
+    spec_errors = validate_promoted_feature_openspec_specs(feature_text, section_name="READY")
+    if spec_errors:
+        raise WorkflowStateError(f"{feature_label} is missing OpenSpec Specs metadata")
 
     active_change_dir = repo_root / "openspec" / "changes" / change_id
     if not active_change_dir.exists():

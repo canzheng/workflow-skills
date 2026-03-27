@@ -1,6 +1,6 @@
-- [ ] 1 Tighten shared workflow structural validation
-  - [ ] 1.1 Detect extra or out-of-order canonical backlog sections, including sections appended after `[DEFER]`
-  - [ ] 1.2 Detect promoted-feature records that are missing linked `OpenSpec Specs` metadata
+- [x] 1 Tighten shared workflow structural validation
+  - [x] 1.1 Detect extra or out-of-order canonical backlog sections, including sections appended after `[DEFER]`
+  - [x] 1.2 Detect promoted-feature records that are missing linked `OpenSpec Specs` metadata
 
 - [ ] 2 Align audit and diagnosis with the stricter structural checks
   - [ ] 2.1 Make `audit-workflow` fail on extra canonical sections and missing promoted-feature spec linkage

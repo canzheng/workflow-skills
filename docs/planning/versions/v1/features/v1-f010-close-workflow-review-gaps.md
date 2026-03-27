@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f010`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
 - OpenSpec Change: `v1-f010-close-workflow-review-gaps`
 - OpenSpec Specs:
   - `openspec/specs/workflow-audit-and-repair/spec.md`
@@ -28,9 +28,26 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `proposal.md`, `design.md`, `tasks.md`, and the linked stable spec paths are present; the shaping artifacts now explicitly enumerate every review-finding bucket and the planned validation coverage for those findings`
   - Run: `python3` `skills._workflow.workflow_state.parse_tasks(...)` over `docs/planning/versions/v1/features/v1-f010-close-workflow-review-gaps.md`
   - Result: `top-level OpenSpec tasks 1 and 4 resolve to workflow status ready, while tasks 2, 3, and 5 remain todo behind declared dependencies`
+- `2026-03-27` Task `1` Completion:
+  - Run: `bin/run-python.sh -m pytest skills/_workflow/tests/test_workflow_state.py -q`
+  - Result: `pass; 27 passed in 0.04s`
+  - Run: `bin/run-python.sh -m pytest skills/_workflow/tests/test_workflow_scripts.py -q`
+  - Result: `pass; 22 passed in 1.29s`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass after task-1 implementation`
+  - Run: `git diff --check && git status --short`
+  - Result: `no patch-format errors; only task-1 implementation files, workflow-state files, and the task implementation plan were pending before closure`
+  - Run: `python - <<'PY' ... compute_completion_handoff(...) ... PY`
+  - Result: `stay_in_progress; next ready tasks are 2 and 4, with remaining open tasks 2, 3, 4, and 5`
+  - Review: `task-level code review completed with no findings before completion`
+  - Result: `shared workflow helpers now detect malformed board section order and promoted features missing OpenSpec Specs metadata`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
+  - Current Task: `1`
+  - Worktree State: `feature worktree created at ../worktrees/workflow-skills/v1-f010-close-workflow-review-gaps on branch v1-f010-close-workflow-review-gaps`
+  - Notes: Task `1` entered active execution after a passing workflow audit in the clean feature worktree. The task implementation plan now lives at `openspec/changes/v1-f010-close-workflow-review-gaps/implementation-plans/1.md`.
+- `2026-03-27`:
   - Current Task: `none`
-  - Worktree State: `n/a`
-  - Notes: Shaping was tightened to explicitly cover all review findings and the planned validation evidence for those findings. Top-level OpenSpec tasks `1` and `4` are ready, so the feature can move to `[READY]`.
+  - Worktree State: `task-1 changes committed on branch v1-f010-close-workflow-review-gaps in ../worktrees/workflow-skills/v1-f010-close-workflow-review-gaps`
+  - Notes: Task `1` is complete. The feature remains `[IN_PROGRESS]`; next ready tasks are `2` and `4`, with `2` as the next ordered task.

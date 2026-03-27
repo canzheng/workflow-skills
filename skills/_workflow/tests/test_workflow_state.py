@@ -7,7 +7,10 @@ from _workflow.workflow_state import (
     WorkflowStateError,
     collect_openspec_change_linkage,
     compute_task_readiness_drift,
+    find_backlog_section_order_errors,
     find_openspec_task_structure_errors,
+    parse_feature_openspec_specs,
+    validate_promoted_feature_openspec_specs,
     list_open_openspec_nested_items,
     parse_backlog_document,
     parse_current_task,
@@ -236,6 +239,37 @@ def test_validate_active_feature_execution_rejects_missing_active_change_dir(tmp
         )
     else:
         raise AssertionError("expected missing active change directory to be rejected")
+
+
+def test_validate_active_feature_execution_rejects_missing_openspec_specs_metadata(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    (repo / "openspec" / "changes" / "sample-change").mkdir(parents=True, exist_ok=True)
+    feature_path = feature_dir / "v1-f001-sample.md"
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Sample
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+        - OpenSpec Change: `sample-change`
+        - Current Task: `none`
+        """
+    )
+    feature_path.write_text(feature_text, encoding="utf-8")
+
+    try:
+        validate_active_feature_execution(feature_text, feature_file=feature_path, repo_root=repo)
+    except WorkflowStateError as exc:
+        assert (
+            str(exc)
+            == "docs/planning/versions/v1/features/v1-f001-sample.md is missing OpenSpec Specs metadata"
+        )
+    else:
+        raise AssertionError("expected missing OpenSpec Specs metadata to be rejected")
 
 
 def test_validate_active_feature_execution_rejects_readiness_drift(tmp_path: Path) -> None:
@@ -1056,3 +1090,140 @@ def test_parse_backlog_document_reports_malformed_structured_entries() -> None:
     assert parsed.feature_sections["SHAPING"] == []
     assert "malformed backlog entry" in parsed.malformed_entries[0]
     assert "malformed feature entry" in parsed.malformed_entries[1]
+
+
+def test_find_backlog_section_order_errors_rejects_extra_section_after_defer() -> None:
+    backlog_text = textwrap.dedent(
+        """\
+        # V1 Backlog
+
+        ## [BACKLOG]
+
+        None yet.
+
+        ## [SHAPING]
+
+        None yet.
+
+        ## [READY]
+
+        None yet.
+
+        ## [IN_PROGRESS]
+
+        None yet.
+
+        ## [DONE]
+
+        None yet.
+
+        ## [DEFER]
+
+        None yet.
+
+        ## [BLOCKED]
+
+        None yet.
+        """
+    )
+
+    assert find_backlog_section_order_errors(backlog_text) == [
+        "has section order ['BACKLOG', 'SHAPING', 'READY', 'IN_PROGRESS', 'DONE', 'DEFER', 'BLOCKED'], "
+        "expected ['BACKLOG', 'SHAPING', 'READY', 'IN_PROGRESS', 'DONE', 'DEFER']"
+    ]
+
+
+def test_find_backlog_section_order_errors_rejects_out_of_order_sections() -> None:
+    backlog_text = textwrap.dedent(
+        """\
+        # V1 Backlog
+
+        ## [BACKLOG]
+
+        None yet.
+
+        ## [READY]
+
+        None yet.
+
+        ## [SHAPING]
+
+        None yet.
+
+        ## [IN_PROGRESS]
+
+        None yet.
+
+        ## [DONE]
+
+        None yet.
+
+        ## [DEFER]
+
+        None yet.
+        """
+    )
+
+    assert find_backlog_section_order_errors(backlog_text) == [
+        "has section order ['BACKLOG', 'READY', 'SHAPING', 'IN_PROGRESS', 'DONE', 'DEFER'], "
+        "expected ['BACKLOG', 'SHAPING', 'READY', 'IN_PROGRESS', 'DONE', 'DEFER']"
+    ]
+
+
+def test_parse_feature_openspec_specs_returns_linked_spec_paths() -> None:
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Sample
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+        - OpenSpec Change: `sample-change`
+        - OpenSpec Specs:
+          - `openspec/specs/workflow-board-lifecycle/spec.md`
+          - `openspec/specs/task-execution-handoff/spec.md`
+        - Current Task: `none`
+        """
+    )
+
+    assert parse_feature_openspec_specs(feature_text) == [
+        "openspec/specs/workflow-board-lifecycle/spec.md",
+        "openspec/specs/task-execution-handoff/spec.md",
+    ]
+
+
+def test_validate_promoted_feature_openspec_specs_rejects_missing_specs_for_active_feature() -> None:
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Sample
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+        - OpenSpec Change: `sample-change`
+        - Current Task: `none`
+        """
+    )
+
+    assert validate_promoted_feature_openspec_specs(feature_text, section_name="READY") == [
+        "feature is missing OpenSpec Specs metadata"
+    ]
+
+
+def test_validate_promoted_feature_openspec_specs_allows_legacy_exempt_done_feature() -> None:
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Sample
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
+        - OpenSpec Status: `legacy-exempt`
+        - Current Task: `none`
+        """
+    )
+
+    assert validate_promoted_feature_openspec_specs(feature_text, section_name="DONE") == []
