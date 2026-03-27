@@ -23,24 +23,42 @@ if ! command -v conda >/dev/null 2>&1; then
   die "conda is required but was not found on PATH"
 fi
 
-env_name="$(awk '
-  BEGIN {
-    found = 0
-  }
-  /^[[:space:]]*name:[[:space:]]*/ {
-    sub(/^[[:space:]]*name:[[:space:]]*/, "")
-    if (length($0) > 0) {
-      print
-      found = 1
-      exit 0
-    }
-  }
-  END {
-    if (!found) {
-      exit 1
-    }
-  }
-' "${environment_file}")" || die "environment.yml must declare a top-level name:"
+extract_env_name() {
+  local line remainder env_value
+
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    case "${line}" in
+      name:*)
+        remainder="${line#name:}"
+        remainder="${remainder#${remainder%%[![:space:]]*}}"
+        case "${remainder}" in
+          \"*)
+            remainder="${remainder#\"}"
+            env_value="${remainder%%\"*}"
+            ;;
+          \'*)
+            remainder="${remainder#\'}"
+            env_value="${remainder%%\'*}"
+            ;;
+          *)
+            env_value="${remainder%%\#*}"
+            env_value="${env_value%${env_value##*[![:space:]]}}"
+            ;;
+        esac
+        env_value="${env_value%${env_value##*[![:space:]]}}"
+        if [[ -n "${env_value}" ]]; then
+          printf '%s\n' "${env_value}"
+          return 0
+        fi
+        return 1
+        ;;
+    esac
+  done < "${environment_file}"
+
+  return 1
+}
+
+env_name="$(extract_env_name)" || die "environment.yml must declare a top-level name:"
 
 if ! conda env list | awk -v env="${env_name}" '
   $1 == env {
@@ -78,16 +96,17 @@ if [[ "${entrypoint}" != *.py ]]; then
 fi
 
 candidate="${repo_root}/${entrypoint}"
-if [[ ! -e "${candidate}" ]]; then
+if [[ ! -f "${candidate}" ]]; then
   die "script entrypoint does not exist: ${entrypoint}"
 fi
 
-candidate_dir="${candidate%/*}"
-if [[ "${candidate_dir}" == "${candidate}" ]]; then
-  candidate_dir="."
-fi
-candidate_dir="$(CDPATH= cd -- "${candidate_dir}" && pwd -P)"
-resolved_script="${candidate_dir}/${candidate##*/}"
+resolved_script="$(python3 - "$candidate" <<'PY'
+from pathlib import Path
+import sys
+
+print(Path(sys.argv[1]).resolve())
+PY
+)"
 case "${resolved_script}" in
   "${repo_root}"/*) ;;
   "${repo_root}") ;;

@@ -100,24 +100,27 @@ def _create_toolchain(
     return toolchain
 
 
-def _write_fixture_repo(tmpdir: Path, *, env_name: str = "workflow") -> Path:
+def _write_fixture_repo(
+    tmpdir: Path,
+    *,
+    env_name: str = "workflow",
+    environment_yml_text: str | None = None,
+) -> Path:
     repo = tmpdir / "repo"
     repo.mkdir()
     (repo / "bin").mkdir()
     shutil.copy2(WRAPPER_SOURCE, repo / "bin" / "run-python.sh")
-    (repo / "environment.yml").write_text(
-        textwrap.dedent(
-            f"""\
-            name: {env_name}
-            dependencies:
-              - python
-              - pip
-              - pip:
-                  - -r requirements.txt
-            """
-        ),
-        encoding="utf-8",
+    env_text = environment_yml_text or textwrap.dedent(
+        f"""\
+        name: {env_name}
+        dependencies:
+          - python
+          - pip
+          - pip:
+              - -r requirements.txt
+        """
     )
+    (repo / "environment.yml").write_text(env_text, encoding="utf-8")
     (repo / "requirements.txt").write_text("pytest\n", encoding="utf-8")
 
     (repo / "scripts").mkdir()
@@ -254,6 +257,19 @@ class RunPythonWrapperTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("script path must stay inside the repository", result.stderr)
 
+    def test_rejects_symlinked_script_targets_outside_the_repo(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            repo = _write_fixture_repo(tmp)
+            outside_script = tmp / "outside.py"
+            outside_script.write_text("print('outside')\n", encoding="utf-8")
+            (repo / "scripts" / "link_outside.py").symlink_to(outside_script)
+
+            result = _run_wrapper(repo, ["scripts/link_outside.py"], cwd=repo)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("script path must stay inside the repository", result.stderr)
+
     def test_rejects_non_python_script_paths(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
@@ -324,6 +340,46 @@ class RunPythonWrapperTests(unittest.TestCase):
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("environment.yml must declare a top-level name:", result.stderr)
+
+    def test_parses_name_with_inline_comment(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            repo = _write_fixture_repo(
+                tmp,
+                environment_yml_text=textwrap.dedent(
+                    """\
+                    name: workflow # comment
+                    dependencies:
+                      - python
+                      - pip
+                    """
+                ),
+            )
+
+            result = _run_wrapper(repo, ["scripts/echo_args.py"], cwd=repo)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("run -n workflow python scripts/echo_args.py", (repo / "conda.log").read_text(encoding="utf-8"))
+
+    def test_parses_quoted_name(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            repo = _write_fixture_repo(
+                tmp,
+                environment_yml_text=textwrap.dedent(
+                    """\
+                    name: "workflow"
+                    dependencies:
+                      - python
+                      - pip
+                    """
+                ),
+            )
+
+            result = _run_wrapper(repo, ["scripts/echo_args.py"], cwd=repo)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("run -n workflow python scripts/echo_args.py", (repo / "conda.log").read_text(encoding="utf-8"))
 
     def test_rejects_missing_conda_environment(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
