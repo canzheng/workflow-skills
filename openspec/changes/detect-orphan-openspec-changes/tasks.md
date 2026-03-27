@@ -12,6 +12,6 @@
 
 ## 3. Coverage
 
-- [ ] 3 Coverage
-  - [ ] 3.1 Add diagnosis fixtures covering orphaned and repaired active-change states
-  - [ ] 3.2 Add audit fixtures proving orphan active changes fail the gate
+- [x] 3 Coverage
+  - [x] 3.1 Add diagnosis fixtures covering orphaned and repaired active-change states
+  - [x] 3.2 Add audit fixtures proving orphan active changes fail the gate

@@ -48,6 +48,17 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `reviewed locally; task-scoped changes are limited to orphan active-change diagnosis/audit integration, focused tests, and workflow bookkeeping`
   - Run: `git diff --check`
   - Result: `pass`
+- `2026-03-27` Task `3`:
+  - Run: `python3 -m unittest tests.test_diagnose_workflow tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_audit_rejects_orphan_active_change_not_linked_from_promoted_feature tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_audit_accepts_repaired_active_change_linkage -v`
+  - Result: `7 tests passed, covering the orphaned and repaired active-change fixture states for diagnose-workflow and audit-workflow`
+  - Run: `python3 skills/complete-task/scripts/resolve_complete_task.py`
+  - Result: `initial guard correctly rejected completion while nested items 3.1 and 3.2 were still open; after closing them, completion_handoff reports decision confirm_feature_acceptance`
+  - Run: `python3 skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass after clearing Current Task and closing task 3`
+  - Inspection: `git diff -- tests/test_diagnose_workflow.py tests/test_workflow_openspec_integration.py docs/planning/versions/v1/features/v1-f004-detect-orphan-openspec-changes.md openspec/changes/detect-orphan-openspec-changes/implementation-plans/3.md openspec/changes/detect-orphan-openspec-changes/tasks.md`
+  - Result: `reviewed locally; task-scoped changes are limited to repaired-state coverage, shared test fixtures, and workflow bookkeeping`
+  - Run: `git diff --check`
+  - Result: `pass`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -70,3 +81,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `clean`
   - Notes: Completed task `2`. `diagnose-workflow` now reports orphan active changes as structured findings, `audit-workflow` now fails on orphan active changes, and task `3` is the next ready execution target while the feature remains `[IN_PROGRESS]`.
+- `2026-03-27`:
+  - Current Task: `3`
+  - Worktree State: `dirty`
+  - Notes: Started task `3` in the existing feature worktree `v1-f004-detect-orphan-openspec-changes` after writing `openspec/changes/detect-orphan-openspec-changes/implementation-plans/3.md`. Execution is scoped to fixture-backed diagnose/audit coverage for orphaned and repaired active-change states.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Completed task `3`. Diagnose and audit coverage now prove both orphaned and repaired active-change linkage states, all top-level OpenSpec tasks are done, and the next handoff is `finish-feature` while the feature remains `[IN_PROGRESS]`.

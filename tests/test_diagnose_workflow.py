@@ -20,6 +20,83 @@ _SPEC.loader.exec_module(_MODULE)
 initialize = _MODULE.initialize
 
 
+def _write_active_change_linkage_fixture(repo: Path, *, orphaned: bool) -> None:
+    backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+
+    backlog_path.write_text(
+        textwrap.dedent(
+            """\
+            # V1 Backlog
+
+            ## [BACKLOG]
+
+            None yet.
+
+            ## [SHAPING]
+
+            ### `v1-f001` [Linked feature](features/v1-f001-linked-feature.md)
+
+            ## [READY]
+
+            None yet.
+
+            ## [IN_PROGRESS]
+
+            None yet.
+
+            ## [DONE]
+
+            None yet.
+
+            ## [DEFER]
+
+            None yet.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    linked_change_id = "linked-change" if orphaned else "orphan-change"
+    feature_path = feature_dir / "v1-f001-linked-feature.md"
+    feature_path.write_text(
+        textwrap.dedent(
+            f"""\
+            # Feature: Linked feature
+
+            ## 0. Meta
+            - Feature ID: `v1-f001`
+            - Version: `v1`
+            - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#shaping`
+            - OpenSpec Change: `{linked_change_id}`
+            - OpenSpec Specs:
+              - `openspec/specs/workflow-board-lifecycle/spec.md`
+            - Current Task: `none`
+
+            ## 1. Validation Log
+            - None yet.
+
+            ## 2. Handoff Notes
+            - None yet.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    linked_change = repo / "openspec" / "changes" / linked_change_id
+    linked_change.mkdir(parents=True, exist_ok=True)
+    (linked_change / "proposal.md").write_text("proposal", encoding="utf-8")
+    (linked_change / "design.md").write_text("design", encoding="utf-8")
+    (linked_change / "tasks.md").write_text("- [ ] 1 Do linked work\n", encoding="utf-8")
+
+    if orphaned:
+        orphan_change = repo / "openspec" / "changes" / "orphan-change"
+        orphan_change.mkdir(parents=True, exist_ok=True)
+        (orphan_change / "proposal.md").write_text("proposal", encoding="utf-8")
+        (orphan_change / "design.md").write_text("design", encoding="utf-8")
+        (orphan_change / "tasks.md").write_text("- [ ] 1 Orphan work\n", encoding="utf-8")
+
+
 class DiagnoseWorkflowTests(unittest.TestCase):
     def test_diagnose_workflow_reports_healthy_repo_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -211,77 +288,7 @@ class DiagnoseWorkflowTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"
             initialize(repo, "v1")
-
-            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
-            backlog_path.write_text(
-                textwrap.dedent(
-                    """\
-                    # V1 Backlog
-
-                    ## [BACKLOG]
-
-                    None yet.
-
-                    ## [SHAPING]
-
-                    ### `v1-f001` [Linked feature](features/v1-f001-linked-feature.md)
-
-                    ## [READY]
-
-                    None yet.
-
-                    ## [IN_PROGRESS]
-
-                    None yet.
-
-                    ## [DONE]
-
-                    None yet.
-
-                    ## [DEFER]
-
-                    None yet.
-                    """
-                ),
-                encoding="utf-8",
-            )
-
-            feature_path = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-linked-feature.md"
-            feature_path.write_text(
-                textwrap.dedent(
-                    """\
-                    # Feature: Linked feature
-
-                    ## 0. Meta
-                    - Feature ID: `v1-f001`
-                    - Version: `v1`
-                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#shaping`
-                    - OpenSpec Change: `linked-change`
-                    - OpenSpec Specs:
-                      - `openspec/specs/workflow-board-lifecycle/spec.md`
-                    - Current Task: `none`
-
-                    ## 1. Validation Log
-                    - None yet.
-
-                    ## 2. Handoff Notes
-                    - None yet.
-                    """
-                ),
-                encoding="utf-8",
-            )
-
-            linked_change = repo / "openspec" / "changes" / "linked-change"
-            linked_change.mkdir(parents=True, exist_ok=True)
-            (linked_change / "proposal.md").write_text("proposal", encoding="utf-8")
-            (linked_change / "design.md").write_text("design", encoding="utf-8")
-            (linked_change / "tasks.md").write_text("- [ ] 1 Do linked work\n", encoding="utf-8")
-
-            orphan_change = repo / "openspec" / "changes" / "orphan-change"
-            orphan_change.mkdir(parents=True, exist_ok=True)
-            (orphan_change / "proposal.md").write_text("proposal", encoding="utf-8")
-            (orphan_change / "design.md").write_text("design", encoding="utf-8")
-            (orphan_change / "tasks.md").write_text("- [ ] 1 Orphan work\n", encoding="utf-8")
+            _write_active_change_linkage_fixture(repo, orphaned=True)
 
             result = subprocess.run(
                 ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
@@ -296,6 +303,25 @@ class DiagnoseWorkflowTests(unittest.TestCase):
             orphan_findings = [finding for finding in payload["findings"] if finding["code"] == "orphan_active_change"]
             self.assertEqual(len(orphan_findings), 1)
             self.assertEqual(orphan_findings[0]["details"]["change_id"], "orphan-change")
+
+    def test_diagnose_workflow_accepts_repaired_active_change_linkage(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+            _write_active_change_linkage_fixture(repo, orphaned=False)
+
+            result = subprocess.run(
+                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "ok")
+            orphan_findings = [finding for finding in payload["findings"] if finding["code"] == "orphan_active_change"]
+            self.assertEqual(orphan_findings, [])
 
 
 if __name__ == "__main__":
