@@ -21,6 +21,7 @@ def _write_repo_fixture(
     feature_section: str = "IN_PROGRESS",
     task_statuses: dict[str, str],
     include_openspec_change: bool = True,
+    create_change_dir: bool = True,
 ) -> Path:
     repo = tmp_path / "repo"
     feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
@@ -98,7 +99,7 @@ def _write_repo_fixture(
     )
     feature_text = "\n".join(feature_lines)
     (feature_dir / "v1-f999-example.md").write_text(feature_text, encoding="utf-8")
-    if include_openspec_change:
+    if include_openspec_change and create_change_dir:
         change_dir = repo / "openspec" / "changes" / "example-change"
         change_dir.mkdir(parents=True, exist_ok=True)
         (change_dir / "proposal.md").write_text("## Why\n\nFixture.\n", encoding="utf-8")
@@ -456,6 +457,28 @@ def test_resolve_start_task_fails_when_feature_has_task_readiness_drift(tmp_path
 
     assert result.returncode == 1
     assert "workflow-derived task readiness drift" in result.stderr.lower()
+
+
+def test_resolve_start_task_fails_when_ready_feature_links_missing_active_change_dir(tmp_path: Path) -> None:
+    repo = _write_repo_fixture(
+        tmp_path,
+        feature_section="READY",
+        task_statuses={"T01": "ready", "T02": "todo"},
+        create_change_dir=False,
+    )
+
+    result = subprocess.run(
+        ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert (
+        "docs/planning/versions/v1/features/v1-f999-example.md links missing active OpenSpec change directory "
+        "openspec/changes/example-change" in result.stderr
+    )
 
 
 def test_autonomous_resolver_uses_openspec_backed_tasks_for_ready_features(tmp_path: Path) -> None:

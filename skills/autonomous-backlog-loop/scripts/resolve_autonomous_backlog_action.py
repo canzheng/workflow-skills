@@ -15,11 +15,10 @@ if str(SKILLS_ROOT) not in sys.path:
 
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
-    compute_task_readiness_drift,
-    format_task_readiness_drift_messages,
-    parse_feature_openspec_change,
     parse_backlog_document,
     parse_tasks,
+    validate_active_feature_execution,
+    WorkflowStateError,
 )
 
 
@@ -133,30 +132,14 @@ def first_ready_task(tasks: list[object]):
 
 
 def validated_first_ready_task(root: Path, feature: FeatureRecord):
-    change_id = parse_feature_openspec_change(feature.feature_text)
-    if change_id is None:
-        raise WorkflowError(f"{feature.feature_path.relative_to(root)} is missing OpenSpec Change metadata")
-
-    active_change_dir = root / "openspec" / "changes" / change_id
-    if not active_change_dir.exists():
-        raise WorkflowError(
-            f"{feature.feature_path.relative_to(root)} links missing active OpenSpec change directory "
-            f"{active_change_dir.relative_to(root)}"
+    try:
+        validate_active_feature_execution(
+            feature.feature_text,
+            feature_file=feature.feature_path,
+            repo_root=root,
         )
-
-    readiness_drift = compute_task_readiness_drift(
-        feature.feature_text,
-        feature_file=feature.feature_path,
-        repo_root=root,
-    )
-    if readiness_drift.has_drift():
-        drift_messages = "; ".join(
-            format_task_readiness_drift_messages(
-                readiness_drift,
-                feature_label=str(feature.feature_path.relative_to(root)),
-            )
-        )
-        raise WorkflowError(f"workflow-derived task readiness drift detected: {drift_messages}")
+    except WorkflowStateError as exc:
+        raise WorkflowError(str(exc)) from exc
     return first_ready_task(feature.tasks)
 
 

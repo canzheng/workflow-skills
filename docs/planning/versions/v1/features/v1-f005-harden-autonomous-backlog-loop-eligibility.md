@@ -17,6 +17,20 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Last Updated: `2026-03-27`
 
 ## 1. Validation Log
+- `2026-03-27` Task `2`:
+  - Run: `conda run -n workflow python -m pytest skills/_workflow/tests/test_workflow_scripts.py -q`
+  - Result: `21 passed in 1.31s`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass with the feature in [IN_PROGRESS] and task 2 active`
+  - Run: `python skills/complete-task/scripts/resolve_complete_task.py --repo-root .`
+  - Result: `pass after closing nested checklist items 2.1 and 2.2 while task 2 remained active; completion_handoff.decision = stay_in_progress, next_ready_task_ids = ['3'], and remaining_open_task_ids = ['3']`
+  - Inspection: `git diff -- skills/_workflow/workflow_state.py skills/start-task/scripts/resolve_start_task.py skills/autonomous-backlog-loop/scripts/resolve_autonomous_backlog_action.py skills/_workflow/tests/test_workflow_scripts.py docs/planning/versions/v1/features/v1-f005-harden-autonomous-backlog-loop-eligibility.md openspec/changes/harden-autonomous-backlog-loop-eligibility/implementation-plans/2.md`
+  - Result: `reviewed locally; task-scoped changes stay within shared active-feature execution validation, start-task parity, autonomous resolver reuse, regression coverage, and workflow bookkeeping`
+  - Review: `Focused task-2 review found no correctness or regression issues. Residual risk: the new shared helper is covered through script-level tests but not yet by direct helper-level unit coverage.`
+  - Run: `git diff --check`
+  - Result: `pass`
+  - Run: `python skills/start-task/scripts/resolve_start_task.py --repo-root .`
+  - Result: `pass after task closure; the next ready execution unit resolves to task 3 (Coverage)`
 - `2026-03-27` Task `1`:
   - Run: `conda run -n workflow python -m pytest skills/_workflow/tests/test_workflow_scripts.py -k 'autonomous_backlog_action and (missing_openspec_change_metadata or malformed_active_feature or missing_active_change_dir or normal_precedence or design_mode_skips_ready_and_selects_shape or design_mode_falls_back_to_backlog or feature_exhausted_without_design_work)' -q`
   - Result: `6 passed, 14 deselected in 0.36s`
@@ -54,6 +68,14 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass`
 
 ## 2. Handoff Notes
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Completed task `2`. `skills/_workflow/workflow_state.py` now owns the shared active-feature execution gate, and both `skills/start-task/scripts/resolve_start_task.py` and `skills/autonomous-backlog-loop/scripts/resolve_autonomous_backlog_action.py` now use it before returning executable work. The next ready task is `3` (`Coverage`).
+- `2026-03-27`:
+  - Current Task: `2`
+  - Worktree State: `dirty`
+  - Notes: Started task `2` in the existing feature worktree using `openspec/changes/harden-autonomous-backlog-loop-eligibility/implementation-plans/2.md`. Execution is scoped to replacing autonomous open-coded execution-eligibility checks with the same shared active-feature gate used by `start-task`, while preserving clean shaping and backlog routing.
 - `2026-03-27`:
   - Current Task: `none`
   - Worktree State: `clean`
