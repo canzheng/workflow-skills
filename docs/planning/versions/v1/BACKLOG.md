@@ -13,12 +13,11 @@ None yet.
 
 ## [SHAPING]
 
-### `v1-f011` [REVIEW] [Harden Workflow Validation](features/v1-f011-harden-workflow-validation.md)
 ### `v1-f013` [REVIEW] [Harden Installer And Dev Environment](features/v1-f013-harden-installer-and-dev-environment.md)
 
 ## [READY]
 
-None yet.
+### `v1-f011` [REVIEW] [Harden Workflow Validation](features/v1-f011-harden-workflow-validation.md)
 
 ## [IN_PROGRESS]
 

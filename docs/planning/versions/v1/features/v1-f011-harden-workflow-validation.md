@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f011`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#shaping`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
 - OpenSpec Change: `v1-f011-harden-workflow-validation`
 - OpenSpec Specs:
   - `openspec/specs/workflow-audit-and-repair/spec.md`
@@ -17,7 +17,16 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Last Updated: `2026-03-27`
 
 ## 1. Validation Log
-- None yet.
+- `2026-03-27` Readiness Review:
+  - Run: `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass before promoting the feature to [READY] and pass after moving the feature to [READY]`
+  - Inspection: `openspec/changes/v1-f011-harden-workflow-validation/{proposal,design,tasks}.md` and linked stable specs
+  - Result: `proposal.md`, `design.md`, `tasks.md`, `openspec/specs/workflow-audit-and-repair/spec.md`, and `openspec/specs/openspec-change-integration/spec.md` are present; top-level OpenSpec task \`1\` resolves to workflow status \`ready\`, while tasks \`2\` and \`3\` remain blocked by explicit \`Depends On\` references.`
+  - Run: `openspec validate v1-f011-harden-workflow-validation --type change --json --no-interactive`
+  - Result: `pass`
 
 ## 2. Handoff Notes
-- None yet.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `n/a`
+  - Notes: Shaping artifacts are complete for `v1-f011-harden-workflow-validation`. Top-level OpenSpec task `1` is ready to execute, so the feature can move to `[READY]`.
