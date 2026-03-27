@@ -46,8 +46,17 @@ extract_env_name() {
     fi
 
     case "${trimmed}" in
-      name:*)
-        remainder="${trimmed#name:}"
+      name*)
+        remainder="${trimmed#name}"
+        remainder="${remainder#"${remainder%%[![:space:]]*}"}"
+        case "${remainder}" in
+          :*)
+            remainder="${remainder#:}"
+            ;;
+          *)
+            continue
+            ;;
+        esac
         remainder="${remainder#${remainder%%[![:space:]]*}}"
         case "${remainder}" in
           \"*)

@@ -412,6 +412,26 @@ class RunPythonWrapperTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn("env=workflow", (repo / "conda.log").read_text(encoding="utf-8"))
 
+    def test_parses_name_with_space_before_colon(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            repo = _write_fixture_repo(
+                tmp,
+                environment_yml_text=textwrap.dedent(
+                    """\
+                    name : workflow
+                    dependencies:
+                      - python
+                      - pip
+                    """
+                ),
+            )
+
+            result = _run_wrapper(repo, ["scripts/echo_args.py"], cwd=repo)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("env=workflow", (repo / "conda.log").read_text(encoding="utf-8"))
+
     def test_ignores_nested_name_before_top_level_name(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
