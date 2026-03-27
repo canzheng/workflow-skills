@@ -51,6 +51,20 @@ The change should not rely on an implied "cleanup everything" task. Each review 
   - use targeted file inspections and git-visible diffs to prove the affected tracked docs/artifacts were repaired
   - record explicit validation steps that map each repaired artifact back to the original review finding
 
+## Finding Coverage Matrix
+
+| Finding | Planned Fix Scope | Required Validation | Expected Evidence |
+| --- | --- | --- | --- |
+| `F1` Audit misses promoted-feature `OpenSpec Specs` linkage | Shared workflow validation helpers plus `audit-workflow` enforcement | Targeted audit fixture with a promoted feature missing `OpenSpec Specs` | Audit fails before acceptance and the fixture test is committed |
+| `F2` Audit accepts extra sections after `[DEFER]` | Canonical backlog-section validation | Targeted audit fixture with an extra section appended after `[DEFER]` | Audit fails on the malformed backlog and the fixture test is committed |
+| `F3` Diagnose reports malformed workflow state as healthy | `diagnose-workflow` structured finding coverage | Targeted diagnose fixture for malformed board shape and missing promoted-feature spec linkage | Diagnosis emits findings and no longer reports the repo as healthy |
+| `F4` `finish-feature` wording is inconsistent across workflow docs/specs | Workflow source-of-truth doc cleanup | Targeted file inspection of `AGENTS-global-workflow.md`, `README.md`, and any affected stable specs | The invocation point wording is aligned across the tracked source-of-truth docs |
+| `F5` `VERSION_SCOPE.md` is still placeholder text despite completed board state | Version planning artifact cleanup | Targeted file inspection of `docs/planning/versions/v1/VERSION_SCOPE.md` | The version goal and exit criteria are no longer placeholders |
+| `F6` Stable `openspec-change-integration` purpose text is still placeholder text | Stable spec cleanup | Targeted file inspection of `openspec/specs/openspec-change-integration/spec.md` | The purpose section is concrete and no longer archive-placeholder text |
+| `F7` Historical feature records contain notes that contradict the accepted workflow | Historical feature-file note cleanup | Targeted file inspection of the corrected feature files and the recorded diff | The notes preserve history without teaching contradictory workflow behavior |
+
+The feature is not complete unless each finding above has a named validation entry in the feature file's `Validation Log`.
+
 ## Risks / Trade-offs
 
 - [Shared validation becomes broader] -> Keep the new helper scope limited to structural checks that both tools already conceptually own.
