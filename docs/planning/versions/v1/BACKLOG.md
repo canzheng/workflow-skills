@@ -13,6 +13,8 @@ None yet.
 
 ## [SHAPING]
 
+None yet.
+
 ## [READY]
 
 ### `v1-f005` [Harden Autonomous Backlog Loop Eligibility](features/v1-f005-harden-autonomous-backlog-loop-eligibility.md)

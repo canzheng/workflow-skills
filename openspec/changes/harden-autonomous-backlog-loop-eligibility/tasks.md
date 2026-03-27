@@ -4,7 +4,7 @@
 
 - [ ] 2 Shared policy alignment
   - [ ] 2.1 Reuse the shared dependency and readiness helpers instead of open-coding a weaker autonomous policy
-  - [ ] 2.2 Confirm clean `[BACKLOG]` and `[SHAPING]` cases still return shaping-oriented actions
+  - [ ] 2.2 Confirm clean backlog and shaping cases still return shaping-oriented actions
   - Depends On:
     - `1`
 
