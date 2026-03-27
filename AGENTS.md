@@ -25,3 +25,6 @@ This repo started without inherited git history, so use short imperative commit 
 
 ## Installation Notes
 The repo is the development source of truth. Keep the global workflow contract in [AGENTS-global-workflow.md](/Users/canzheng/Work/sandbox/workflow-skills/AGENTS-global-workflow.md); the installer patches only that marked section inside `${CODEX_HOME:-$HOME/.codex}/AGENTS.md`. After editing `skills/` or the managed workflow block, run `bash install.sh` to copy the tracked workflow skills back into the global Codex skills directory and update the managed workflow section. The installer fails hard if the target `AGENTS.md` is missing the expected workflow markers, and it excludes repo-only tests and generated Python cache files from the installed skills.
+
+Environment changes happen only through `environment.yml` and `requirements.txt`.
+`bin/run-python.sh` is dev-repo-only and is not part of installed skills.
