@@ -59,6 +59,7 @@ class InstallScriptTests(unittest.TestCase):
             self.assertFalse((skills_root / "_workflow" / "tests").exists())
             self.assertFalse((codex_home / "bin" / "run-python.sh").exists())
             self.assertFalse((skills_root / "run-python.sh").exists())
+            self.assertFalse((skills_root / "bin" / "run-python.sh").exists())
 
             installed_agents = agents_path.read_text(encoding="utf-8")
             managed_workflow = MANAGED_WORKFLOW.read_text(encoding="utf-8")
