@@ -22,11 +22,11 @@
   - [x] 4.3 Replace placeholder purpose text in `openspec/specs/openspec-change-integration/spec.md`
   - [x] 4.4 Repair historical feature notes that currently contradict the accepted workflow contract
 
-- [ ] 5 Record explicit finding-to-validation evidence
-  - [ ] 5.1 Add and maintain a finding coverage matrix that maps each original review finding to a specific test or inspection
-  - [ ] 5.2 Record validation evidence for implementation findings `F1` through `F3` in the feature file using the same finding ids
-  - [ ] 5.3 Record inspection evidence for source-of-truth cleanup findings `F4` through `F7` in the feature file using the same finding ids
-  - [ ] 5.4 Validate that every original review finding has an explicit coverage entry before feature completion
+- [x] 5 Record explicit finding-to-validation evidence
+  - [x] 5.1 Add and maintain a finding coverage matrix that maps each original review finding to a specific test or inspection
+  - [x] 5.2 Record validation evidence for implementation findings `F1` through `F3` in the feature file using the same finding ids
+  - [x] 5.3 Record inspection evidence for source-of-truth cleanup findings `F4` through `F7` in the feature file using the same finding ids
+  - [x] 5.4 Validate that every original review finding has an explicit coverage entry before feature completion
   - Depends On:
     - `2`
     - `3`

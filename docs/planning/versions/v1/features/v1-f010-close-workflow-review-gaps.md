@@ -82,6 +82,60 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass; the touched source-of-truth files no longer contain the placeholder text or superseded contradictory handoff phrases called out by findings F4 through F7`
   - Review: `manual task-scope diff review against implementation-plans/4.md`
   - Result: `no out-of-scope changes found; task-4 edits stay limited to source-of-truth artifact cleanup`
+- `2026-03-27` Finding Coverage Matrix:
+
+  | Finding | Fix Scope | Validation / Inspection Path | Feature-File Evidence |
+  | --- | --- | --- | --- |
+  | `F1` | Audit rejects promoted features missing `OpenSpec Specs` metadata | Task `1` helper/script validation plus task `3` integration coverage | `2026-03-27` Finding Coverage Evidence `F1` |
+  | `F2` | Audit rejects extra canonical sections after `[DEFER]` | Task `1` helper validation plus task `3` integration coverage | `2026-03-27` Finding Coverage Evidence `F2` |
+  | `F3` | Diagnose reports malformed workflow state as findings instead of healthy | Task `2` diagnose-focused coverage plus task `3` broader regression coverage | `2026-03-27` Finding Coverage Evidence `F3` |
+  | `F4` | `finish-feature` wording aligned across workflow source-of-truth docs | Task `4` targeted source-of-truth inspection | `2026-03-27` Finding Coverage Evidence `F4` |
+  | `F5` | `VERSION_SCOPE.md` placeholder text replaced with concrete version scope | Task `4` targeted source-of-truth inspection | `2026-03-27` Finding Coverage Evidence `F5` |
+  | `F6` | `openspec-change-integration` purpose text replaced with concrete stable-spec purpose | Task `4` targeted source-of-truth inspection | `2026-03-27` Finding Coverage Evidence `F6` |
+  | `F7` | Historical feature notes repaired so they preserve chronology without contradicting the accepted workflow | Task `4` targeted source-of-truth inspection | `2026-03-27` Finding Coverage Evidence `F7` |
+- `2026-03-27` Finding Coverage Evidence:
+  - `F1`:
+    - Evidence Source: `2026-03-27` Task `1` Completion and Task `3` Completion
+    - Validation: `bin/run-python.sh -m pytest skills/_workflow/tests/test_workflow_state.py -q`, `bin/run-python.sh -m pytest skills/_workflow/tests/test_workflow_scripts.py -q`, and `bin/run-python.sh -m pytest tests/test_workflow_openspec_integration.py -q`
+    - Result: `shared helper, script, and integration coverage now explicitly reject promoted features missing linked OpenSpec spec metadata without regressing repository audit health`
+  - `F2`:
+    - Evidence Source: `2026-03-27` Task `1` Completion and Task `3` Completion
+    - Validation: `bin/run-python.sh -m pytest skills/_workflow/tests/test_workflow_state.py -q` and `bin/run-python.sh -m pytest tests/test_workflow_openspec_integration.py -q`
+    - Result: `canonical backlog validation and the broader audit integration suite now reject extra sections appended after [DEFER]`
+  - `F3`:
+    - Evidence Source: `2026-03-27` Task `2` Completion and Task `3` Completion
+    - Validation: `bin/run-python.sh -m pytest tests/test_diagnose_workflow.py -q` and `bin/run-python.sh -m pytest skills/_workflow/tests/test_workflow_scripts.py -q`
+    - Result: `diagnose coverage now reports malformed board shape and missing promoted-feature spec linkage as findings instead of returning a false healthy status`
+  - `F4`:
+    - Evidence Source: `2026-03-27` Task `4` Completion
+    - Inspection: `rg -n "finish-feature" AGENTS-global-workflow.md README.md openspec/specs/task-execution-handoff/spec.md openspec/specs/feature-execution-tracking/spec.md`
+    - Result: `workflow routing, lifecycle wording, and stable spec behavior now agree that finish-feature runs from [IN_PROGRESS], owns validate/archive, and moves the feature to [DONE] before downstream branch finalization`
+  - `F5`:
+    - Evidence Source: `2026-03-27` Task `4` Completion
+    - Inspection: `docs/planning/versions/v1/VERSION_SCOPE.md`
+    - Result: `the version goal, exit criteria, deferral state, and cross-feature decisions are now concrete and no longer placeholder text`
+  - `F6`:
+    - Evidence Source: `2026-03-27` Task `4` Completion
+    - Inspection: `openspec/specs/openspec-change-integration/spec.md`
+    - Result: `the stable spec purpose now concretely describes feature-to-change linkage, readiness artifacts, and workflow-derived task structure/readiness`
+  - `F7`:
+    - Evidence Source: `2026-03-27` Task `4` Completion
+    - Inspection: `docs/planning/versions/v1/features/v1-f001-legacy-openspec-audit-migration.md`, `docs/planning/versions/v1/features/v1-f002-integrate-openspec-shaping-readiness.md`, `docs/planning/versions/v1/features/v1-f006-add-feature-completion-handoff-gate.md`, and `docs/planning/versions/v1/features/v1-f008-clarify-workflow-owned-task-readiness.md`
+    - Result: `historical notes now preserve migration and pre-contract chronology without implying that manual [DONE] transitions or superseded completion flows are the accepted workflow`
+- `2026-03-27` Finding Coverage Completeness Check:
+  - Run: `python - <<'PY' ... feature-file scan for F1 through F7 ... PY`
+  - Result: `all_findings_present=F1,F2,F3,F4,F5,F6,F7; every finding named in the matrix has a matching evidence entry in this feature file before feature completion`
+- `2026-03-27` Task `5` Completion:
+  - Run: `git diff --check`
+  - Result: `pass; no patch-format errors in the task-5 feature-file, task-ledger, or implementation-plan updates`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass after task-5 evidence mapping updates`
+  - Run: `git status --short`
+  - Result: `only the intended task-5 files were pending before closure: docs/planning/versions/v1/features/v1-f010-close-workflow-review-gaps.md, openspec/changes/v1-f010-close-workflow-review-gaps/tasks.md, and openspec/changes/v1-f010-close-workflow-review-gaps/implementation-plans/5.md`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/complete-task/scripts/resolve_complete_task.py"`
+  - Result: `pass; completion_handoff.decision=confirm_feature_acceptance, all_top_level_tasks_complete=true, and remaining_open_task_ids=[] before task-state closure`
+  - Review: `manual task-scope diff review against implementation-plans/5.md`
+  - Result: `no out-of-scope changes found; task-5 work stays limited to explicit finding-to-validation evidence in the feature file plus matching task-ledger updates`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -116,3 +170,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `task-4 changes committed on branch v1-f010-close-workflow-review-gaps in ../worktrees/workflow-skills/v1-f010-close-workflow-review-gaps`
   - Notes: Task `4` is complete. The feature remains `[IN_PROGRESS]`; task `5` is now the next ready task because tasks `2`, `3`, and `4` are all done.
+- `2026-03-27`:
+  - Current Task: `5`
+  - Worktree State: `resumed clean feature worktree at ../worktrees/workflow-skills/v1-f010-close-workflow-review-gaps on branch v1-f010-close-workflow-review-gaps`
+  - Notes: Task `5` entered active execution after a passing workflow audit and resolver confirmation that it is the next ready task. The task implementation plan now lives at `openspec/changes/v1-f010-close-workflow-review-gaps/implementation-plans/5.md`.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `task-5 changes committed on branch v1-f010-close-workflow-review-gaps in ../worktrees/workflow-skills/v1-f010-close-workflow-review-gaps`
+  - Notes: Task `5` is complete. All top-level OpenSpec tasks are now done, the feature remains `[IN_PROGRESS]`, and the next handoff target is `finish-feature`.
