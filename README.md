@@ -24,6 +24,8 @@ Examples:
 - `bin/run-python.sh -m unittest tests.test_install_script -v`
 - `bin/run-python.sh -m pytest skills/_workflow/tests -q`
 
+`install.sh` also depends on `rsync` to copy the tracked skill directories into `${CODEX_HOME:-$HOME/.codex}/skills`.
+
 The goal is to keep one source of truth per concern:
 
 - release planning truth in `BACKLOG.md`

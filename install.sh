@@ -76,41 +76,50 @@ if [[ "$(grep -Fc "${WORKFLOW_START_MARKER}" "${MANAGED_WORKFLOW_FILE}")" -ne 1 
   exit 1
 fi
 
-if [[ "$(grep -Fc "${WORKFLOW_START_MARKER}" "${TARGET_AGENTS_FILE}")" -ne 1 ]] || [[ "$(grep -Fc "${WORKFLOW_END_MARKER}" "${TARGET_AGENTS_FILE}")" -ne 1 ]]; then
+target_start_marker_count="$(grep -Fc "${WORKFLOW_START_MARKER}" "${TARGET_AGENTS_FILE}" || true)"
+target_end_marker_count="$(grep -Fc "${WORKFLOW_END_MARKER}" "${TARGET_AGENTS_FILE}" || true)"
+
+if [[ "${target_start_marker_count}" -eq 1 ]] && [[ "${target_end_marker_count}" -eq 1 ]]; then
+  tmp_agents_file="$(mktemp)"
+
+  awk \
+    -v start_marker="${WORKFLOW_START_MARKER}" \
+    -v end_marker="${WORKFLOW_END_MARKER}" \
+    -v replacement_file="${MANAGED_WORKFLOW_FILE}" \
+    '
+    BEGIN {
+      while ((getline line < replacement_file) > 0) {
+        replacement[++replacement_count] = line
+      }
+      close(replacement_file)
+    }
+    $0 == start_marker {
+      for (i = 1; i <= replacement_count; i++) {
+        print replacement[i]
+      }
+      in_managed_block = 1
+      next
+    }
+    $0 == end_marker {
+      in_managed_block = 0
+      next
+    }
+    !in_managed_block {
+      print
+    }
+    ' \
+    "${TARGET_AGENTS_FILE}" > "${tmp_agents_file}"
+
+  mv "${tmp_agents_file}" "${TARGET_AGENTS_FILE}"
+elif [[ "${target_start_marker_count}" -eq 0 ]] && [[ "${target_end_marker_count}" -eq 0 ]]; then
+  tmp_agents_file="$(mktemp)"
+  cat "${TARGET_AGENTS_FILE}" > "${tmp_agents_file}"
+  printf '\n' >> "${tmp_agents_file}"
+  cat "${MANAGED_WORKFLOW_FILE}" >> "${tmp_agents_file}"
+  mv "${tmp_agents_file}" "${TARGET_AGENTS_FILE}"
+else
   printf 'Workflow section markers missing or duplicated in target AGENTS.md: %s\n' "${TARGET_AGENTS_FILE}" >&2
   exit 1
 fi
-
-tmp_agents_file="$(mktemp)"
-
-awk \
-  -v start_marker="${WORKFLOW_START_MARKER}" \
-  -v end_marker="${WORKFLOW_END_MARKER}" \
-  -v replacement_file="${MANAGED_WORKFLOW_FILE}" \
-  '
-  BEGIN {
-    while ((getline line < replacement_file) > 0) {
-      replacement[++replacement_count] = line
-    }
-    close(replacement_file)
-  }
-  $0 == start_marker {
-    for (i = 1; i <= replacement_count; i++) {
-      print replacement[i]
-    }
-    in_managed_block = 1
-    next
-  }
-  $0 == end_marker {
-    in_managed_block = 0
-    next
-  }
-  !in_managed_block {
-    print
-  }
-  ' \
-  "${TARGET_AGENTS_FILE}" > "${tmp_agents_file}"
-
-mv "${tmp_agents_file}" "${TARGET_AGENTS_FILE}"
 
 printf 'Installed %d workflow skill directories into %s\n' "${#SKILLS[@]}" "${TARGET_SKILLS_DIR}"

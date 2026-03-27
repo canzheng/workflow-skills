@@ -17,11 +17,11 @@ None yet.
 
 ## [READY]
 
-### `v1-f013` [REVIEW] [Harden Installer And Dev Environment](features/v1-f013-harden-installer-and-dev-environment.md)
+None yet.
 
 ## [IN_PROGRESS]
 
-None yet.
+### `v1-f013` [REVIEW] [Harden Installer And Dev Environment](features/v1-f013-harden-installer-and-dev-environment.md)
 
 ## [DONE]
 

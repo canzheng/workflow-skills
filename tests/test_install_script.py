@@ -75,7 +75,7 @@ class InstallScriptTests(unittest.TestCase):
             self.assertIn("User-managed header", installed_agents)
             self.assertIn("User-managed footer", installed_agents)
 
-    def test_install_script_fails_when_agents_markers_are_missing(self) -> None:
+    def test_install_script_initializes_existing_agents_without_markers(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             codex_home = Path(tmpdir) / "codex-home"
             agents_path = codex_home / "AGENTS.md"
@@ -94,8 +94,21 @@ class InstallScriptTests(unittest.TestCase):
 
             result = _run_install(codex_home)
 
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+            installed_agents = agents_path.read_text(encoding="utf-8")
+            managed_workflow = MANAGED_WORKFLOW.read_text(encoding="utf-8")
+            self.assertEqual(installed_agents.count(managed_workflow), 1)
+            self.assertIn("No managed workflow markers here.", installed_agents)
+
+    def test_install_script_fails_when_agents_file_is_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            codex_home = Path(tmpdir) / "codex-home"
+
+            result = _run_install(codex_home)
+
             self.assertNotEqual(result.returncode, 0)
-            self.assertIn("Workflow section markers", result.stdout + result.stderr)
+            self.assertIn("Missing target AGENTS.md", result.stdout + result.stderr)
 
 
 if __name__ == "__main__":
