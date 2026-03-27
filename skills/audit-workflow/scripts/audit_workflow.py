@@ -213,10 +213,14 @@ def main(argv: list[str] | None = None) -> int:
                             f"{feature_path.relative_to(root)} links missing OpenSpec change openspec/changes/{change_id}"
                         )
 
-            task_statuses = [
-                task.status
-                for task in parse_tasks(feature_text, feature_file=feature_path, repo_root=root)
-            ]
+            try:
+                task_statuses = [
+                    task.status
+                    for task in parse_tasks(feature_text, feature_file=feature_path, repo_root=root)
+                ]
+            except ValueError as exc:
+                errors.append(f"{feature_path.relative_to(root)} {exc}")
+                continue
             in_progress_tasks += sum(1 for status in task_statuses if status == "in_progress")
 
             if section_name == "READY" and "ready" not in task_statuses:

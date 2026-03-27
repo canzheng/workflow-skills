@@ -21,6 +21,7 @@ FEATURE_ID_RE = re.compile(r"^- Feature ID: `([^`]+)`$", re.MULTILINE)
 OPEN_SPEC_CHANGE_RE = re.compile(r"^- OpenSpec Change: `([^`]+)`$", re.MULTILINE)
 OPEN_SPEC_STATUS_RE = re.compile(r"^- OpenSpec Status: `([^`]+)`$", re.MULTILINE)
 CURRENT_TASK_RE = re.compile(r"^- Current Task: `([^`]+)`$", re.MULTILINE)
+TOP_LEVEL_TASK_ID_RE = re.compile(r"^\d+$")
 OPEN_SPEC_TASK_RE = re.compile(r"^- \[(?P<done>[ xX])\]\s+(?P<id>\d+)\s+(?P<title>.+)$")
 OPEN_SPEC_NESTED_TASK_RE = re.compile(
     r"^\s+- \[(?P<done>[ xX])\]\s+(?P<id>\d+\.\d+(?:\.\d+)*)\s+(?P<title>.+)$"
@@ -231,6 +232,10 @@ def parse_current_task(feature_text: str) -> str | None:
     current_task = match.group(1)
     if current_task == "none":
         return None
+    if not TOP_LEVEL_TASK_ID_RE.fullmatch(current_task):
+        raise ValueError(
+            f"Current Task must be `none` or a top-level OpenSpec task ID, got `{current_task}`"
+        )
     return current_task
 
 

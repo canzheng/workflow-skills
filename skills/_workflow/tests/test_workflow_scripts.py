@@ -8,6 +8,7 @@ from pathlib import Path
 
 SKILLS_ROOT = Path(__file__).resolve().parents[2]
 AUDIT_SCRIPT = SKILLS_ROOT / "audit-workflow" / "scripts" / "audit_workflow.py"
+DIAGNOSE_SCRIPT = SKILLS_ROOT / "diagnose-workflow" / "scripts" / "diagnose_workflow.py"
 START_TASK_SCRIPT = SKILLS_ROOT / "start-task" / "scripts" / "resolve_start_task.py"
 AUTONOMOUS_RESOLVER_SCRIPT = (
     SKILLS_ROOT / "autonomous-backlog-loop" / "scripts" / "resolve_autonomous_backlog_action.py"
@@ -310,6 +311,85 @@ def _write_cross_feature_openspec_repo_fixture(tmp_path: Path, *, archived_upstr
     return repo
 
 
+def _write_invalid_current_task_openspec_repo_fixture(tmp_path: Path) -> Path:
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    (repo / "docs" / "planning").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "planning" / "current_version").symlink_to(Path("versions/v1"))
+    (repo / "openspec" / "specs").mkdir(parents=True, exist_ok=True)
+
+    backlog = textwrap.dedent(
+        """\
+        # V1 Backlog
+
+        ## [BACKLOG]
+
+        None yet.
+
+        ## [SHAPING]
+
+        None yet.
+
+        ## [READY]
+
+        None yet.
+
+        ## [IN_PROGRESS]
+
+        ### `v1-f001` [Invalid Current Task](features/v1-f001-invalid-current-task.md)
+
+        ## [DONE]
+
+        None yet.
+
+        ## [DEFER]
+
+        None yet.
+        """
+    )
+    (repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md").write_text(backlog, encoding="utf-8")
+
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Invalid Current Task
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+        - OpenSpec Change: `invalid-current-task`
+        - OpenSpec Specs:
+          - `openspec/specs/feature-execution-tracking/spec.md`
+          - `openspec/specs/workflow-audit-and-repair/spec.md`
+        - Current Task: `1.1`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - None yet.
+        """
+    )
+    (feature_dir / "v1-f001-invalid-current-task.md").write_text(feature_text, encoding="utf-8")
+
+    change_dir = repo / "openspec" / "changes" / "invalid-current-task"
+    change_dir.mkdir(parents=True, exist_ok=True)
+    (change_dir / "proposal.md").write_text("## Why\n\nInvalid current task fixture.\n", encoding="utf-8")
+    (change_dir / "design.md").write_text("## Context\n\nInvalid current task fixture.\n", encoding="utf-8")
+    (change_dir / "tasks.md").write_text(
+        textwrap.dedent(
+            """\
+            - [ ] 1 Repair metadata
+              - [ ] 1.1 Replace nested task id
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    return repo
+
+
 def test_audit_workflow_reports_ready_drift_for_promotable_todo_tasks(tmp_path: Path) -> None:
     repo = _write_repo_fixture(tmp_path, task_statuses={"T01": "done", "T02": "todo"})
 
@@ -440,6 +520,42 @@ def test_audit_workflow_accepts_resolvable_cross_feature_dependencies(tmp_path: 
         )
 
         assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_audit_workflow_reports_invalid_current_task_metadata(tmp_path: Path) -> None:
+    repo = _write_invalid_current_task_openspec_repo_fixture(tmp_path)
+
+    result = subprocess.run(
+        ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "docs/planning/versions/v1/features/v1-f001-invalid-current-task.md" in result.stdout
+    assert "Current Task must be `none` or a top-level OpenSpec task ID, got `1.1`" in result.stdout
+
+
+def test_diagnose_workflow_reports_invalid_current_task_metadata(tmp_path: Path) -> None:
+    repo = _write_invalid_current_task_openspec_repo_fixture(tmp_path)
+
+    result = subprocess.run(
+        ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["status"] == "issues_found"
+    assert any(
+        finding["code"] == "invalid_current_task_metadata"
+        and finding["path"] == "docs/planning/versions/v1/features/v1-f001-invalid-current-task.md"
+        and "Current Task must be `none` or a top-level OpenSpec task ID, got `1.1`" in finding["message"]
+        for finding in payload["findings"]
+    )
 
 
 def test_resolve_start_task_selects_cross_feature_ready_task_with_active_upstream_change(tmp_path: Path) -> None:

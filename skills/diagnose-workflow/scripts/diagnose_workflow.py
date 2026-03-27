@@ -95,8 +95,23 @@ def _feature_summary(
     relative_path = str(feature_path.relative_to(root))
     change_id = parse_feature_openspec_change(feature_text)
     openspec_status = parse_feature_openspec_status(feature_text)
-    current_task = parse_current_task(feature_text)
-    task_records = parse_tasks(feature_text, feature_file=feature_path, repo_root=root)
+    current_task = None
+    task_records = []
+    invalid_current_task_error: str | None = None
+    try:
+        current_task = parse_current_task(feature_text)
+        task_records = parse_tasks(feature_text, feature_file=feature_path, repo_root=root)
+    except ValueError as exc:
+        invalid_current_task_error = str(exc)
+        add_finding(
+            findings,
+            severity="error",
+            code="invalid_current_task_metadata",
+            message=invalid_current_task_error,
+            path=relative_path,
+            feature_id=feature_id,
+            section=section_name,
+        )
     task_counts = dict(sorted(Counter(task.status for task in task_records).items()))
     active_task_ids = [task.task_id for task in task_records if task.status == "in_progress"]
 
@@ -207,22 +222,23 @@ def _feature_summary(
             section=section_name,
         )
 
-    readiness_drift = compute_task_readiness_drift(feature_text, feature_file=feature_path, repo_root=root)
-    if readiness_drift.promotable_task_ids or readiness_drift.invalid_ready_task_ids or readiness_drift.unknown_dependency_errors:
-        add_finding(
-            findings,
-            severity="error",
-            code="task_readiness_drift",
-            message="feature has workflow-derived task readiness drift",
-            path=relative_path,
-            feature_id=feature_id,
-            section=section_name,
-            details={
-                "promotable_task_ids": readiness_drift.promotable_task_ids,
-                "invalid_ready_task_ids": readiness_drift.invalid_ready_task_ids,
-                "unknown_dependency_errors": readiness_drift.unknown_dependency_errors,
-            },
-        )
+    if invalid_current_task_error is None:
+        readiness_drift = compute_task_readiness_drift(feature_text, feature_file=feature_path, repo_root=root)
+        if readiness_drift.promotable_task_ids or readiness_drift.invalid_ready_task_ids or readiness_drift.unknown_dependency_errors:
+            add_finding(
+                findings,
+                severity="error",
+                code="task_readiness_drift",
+                message="feature has workflow-derived task readiness drift",
+                path=relative_path,
+                feature_id=feature_id,
+                section=section_name,
+                details={
+                    "promotable_task_ids": readiness_drift.promotable_task_ids,
+                    "invalid_ready_task_ids": readiness_drift.invalid_ready_task_ids,
+                    "unknown_dependency_errors": readiness_drift.unknown_dependency_errors,
+                },
+            )
 
     return {
         "feature_id": feature_id,
