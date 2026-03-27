@@ -6,8 +6,11 @@ This repository is the source-controlled home for global workflow skills. Keep s
 ## Build, Test, and Development Commands
 Use narrow verification first.
 
-- `pytest skills/_workflow/tests -q` runs the shared workflow helper and script tests.
-- `python3 -m unittest tests.test_install_script -v` verifies `install.sh` syncs the skills and patches only the managed workflow section in global `AGENTS.md`.
+- `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py` runs the repo audit script through the managed Python environment.
+- `bin/run-python.sh -m unittest tests.test_install_script -v` verifies `install.sh` syncs the skills and patches only the managed workflow section in global `AGENTS.md`.
+- `bin/run-python.sh -m pytest skills/_workflow/tests -q` runs the shared workflow helper and script tests.
+- `conda env create -f environment.yml` creates the managed environment named in `environment.yml`.
+- `conda env update -f environment.yml --prune` updates the managed environment from the tracked environment definition.
 - `bash install.sh` syncs the workflow skills from this repo into `${CODEX_HOME:-$HOME/.codex}/skills`, patches the managed workflow section in `${CODEX_HOME:-$HOME/.codex}/AGENTS.md`, and does not install repo-only tests.
 - `git status --short` and `git diff --check` confirm you only changed intended files and did not introduce patch-format issues.
 
