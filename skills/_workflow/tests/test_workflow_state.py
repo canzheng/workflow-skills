@@ -198,6 +198,38 @@ def test_parse_current_task_rejects_nested_subtask_identifier() -> None:
         raise AssertionError("expected nested Current Task identifier to be rejected")
 
 
+def test_parse_current_task_accepts_top_level_task_identifier() -> None:
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Active Current Task
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+        - Current Task: `1`
+        """
+    )
+
+    assert parse_current_task(feature_text) == "1"
+
+
+def test_parse_current_task_maps_none_to_no_active_task() -> None:
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Idle Current Task
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+        - Current Task: `none`
+        """
+    )
+
+    assert parse_current_task(feature_text) is None
+
+
 def test_parse_tasks_marks_openspec_cross_feature_dependency_ready_from_active_change(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
