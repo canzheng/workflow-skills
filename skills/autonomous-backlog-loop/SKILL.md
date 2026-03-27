@@ -57,7 +57,7 @@ Optional resolver flags:
 
 - `--completed-count <n>`
 - `--completion-limit <n>`
-- `--design-mode` to run only design-stage work from `[SHAPING]` and `[BACKLOG]`
+- `--design-mode` to run only design-stage work from `[SHAPING]` and `[BACKLOG]`; it does not act on active execution work in `[READY]` or `[IN_PROGRESS]`, and the resolver still sanity-checks `[READY]` and `[IN_PROGRESS]` features for invalid workflow state before continuing
 - `--feature-id <feature-id>` for continuing a selected feature's task loop
 
 Resolver precedence:
@@ -76,7 +76,7 @@ Design-mode precedence:
 2. otherwise first `[BACKLOG]` item
 3. otherwise return `feature_exhausted`
 
-Use design mode when the user request is clearly design-only, explicitly says to ignore `[READY]` work, or asks to exhaust only shaping/backlog design work. Pass `--design-mode` explicitly in those cases.
+Use design mode when the user request is clearly design-only, explicitly asks to avoid acting on active execution work, or asks to exhaust only shaping/backlog design work. Pass `--design-mode` explicitly in those cases. Design mode still sanity-checks `[READY]` and `[IN_PROGRESS]` features for invalid workflow state before it selects design work.
 
 ## Recommendation Mode
 
@@ -104,7 +104,7 @@ Do not infer solo mode from the word "autonomous" alone. When the user asks to r
 3. Decide whether the run is in normal mode or design mode from the user request.
 4. Decide whether recommendation handling is `solo` or `interactive`, using explicit `--solo` first, then clear user-request inference, else interactive by default.
 5. Pass the selected recommendation-handling mode into every spawned backlog-process sub-agent instruction.
-6. Run the resolver without `--feature-id`, adding `--design-mode` whenever the request is clearly design-only or explicitly excludes `[READY]` work.
+6. Run the resolver without `--feature-id`, adding `--design-mode` whenever the request is clearly design-only or explicitly asks to avoid acting on active execution work.
 7. If the resolver returns `run_task_loop`, spawn one backlog-process sub-agent for that feature.
 8. The backlog-process sub-agent owns only that one feature and must not start another feature.
 9. Inside that backlog-process agent, loop:

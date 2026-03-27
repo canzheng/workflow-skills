@@ -32,6 +32,15 @@ class WorkflowContractDocsTests(unittest.TestCase):
             autonomous_loop_skill,
         )
 
+    def test_autonomous_backlog_loop_design_mode_meaning_is_sanity_only(self) -> None:
+        autonomous_loop_skill = AUTONOMOUS_BACKLOG_LOOP_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn("does not act on active execution work", autonomous_loop_skill)
+        self.assertIn(
+            "still sanity-checks `[READY]` and `[IN_PROGRESS]` features for invalid workflow state",
+            autonomous_loop_skill,
+        )
+
     def test_stable_handoff_spec_mentions_autonomous_finish_feature_gate(self) -> None:
         task_execution_handoff_spec = TASK_EXECUTION_HANDOFF_SPEC.read_text(encoding="utf-8")
 

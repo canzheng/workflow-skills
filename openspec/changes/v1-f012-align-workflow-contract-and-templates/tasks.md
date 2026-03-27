@@ -2,9 +2,9 @@
   - [x] 1.1 Update `finish-feature` metadata to describe the accepted `[IN_PROGRESS]` handoff
   - [x] 1.2 Update autonomous-loop guidance to route completed features through `finish-feature`
 
-- [ ] 2 Clarify design-mode wording without changing behavior
-  - [ ] 2.1 Rewrite `design-mode` language to mean "does not act on active execution work"
-  - [ ] 2.2 Preserve the current sanity-check validation behavior
+- [x] 2 Clarify design-mode wording without changing behavior
+  - [x] 2.1 Rewrite `design-mode` language to mean "does not act on active execution work"
+  - [x] 2.2 Preserve the current sanity-check validation behavior
   - Depends On:
     - `1`
 

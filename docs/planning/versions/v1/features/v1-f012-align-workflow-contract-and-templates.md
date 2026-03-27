@@ -37,6 +37,17 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `reviewed locally; task-scoped changes are limited to finish-feature/autonomous-loop wording alignment, the stable handoff contract update, focused contract coverage, and workflow bookkeeping`
   - Run: `git diff --check`
   - Result: `pass`
+- `2026-03-27` Task `2`:
+  - Run: `bin/run-python.sh -m pytest skills/_workflow/tests/test_workflow_scripts.py tests/test_workflow_contract_docs.py -q`
+  - Result: `30 passed; coverage includes the design-mode malformed-active-feature guardrails and the workflow contract wording checks`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass after the task-2 wording/test updates and completion bookkeeping`
+  - Review: `subagent-driven-development per-task spec review and code-quality review`
+  - Result: `pass; both review gates reported no issues and confirmed the task stayed within the wording-and-tests scope`
+  - Inspection: `git diff -- skills/autonomous-backlog-loop/SKILL.md skills/_workflow/tests/test_workflow_scripts.py tests/test_workflow_contract_docs.py openspec/changes/v1-f012-align-workflow-contract-and-templates/tasks.md docs/planning/versions/v1/features/v1-f012-align-workflow-contract-and-templates.md openspec/changes/v1-f012-align-workflow-contract-and-templates/implementation-plans/2.md`
+  - Result: `reviewed locally; task-scoped changes are limited to design-mode wording clarification, matching resolver/doc coverage, and workflow bookkeeping`
+  - Run: `git diff --check`
+  - Result: `pass`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -47,3 +58,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `clean`
   - Notes: Completed task `1`. `finish-feature` now advertises the accepted `[IN_PROGRESS]` entrypoint, autonomous orchestration now routes final-task completion through `finish-feature` before cleanup, and task `2` is the next ready execution target while the feature remains `[IN_PROGRESS]`.
+- `2026-03-27`:
+  - Current Task: `2`
+  - Worktree State: `clean`
+  - Notes: Started task `2` after writing `openspec/changes/v1-f012-align-workflow-contract-and-templates/implementation-plans/2.md`. Execution is scoped to clarifying that `--design-mode` does not act on `[READY]` or `[IN_PROGRESS]` work while preserving the resolver's existing sanity-check validation of malformed active features.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `dirty`
+  - Notes: Completed task `2`. `skills/autonomous-backlog-loop/SKILL.md` now states that `--design-mode` does not act on active execution work while still sanity-checking `[READY]` and `[IN_PROGRESS]`, and task `3` is the next ready execution target while the feature remains `[IN_PROGRESS]`.
