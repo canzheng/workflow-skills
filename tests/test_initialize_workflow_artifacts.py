@@ -46,6 +46,18 @@ class InitializeWorkflowArtifactsTests(unittest.TestCase):
             self.assertTrue((repo / "openspec" / "specs").is_dir())
             self.assertTrue((repo / "openspec" / "changes" / "archive").is_dir())
 
+    def test_initialize_creates_workflow_reference_doc(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+
+            initialize(repo, "v1")
+
+            reference_doc = (repo / "docs" / "planning" / "WORKFLOW_REFERENCE.md").read_text(encoding="utf-8")
+
+            self.assertIn("# Workflow Reference", reference_doc)
+            self.assertIn("## Feature Status Model", reference_doc)
+            self.assertIn("## Task Status Model", reference_doc)
+
 
 if __name__ == "__main__":
     unittest.main()
