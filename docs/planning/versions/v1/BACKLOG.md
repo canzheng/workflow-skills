@@ -17,11 +17,11 @@ None yet.
 
 ## [READY]
 
-### `v1-f005` [Harden Autonomous Backlog Loop Eligibility](features/v1-f005-harden-autonomous-backlog-loop-eligibility.md)
+None yet.
 
 ## [IN_PROGRESS]
 
-None yet.
+### `v1-f005` [Harden Autonomous Backlog Loop Eligibility](features/v1-f005-harden-autonomous-backlog-loop-eligibility.md)
 
 ## [DONE]
 

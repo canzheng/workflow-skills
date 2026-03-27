@@ -15,11 +15,19 @@ AUTONOMOUS_RESOLVER_SCRIPT = (
 )
 
 
-def _write_repo_fixture(tmp_path: Path, *, feature_section: str = "IN_PROGRESS", task_statuses: dict[str, str]) -> Path:
+def _write_repo_fixture(
+    tmp_path: Path,
+    *,
+    feature_section: str = "IN_PROGRESS",
+    task_statuses: dict[str, str],
+    include_openspec_change: bool = True,
+) -> Path:
     repo = tmp_path / "repo"
     feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
     feature_dir.mkdir(parents=True)
     (repo / "docs" / "planning").mkdir(parents=True, exist_ok=True)
+    (repo / "openspec" / "changes").mkdir(parents=True, exist_ok=True)
+    (repo / "openspec" / "specs").mkdir(parents=True, exist_ok=True)
     current_version = repo / "docs" / "planning" / "current_version"
     current_version.symlink_to(Path("versions/v1"))
 
@@ -54,30 +62,48 @@ def _write_repo_fixture(tmp_path: Path, *, feature_section: str = "IN_PROGRESS",
     )
     (repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md").write_text(backlog, encoding="utf-8")
 
-    feature_text = textwrap.dedent(
-        f"""\
-        # Feature: Example
-
-        ## 0. Meta
-        - Feature ID: `v1-f999`
-        - Version: `v1`
-        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#{feature_section.lower()}`
-        - Current Task: `none`
-
-        ## 6. Tasks
-
-        ### T01: First task
-        - Status: `{task_statuses["T01"]}`
-        - Depends On:
-          - none
-
-        ### T02: Second task
-        - Status: `{task_statuses["T02"]}`
-        - Depends On:
-          - `T01`
-        """
+    feature_lines = [
+        "# Feature: Example",
+        "",
+        "## 0. Meta",
+        "- Feature ID: `v1-f999`",
+        "- Version: `v1`",
+        f"- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#{feature_section.lower()}`",
+    ]
+    if include_openspec_change:
+        feature_lines.extend(
+            [
+                "- OpenSpec Change: `example-change`",
+                "- OpenSpec Specs:",
+                "  - `openspec/specs/task-execution-handoff/spec.md`",
+            ]
+        )
+    feature_lines.extend(
+        [
+            "- Current Task: `none`",
+            "",
+            "## 6. Tasks",
+            "",
+            "### T01: First task",
+            f"- Status: `{task_statuses['T01']}`",
+            "- Depends On:",
+            "  - none",
+            "",
+            "### T02: Second task",
+            f"- Status: `{task_statuses['T02']}`",
+            "- Depends On:",
+            "  - `T01`",
+            "",
+        ]
     )
+    feature_text = "\n".join(feature_lines)
     (feature_dir / "v1-f999-example.md").write_text(feature_text, encoding="utf-8")
+    if include_openspec_change:
+        change_dir = repo / "openspec" / "changes" / "example-change"
+        change_dir.mkdir(parents=True, exist_ok=True)
+        (change_dir / "proposal.md").write_text("## Why\n\nFixture.\n", encoding="utf-8")
+        (change_dir / "design.md").write_text("## Context\n\nFixture.\n", encoding="utf-8")
+        (change_dir / "tasks.md").write_text("- [ ] 1 Fixture task\n", encoding="utf-8")
     return repo
 
 
@@ -95,6 +121,7 @@ def _write_autonomous_repo_fixture(
     (repo / "docs" / "planning").mkdir(parents=True, exist_ok=True)
     current_version = repo / "docs" / "planning" / "current_version"
     current_version.symlink_to(Path("versions/v1"))
+    (repo / "openspec" / "changes").mkdir(parents=True, exist_ok=True)
 
     backlog_items = backlog_items or []
     shaping_features = shaping_features or []
@@ -146,6 +173,8 @@ def _write_autonomous_repo_fixture(
         ("IN_PROGRESS", in_progress_features),
     ):
         for feature in features:
+            change_id = feature.get("change_id")
+            create_change_dir = feature.get("create_change_dir", True)
             task_lines = []
             for index, (task_id, status) in enumerate(feature["tasks"], start=1):
                 depends_on = "none" if index == 1 else feature["tasks"][index - 2][0]
@@ -168,6 +197,11 @@ def _write_autonomous_repo_fixture(
                     f"- Feature ID: `{feature['id']}`",
                     "- Version: `v1`",
                     f"- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#{section_name.lower()}`",
+                    *((
+                        f"- OpenSpec Change: `{change_id}`",
+                        "- OpenSpec Specs:",
+                        "  - `openspec/specs/task-execution-handoff/spec.md`",
+                    ) if change_id else ()),
                     "- Current Task: `none`",
                     "",
                     "## 6. Tasks",
@@ -177,6 +211,12 @@ def _write_autonomous_repo_fixture(
                 ]
             )
             (feature_dir / f"{feature['id']}-{feature['slug']}.md").write_text(feature_text, encoding="utf-8")
+            if change_id and create_change_dir:
+                change_dir = repo / "openspec" / "changes" / str(change_id)
+                change_dir.mkdir(parents=True, exist_ok=True)
+                (change_dir / "proposal.md").write_text("## Why\n\nFixture.\n", encoding="utf-8")
+                (change_dir / "design.md").write_text("## Context\n\nFixture.\n", encoding="utf-8")
+                (change_dir / "tasks.md").write_text("- [ ] 1 Fixture task\n", encoding="utf-8")
 
     return repo
 
@@ -723,10 +763,22 @@ def test_resolve_autonomous_backlog_action_preserves_normal_precedence(tmp_path:
             {"id": "v1-f010", "slug": "shape", "title": "Shape", "tasks": [("T01", "todo")]},
         ],
         ready_features=[
-            {"id": "v1-f020", "slug": "ready", "title": "Ready", "tasks": [("T01", "ready")]},
+            {
+                "id": "v1-f020",
+                "slug": "ready",
+                "title": "Ready",
+                "tasks": [("T01", "ready")],
+                "change_id": "ready-change",
+            },
         ],
         in_progress_features=[
-            {"id": "v1-f030", "slug": "active", "title": "Active", "tasks": [("T01", "done")]},
+            {
+                "id": "v1-f030",
+                "slug": "active",
+                "title": "Active",
+                "tasks": [("T01", "done")],
+                "change_id": "active-change",
+            },
         ],
     )
 
@@ -757,7 +809,13 @@ def test_resolve_autonomous_backlog_action_design_mode_skips_ready_and_selects_s
             {"id": "v1-f010", "slug": "shape", "title": "Shape", "tasks": [("T01", "todo")]},
         ],
         ready_features=[
-            {"id": "v1-f020", "slug": "ready", "title": "Ready", "tasks": [("T01", "ready")]},
+            {
+                "id": "v1-f020",
+                "slug": "ready",
+                "title": "Ready",
+                "tasks": [("T01", "ready")],
+                "change_id": "ready-change",
+            },
         ],
     )
 
@@ -783,7 +841,13 @@ def test_resolve_autonomous_backlog_action_design_mode_falls_back_to_backlog(tmp
         tmp_path,
         backlog_items=["First backlog item", "Second backlog item"],
         ready_features=[
-            {"id": "v1-f020", "slug": "ready", "title": "Ready", "tasks": [("T01", "ready")]},
+            {
+                "id": "v1-f020",
+                "slug": "ready",
+                "title": "Ready",
+                "tasks": [("T01", "ready")],
+                "change_id": "ready-change",
+            },
         ],
     )
 
@@ -809,7 +873,13 @@ def test_resolve_autonomous_backlog_action_design_mode_reports_feature_exhausted
     repo = _write_autonomous_repo_fixture(
         tmp_path,
         ready_features=[
-            {"id": "v1-f020", "slug": "ready", "title": "Ready", "tasks": [("T01", "ready")]},
+            {
+                "id": "v1-f020",
+                "slug": "ready",
+                "title": "Ready",
+                "tasks": [("T01", "ready")],
+                "change_id": "ready-change",
+            },
         ],
     )
 
@@ -826,3 +896,83 @@ def test_resolve_autonomous_backlog_action_design_mode_reports_feature_exhausted
         "action": "feature_exhausted",
         "reason": "design_mode_no_design_work",
     }
+
+
+def test_resolve_autonomous_backlog_action_fails_when_ready_feature_is_missing_openspec_change_metadata(
+    tmp_path: Path,
+) -> None:
+    repo = _write_repo_fixture(
+        tmp_path,
+        feature_section="READY",
+        task_statuses={"T01": "ready", "T02": "todo"},
+        include_openspec_change=False,
+    )
+
+    result = subprocess.run(
+        ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "docs/planning/versions/v1/features/v1-f999-example.md is missing OpenSpec Change metadata" in result.stderr
+
+
+def test_resolve_autonomous_backlog_action_does_not_route_around_malformed_active_feature(
+    tmp_path: Path,
+) -> None:
+    repo = _write_autonomous_repo_fixture(
+        tmp_path,
+        ready_features=[
+            {"id": "v1-f010", "slug": "broken", "title": "Broken", "tasks": [("T01", "ready")]},
+            {
+                "id": "v1-f020",
+                "slug": "valid",
+                "title": "Valid",
+                "tasks": [("T01", "ready")],
+                "change_id": "valid-change",
+            },
+        ],
+    )
+
+    result = subprocess.run(
+        ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "docs/planning/versions/v1/features/v1-f010-broken.md is missing OpenSpec Change metadata" in result.stderr
+
+
+def test_resolve_autonomous_backlog_action_fails_when_ready_feature_links_missing_active_change_dir(
+    tmp_path: Path,
+) -> None:
+    repo = _write_autonomous_repo_fixture(
+        tmp_path,
+        ready_features=[
+            {
+                "id": "v1-f010",
+                "slug": "broken",
+                "title": "Broken",
+                "tasks": [("T01", "ready")],
+                "change_id": "missing-change",
+                "create_change_dir": False,
+            },
+        ],
+    )
+
+    result = subprocess.run(
+        ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert (
+        "docs/planning/versions/v1/features/v1-f010-broken.md links missing active OpenSpec change directory "
+        "openspec/changes/missing-change" in result.stderr
+    )

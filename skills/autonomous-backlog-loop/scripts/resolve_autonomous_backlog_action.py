@@ -17,6 +17,7 @@ from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
     compute_task_readiness_drift,
     format_task_readiness_drift_messages,
+    parse_feature_openspec_change,
     parse_backlog_document,
     parse_tasks,
 )
@@ -132,6 +133,17 @@ def first_ready_task(tasks: list[object]):
 
 
 def validated_first_ready_task(root: Path, feature: FeatureRecord):
+    change_id = parse_feature_openspec_change(feature.feature_text)
+    if change_id is None:
+        raise WorkflowError(f"{feature.feature_path.relative_to(root)} is missing OpenSpec Change metadata")
+
+    active_change_dir = root / "openspec" / "changes" / change_id
+    if not active_change_dir.exists():
+        raise WorkflowError(
+            f"{feature.feature_path.relative_to(root)} links missing active OpenSpec change directory "
+            f"{active_change_dir.relative_to(root)}"
+        )
+
     readiness_drift = compute_task_readiness_drift(
         feature.feature_text,
         feature_file=feature.feature_path,
@@ -192,11 +204,15 @@ def resolve_action(
     if active_tasks:
         raise WorkflowError("repository already has a task with status `in_progress`")
 
+    for section_name in ("IN_PROGRESS", "READY"):
+        for feature in feature_sections[section_name]:
+            validated_first_ready_task(root, feature)
+
     if feature_id is not None:
         for feature in all_features:
             if feature.feature_id != feature_id:
                 continue
-            task = validated_first_ready_task(root, feature)
+            task = first_ready_task(feature.tasks)
             if task is None:
                 return build_feature_payload(root, "feature_exhausted", feature)
             return build_task_payload(root, feature, task)
