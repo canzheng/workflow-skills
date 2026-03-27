@@ -4,6 +4,7 @@ import textwrap
 from pathlib import Path
 
 from _workflow.workflow_state import (
+    WorkflowStateError,
     collect_openspec_change_linkage,
     compute_task_readiness_drift,
     find_openspec_task_structure_errors,
@@ -11,6 +12,7 @@ from _workflow.workflow_state import (
     parse_backlog_document,
     parse_current_task,
     parse_tasks,
+    validate_active_feature_execution,
 )
 
 
@@ -175,6 +177,113 @@ def test_compute_task_readiness_drift_uses_openspec_tasks_with_feature_context(t
     assert drift.promotable_task_ids == []
     assert drift.invalid_ready_task_ids == []
     assert drift.unknown_dependency_errors == []
+
+
+def test_validate_active_feature_execution_rejects_missing_openspec_change_metadata(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    feature_path = feature_dir / "v1-f001-sample.md"
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Sample
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+        - Current Task: `none`
+        """
+    )
+    feature_path.write_text(feature_text, encoding="utf-8")
+
+    try:
+        validate_active_feature_execution(feature_text, feature_file=feature_path, repo_root=repo)
+    except WorkflowStateError as exc:
+        assert str(exc) == "docs/planning/versions/v1/features/v1-f001-sample.md is missing OpenSpec Change metadata"
+    else:
+        raise AssertionError("expected missing OpenSpec Change metadata to be rejected")
+
+
+def test_validate_active_feature_execution_rejects_missing_active_change_dir(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    feature_path = feature_dir / "v1-f001-sample.md"
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Sample
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+        - OpenSpec Change: `sample-change`
+        - OpenSpec Specs:
+          - `openspec/specs/task-execution-handoff/spec.md`
+        - Current Task: `none`
+        """
+    )
+    feature_path.write_text(feature_text, encoding="utf-8")
+
+    try:
+        validate_active_feature_execution(feature_text, feature_file=feature_path, repo_root=repo)
+    except WorkflowStateError as exc:
+        assert (
+            str(exc)
+            == "docs/planning/versions/v1/features/v1-f001-sample.md links missing active OpenSpec change directory "
+            "openspec/changes/sample-change"
+        )
+    else:
+        raise AssertionError("expected missing active change directory to be rejected")
+
+
+def test_validate_active_feature_execution_rejects_readiness_drift(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    feature_path = feature_dir / "v1-f001-sample.md"
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Sample
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+        - OpenSpec Change: `sample-change`
+        - OpenSpec Specs:
+          - `openspec/specs/task-execution-handoff/spec.md`
+        - Current Task: `none`
+
+        ## 6. Tasks
+
+        ### T01: Baseline
+        - Status: `done`
+        - Depends On:
+          - none
+
+        ### T02: Should be ready
+        - Status: `todo`
+        - Depends On:
+          - `T01`
+        """
+    )
+    feature_path.write_text(feature_text, encoding="utf-8")
+
+    change_dir = repo / "openspec" / "changes" / "sample-change"
+    change_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        validate_active_feature_execution(feature_text, feature_file=feature_path, repo_root=repo)
+    except WorkflowStateError as exc:
+        assert (
+            str(exc)
+            == "workflow-derived task readiness drift detected: "
+            "docs/planning/versions/v1/features/v1-f001-sample.md T02 could be `ready` but is still `todo`"
+        )
+    else:
+        raise AssertionError("expected readiness drift to be rejected")
 
 
 def test_parse_current_task_rejects_nested_subtask_identifier() -> None:

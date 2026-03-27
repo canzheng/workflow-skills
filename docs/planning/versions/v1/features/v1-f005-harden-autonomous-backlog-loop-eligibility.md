@@ -17,6 +17,22 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Last Updated: `2026-03-27`
 
 ## 1. Validation Log
+- `2026-03-27` Task `3`:
+  - Run: `conda run -n workflow python -m pytest skills/_workflow/tests/test_workflow_state.py -k 'validate_active_feature_execution' -q`
+  - Result: `3 passed, 18 deselected in 0.03s`
+  - Run: `conda run -n workflow python -m pytest skills/_workflow/tests/test_workflow_state.py -q`
+  - Result: `21 passed in 0.03s`
+  - Run: `conda run -n workflow python -m pytest skills/_workflow/tests/test_workflow_scripts.py -q`
+  - Result: `22 passed in 1.17s`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass with the feature in [IN_PROGRESS] and task 3 active`
+  - Run: `python skills/complete-task/scripts/resolve_complete_task.py --repo-root .`
+  - Result: `pass after closing nested checklist items 3.1 and 3.2 while task 3 remained active; completion_handoff.decision = confirm_feature_acceptance, all_top_level_tasks_complete = true, and remaining_open_task_ids = []`
+  - Inspection: `git diff -- skills/_workflow/tests/test_workflow_state.py skills/_workflow/tests/test_workflow_scripts.py docs/planning/versions/v1/features/v1-f005-harden-autonomous-backlog-loop-eligibility.md openspec/changes/harden-autonomous-backlog-loop-eligibility/implementation-plans/3.md`
+  - Result: `reviewed locally; task-scoped changes stay within helper-level coverage, start-task parity coverage, and workflow bookkeeping`
+  - Review: `Focused task-3 review found no correctness or regression issues. Residual risk: repaired-state precedence is still covered mainly by the broader existing script suite rather than a new task-3-specific fixture.`
+  - Run: `git diff --check`
+  - Result: `pass`
 - `2026-03-27` Task `2`:
   - Run: `conda run -n workflow python -m pytest skills/_workflow/tests/test_workflow_scripts.py -q`
   - Result: `21 passed in 1.31s`
@@ -68,6 +84,14 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass`
 
 ## 2. Handoff Notes
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Completed task `3`. Added direct helper-level coverage for `validate_active_feature_execution` plus `start-task` parity coverage for missing `OpenSpec Change` metadata. All top-level OpenSpec tasks are now done; the next handoff target is `finish-feature`.
+- `2026-03-27`:
+  - Current Task: `3`
+  - Worktree State: `dirty`
+  - Notes: Started task `3` in the existing feature worktree using `openspec/changes/harden-autonomous-backlog-loop-eligibility/implementation-plans/3.md`. Execution is scoped to closing the remaining helper-level and start-task parity coverage gaps around the shared active-feature execution gate.
 - `2026-03-27`:
   - Current Task: `none`
   - Worktree State: `clean`

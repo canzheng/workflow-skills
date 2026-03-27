@@ -459,6 +459,25 @@ def test_resolve_start_task_fails_when_feature_has_task_readiness_drift(tmp_path
     assert "workflow-derived task readiness drift" in result.stderr.lower()
 
 
+def test_resolve_start_task_fails_when_ready_feature_is_missing_openspec_change_metadata(tmp_path: Path) -> None:
+    repo = _write_repo_fixture(
+        tmp_path,
+        feature_section="READY",
+        task_statuses={"T01": "ready", "T02": "todo"},
+        include_openspec_change=False,
+    )
+
+    result = subprocess.run(
+        ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "docs/planning/versions/v1/features/v1-f999-example.md is missing OpenSpec Change metadata" in result.stderr
+
+
 def test_resolve_start_task_fails_when_ready_feature_links_missing_active_change_dir(tmp_path: Path) -> None:
     repo = _write_repo_fixture(
         tmp_path,

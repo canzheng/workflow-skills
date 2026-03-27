@@ -8,9 +8,9 @@
   - Depends On:
     - `1`
 
-- [ ] 3 Coverage
-  - [ ] 3.1 Add autonomous-loop fixture coverage for malformed ready features and repaired states
-  - [ ] 3.2 Add regression coverage for parity with start-task eligibility behavior
+- [x] 3 Coverage
+  - [x] 3.1 Add autonomous-loop fixture coverage for malformed ready features and repaired states
+  - [x] 3.2 Add regression coverage for parity with start-task eligibility behavior
   - Depends On:
     - `1`
     - `2`
