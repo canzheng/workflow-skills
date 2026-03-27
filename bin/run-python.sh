@@ -25,11 +25,13 @@ fi
 
 extract_env_name() {
   local line remainder env_value
+  local trimmed
 
   while IFS= read -r line || [[ -n "${line}" ]]; do
-    case "${line}" in
+    trimmed="${line#"${line%%[![:space:]]*}"}"
+    case "${trimmed}" in
       name:*)
-        remainder="${line#name:}"
+        remainder="${trimmed#name:}"
         remainder="${remainder#${remainder%%[![:space:]]*}}"
         case "${remainder}" in
           \"*)
@@ -100,13 +102,32 @@ if [[ ! -f "${candidate}" ]]; then
   die "script entrypoint does not exist: ${entrypoint}"
 fi
 
-resolved_script="$(python3 - "$candidate" <<'PY'
-from pathlib import Path
-import sys
+resolve_symlink_target() {
+  local path="$1" target dir
 
-print(Path(sys.argv[1]).resolve())
-PY
-)"
+  while [[ -L "${path}" ]]; do
+    target="$(readlink "${path}")" || return 1
+    if [[ "${target}" == /* ]]; then
+      path="${target}"
+    else
+      dir="${path%/*}"
+      if [[ "${dir}" == "${path}" ]]; then
+        dir="."
+      fi
+      dir="$(CDPATH= cd -- "${dir}" && pwd -P)"
+      path="${dir}/${target}"
+    fi
+  done
+
+  dir="${path%/*}"
+  if [[ "${dir}" == "${path}" ]]; then
+    dir="."
+  fi
+  dir="$(CDPATH= cd -- "${dir}" && pwd -P)"
+  printf '%s/%s\n' "${dir}" "${path##*/}"
+}
+
+resolved_script="$(resolve_symlink_target "${candidate}")"
 case "${resolved_script}" in
   "${repo_root}"/*) ;;
   "${repo_root}") ;;

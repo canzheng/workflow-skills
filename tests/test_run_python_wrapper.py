@@ -30,9 +30,9 @@ def _create_toolchain(
 
     bash = shutil.which("bash") or "/bin/bash"
     awk = shutil.which("awk") or "/usr/bin/awk"
-    python3 = shutil.which("python3") or os.fspath(Path(os.sys.executable))
+    readlink = shutil.which("readlink") or "/usr/bin/readlink"
 
-    for name, source in {"bash": bash, "awk": awk, "python3": python3}.items():
+    for name, source in {"bash": bash, "awk": awk, "readlink": readlink}.items():
         source_path = Path(source)
         if source_path.exists():
             (toolchain / name).symlink_to(source_path)
@@ -56,6 +56,7 @@ def _create_toolchain(
                         shift
                         case "${1-}" in
                             list)
+                                printf 'cwd=%s env=list argv=%s\n' "$PWD" "$*" >> "${log_path}"
                                 printf '# conda environments:\n'
                 """
             )
@@ -83,7 +84,8 @@ def _create_toolchain(
                             printf 'stub conda received empty env name\n' >&2
                             exit 2
                         fi
-                        exec python3 "$@"
+                        printf 'cwd=%s env=%s argv=%s\n' "$PWD" "${env_name}" "$*" >> "${log_path}"
+                        exit 0
                         ;;
                 esac
 
@@ -207,12 +209,11 @@ class RunPythonWrapperTests(unittest.TestCase):
             )
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            payload = json.loads(result.stdout.strip())
-            self.assertEqual(Path(payload["cwd"]).resolve(), repo.resolve())
-            self.assertEqual(payload["argv"], ["one", "two"])
-
             log = (outside_cwd / "conda.log").read_text(encoding="utf-8")
+            self.assertIn(f"cwd={repo.resolve()}", log)
+            self.assertIn("env=alt-workflow", log)
             self.assertIn("run -n alt-workflow python scripts/echo_args.py one two", log)
+            self.assertIn("argv=scripts/echo_args.py one two", log)
 
     def test_module_mode_uses_the_env_name_declared_in_environment_yml(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -226,12 +227,12 @@ class RunPythonWrapperTests(unittest.TestCase):
                 conda_env_names=["module-env"],
             )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            payload = json.loads(result.stdout.strip())
-            self.assertEqual(Path(payload["cwd"]).resolve(), repo.resolve())
-            self.assertEqual(payload["argv"], ["alpha"])
 
             log = (repo / "conda.log").read_text(encoding="utf-8")
+            self.assertIn(f"cwd={repo.resolve()}", log)
+            self.assertIn("env=module-env", log)
             self.assertIn("run -n module-env python -m samplepkg alpha", log)
+            self.assertIn("argv=-m samplepkg alpha", log)
 
     def test_rejects_absolute_script_paths(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -359,7 +360,7 @@ class RunPythonWrapperTests(unittest.TestCase):
             result = _run_wrapper(repo, ["scripts/echo_args.py"], cwd=repo)
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            self.assertIn("run -n workflow python scripts/echo_args.py", (repo / "conda.log").read_text(encoding="utf-8"))
+            self.assertIn("env=workflow", (repo / "conda.log").read_text(encoding="utf-8"))
 
     def test_parses_quoted_name(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -379,7 +380,27 @@ class RunPythonWrapperTests(unittest.TestCase):
             result = _run_wrapper(repo, ["scripts/echo_args.py"], cwd=repo)
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            self.assertIn("run -n workflow python scripts/echo_args.py", (repo / "conda.log").read_text(encoding="utf-8"))
+            self.assertIn("env=workflow", (repo / "conda.log").read_text(encoding="utf-8"))
+
+    def test_parses_indented_name(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            repo = _write_fixture_repo(
+                tmp,
+                environment_yml_text=textwrap.dedent(
+                    """\
+                      name: workflow
+                      dependencies:
+                        - python
+                        - pip
+                    """
+                ),
+            )
+
+            result = _run_wrapper(repo, ["scripts/echo_args.py"], cwd=repo)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("env=workflow", (repo / "conda.log").read_text(encoding="utf-8"))
 
     def test_rejects_missing_conda_environment(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
