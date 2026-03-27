@@ -35,6 +35,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `git diff --check`
   - Result: `pass`
   - Review: `Focused local spec-compliance and code-quality review found no correctness, regression, or scope-drift issues in the task-1 diff.`
+  - Review Follow-up: `A late spec-compliance pass identified that the installer-behavior TDD coverage overlapped the original task 3 wording, so the remaining task-3 scope was narrowed to the managed-environment regression work that still depends on task 2.`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -48,4 +49,4 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - `2026-03-28`:
   - Current Task: `none`
   - Worktree State: `task-1 changes ready to commit on branch v1-f013-harden-installer-and-dev-environment in ../worktrees/workflow-skills/v1-f013-harden-installer-and-dev-environment`
-  - Notes: Completed task `1`. `install.sh` now initializes an existing unmarked AGENTS.md while keeping the missing-file path strict, `README.md` now documents the installer's `rsync` dependency, and task `2` is the next ready execution unit while task `3` remains blocked by dependencies.
+  - Notes: Completed task `1`. `install.sh` now initializes an existing unmarked AGENTS.md while keeping the missing-file path strict, `README.md` now documents the installer's `rsync` dependency, and task `2` is the next ready execution unit while the remaining task-3 regression scope is limited to the managed-environment coverage that still depends on task `2`.

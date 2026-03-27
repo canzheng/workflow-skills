@@ -10,8 +10,7 @@
     - `1`
 
 - [ ] 3 Add regression coverage
-  - [ ] 3.1 Cover missing-file versus missing-marker installer behavior
-  - [ ] 3.2 Cover the managed-environment assumptions used by the wrapper and tests
+  - [ ] 3.1 Cover the managed-environment assumptions used by the wrapper and tests
   - Depends On:
     - `1`
     - `2`
