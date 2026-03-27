@@ -1,13 +1,20 @@
 ## Why
 
-The review surfaced workflow contract gaps in the repo's own source of truth: `audit-workflow` misses required checks, `diagnose-workflow` can report malformed states as healthy, and several workflow docs/artifacts disagree with the implemented process.
+The review surfaced multiple mismatches between the documented workflow contract, the implemented enforcement, and the repo's own planning/spec artifacts. The current repo can pass audit while still missing required promoted-feature metadata, and diagnosis can still report malformed states as healthy.
 
 ## What Changes
 
-- Tighten `audit-workflow` so it enforces promoted-feature `OpenSpec Specs` linkage and rejects non-canonical backlog sections, including extra sections appended after `[DEFER]`.
-- Extend `diagnose-workflow` so it surfaces the same structural workflow issues as read-only findings instead of returning a false healthy status.
-- Align workflow documentation around `finish-feature` ownership of the `[IN_PROGRESS] -> [DONE]` transition.
-- Repair incomplete or contradictory workflow source-of-truth artifacts identified in the review.
+- Tighten `audit-workflow` so it enforces every structural rule implicated by the review:
+  - promoted-feature `OpenSpec Specs` linkage
+  - canonical backlog section order
+  - rejection of extra backlog sections, including sections appended after `[DEFER]`
+- Extend `diagnose-workflow` so the same malformed states are surfaced as structured findings rather than being reported as healthy.
+- Explicitly cover the review's source-of-truth findings in tracked artifacts:
+  - `finish-feature` wording drift across workflow docs
+  - incomplete `VERSION_SCOPE.md` placeholders despite a fully completed board
+  - placeholder stable-spec purpose text in `openspec-change-integration`
+  - historical feature records whose notes currently contradict the accepted workflow
+- Add validations that map directly back to each review finding so readiness and later task completion can prove full finding coverage.
 
 ## Capabilities
 
@@ -22,3 +29,4 @@ The review surfaced workflow contract gaps in the repo's own source of truth: `a
 - Affected skills: `skills/audit-workflow/`, `skills/diagnose-workflow/`
 - Affected helpers/tests: `skills/_workflow/`, `skills/_workflow/tests/`, `tests/`
 - Affected docs/planning artifacts: `AGENTS-global-workflow.md`, `README.md`, `docs/planning/versions/v1/`
+- Affected stable source-of-truth docs: `openspec/specs/openspec-change-integration/spec.md`

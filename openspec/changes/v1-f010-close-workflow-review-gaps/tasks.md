@@ -1,19 +1,31 @@
-## 1. Shared Workflow Validation
+- [ ] 1 Tighten shared workflow structural validation
+  - [ ] 1.1 Detect extra or out-of-order canonical backlog sections, including sections appended after `[DEFER]`
+  - [ ] 1.2 Detect promoted-feature records that are missing linked `OpenSpec Specs` metadata
 
-- [ ] 1.1 Add shared validation for canonical backlog sections so extra or out-of-order sections are detected consistently
-- [ ] 1.2 Add shared validation for promoted-feature `OpenSpec Specs` metadata so missing linked spec paths are detectable
+- [ ] 2 Align audit and diagnosis with the stricter structural checks
+  - [ ] 2.1 Make `audit-workflow` fail on extra canonical sections and missing promoted-feature spec linkage
+  - [ ] 2.2 Make `diagnose-workflow` emit structured findings for those same states instead of returning a false healthy status
+  - Depends On:
+    - `1`
 
-## 2. Audit And Diagnosis Alignment
+- [ ] 3 Add validation coverage for all implementation findings
+  - [ ] 3.1 Add audit coverage for extra sections after `[DEFER]`
+  - [ ] 3.2 Add audit and diagnosis coverage for missing promoted-feature `OpenSpec Specs`
+  - [ ] 3.3 Add diagnosis coverage proving malformed workflow states are not reported as healthy
+  - Depends On:
+    - `1`
+    - `2`
 
-- [ ] 2.1 Make `audit-workflow` fail when canonical board structure or promoted-feature spec linkage is invalid
-- [ ] 2.2 Make `diagnose-workflow` report those same issues as structured findings without becoming a hard gate
+- [ ] 4 Repair workflow source-of-truth artifacts called out by the review
+  - [ ] 4.1 Reconcile `finish-feature` wording across `AGENTS-global-workflow.md` and `README.md`
+  - [ ] 4.2 Replace placeholder version-goal and exit-bar text in `docs/planning/versions/v1/VERSION_SCOPE.md`
+  - [ ] 4.3 Replace placeholder purpose text in `openspec/specs/openspec-change-integration/spec.md`
+  - [ ] 4.4 Repair historical feature notes that currently contradict the accepted workflow contract
 
-## 3. Coverage
-
-- [ ] 3.1 Add fixture coverage for extra sections after `[DEFER]` and missing promoted-feature `OpenSpec Specs`
-- [ ] 3.2 Add diagnosis coverage for malformed board structure and missing promoted-feature spec linkage
-
-## 4. Source-Of-Truth Cleanup
-
-- [ ] 4.1 Reconcile `finish-feature` wording across workflow docs so the invocation point is consistent
-- [ ] 4.2 Repair incomplete or contradictory planning/spec artifacts identified by the review
+- [ ] 5 Record explicit finding-to-validation evidence
+  - [ ] 5.1 Define validation steps that map each original review finding to a specific test or inspection
+  - [ ] 5.2 Validate that the tightened change artifacts explicitly cover every finding before feature completion
+  - Depends On:
+    - `2`
+    - `3`
+    - `4`

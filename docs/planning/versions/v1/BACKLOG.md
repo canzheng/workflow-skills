@@ -13,11 +13,11 @@ None yet.
 
 ## [SHAPING]
 
-### `v1-f010` [Close Workflow Review Gaps](features/v1-f010-close-workflow-review-gaps.md)
+None yet.
 
 ## [READY]
 
-None yet.
+### `v1-f010` [Close Workflow Review Gaps](features/v1-f010-close-workflow-review-gaps.md)
 
 ## [IN_PROGRESS]
 
