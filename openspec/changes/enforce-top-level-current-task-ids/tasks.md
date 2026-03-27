@@ -1,6 +1,6 @@
-- [ ] 1 Shared Validation
-  - [ ] 1.1 Enforce that `Current Task` is either `none` or a top-level OpenSpec task ID
-  - [ ] 1.2 Keep task-state parsing and resolver behavior unchanged for valid top-level IDs
+- [x] 1 Shared Validation
+  - [x] 1.1 Enforce that `Current Task` is either `none` or a top-level OpenSpec task ID
+  - [x] 1.2 Keep task-state parsing and resolver behavior unchanged for valid top-level IDs
 
 - [ ] 2 Workflow Reporting
   - [ ] 2.1 Make audit-workflow reject invalid subtask-style `Current Task` values
