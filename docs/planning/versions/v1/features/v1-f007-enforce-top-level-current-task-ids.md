@@ -5,12 +5,12 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f007`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
 - OpenSpec Change: `enforce-top-level-current-task-ids`
 - OpenSpec Specs:
   - `openspec/specs/feature-execution-tracking/spec.md`
   - `openspec/specs/workflow-audit-and-repair/spec.md`
-- Current Task: `none`
+- Current Task: `1`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
 - Created: `2026-03-25`
@@ -26,6 +26,10 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass`
 
 ## 2. Handoff Notes
+- `2026-03-27`:
+  - Current Task: `1`
+  - Worktree State: `dirty`
+  - Notes: Started task `1` in feature worktree `../worktrees/workflow-skills/v1-f007-enforce-top-level-current-task-ids` after writing `openspec/changes/enforce-top-level-current-task-ids/implementation-plans/1.md`. Execution is scoped to shared `Current Task` validation in `skills/_workflow/workflow_state.py`.
 - `2026-03-27`:
   - Current Task: `none`
   - Worktree State: `n/a`

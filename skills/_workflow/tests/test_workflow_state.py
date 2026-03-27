@@ -9,6 +9,7 @@ from _workflow.workflow_state import (
     find_openspec_task_structure_errors,
     list_open_openspec_nested_items,
     parse_backlog_document,
+    parse_current_task,
     parse_tasks,
 )
 
@@ -174,6 +175,27 @@ def test_compute_task_readiness_drift_uses_openspec_tasks_with_feature_context(t
     assert drift.promotable_task_ids == []
     assert drift.invalid_ready_task_ids == []
     assert drift.unknown_dependency_errors == []
+
+
+def test_parse_current_task_rejects_nested_subtask_identifier() -> None:
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Invalid Current Task
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+        - Current Task: `1.1`
+        """
+    )
+
+    try:
+        parse_current_task(feature_text)
+    except ValueError as exc:
+        assert str(exc) == "Current Task must be `none` or a top-level OpenSpec task ID, got `1.1`"
+    else:
+        raise AssertionError("expected nested Current Task identifier to be rejected")
 
 
 def test_parse_tasks_marks_openspec_cross_feature_dependency_ready_from_active_change(tmp_path: Path) -> None:

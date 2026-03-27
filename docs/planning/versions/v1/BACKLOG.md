@@ -17,10 +17,9 @@ None yet.
 
 ## [READY]
 
-### `v1-f007` [Enforce Top-Level Current Task IDs](features/v1-f007-enforce-top-level-current-task-ids.md)
 ## [IN_PROGRESS]
 
-None yet.
+### `v1-f007` [Enforce Top-Level Current Task IDs](features/v1-f007-enforce-top-level-current-task-ids.md)
 
 ## [DONE]
 
