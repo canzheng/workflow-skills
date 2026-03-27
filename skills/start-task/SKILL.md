@@ -36,20 +36,18 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
    - if this is the first executing task for the feature, create one feature branch/worktree
    - otherwise re-enter or reuse the existing feature branch/worktree for that feature only
    - if reusing an existing feature worktree, stop unless that worktree is already clean and ready for the next task
-8. Update the feature file:
-   - set `Current Task`
-9. Record active execution using the implemented workflow state model:
+8. Update the feature file to record active execution:
    - set `Current Task` to the selected top-level task ID
    - keep OpenSpec `tasks.md` as the checked/unchecked task ledger rather than inventing a separate native `in_progress` syntax
-10. If the feature is currently `[READY]`, move the backlog entry to the bottom of `[IN_PROGRESS]`. If the feature is already `[IN_PROGRESS]`, leave the backlog entry there.
-11. Re-run `audit-workflow`.
-12. Choose execution mode:
+9. If the feature is currently `[READY]`, move the backlog entry to the bottom of `[IN_PROGRESS]`. If the feature is already `[IN_PROGRESS]`, leave the backlog entry there.
+10. Re-run `audit-workflow`.
+11. Choose execution mode:
    - prefer `subagent-driven-development` when available and still scoped to this one task
    - otherwise use `executing-plans`
-13. Within the chosen execution mode, choose the work method:
+12. Within the chosen execution mode, choose the work method:
    - use `systematic-debugging` when the task is primarily a debug task
    - use `test-driven-development` when the task is implementation or bugfix work with tests in scope
-14. Execute the task work inside the selected feature worktree:
+13. Execute the task work inside the selected feature worktree:
    - keep execution scoped to this one task
    - read the files listed as context before starting work, including `proposal.md`, `design.md`, `tasks.md`, any other Markdown files under the linked change directory, and the task implementation plan after you write or update it
    - apply the chosen work method inside the chosen execution mode
@@ -57,15 +55,6 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 
 ## Rules
 
-- Only one repository task may be `in_progress`.
-- One task means one top-level OpenSpec task ID and one bounded acceptance target.
-- A feature in execution owns one feature branch/worktree reused across its sequential tasks.
-- OpenSpec is the task-definition authority and checkbox completion ledger for this skill; active execution is represented by `Current Task` in the feature file.
-- Task implementation plans live under the linked OpenSpec change and are execution aids, not a second source of truth over `tasks.md`.
-- Execution context must be explicit. Provide the linked OpenSpec change directory plus the Markdown context file list to the executor instead of relying on implied context.
-- Do not auto-commit dirty primary-checkout changes just to create a feature worktree.
-- For later tasks on the same feature, resume in that existing feature worktree only; never switch the task back to the primary checkout or a different feature worktree.
-- Do not start a second task while another is active.
 - Keep any `subagent-driven-development` execution scoped to the one active task only.
 - Treat `systematic-debugging` and `test-driven-development` as task methods inside the chosen execution mode, not as peer replacements for that mode.
 - Do not finish the feature branch/worktree in this skill.

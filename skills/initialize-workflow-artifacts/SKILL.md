@@ -20,6 +20,7 @@ python "${CODEX_HOME:-$HOME/.codex}/skills/initialize-workflow-artifacts/scripts
 ## What It Creates
 
 - `docs/planning/ROADMAP.md`
+- `docs/planning/WORKFLOW_REFERENCE.md`
 - `docs/planning/template/feature-template.md`
 - `docs/planning/versions/<version>/VERSION_SCOPE.md`
 - `docs/planning/versions/<version>/BACKLOG.md`

@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 
 SKILLS_ROOT = Path(__file__).resolve().parents[2]
+SKILL_DIR = Path(__file__).resolve().parents[1]
+WORKFLOW_REFERENCE_TEMPLATE_PATH = SKILL_DIR / "templates" / "WORKFLOW_REFERENCE.md"
 if str(SKILLS_ROOT) not in sys.path:
     sys.path.insert(0, str(SKILLS_ROOT))
 
@@ -122,6 +124,10 @@ def ensure_symlink(path: Path, target: Path) -> str:
     return f"CREATE {path} -> {target}"
 
 
+def workflow_reference_template() -> str:
+    return WORKFLOW_REFERENCE_TEMPLATE_PATH.read_text(encoding="utf-8")
+
+
 def initialize(root: Path, version: str) -> list[str]:
     planning_root = root / "docs" / "planning"
     version_root = planning_root / "versions" / version
@@ -136,6 +142,7 @@ def initialize(root: Path, version: str) -> list[str]:
     (openspec_root / "changes" / "archive").mkdir(parents=True, exist_ok=True)
     results.append(f"ENSURE {openspec_root / 'changes' / 'archive'}")
     results.append(ensure_text_file(planning_root / "ROADMAP.md", ROADMAP_TEMPLATE))
+    results.append(ensure_text_file(planning_root / "WORKFLOW_REFERENCE.md", workflow_reference_template()))
     results.append(ensure_text_file(planning_root / "template" / "feature-template.md", FEATURE_TEMPLATE))
     results.append(
         ensure_text_file(
