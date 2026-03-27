@@ -85,6 +85,9 @@ def _create_toolchain(
                             exit 2
                         fi
                         printf 'cwd=%s env=%s argv=%s\n' "$PWD" "${env_name}" "$*" >> "${log_path}"
+                        if [[ "${CONDA_STUB_EXEC_PYTHON:-}" == "1" ]]; then
+                            exec "${PYTHON_STUB_EXECUTABLE:?PYTHON_STUB_EXECUTABLE is required}" "$@"
+                        fi
                         exit 0
                         ;;
                 esac
@@ -170,6 +173,7 @@ def _run_wrapper(
     cwd: Path,
     include_conda: bool = True,
     conda_env_names: list[str] | None = None,
+    exec_python: bool = False,
     extra_env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     toolchain = _create_toolchain(cwd.parent, include_conda=include_conda, env_names=conda_env_names)
@@ -180,6 +184,9 @@ def _run_wrapper(
             "CONDA_STUB_LOG": os.fspath(cwd / "conda.log"),
         }
     )
+    if exec_python:
+        env["CONDA_STUB_EXEC_PYTHON"] = "1"
+        env["PYTHON_STUB_EXECUTABLE"] = os.fspath(Path(os.sys.executable))
     if extra_env:
         env.update(extra_env)
 
@@ -212,8 +219,8 @@ class RunPythonWrapperTests(unittest.TestCase):
             log = (outside_cwd / "conda.log").read_text(encoding="utf-8")
             self.assertIn(f"cwd={repo.resolve()}", log)
             self.assertIn("env=alt-workflow", log)
-            self.assertIn("run -n alt-workflow python scripts/echo_args.py one two", log)
-            self.assertIn("argv=scripts/echo_args.py one two", log)
+            self.assertIn("run -n alt-workflow python -- scripts/echo_args.py one two", log)
+            self.assertIn("argv=-- scripts/echo_args.py one two", log)
 
     def test_module_mode_uses_the_env_name_declared_in_environment_yml(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -291,6 +298,33 @@ class RunPythonWrapperTests(unittest.TestCase):
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("script entrypoint does not exist: scripts/missing.py", result.stderr)
+
+    def test_executes_dash_prefixed_script_names(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            repo = _write_fixture_repo(tmp)
+            dash_script = repo / "scripts" / "-Wignore.py"
+            dash_script.write_text(
+                textwrap.dedent(
+                    """\
+                    from __future__ import annotations
+
+                    print("dash-script-ran")
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            result = _run_wrapper(
+                repo,
+                ["scripts/-Wignore.py"],
+                cwd=repo,
+                exec_python=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(result.stdout.strip(), "dash-script-ran")
+            self.assertIn("run -n workflow python -- scripts/-Wignore.py", (repo / "conda.log").read_text(encoding="utf-8"))
 
     def test_rejects_missing_entrypoint(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

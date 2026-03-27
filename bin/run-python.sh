@@ -167,4 +167,4 @@ case "${resolved_script}" in
 esac
 
 cd "${repo_root}"
-exec conda run -n "${env_name}" python "${entrypoint}" "$@"
+exec conda run -n "${env_name}" python -- "${entrypoint}" "$@"
