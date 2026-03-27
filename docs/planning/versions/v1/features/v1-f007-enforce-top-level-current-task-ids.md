@@ -10,13 +10,26 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - OpenSpec Specs:
   - `openspec/specs/feature-execution-tracking/spec.md`
   - `openspec/specs/workflow-audit-and-repair/spec.md`
-- Current Task: `3`
+- Current Task: `none`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
 - Created: `2026-03-25`
 - Last Updated: `2026-03-27`
 
 ## 1. Validation Log
+- `2026-03-27` Task `3`:
+  - Run: `PYTHONPATH=skills .local/venv/bin/pytest skills/_workflow/tests/test_workflow_state.py -q`
+  - Result: `18 tests passed in the disposable local virtualenv used for workflow task execution because pytest is not installed on the base shell PATH in this environment.`
+  - Run: `PYTHONPATH=skills .local/venv/bin/pytest skills/_workflow/tests/test_workflow_scripts.py -q`
+  - Result: `17 tests passed in the same disposable local virtualenv.`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/complete-task/scripts/resolve_complete_task.py"`
+  - Result: `Passed after closing nested checklist items 3.1 and 3.2; completion_handoff.decision = confirm_feature_acceptance and all_top_level_tasks_complete = true.`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `Passed before task-state updates and again after them.`
+  - Run: `git diff --check`
+  - Result: `Passed before task completion and again after task-state updates.`
+  - Review: `Local spec-compliance review found the task-3 diff stayed within the remaining coverage scope.`
+  - Review: `Local code-quality review found no correctness or maintainability issues in the helper-level valid-case coverage additions.`
 - `2026-03-27` Task `2`:
   - Run: `PYTHONPATH=skills .local/venv/bin/pytest skills/_workflow/tests/test_workflow_scripts.py -q`
   - Result: `17 tests passed in the disposable local virtualenv used for workflow task execution because pytest is not installed on the base shell PATH in this environment.`
@@ -48,6 +61,10 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass`
 
 ## 2. Handoff Notes
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Completed task `3`. Helper-level coverage now explicitly proves both valid top-level task ids and `Current Task: none`, while the script-level workflow fixture coverage still proves nested `1.1` values are rejected in audit and diagnosis flows. All top-level OpenSpec tasks are now done; the next handoff target is `finish-feature`.
 - `2026-03-27`:
   - Current Task: `3`
   - Worktree State: `dirty`
