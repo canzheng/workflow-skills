@@ -14,11 +14,10 @@ None yet.
 ## [SHAPING]
 
 ### `v1-f005` [Harden Autonomous Backlog Loop Eligibility](features/v1-f005-harden-autonomous-backlog-loop-eligibility.md)
-### `v1-f007` [Enforce Top-Level Current Task IDs](features/v1-f007-enforce-top-level-current-task-ids.md)
 
 ## [READY]
 
-None yet.
+### `v1-f007` [Enforce Top-Level Current Task IDs](features/v1-f007-enforce-top-level-current-task-ids.md)
 ## [IN_PROGRESS]
 
 None yet.
