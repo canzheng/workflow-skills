@@ -273,6 +273,7 @@ def diagnose(root: Path) -> dict[str, object]:
     current_version = root / "docs" / "planning" / "current_version"
     active_version_name: str | None = None
     backlog_relative: str | None = None
+    planning_scaffold_ready_for_linkage = False
 
     if not current_version.exists():
         add_finding(
@@ -303,6 +304,7 @@ def diagnose(root: Path) -> dict[str, object]:
                 path=backlog_relative,
             )
         else:
+            planning_scaffold_ready_for_linkage = True
             backlog_text = backlog_path.read_text(encoding="utf-8")
             parsed_backlog = parse_backlog_document(backlog_text)
             for section_error in find_backlog_section_order_errors(backlog_text):
@@ -375,7 +377,7 @@ def diagnose(root: Path) -> dict[str, object]:
                 message="openspec/changes is missing",
                 path="openspec/changes",
             )
-        else:
+        elif planning_scaffold_ready_for_linkage:
             linkage = collect_openspec_change_linkage(root)
             for change_id in linkage.orphan_active_change_ids:
                 add_finding(

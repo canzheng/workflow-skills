@@ -17,11 +17,11 @@ None yet.
 
 ## [READY]
 
-### `v1-f011` [REVIEW] [Harden Workflow Validation](features/v1-f011-harden-workflow-validation.md)
+None yet.
 
 ## [IN_PROGRESS]
 
-None yet.
+### `v1-f011` [REVIEW] [Harden Workflow Validation](features/v1-f011-harden-workflow-validation.md)
 
 ## [DONE]
 

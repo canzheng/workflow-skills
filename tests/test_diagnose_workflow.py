@@ -118,6 +118,54 @@ class DiagnoseWorkflowTests(unittest.TestCase):
             self.assertEqual(payload["finding_counts"]["error"], 0)
             self.assertEqual(payload["finding_counts"]["warning"], 0)
 
+    def test_diagnose_workflow_reports_missing_current_version_as_structured_finding(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+            (repo / "docs" / "planning" / "current_version").unlink()
+
+            result = subprocess.run(
+                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "issues_found")
+            self.assertTrue(
+                any(
+                    finding["code"] == "missing_current_version"
+                    and finding["path"] == "docs/planning/current_version"
+                    for finding in payload["findings"]
+                )
+            )
+
+    def test_diagnose_workflow_reports_missing_active_backlog_as_structured_finding(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+            (repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md").unlink()
+
+            result = subprocess.run(
+                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "issues_found")
+            self.assertTrue(
+                any(
+                    finding["code"] == "missing_backlog"
+                    and finding["path"] == "docs/planning/versions/v1/BACKLOG.md"
+                    for finding in payload["findings"]
+                )
+            )
+
     def test_diagnose_workflow_reports_findings_without_failing_for_repairable_state(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"

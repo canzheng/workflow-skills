@@ -1,6 +1,6 @@
-- [ ] 1 Harden diagnosis fallback behavior
-  - [ ] 1.1 Prevent `diagnose-workflow` from raising when planning scaffold is missing
-  - [ ] 1.2 Keep diagnosis output structured and advisory for those malformed states
+- [x] 1 Harden diagnosis fallback behavior
+  - [x] 1.1 Prevent `diagnose-workflow` from raising when planning scaffold is missing
+  - [x] 1.2 Keep diagnosis output structured and advisory for those malformed states
 
 - [ ] 2 Enforce shaping artifact baseline and archived done-state rules
   - [ ] 2.1 Require `proposal.md`, `design.md`, and `tasks.md` for features in `[SHAPING]`
