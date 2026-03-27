@@ -10,6 +10,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INSTALL_SCRIPT = REPO_ROOT / "install.sh"
 MANAGED_WORKFLOW = REPO_ROOT / "AGENTS-global-workflow.md"
+FEATURE_TEMPLATE = REPO_ROOT / "docs" / "planning" / "template" / "feature-template.md"
 
 
 def _run_install(codex_home: Path) -> subprocess.CompletedProcess[str]:
@@ -57,9 +58,15 @@ class InstallScriptTests(unittest.TestCase):
             self.assertTrue((skills_root / "finish-feature" / "SKILL.md").is_file())
             self.assertTrue((skills_root / "_workflow" / "workflow_state.py").is_file())
             self.assertFalse((skills_root / "_workflow" / "tests").exists())
+            self.assertTrue((skills_root / "_workflow" / "templates" / "feature-template.md").is_file())
             self.assertFalse((codex_home / "bin" / "run-python.sh").exists())
             self.assertFalse((skills_root / "run-python.sh").exists())
             self.assertFalse((skills_root / "bin" / "run-python.sh").exists())
+
+            installed_template = (skills_root / "_workflow" / "templates" / "feature-template.md").read_text(
+                encoding="utf-8"
+            )
+            self.assertEqual(installed_template, FEATURE_TEMPLATE.read_text(encoding="utf-8"))
 
             installed_agents = agents_path.read_text(encoding="utf-8")
             managed_workflow = MANAGED_WORKFLOW.read_text(encoding="utf-8")

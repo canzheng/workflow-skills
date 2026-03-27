@@ -48,6 +48,17 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `reviewed locally; task-scoped changes are limited to design-mode wording clarification, matching resolver/doc coverage, and workflow bookkeeping`
   - Run: `git diff --check`
   - Result: `pass`
+- `2026-03-27` Task `3`:
+  - Run: `bin/run-python.sh -m unittest tests.test_shape_backlog_item_renderer tests.test_initialize_workflow_artifacts tests.test_install_script tests.test_workflow_contract_docs -v`
+  - Result: `12 tests passed, covering renderer/template alignment, initializer/template parity, installed template availability, and the targeted path-hygiene regression`
+  - Run: `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass before task closure with the feature still in [IN_PROGRESS]`
+  - Run: `git diff --check`
+  - Result: `pass`
+  - Inspection: `rg -n "/Users/|/home/|file://|C:\\Users\\" docs/planning/versions/v1/features/v1-f008-clarify-workflow-owned-task-readiness.md -S`
+  - Result: `no matches; the targeted historical record no longer leaks machine-local absolute-path markers`
+  - Inspection: `git diff -- skills/_workflow/feature_file.py install.sh tests/test_shape_backlog_item_renderer.py tests/test_initialize_workflow_artifacts.py tests/test_install_script.py docs/planning/versions/v1/features/v1-f008-clarify-workflow-owned-task-readiness.md docs/planning/versions/v1/features/v1-f012-align-workflow-contract-and-templates.md openspec/changes/v1-f012-align-workflow-contract-and-templates/tasks.md openspec/changes/v1-f012-align-workflow-contract-and-templates/implementation-plans/3.md`
+  - Result: `reviewed locally; task-scoped changes are limited to template single-sourcing, installed template propagation, targeted history repair, focused tests, and task-state bookkeeping`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -66,3 +77,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `dirty`
   - Notes: Completed task `2`. `skills/autonomous-backlog-loop/SKILL.md` now states that `--design-mode` does not act on active execution work while still sanity-checking `[READY]` and `[IN_PROGRESS]`, and task `3` is the next ready execution target while the feature remains `[IN_PROGRESS]`.
+- `2026-03-27`:
+  - Current Task: `3`
+  - Worktree State: `clean`
+  - Notes: Started task `3` after writing `openspec/changes/v1-f012-align-workflow-contract-and-templates/implementation-plans/3.md`. Execution is scoped to single-sourcing the tracked feature template, repairing the targeted teammate-safety path leak in the historical feature record, and adding focused validation for both seams.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Completed task `3`. Rendered feature files now inherit the tracked template guidance, installed workflow skills receive the same template asset, the targeted historical path leak is repaired, and `finish-feature` is the next workflow step while the feature remains `[IN_PROGRESS]`.

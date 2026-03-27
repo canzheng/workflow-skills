@@ -8,10 +8,10 @@
   - Depends On:
     - `1`
 
-- [ ] 3 Single-source template and clean tracked history
-  - [ ] 3.1 Make the renderer use the tracked feature template file as its source
-  - [ ] 3.2 Remove the machine-local absolute-path leak from the historical feature record
-  - [ ] 3.3 Add focused validation for template/render alignment and the targeted history repair
+- [x] 3 Single-source template and clean tracked history
+  - [x] 3.1 Make the renderer use the tracked feature template file as its source
+  - [x] 3.2 Remove the machine-local absolute-path leak from the historical feature record
+  - [x] 3.3 Add focused validation for template/render alignment and the targeted history repair
   - Depends On:
     - `1`
     - `2`

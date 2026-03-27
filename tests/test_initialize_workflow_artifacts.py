@@ -14,9 +14,30 @@ assert _SPEC is not None and _SPEC.loader is not None
 _MODULE = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(_MODULE)
 initialize = _MODULE.initialize
+FEATURE_TEMPLATE = _MODULE.FEATURE_TEMPLATE
 
 
 class InitializeWorkflowArtifactsTests(unittest.TestCase):
+    def test_initializer_uses_tracked_feature_template_as_source(self) -> None:
+        tracked_template = (
+            REPO_ROOT / "docs" / "planning" / "template" / "feature-template.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertEqual(FEATURE_TEMPLATE, tracked_template)
+
+    def test_initialize_writes_the_tracked_feature_template_verbatim(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+
+            initialize(repo, "v1")
+
+            template = (repo / "docs" / "planning" / "template" / "feature-template.md").read_text(encoding="utf-8")
+            tracked_template = (
+                REPO_ROOT / "docs" / "planning" / "template" / "feature-template.md"
+            ).read_text(encoding="utf-8")
+
+            self.assertEqual(template, tracked_template)
+
     def test_initialize_creates_thin_feature_template_with_openspec_links(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"
@@ -28,6 +49,10 @@ class InitializeWorkflowArtifactsTests(unittest.TestCase):
             self.assertIn("- OpenSpec Change: `<change-id>`", template)
             self.assertIn("- OpenSpec Specs:", template)
             self.assertIn("- Current Task: `none`", template)
+            self.assertIn(
+                "- This field is the active execution marker for the implemented workflow; OpenSpec `tasks.md` remains the checked/unchecked task ledger.",
+                template,
+            )
             self.assertIn("## 1. Validation Log", template)
             self.assertIn("## 2. Handoff Notes", template)
             self.assertNotIn("## 2. Tasks", template)

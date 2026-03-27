@@ -36,7 +36,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `Passed for docs/planning/versions/v1 before task-state closure and after task-state closure.`
   - Run: `git diff --check`
   - Result: `Passed with no patch-format issues.`
-  - Inspection: `rg -n "/Users/canzheng|/Users/|/home/" ...`
+  - Inspection: `rg -n "<machine-local-home-path>" docs/planning openspec skills tests -S`
   - Result: `No local absolute path leakage found in the tracked task changes.`
 - `2026-03-26` Task `2`:
   - Run: `python3` one-off assertions for `find_openspec_task_structure_errors(...)`
