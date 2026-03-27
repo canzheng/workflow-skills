@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f011`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `v1-f011-harden-workflow-validation`
 - OpenSpec Specs:
   - `openspec/specs/workflow-audit-and-repair/spec.md`
@@ -66,6 +66,13 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `git diff --check`
   - Result: `pass`
   - Review: `Spec-compliance review found no findings; code-quality review found no findings. Residual risk remains intentionally narrow to the targeted regression cases and current diagnostic wording.`
+- `2026-03-27` Feature Completion:
+  - Run: `openspec validate v1-f011-harden-workflow-validation --type change --json --no-interactive`
+  - Result: `pass; summary.totals.passed = 1 and summary.totals.failed = 0`
+  - Run: `openspec archive v1-f011-harden-workflow-validation -y`
+  - Result: `pass; synced openspec/specs/openspec-change-integration/spec.md and openspec/specs/workflow-audit-and-repair/spec.md, then archived the change to openspec/changes/archive/2026-03-27-v1-f011-harden-workflow-validation`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/finish-feature/scripts/resolve_finish_feature.py"`
+  - Result: `pass; active_change_path = null, archive_path = openspec/changes/archive/2026-03-27-v1-f011-harden-workflow-validation, and requires_archive = false`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -96,3 +103,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `task-3 changes ready to commit on branch v1-f011-harden-workflow-validation in ../worktrees/workflow-skills/v1-f011-harden-workflow-validation`
   - Notes: Completed task `3`. The task added regression coverage for scaffold-missing diagnosis fallback, preserved the distinct [READY] baseline-artifact path, and tightened the archived [DONE] contract around duplicate archive matches. All top-level OpenSpec tasks are now complete, so the next handoff is `finish-feature` while the feature remains in [IN_PROGRESS].
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `feature-complete changes ready to commit on branch v1-f011-harden-workflow-validation in ../worktrees/workflow-skills/v1-f011-harden-workflow-validation`
+  - Notes: Finished feature `v1-f011`. The linked OpenSpec change is archived at `openspec/changes/archive/2026-03-27-v1-f011-harden-workflow-validation`, the stable specs now include the shipped workflow-validation requirements, and the feature is ready for branch finalization.

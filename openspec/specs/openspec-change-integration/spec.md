@@ -44,3 +44,11 @@ Promoting a backlog item into shaping SHALL create or update its linked OpenSpec
 - **WHEN** `shape-backlog-item` promotes work from `[BACKLOG]` into `[SHAPING]`
 - **THEN** it creates or updates the linked OpenSpec change as part of that workflow
 - **AND** the resulting feature file and backlog entry reference that same linked change
+
+### Requirement: Shaping retains authored OpenSpec change artifacts
+Promoted workflow-managed features in `[SHAPING]` SHALL keep the authored baseline artifacts created by `openspec-propose`.
+
+#### Scenario: Feature enters shaping with authored change artifacts
+- **WHEN** `shape-backlog-item` promotes a backlog item into `[SHAPING]`
+- **THEN** the linked OpenSpec change contains `proposal.md`, `design.md`, and `tasks.md`
+- **AND** those files remain part of the shaping authority for that feature until later workflow stages tighten additional gates
