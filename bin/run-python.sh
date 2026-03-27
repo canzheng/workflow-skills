@@ -30,7 +30,7 @@ extract_env_name() {
     trimmed="${line#"${line%%[![:space:]]*}"}"
     [[ -z "${trimmed}" ]] && continue
     case "${trimmed}" in
-      \#*|---)
+      \#*|---*)
         continue
         ;;
     esac
@@ -59,7 +59,12 @@ extract_env_name() {
             env_value="${remainder%%\'*}"
             ;;
           *)
-            env_value="${remainder%%\#*}"
+            env_value="${remainder}"
+            case "${env_value}" in
+              *[[:space:]]\#*)
+                env_value="${env_value%%[[:space:]]\#*}"
+                ;;
+            esac
             env_value="${env_value%${env_value##*[![:space:]]}}"
             ;;
         esac

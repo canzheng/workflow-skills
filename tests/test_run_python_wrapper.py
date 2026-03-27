@@ -282,6 +282,16 @@ class RunPythonWrapperTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("script entrypoints must end with .py", result.stderr)
 
+    def test_rejects_missing_repo_relative_python_script(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            repo = _write_fixture_repo(tmp)
+
+            result = _run_wrapper(repo, ["scripts/missing.py"], cwd=repo)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("script entrypoint does not exist: scripts/missing.py", result.stderr)
+
     def test_rejects_missing_entrypoint(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
