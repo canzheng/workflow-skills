@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f010`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `v1-f010-close-workflow-review-gaps`
 - OpenSpec Specs:
   - `openspec/specs/workflow-audit-and-repair/spec.md`
@@ -136,6 +136,17 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass; completion_handoff.decision=confirm_feature_acceptance, all_top_level_tasks_complete=true, and remaining_open_task_ids=[] before task-state closure`
   - Review: `manual task-scope diff review against implementation-plans/5.md`
   - Result: `no out-of-scope changes found; task-5 work stays limited to explicit finding-to-validation evidence in the feature file plus matching task-ledger updates`
+- `2026-03-27` Feature Completion:
+  - Run: `openspec validate v1-f010-close-workflow-review-gaps --type change --json --no-interactive`
+  - Result: `pass; summary totals report 1 passed and 0 failed`
+  - Run: `openspec status --change v1-f010-close-workflow-review-gaps --json`
+  - Result: `pass; schemaName=spec-driven, isComplete=true, and proposal/design/specs/tasks artifacts all report status done before archive`
+  - Run: `openspec archive v1-f010-close-workflow-review-gaps -y`
+  - Result: `pass; synced the accepted workflow-audit-and-repair delta into openspec/specs/workflow-audit-and-repair/spec.md and archived the change as openspec/changes/archive/2026-03-27-v1-f010-close-workflow-review-gaps`
+  - Run: `test -d openspec/changes/v1-f010-close-workflow-review-gaps && echo ACTIVE_EXISTS || echo ACTIVE_MISSING`
+  - Result: `ACTIVE_MISSING`
+  - Run: `find openspec/changes/archive -maxdepth 1 -type d -name '*v1-f010-close-workflow-review-gaps' | sort`
+  - Result: `openspec/changes/archive/2026-03-27-v1-f010-close-workflow-review-gaps`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -178,3 +189,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `task-5 changes committed on branch v1-f010-close-workflow-review-gaps in ../worktrees/workflow-skills/v1-f010-close-workflow-review-gaps`
   - Notes: Task `5` is complete. All top-level OpenSpec tasks are now done, the feature remains `[IN_PROGRESS]`, and the next handoff target is `finish-feature`.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: `finish-feature` validated and archived `v1-f010-close-workflow-review-gaps`, synced the accepted `workflow-audit-and-repair` delta into the stable spec, and moved the feature to `[DONE]`. The feature branch/worktree remains available for downstream branch finalization.
