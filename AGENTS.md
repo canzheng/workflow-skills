@@ -6,8 +6,11 @@ This repository is the source-controlled home for global workflow skills. Keep s
 ## Build, Test, and Development Commands
 Use narrow verification first.
 
-- `pytest skills/_workflow/tests -q` runs the shared workflow helper and script tests.
-- `python3 -m unittest tests.test_install_script -v` verifies `install.sh` syncs the skills and patches only the managed workflow section in global `AGENTS.md`.
+- `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py` runs the repo audit script through the managed Python environment.
+- `bin/run-python.sh -m unittest tests.test_install_script -v` verifies `install.sh` syncs the skills and patches only the managed workflow section in global `AGENTS.md`.
+- `bin/run-python.sh -m pytest skills/_workflow/tests -q` runs the shared workflow helper and script tests.
+- `conda env create -f environment.yml` creates the managed environment named in `environment.yml`.
+- `conda env update -f environment.yml --prune` updates the managed environment from the tracked environment definition.
 - `bash install.sh` syncs the workflow skills from this repo into `${CODEX_HOME:-$HOME/.codex}/skills`, patches the managed workflow section in `${CODEX_HOME:-$HOME/.codex}/AGENTS.md`, and does not install repo-only tests.
 - `git status --short` and `git diff --check` confirm you only changed intended files and did not introduce patch-format issues.
 
@@ -21,4 +24,7 @@ When changing workflow Python code or mirrored tests, run the smallest relevant 
 This repo started without inherited git history, so use short imperative commit subjects scoped to one change, for example `test: make workflow script tests path-relative`. In pull requests, summarize which skill directories changed, note whether the change must also be installed with `bash install.sh`, and list the exact verification commands you ran.
 
 ## Installation Notes
-The repo is the development source of truth. Keep the global workflow contract in [AGENTS-global-workflow.md](/Users/canzheng/Work/sandbox/workflow-skills/AGENTS-global-workflow.md); the installer patches only that marked section inside `${CODEX_HOME:-$HOME/.codex}/AGENTS.md`. After editing `skills/` or the managed workflow block, run `bash install.sh` to copy the tracked workflow skills back into the global Codex skills directory and update the managed workflow section. The installer fails hard if the target `AGENTS.md` is missing the expected workflow markers, and it excludes repo-only tests and generated Python cache files from the installed skills.
+The repo is the development source of truth. Keep the global workflow contract in [AGENTS-global-workflow.md](AGENTS-global-workflow.md); the installer patches only that marked section inside `${CODEX_HOME:-$HOME/.codex}/AGENTS.md`. After editing `skills/` or the managed workflow block, run `bash install.sh` to copy the tracked workflow skills back into the global Codex skills directory and update the managed workflow section. The installer fails hard if the target `AGENTS.md` is missing the expected workflow markers, and it excludes repo-only tests and generated Python cache files from the installed skills.
+
+Environment changes happen only through `environment.yml` and `requirements.txt`.
+`bin/run-python.sh` is dev-repo-only and is not part of installed skills.

@@ -7,6 +7,23 @@ This repository defines the official workflow:
 - `openspec/changes/<change-id>/` owns shaping artifacts for one feature change
 - feature files under `docs/planning/versions/<version>/features/` own workflow metadata, validation evidence, and handoff notes
 
+## Contributor Setup
+
+Use the tracked environment definition to manage local development:
+
+- `conda env create -f environment.yml`
+- `conda env update -f environment.yml --prune`
+
+The environment name comes from `environment.yml`. Keep environment changes limited to `environment.yml` and `requirements.txt`.
+
+Use `bin/run-python.sh` for repository Python scripts and module entrypoints while working in this repo. The wrapper is dev-repo-only and is not shipped with installed skills.
+
+Examples:
+
+- `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+- `bin/run-python.sh -m unittest tests.test_install_script -v`
+- `bin/run-python.sh -m pytest skills/_workflow/tests -q`
+
 The goal is to keep one source of truth per concern:
 
 - release planning truth in `BACKLOG.md`
