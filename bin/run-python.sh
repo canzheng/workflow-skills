@@ -24,11 +24,27 @@ if ! command -v conda >/dev/null 2>&1; then
 fi
 
 extract_env_name() {
-  local line remainder env_value
-  local trimmed
+  local line trimmed indent root_indent=0 seen_root_indent=0 remainder env_value
 
   while IFS= read -r line || [[ -n "${line}" ]]; do
     trimmed="${line#"${line%%[![:space:]]*}"}"
+    [[ -z "${trimmed}" ]] && continue
+    case "${trimmed}" in
+      \#*|---)
+        continue
+        ;;
+    esac
+
+    indent=$(( ${#line} - ${#trimmed} ))
+    if [[ "${seen_root_indent}" -eq 0 ]]; then
+      root_indent="${indent}"
+      seen_root_indent=1
+    fi
+
+    if [[ "${indent}" -ne "${root_indent}" ]]; then
+      continue
+    fi
+
     case "${trimmed}" in
       name:*)
         remainder="${trimmed#name:}"

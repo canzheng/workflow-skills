@@ -402,6 +402,35 @@ class RunPythonWrapperTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn("env=workflow", (repo / "conda.log").read_text(encoding="utf-8"))
 
+    def test_ignores_nested_name_before_top_level_name(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            repo = _write_fixture_repo(
+                tmp,
+                environment_yml_text=textwrap.dedent(
+                    """\
+                    vars:
+                      name: nested-env
+                    name: workflow
+                    dependencies:
+                      - python
+                      - pip
+                    """
+                ),
+            )
+
+            result = _run_wrapper(
+                repo,
+                ["scripts/echo_args.py"],
+                cwd=repo,
+                conda_env_names=["workflow"],
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            log = (repo / "conda.log").read_text(encoding="utf-8")
+            self.assertIn("env=workflow", log)
+            self.assertNotIn("env=nested-env", log)
+
     def test_rejects_missing_conda_environment(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
