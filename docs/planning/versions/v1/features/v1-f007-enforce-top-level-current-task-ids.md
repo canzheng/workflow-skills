@@ -10,13 +10,24 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - OpenSpec Specs:
   - `openspec/specs/feature-execution-tracking/spec.md`
   - `openspec/specs/workflow-audit-and-repair/spec.md`
-- Current Task: `2`
+- Current Task: `none`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
 - Created: `2026-03-25`
 - Last Updated: `2026-03-27`
 
 ## 1. Validation Log
+- `2026-03-27` Task `2`:
+  - Run: `PYTHONPATH=skills .local/venv/bin/pytest skills/_workflow/tests/test_workflow_scripts.py -q`
+  - Result: `17 tests passed in the disposable local virtualenv used for workflow task execution because pytest is not installed on the base shell PATH in this environment.`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/complete-task/scripts/resolve_complete_task.py"`
+  - Result: `Passed after closing nested checklist items 2.1 and 2.2; completion_handoff.decision = stay_in_progress and next_ready_task_ids = ['3'].`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `Passed before task-state updates and again after them.`
+  - Run: `git diff --check`
+  - Result: `Passed before task completion and again after task-state updates.`
+  - Review: `Local spec-compliance review found the task-2 diff stayed within audit-and-diagnosis reporting scope after the dedicated gpt-5.4-mini review agents stalled.`
+  - Review: `Local code-quality review found no correctness, fixture, or maintainability issues in the reporting and script-test changes.`
 - `2026-03-27` Task `1`:
   - Run: `PYTHONPATH=skills .local/venv/bin/pytest skills/_workflow/tests/test_workflow_state.py -q`
   - Result: `16 tests passed in the disposable local virtualenv used for workflow task execution because pytest is not installed on the base shell PATH in this environment.`
@@ -37,6 +48,10 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass`
 
 ## 2. Handoff Notes
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Completed task `2`. `skills/audit-workflow/scripts/audit_workflow.py` now reports invalid nested `Current Task` values as normal workflow errors, and `skills/diagnose-workflow/scripts/diagnose_workflow.py` now emits a structured `invalid_current_task_metadata` finding instead of crashing. `completion_handoff.next_ready_task_ids` is `['3']`; handoff should resume with task `3` (`Coverage`).
 - `2026-03-27`:
   - Current Task: `2`
   - Worktree State: `dirty`
