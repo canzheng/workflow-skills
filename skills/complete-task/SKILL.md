@@ -51,6 +51,7 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 - No completion claim without fresh verification evidence.
 - Verification and review are separate requirements: verification proves the completion claim, while review satisfies the execution-path quality gate.
 - Do not bypass review requirements inherited from the execution method that produced the task changes.
+- A task may move to `done` only after validation evidence is recorded in the feature file.
 - Leave the feature worktree clean before handing off to the next task.
 - A clean handoff usually means committing the task's intended changes, but the invariant is a clean feature worktree, not a fixed number of commits.
 - Do not finish, repurpose, or clean up the feature branch/worktree in this skill.

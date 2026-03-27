@@ -63,6 +63,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 - OpenSpec is the task-definition authority and checkbox completion ledger for this skill; active execution is represented by `Current Task` in the feature file.
 - Task implementation plans live under the linked OpenSpec change and are execution aids, not a second source of truth over `tasks.md`.
 - Execution context must be explicit. Provide the linked OpenSpec change directory plus the Markdown context file list to the executor instead of relying on implied context.
+- If new work is discovered during execution, add or revise OpenSpec tasks first. Do not silently expand the active task.
 - Do not auto-commit dirty primary-checkout changes just to create a feature worktree.
 - For later tasks on the same feature, resume in that existing feature worktree only; never switch the task back to the primary checkout or a different feature worktree.
 - Do not start a second task while another is active.
