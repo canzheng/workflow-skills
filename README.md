@@ -41,7 +41,7 @@ Feature lifecycle:
 
 Work lifecycle inside a feature:
 
-`Backlog Item -> OpenSpec proposal/specs/design/tasks -> Execution -> OpenSpec archive -> Branch finish`
+`Backlog Item -> OpenSpec proposal/specs/design/tasks -> Execution -> finish-feature archive/completion gate -> Branch finish`
 
 `DEFER` is allowed from any non-`DONE` state when the deferral reason is recorded.
 
@@ -212,14 +212,16 @@ OpenSpec `apply` is intentionally not used here. Execution stays under workflow 
 ### 5. Feature Completion
 
 When the feature-level acceptance bar is met:
-- the feature can move to `[DONE]`
-- the linked OpenSpec change must be validated before archive
+- the feature remains `[IN_PROGRESS]` until `finish-feature` runs
+- `finish-feature` validates and archives the linked OpenSpec change
+- `finish-feature` moves the feature to `[DONE]` before any downstream branch/worktree finalization
 
 Official sequence:
 1. Finish the last execution task with `complete-task`
-2. Run `finish-feature`
-3. Let `finish-feature` run `openspec-archive-change` after validation and archive the linked OpenSpec change
-4. Let `finish-feature` hand off to `finishing-a-development-branch`
+2. Run `finish-feature` while the feature is still `[IN_PROGRESS]` and `Current Task` is `none`
+3. Let `finish-feature` validate the linked OpenSpec change and run `openspec-archive-change` if the change is still active
+4. Let `finish-feature` move the feature to `[DONE]`
+5. Let `finish-feature` hand off to `finishing-a-development-branch`
 
 Current OpenSpec CLI note:
 - this workflow uses `openspec validate ...` as the verification step before archive

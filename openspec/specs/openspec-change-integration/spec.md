@@ -1,7 +1,7 @@
 # openspec-change-integration Specification
 
 ## Purpose
-TBD - created by archiving change integrate-openspec-shaping-readiness. Update Purpose after archive.
+Define how promoted workflow features link to one OpenSpec change, which linked change artifacts are required for readiness, and how workflow execution derives task structure and readiness from that linked OpenSpec source of truth.
 ## Requirements
 ### Requirement: Promoted features link to one OpenSpec change
 Each feature promoted out of `[BACKLOG]` SHALL record exactly one linked OpenSpec change as the authority for shaping and readiness artifacts.

@@ -79,7 +79,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - `2026-03-26`:
   - Current Task: `none`
   - Worktree State: `clean`
-  - Notes: Task `2` completed. All top-level OpenSpec tasks are now done and the completion handoff resolves to `confirm_feature_acceptance`, but the feature remains in `[IN_PROGRESS]` for now because moving it to `[DONE]` while the linked OpenSpec change is still active would violate the current audit gate. The branch/worktree is ready for the downstream feature-completion decision.
+  - Notes: Task `2` completed under the superseded pre-revision model. All top-level OpenSpec tasks were done and the resolver surfaced `confirm_feature_acceptance`, but this entry is preserved only as historical context because the approved contract was revised immediately afterward so `finish-feature` owns the `[IN_PROGRESS] -> [DONE]` transition.
 - `2026-03-26`:
   - Current Task: `none`
   - Worktree State: `dirty`

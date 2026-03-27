@@ -16,11 +16,11 @@
     - `1`
     - `2`
 
-- [ ] 4 Repair workflow source-of-truth artifacts called out by the review
-  - [ ] 4.1 Reconcile `finish-feature` wording across `AGENTS-global-workflow.md` and `README.md`
-  - [ ] 4.2 Replace placeholder version-goal and exit-bar text in `docs/planning/versions/v1/VERSION_SCOPE.md`
-  - [ ] 4.3 Replace placeholder purpose text in `openspec/specs/openspec-change-integration/spec.md`
-  - [ ] 4.4 Repair historical feature notes that currently contradict the accepted workflow contract
+- [x] 4 Repair workflow source-of-truth artifacts called out by the review
+  - [x] 4.1 Reconcile `finish-feature` wording across `AGENTS-global-workflow.md` and `README.md`
+  - [x] 4.2 Replace placeholder version-goal and exit-bar text in `docs/planning/versions/v1/VERSION_SCOPE.md`
+  - [x] 4.3 Replace placeholder purpose text in `openspec/specs/openspec-change-integration/spec.md`
+  - [x] 4.4 Repair historical feature notes that currently contradict the accepted workflow contract
 
 - [ ] 5 Record explicit finding-to-validation evidence
   - [ ] 5.1 Add and maintain a finding coverage matrix that maps each original review finding to a specific test or inspection

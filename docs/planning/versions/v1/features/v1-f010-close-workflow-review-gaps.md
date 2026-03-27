@@ -71,6 +71,17 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `stay_in_progress; next ready task is 4, with remaining open tasks 4 and 5`
   - Review: `task-level code review completed with no findings before completion`
   - Result: `broader audit integration coverage and combined diagnose false-healthy regression now explicitly cover implementation findings F1 through F3`
+- `2026-03-27` Task `4` Completion:
+  - Run: `git diff --check`
+  - Result: `pass; no patch-format errors in the task-4 doc, spec, workflow-state, or implementation-plan changes`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass after task-4 source-of-truth cleanup`
+  - Run: `git status --short`
+  - Result: `only the intended task-4 files were pending before closure: AGENTS-global-workflow.md, README.md, docs/planning/versions/v1/VERSION_SCOPE.md, docs/planning/versions/v1/features/{v1-f001,v1-f002,v1-f006,v1-f008,v1-f010}*.md, openspec/specs/openspec-change-integration/spec.md, openspec/changes/v1-f010-close-workflow-review-gaps/tasks.md, and openspec/changes/v1-f010-close-workflow-review-gaps/implementation-plans/4.md`
+  - Inspection: `rg -n "Define the version goal|Define the bar for completing this version|TBD - created by archiving change|Manual \`\[DONE\]\` transition was applied|Feature completion accepted\\. The linked OpenSpec change is archived|Feature reached \`\[DONE\]\` after" AGENTS-global-workflow.md README.md docs/planning/versions/v1/VERSION_SCOPE.md openspec/specs/openspec-change-integration/spec.md docs/planning/versions/v1/features/v1-f001-legacy-openspec-audit-migration.md docs/planning/versions/v1/features/v1-f002-integrate-openspec-shaping-readiness.md docs/planning/versions/v1/features/v1-f006-add-feature-completion-handoff-gate.md docs/planning/versions/v1/features/v1-f008-clarify-workflow-owned-task-readiness.md`
+  - Result: `pass; the touched source-of-truth files no longer contain the placeholder text or superseded contradictory handoff phrases called out by findings F4 through F7`
+  - Review: `manual task-scope diff review against implementation-plans/4.md`
+  - Result: `no out-of-scope changes found; task-4 edits stay limited to source-of-truth artifact cleanup`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -97,3 +108,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `task-3 changes committed on branch v1-f010-close-workflow-review-gaps in ../worktrees/workflow-skills/v1-f010-close-workflow-review-gaps`
   - Notes: Task `3` is complete. The feature remains `[IN_PROGRESS]`; task `4` is now the next ready task.
+- `2026-03-27`:
+  - Current Task: `4`
+  - Worktree State: `resumed clean feature worktree at ../worktrees/workflow-skills/v1-f010-close-workflow-review-gaps on branch v1-f010-close-workflow-review-gaps`
+  - Notes: Task `4` entered active execution after a passing workflow audit and confirmation that the remaining scope is limited to source-of-truth artifact cleanup. The task implementation plan now lives at `openspec/changes/v1-f010-close-workflow-review-gaps/implementation-plans/4.md`.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `task-4 changes committed on branch v1-f010-close-workflow-review-gaps in ../worktrees/workflow-skills/v1-f010-close-workflow-review-gaps`
+  - Notes: Task `4` is complete. The feature remains `[IN_PROGRESS]`; task `5` is now the next ready task because tasks `2`, `3`, and `4` are all done.

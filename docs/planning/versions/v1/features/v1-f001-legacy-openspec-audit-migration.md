@@ -31,4 +31,4 @@
 - `2026-03-25`:
   - Current Task: `none`
   - Worktree State: `clean`
-  - Notes: Manual bootstrap completed. Feature reached `[DONE]` after audit and migration checks were updated for archived and legacy-exempt completed features, and the linked OpenSpec change was archived.
+  - Notes: Manual bootstrap completed before the current wrapper contract existed. The linked OpenSpec change was archived during migration, and this record is preserved as historical adoption context rather than as current guidance for how active features reach `[DONE]`.

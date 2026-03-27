@@ -52,4 +52,4 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - `2026-03-26`:
   - Current Task: `none`
   - Worktree State: `clean`
-  - Notes: Manual `[DONE]` transition was applied to work around the current finish-feature sequencing break, the linked OpenSpec change was archived, and the feature is ready for branch-finalization handling. The branch/worktree still exists and is not finalized.
+  - Notes: Historical pre-contract workaround: after the linked OpenSpec change was archived, this feature was moved to `[DONE]` manually because `finish-feature` had not yet become the enforced owner of the completion transition. Preserve this as chronology only; the accepted workflow now requires `finish-feature` to own the `[IN_PROGRESS] -> [DONE]` move before branch-finalization handling.

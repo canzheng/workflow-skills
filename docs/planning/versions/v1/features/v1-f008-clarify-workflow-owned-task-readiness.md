@@ -98,4 +98,4 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - `2026-03-26`:
   - Current Task: `none`
   - Worktree State: `dirty`
-  - Notes: Feature completion accepted. The linked OpenSpec change is archived at `openspec/changes/archive/2026-03-26-clarify-workflow-task-readiness-convention`, the feature now belongs in `[DONE]`, and the remaining handoff is generic branch finalization.
+  - Notes: Feature completion was recorded after the linked OpenSpec change was confirmed archived at `openspec/changes/archive/2026-03-26-clarify-workflow-task-readiness-convention` and the `finish-feature` checks were satisfied. The feature now belongs in `[DONE]`, and the remaining downstream handoff is generic branch finalization.
