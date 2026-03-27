@@ -101,6 +101,15 @@ Completing the active task SHALL make it explicit whether the feature still has 
 - **THEN** the feature remains in `[IN_PROGRESS]`
 - **AND** the workflow reports that `finish-feature` is startable
 
+### Requirement: Autonomous orchestration routes completion through finish-feature
+Autonomous workflow guidance SHALL preserve the same feature-completion gate used by the manual workflow.
+
+#### Scenario: Autonomous loop completes the final task for a feature
+- **WHEN** autonomous orchestration finishes the final top-level task for a feature
+- **THEN** the feature remains `[IN_PROGRESS]`
+- **AND** the next workflow handoff is `finish-feature`
+- **AND** downstream branch or worktree cleanup does not occur until `finish-feature` has satisfied its validate-and-archive gate
+
 ### Requirement: Top-level task closure requires closed nested checklist items
 `complete-task` SHALL refuse to close a top-level OpenSpec task while any nested checklist item under that task remains unchecked.
 

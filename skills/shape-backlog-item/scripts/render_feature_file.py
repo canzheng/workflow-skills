@@ -70,6 +70,7 @@ def main(argv: list[str] | None = None) -> int:
                 openspec_specs=args.openspec_specs,
                 created=args.created,
                 last_updated=args.last_updated,
+                repo_root=root,
             ),
             encoding="utf-8",
         )

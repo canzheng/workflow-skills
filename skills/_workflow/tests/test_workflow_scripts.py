@@ -5,6 +5,8 @@ import subprocess
 import textwrap
 from pathlib import Path
 
+import pytest
+
 
 SKILLS_ROOT = Path(__file__).resolve().parents[2]
 AUDIT_SCRIPT = SKILLS_ROOT / "audit-workflow" / "scripts" / "audit_workflow.py"
@@ -1038,6 +1040,67 @@ def test_resolve_autonomous_backlog_action_design_mode_falls_back_to_backlog(tmp
         "backlog_index": 1,
         "backlog_title": "First backlog item",
     }
+
+
+@pytest.mark.parametrize(
+    ("active_feature_args", "expected_feature_path"),
+    [
+        (
+            {
+                "ready_features": [
+                    {
+                        "id": "v1-f020",
+                        "slug": "broken-ready",
+                        "title": "Broken Ready",
+                        "tasks": [("T01", "ready")],
+                    }
+                ],
+            },
+            "docs/planning/versions/v1/features/v1-f020-broken-ready.md",
+        ),
+        (
+            {
+                "in_progress_features": [
+                    {
+                        "id": "v1-f030",
+                        "slug": "broken-progress",
+                        "title": "Broken Progress",
+                        "tasks": [("T01", "ready")],
+                    }
+                ],
+            },
+            "docs/planning/versions/v1/features/v1-f030-broken-progress.md",
+        ),
+    ],
+)
+def test_resolve_autonomous_backlog_action_design_mode_refuses_malformed_active_features(
+    tmp_path: Path,
+    active_feature_args: dict[str, object],
+    expected_feature_path: str,
+) -> None:
+    repo = _write_autonomous_repo_fixture(
+        tmp_path,
+        shaping_features=[
+            {
+                "id": "v1-f010",
+                "slug": "shape",
+                "title": "Shape",
+                "tasks": [("T01", "todo")],
+                "change_id": "shape-change",
+            },
+        ],
+        **active_feature_args,
+    )
+
+    result = subprocess.run(
+        ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo), "--design-mode"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert f"{expected_feature_path} is missing OpenSpec Change metadata" in result.stderr
 
 
 def test_resolve_autonomous_backlog_action_design_mode_reports_feature_exhausted_without_design_work(

@@ -57,7 +57,7 @@ Optional resolver flags:
 
 - `--completed-count <n>`
 - `--completion-limit <n>`
-- `--design-mode` to run only design-stage work from `[SHAPING]` and `[BACKLOG]`
+- `--design-mode` to run only design-stage work from `[SHAPING]` and `[BACKLOG]`; it does not act on active execution work in `[READY]` or `[IN_PROGRESS]`, and the resolver still sanity-checks `[READY]` and `[IN_PROGRESS]` features for invalid workflow state before continuing
 - `--feature-id <feature-id>` for continuing a selected feature's task loop
 
 Resolver precedence:
@@ -76,7 +76,7 @@ Design-mode precedence:
 2. otherwise first `[BACKLOG]` item
 3. otherwise return `feature_exhausted`
 
-Use design mode when the user request is clearly design-only, explicitly says to ignore `[READY]` work, or asks to exhaust only shaping/backlog design work. Pass `--design-mode` explicitly in those cases.
+Use design mode when the user request is clearly design-only, explicitly asks to avoid acting on active execution work, or asks to exhaust only shaping/backlog design work. Pass `--design-mode` explicitly in those cases. Design mode still sanity-checks `[READY]` and `[IN_PROGRESS]` features for invalid workflow state before it selects design work.
 
 ## Recommendation Mode
 
@@ -104,7 +104,7 @@ Do not infer solo mode from the word "autonomous" alone. When the user asks to r
 3. Decide whether the run is in normal mode or design mode from the user request.
 4. Decide whether recommendation handling is `solo` or `interactive`, using explicit `--solo` first, then clear user-request inference, else interactive by default.
 5. Pass the selected recommendation-handling mode into every spawned backlog-process sub-agent instruction.
-6. Run the resolver without `--feature-id`, adding `--design-mode` whenever the request is clearly design-only or explicitly excludes `[READY]` work.
+6. Run the resolver without `--feature-id`, adding `--design-mode` whenever the request is clearly design-only or explicitly asks to avoid acting on active execution work.
 7. If the resolver returns `run_task_loop`, spawn one backlog-process sub-agent for that feature.
 8. The backlog-process sub-agent owns only that one feature and must not start another feature.
 9. Inside that backlog-process agent, loop:
@@ -113,9 +113,11 @@ Do not infer solo mode from the word "autonomous" alone. When the user asks to r
    - otherwise, inside the same backlog-process sub-agent:
      - call `start-task` for the named feature/task so execution stays on the selected feature and feature worktree
      - if the task finishes cleanly, call `complete-task`
-     - do not bypass any review or verification gates owned by the wrapped execution skill or by `complete-task`
-     - if the feature reaches `DONE`, perform the default finishing behavior equivalent to local merge plus branch/worktree cleanup, then stop the feature loop and return control
-     - if the feature remains `IN_PROGRESS`, continue the feature loop on the same feature branch/worktree
+     - if `complete-task` reports that `finish-feature` is startable, call `finish-feature` before any downstream cleanup
+     - do not bypass any review or verification gates owned by the wrapped execution skill, `complete-task`, or `finish-feature`
+     - if `finish-feature` moves the feature to `[DONE]`, perform the default finishing behavior equivalent to local merge plus branch/worktree cleanup, then stop the feature loop and return control
+     - if the feature remains `IN_PROGRESS` with more task work available, continue the feature loop on the same feature branch/worktree
+     - if the feature remains `IN_PROGRESS` after `complete-task` because `finish-feature` is not yet startable, stop the feature loop and return control instead of skipping directly to cleanup
      - if the task ends `blocked` or `cancelled`, leave the feature branch/worktree in place, then stop the feature loop and return control
 10. When a feature-scoped sub-agent raises a design choice:
    - in `solo` mode, auto-accept the recommendation only if one was offered and it does not conflict with direct user instructions already given
@@ -145,7 +147,8 @@ Do not infer solo mode from the word "autonomous" alone. When the user asks to r
 - Auto-accept recommendations only in `solo` mode, and only when they do not conflict with direct user instructions already given.
 - In `interactive` mode, do not auto-accept recommendations. Surface the choice to the user and wait for their decision.
 - When a recommendation is accepted, rejected, deferred, or absent, record that outcome in the run log immediately with the recommendation and context that led to the decision.
-- Keep branch cleanup non-interactive only when the feature reaches `DONE`: local merge plus branch/worktree cleanup is the default policy.
+- Keep `finish-feature` as the required completion gate after final task execution and before any downstream cleanup.
+- Keep branch cleanup non-interactive only after `finish-feature` has moved the feature to `[DONE]`: local merge plus branch/worktree cleanup is the default policy.
 - Keep using the installed workflow skills instead of re-implementing their state transitions here.
 
 ## Stop Conditions

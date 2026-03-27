@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f012`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `v1-f012-align-workflow-contract-and-templates`
 - OpenSpec Specs:
   - `openspec/specs/task-execution-handoff/spec.md`
@@ -26,6 +26,96 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `proposal.md`, `design.md`, `tasks.md`, `openspec/specs/task-execution-handoff/spec.md`, and `openspec/specs/feature-execution-tracking/spec.md` are present`
   - Run: `python3` `skills._workflow.workflow_state.parse_tasks(...)` over `docs/planning/versions/v1/features/v1-f012-align-workflow-contract-and-templates.md`
   - Result: `top-level OpenSpec task 1 resolves to workflow status ready, while tasks 2 and 3 remain todo behind declared dependencies`
+- `2026-03-27` Task `1`:
+  - Run: `bin/run-python.sh -m unittest tests.test_workflow_contract_docs -v`
+  - Result: `3 tests passed, covering the finish-feature entrypoint wording, autonomous-loop finish-feature routing, and the stable autonomous handoff requirement`
+  - Run: `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass after the task-scoped wording/spec updates and task-state bookkeeping`
+  - Run: `python` one-off using `skills._workflow.workflow_state.compute_completion_handoff(...)` for completed task `1`
+  - Result: `pass; completion_handoff reports decision stay_in_progress with next_ready_task_ids ['2'] and all_top_level_tasks_complete=False`
+  - Inspection: `git diff -- skills/finish-feature/SKILL.md skills/autonomous-backlog-loop/SKILL.md openspec/specs/task-execution-handoff/spec.md tests/test_workflow_contract_docs.py docs/planning/versions/v1/features/v1-f012-align-workflow-contract-and-templates.md openspec/changes/v1-f012-align-workflow-contract-and-templates/tasks.md openspec/changes/v1-f012-align-workflow-contract-and-templates/implementation-plans/1.md`
+  - Result: `reviewed locally; task-scoped changes are limited to finish-feature/autonomous-loop wording alignment, the stable handoff contract update, focused contract coverage, and workflow bookkeeping`
+  - Run: `git diff --check`
+  - Result: `pass`
+- `2026-03-27` Task `2`:
+  - Run: `bin/run-python.sh -m pytest skills/_workflow/tests/test_workflow_scripts.py tests/test_workflow_contract_docs.py -q`
+  - Result: `30 passed; coverage includes the design-mode malformed-active-feature guardrails and the workflow contract wording checks`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass after the task-2 wording/test updates and completion bookkeeping`
+  - Review: `subagent-driven-development per-task spec review and code-quality review`
+  - Result: `pass; both review gates reported no issues and confirmed the task stayed within the wording-and-tests scope`
+  - Inspection: `git diff -- skills/autonomous-backlog-loop/SKILL.md skills/_workflow/tests/test_workflow_scripts.py tests/test_workflow_contract_docs.py openspec/changes/v1-f012-align-workflow-contract-and-templates/tasks.md docs/planning/versions/v1/features/v1-f012-align-workflow-contract-and-templates.md openspec/changes/v1-f012-align-workflow-contract-and-templates/implementation-plans/2.md`
+  - Result: `reviewed locally; task-scoped changes are limited to design-mode wording clarification, matching resolver/doc coverage, and workflow bookkeeping`
+  - Run: `git diff --check`
+  - Result: `pass`
+- `2026-03-27` Task `3`:
+  - Run: `bin/run-python.sh -m unittest tests.test_shape_backlog_item_renderer tests.test_initialize_workflow_artifacts tests.test_install_script tests.test_workflow_contract_docs -v`
+  - Result: `12 tests passed, covering renderer/template alignment, initializer/template parity, installed template availability, and the targeted path-hygiene regression`
+  - Run: `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass before task closure with the feature still in [IN_PROGRESS]`
+  - Run: `git diff --check`
+  - Result: `pass`
+  - Inspection: `rg -n "/Users/|/home/|file://|C:\\Users\\" docs/planning/versions/v1/features/v1-f008-clarify-workflow-owned-task-readiness.md -S`
+  - Result: `no matches; the targeted historical record no longer leaks machine-local absolute-path markers`
+  - Inspection: `git diff -- skills/_workflow/feature_file.py install.sh tests/test_shape_backlog_item_renderer.py tests/test_initialize_workflow_artifacts.py tests/test_install_script.py docs/planning/versions/v1/features/v1-f008-clarify-workflow-owned-task-readiness.md docs/planning/versions/v1/features/v1-f012-align-workflow-contract-and-templates.md openspec/changes/v1-f012-align-workflow-contract-and-templates/tasks.md openspec/changes/v1-f012-align-workflow-contract-and-templates/implementation-plans/3.md`
+  - Result: `reviewed locally; task-scoped changes are limited to template single-sourcing, installed template propagation, targeted history repair, focused tests, and task-state bookkeeping`
+- `2026-03-27` Task `3` Reopened Fix Pass:
+  - Run: `bin/run-python.sh -m unittest tests.test_shape_backlog_item_renderer tests.test_initialize_workflow_artifacts tests.test_install_script tests.test_workflow_contract_docs -v`
+  - Result: `12 tests passed after proving the renderer consumes the target repo template and the historical path-scan evidence uses a real generic leak pattern`
+  - Run: `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass after reopening task 3 for the acceptance-gap repair`
+  - Run: `git diff --check`
+  - Result: `pass`
+  - Inspection: `rg -n "/Users/|/home/|file://|C:\\Users\\\\" docs/planning/versions/v1/features/v1-f008-clarify-workflow-owned-task-readiness.md -S`
+  - Result: `the recorded evidence uses a reproducible generic path-leak scan and no machine-local user path remains in the tracked record`
+  - Inspection: `git diff -- skills/_workflow/feature_file.py skills/shape-backlog-item/scripts/render_feature_file.py tests/test_shape_backlog_item_renderer.py docs/planning/versions/v1/features/v1-f008-clarify-workflow-owned-task-readiness.md docs/planning/versions/v1/features/v1-f012-align-workflow-contract-and-templates.md openspec/changes/v1-f012-align-workflow-contract-and-templates/tasks.md`
+  - Result: `reviewed locally; the reopened fix is limited to repo-local template precedence, reproducible historical scan evidence, regression coverage, and workflow bookkeeping`
+- `2026-03-27` Feature Completion:
+  - Run: `openspec validate v1-f012-align-workflow-contract-and-templates --type change --json --no-interactive`
+  - Result: `pass; summary totals report 1 passed and 0 failed`
+  - Run: `openspec archive v1-f012-align-workflow-contract-and-templates -y`
+  - Result: `aborted cleanly because the delta spec headers already existed in the main specs, confirming the spec sync was already present`
+  - Run: `openspec archive v1-f012-align-workflow-contract-and-templates -y --skip-specs`
+  - Result: `pass; archived as openspec/changes/archive/2026-03-27-v1-f012-align-workflow-contract-and-templates`
+  - Run: `python skills/finish-feature/scripts/resolve_finish_feature.py --feature-id v1-f012`
+  - Result: `pass; active change path is gone and archive_path resolves to openspec/changes/archive/2026-03-27-v1-f012-align-workflow-contract-and-templates`
+  - Run: `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass after moving the feature to [DONE]`
 
 ## 2. Handoff Notes
-- None yet.
+- `2026-03-27`:
+  - Current Task: `1`
+  - Worktree State: `dirty`
+  - Notes: Started task `1` in feature worktree `v1-f012-align-workflow-contract-and-templates` after writing `openspec/changes/v1-f012-align-workflow-contract-and-templates/implementation-plans/1.md`. Execution is scoped to aligning `finish-feature` and autonomous-loop wording with the accepted `[IN_PROGRESS]` handoff gate before downstream cleanup.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Completed task `1`. `finish-feature` now advertises the accepted `[IN_PROGRESS]` entrypoint, autonomous orchestration now routes final-task completion through `finish-feature` before cleanup, and task `2` is the next ready execution target while the feature remains `[IN_PROGRESS]`.
+- `2026-03-27`:
+  - Current Task: `2`
+  - Worktree State: `clean`
+  - Notes: Started task `2` after writing `openspec/changes/v1-f012-align-workflow-contract-and-templates/implementation-plans/2.md`. Execution is scoped to clarifying that `--design-mode` does not act on `[READY]` or `[IN_PROGRESS]` work while preserving the resolver's existing sanity-check validation of malformed active features.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `dirty`
+  - Notes: Completed task `2`. `skills/autonomous-backlog-loop/SKILL.md` now states that `--design-mode` does not act on active execution work while still sanity-checking `[READY]` and `[IN_PROGRESS]`, and task `3` is the next ready execution target while the feature remains `[IN_PROGRESS]`.
+- `2026-03-27`:
+  - Current Task: `3`
+  - Worktree State: `clean`
+  - Notes: Started task `3` after writing `openspec/changes/v1-f012-align-workflow-contract-and-templates/implementation-plans/3.md`. Execution is scoped to single-sourcing the tracked feature template, repairing the targeted teammate-safety path leak in the historical feature record, and adding focused validation for both seams.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Completed task `3`. Rendered feature files now inherit the tracked template guidance, installed workflow skills receive the same template asset, the targeted historical path leak is repaired, and `finish-feature` is the next workflow step while the feature remains `[IN_PROGRESS]`.
+- `2026-03-27`:
+  - Current Task: `3`
+  - Worktree State: `clean`
+  - Notes: Reopened task `3` after review found two acceptance gaps: the renderer still preferred the skill-owned template over the target repo template, and the historical path-scan evidence used a non-functional placeholder pattern. Execution is scoped to repairing those gaps and restoring finish-feature acceptance.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Completed the reopened task `3` fix pass. The renderer now prefers the target repo template when rendering feature files, the historical `v1-f008` evidence records a real generic path-leak scan, and `finish-feature` is unblocked again while the feature remains `[IN_PROGRESS]`.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Feature completion was recorded after the linked OpenSpec change was confirmed archived at `openspec/changes/archive/2026-03-27-v1-f012-align-workflow-contract-and-templates`. The feature now belongs in `[DONE]`, and the remaining handoff is generic branch finalization.

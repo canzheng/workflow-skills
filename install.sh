@@ -6,6 +6,7 @@ SOURCE_SKILLS_DIR="${REPO_ROOT}/skills"
 TARGET_SKILLS_DIR="${CODEX_HOME:-${HOME}/.codex}/skills"
 TARGET_AGENTS_FILE="${CODEX_HOME:-${HOME}/.codex}/AGENTS.md"
 MANAGED_WORKFLOW_FILE="${REPO_ROOT}/AGENTS-global-workflow.md"
+SOURCE_FEATURE_TEMPLATE_FILE="${REPO_ROOT}/docs/planning/template/feature-template.md"
 WORKFLOW_START_MARKER='<!-- Beginning of Workflow Section -->'
 WORKFLOW_END_MARKER='<!-- End of Workflow Section -->'
 
@@ -51,6 +52,14 @@ for skill in "${SKILLS[@]}"; do
 
   rsync "${rsync_args[@]}" "${source_dir}/" "${target_dir}/"
 done
+
+if [[ ! -f "${SOURCE_FEATURE_TEMPLATE_FILE}" ]]; then
+  printf 'Missing tracked feature template source: %s\n' "${SOURCE_FEATURE_TEMPLATE_FILE}" >&2
+  exit 1
+fi
+
+mkdir -p "${TARGET_SKILLS_DIR}/_workflow/templates"
+cp "${SOURCE_FEATURE_TEMPLATE_FILE}" "${TARGET_SKILLS_DIR}/_workflow/templates/feature-template.md"
 
 if [[ ! -f "${MANAGED_WORKFLOW_FILE}" ]]; then
   printf 'Missing managed workflow source file: %s\n' "${MANAGED_WORKFLOW_FILE}" >&2
