@@ -2,10 +2,10 @@
   - [x] 1.1 Prevent `diagnose-workflow` from raising when planning scaffold is missing
   - [x] 1.2 Keep diagnosis output structured and advisory for those malformed states
 
-- [ ] 2 Enforce shaping artifact baseline and archived done-state rules
-  - [ ] 2.1 Require `proposal.md`, `design.md`, and `tasks.md` for features in `[SHAPING]`
-  - [ ] 2.2 Keep the existing stronger `[READY]` gate unchanged
-  - [ ] 2.3 Tighten completed-feature validation around archived linked changes
+- [x] 2 Enforce shaping artifact baseline and archived done-state rules
+  - [x] 2.1 Require `proposal.md`, `design.md`, and `tasks.md` for features in `[SHAPING]`
+  - [x] 2.2 Keep the existing stronger `[READY]` gate unchanged
+  - [x] 2.3 Tighten completed-feature validation around archived linked changes
   - Depends On:
     - `1`
 

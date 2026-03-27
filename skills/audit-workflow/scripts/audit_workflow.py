@@ -172,11 +172,11 @@ def main(argv: list[str] | None = None) -> int:
                         errors.append(
                             f"{feature_path.relative_to(root)} links missing OpenSpec change openspec/changes/{change_id}"
                         )
-                    if section_name == "READY":
+                    if section_name in {"SHAPING", "READY"}:
                         for required_name in ("proposal.md", "design.md", "tasks.md"):
                             if not (change_dir / required_name).exists():
                                 errors.append(
-                                    f"{feature_path.relative_to(root)} is in [READY] but linked OpenSpec change is missing {required_name}"
+                                    f"{feature_path.relative_to(root)} is in [{section_name}] but linked OpenSpec change is missing {required_name}"
                                 )
                     tasks_file = change_dir / "tasks.md"
                     if tasks_file.exists():

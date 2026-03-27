@@ -164,13 +164,13 @@ def _feature_summary(
                     feature_id=feature_id,
                     section=section_name,
                 )
-            if section_name == "READY":
+            if section_name in {"SHAPING", "READY"}:
                 for required_name in ("proposal.md", "design.md", "tasks.md"):
                     if not (change_dir / required_name).exists():
                         add_finding(
                             findings,
                             severity="error",
-                            code="missing_ready_artifact",
+                            code="missing_shaping_artifact" if section_name == "SHAPING" else "missing_ready_artifact",
                             message=f"linked OpenSpec change is missing {required_name}",
                             path=relative_path,
                             feature_id=feature_id,

@@ -395,6 +395,180 @@ class DiagnoseWorkflowTests(unittest.TestCase):
                 )
             )
 
+    def test_diagnose_workflow_reports_missing_shaping_artifact(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    ### `v1-f001` [Shaping feature](features/v1-f001-shaping-feature.md)
+
+                    ## [READY]
+
+                    None yet.
+
+                    ## [IN_PROGRESS]
+
+                    None yet.
+
+                    ## [DONE]
+
+                    None yet.
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            feature_path = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-shaping-feature.md"
+            feature_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # Feature: Shaping feature
+
+                    ## 0. Meta
+                    - Feature ID: `v1-f001`
+                    - Version: `v1`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#shaping`
+                    - OpenSpec Change: `shaping-change`
+                    - OpenSpec Specs:
+                      - `openspec/specs/openspec-change-integration/spec.md`
+                    - Current Task: `none`
+
+                    ## 1. Validation Log
+                    - None yet.
+
+                    ## 2. Handoff Notes
+                    - None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            change_dir = repo / "openspec" / "changes" / "shaping-change"
+            change_dir.mkdir(parents=True, exist_ok=True)
+            (change_dir / "proposal.md").write_text("proposal", encoding="utf-8")
+            (change_dir / "tasks.md").write_text("- [ ] 1 Fixture task\n", encoding="utf-8")
+
+            result = subprocess.run(
+                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "issues_found")
+            self.assertTrue(
+                any(
+                    finding["code"] == "missing_shaping_artifact"
+                    and finding["path"] == "docs/planning/versions/v1/features/v1-f001-shaping-feature.md"
+                    and finding["details"]["required_file"] == "design.md"
+                    for finding in payload["findings"]
+                )
+            )
+
+    def test_diagnose_workflow_reports_done_feature_with_active_change(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    None yet.
+
+                    ## [READY]
+
+                    None yet.
+
+                    ## [IN_PROGRESS]
+
+                    None yet.
+
+                    ## [DONE]
+
+                    ### `v1-f001` [Archived feature](features/v1-f001-archived-feature.md)
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            feature_path = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-archived-feature.md"
+            feature_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # Feature: Archived feature
+
+                    ## 0. Meta
+                    - Feature ID: `v1-f001`
+                    - Version: `v1`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
+                    - OpenSpec Change: `archived-feature`
+                    - OpenSpec Specs:
+                      - `openspec/specs/workflow-audit-and-repair/spec.md`
+                    - Current Task: `none`
+
+                    ## 1. Validation Log
+                    - Archived after completion.
+
+                    ## 2. Handoff Notes
+                    - None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            change_dir = repo / "openspec" / "changes" / "archived-feature"
+            change_dir.mkdir(parents=True, exist_ok=True)
+            (change_dir / "proposal.md").write_text("proposal", encoding="utf-8")
+
+            result = subprocess.run(
+                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "issues_found")
+            self.assertTrue(
+                any(
+                    finding["code"] == "done_feature_change_still_active"
+                    and finding["path"] == "docs/planning/versions/v1/features/v1-f001-archived-feature.md"
+                    for finding in payload["findings"]
+                )
+            )
+
     def test_diagnose_workflow_reports_multiple_structural_findings_without_false_healthy_status(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"

@@ -40,6 +40,20 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `git diff --check`
   - Result: `pass`
   - Review: `Focused local task review found no correctness, regression, or scope-drift issues in the task-1 diff.`
+- `2026-03-27` Task `2`:
+  - Run: `bin/run-python.sh -m pytest tests/test_diagnose_workflow.py -q -k 'missing_shaping_artifact or done_feature_with_active_change'`
+  - Result: `failed before the fix because diagnosis reported the shaping fixture as healthy, then passed after shaping-artifact findings were enforced while completed-feature active-change diagnosis remained green`
+  - Run: `bin/run-python.sh -m pytest tests/test_workflow_openspec_integration.py -q -k 'shaping_feature_missing_baseline_artifact'`
+  - Result: `failed before the fix because audit accepted a [SHAPING] feature missing design.md, then passed after audit enforced the baseline authored artifacts for [SHAPING]`
+  - Run: `bin/run-python.sh -m pytest tests/test_diagnose_workflow.py -q`
+  - Result: `12 passed in 0.71s`
+  - Run: `bin/run-python.sh -m pytest tests/test_workflow_openspec_integration.py -q -k 'shaping_feature_missing_baseline_artifact or audit_accepts_done_feature_with_archived_openspec_change or audit_rejects_done_feature_without_archived_change_or_legacy_exemption'`
+  - Result: `3 passed, 22 deselected in 0.18s`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass with the feature in [IN_PROGRESS] and task 2 active`
+  - Run: `git diff --check`
+  - Result: `pass`
+  - Review: `Focused local task review found no correctness, regression, or scope-drift issues in the task-2 diff; audit and diagnose now enforce the shaping baseline while the stronger [READY] gate and archived [DONE] checks remain intact.`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -54,3 +68,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `task-1 changes ready to commit on branch v1-f011-harden-workflow-validation in ../worktrees/workflow-skills/v1-f011-harden-workflow-validation`
   - Notes: Completed task `1`. `skills/diagnose-workflow/scripts/diagnose_workflow.py` now preserves structured findings when `docs/planning/current_version` or the active `BACKLOG.md` is missing, and task `2` is the next ready execution unit while task `3` remains blocked by dependencies.
+- `2026-03-27`:
+  - Current Task: `2`
+  - Worktree State: `resumed clean feature worktree at ../worktrees/workflow-skills/v1-f011-harden-workflow-validation on branch v1-f011-harden-workflow-validation`
+  - Notes: Task `2` entered active execution after a passing workflow audit and resolver confirmation that it is the next ready task from the existing feature branch. The task implementation plan now lives at `openspec/changes/v1-f011-harden-workflow-validation/implementation-plans/2.md`.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `task-2 changes ready to commit on branch v1-f011-harden-workflow-validation in ../worktrees/workflow-skills/v1-f011-harden-workflow-validation`
+  - Notes: Completed task `2`. `skills/audit-workflow/scripts/audit_workflow.py` and `skills/diagnose-workflow/scripts/diagnose_workflow.py` now require `proposal.md`, `design.md`, and `tasks.md` for [SHAPING] features, the stronger [READY] gate remains unchanged, and task `3` is the next ready execution unit while the feature stays in [IN_PROGRESS].
