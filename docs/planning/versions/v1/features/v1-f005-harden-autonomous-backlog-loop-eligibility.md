@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f005`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `harden-autonomous-backlog-loop-eligibility`
 - OpenSpec Specs:
   - `openspec/specs/task-execution-handoff/spec.md`
@@ -17,6 +17,13 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Last Updated: `2026-03-27`
 
 ## 1. Validation Log
+- `2026-03-27` Feature Completion:
+  - Run: `openspec validate harden-autonomous-backlog-loop-eligibility --type change --json --no-interactive`
+  - Result: `pass; summary totals report 1 passed, 0 failed`
+  - Run: `openspec archive harden-autonomous-backlog-loop-eligibility -y`
+  - Result: `pass; change archived as openspec/changes/archive/2026-03-27-harden-autonomous-backlog-loop-eligibility and stable specs updated with the accepted requirements`
+  - Run: `python skills/finish-feature/scripts/resolve_finish_feature.py --repo-root . --feature-id v1-f005`
+  - Result: `pass; requires_archive=false, active_change_path=null, archive_path=openspec/changes/archive/2026-03-27-harden-autonomous-backlog-loop-eligibility`
 - `2026-03-27` Task `3`:
   - Run: `conda run -n workflow python -m pytest skills/_workflow/tests/test_workflow_state.py -k 'validate_active_feature_execution' -q`
   - Result: `3 passed, 18 deselected in 0.03s`
@@ -84,6 +91,10 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass`
 
 ## 2. Handoff Notes
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: `finish-feature` validated and archived `harden-autonomous-backlog-loop-eligibility`, updated the stable OpenSpec specs, and moved the feature to `[DONE]`. The feature branch/worktree remains available for downstream branch finalization.
 - `2026-03-27`:
   - Current Task: `none`
   - Worktree State: `clean`
