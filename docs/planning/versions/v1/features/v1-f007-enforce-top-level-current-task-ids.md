@@ -10,7 +10,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - OpenSpec Specs:
   - `openspec/specs/feature-execution-tracking/spec.md`
   - `openspec/specs/workflow-audit-and-repair/spec.md`
-- Current Task: `none`
+- Current Task: `2`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
 - Created: `2026-03-25`
@@ -37,6 +37,10 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass`
 
 ## 2. Handoff Notes
+- `2026-03-27`:
+  - Current Task: `2`
+  - Worktree State: `dirty`
+  - Notes: Started task `2` in the existing feature worktree `../worktrees/workflow-skills/v1-f007-enforce-top-level-current-task-ids` after writing `openspec/changes/enforce-top-level-current-task-ids/implementation-plans/2.md`. Execution is scoped to surfacing invalid `Current Task` metadata through `audit-workflow` and `diagnose-workflow`.
 - `2026-03-27`:
   - Current Task: `none`
   - Worktree State: `clean`
