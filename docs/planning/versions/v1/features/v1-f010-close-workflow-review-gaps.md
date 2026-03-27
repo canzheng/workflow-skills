@@ -6,7 +6,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Feature ID: `v1-f010`
 - Version: `v1`
 - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#shaping`
-- OpenSpec Change: `align-workflow-contract-artifacts`
+- OpenSpec Change: `v1-f010-close-workflow-review-gaps`
 - OpenSpec Specs:
   - `openspec/specs/workflow-audit-and-repair/spec.md`
 - Current Task: `none`
