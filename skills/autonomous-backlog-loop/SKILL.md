@@ -19,7 +19,8 @@ Use the installed workflow skills as the source of truth for state transitions. 
   - Count a feature only when it reaches `DONE` or `DEFER`.
 - Optional `--solo`
   - In solo mode, the loop may auto-accept a feature-scoped sub-agent's recommendation without pausing for user confirmation, unless it conflicts with direct user instructions.
-  - If `--solo` is omitted, infer solo mode only when the user request clearly asks for unattended execution, no confirmation prompts, or equivalent "decide for me and keep going" behavior.
+  - If `--solo` is omitted, infer solo mode only when the user request clearly asks for unattended execution, no confirmation prompts, or equivalent "decide for me and keep going" behavior. Do not infer solo mode from the word "autonomous" alone.
+  - Examples of cues that may justify inferred solo mode: "run unattended", "don't ask me", "keep going and decide for me", "no confirmation prompts".
   - Otherwise default to interactive mode and surface design choices back to the user.
 
 ## Run Log
@@ -78,25 +79,6 @@ Design-mode precedence:
 
 Use design mode when the user request is clearly design-only, explicitly says to ignore `[READY]` work, or asks to exhaust only shaping/backlog design work. Pass `--design-mode` explicitly in those cases.
 
-## Recommendation Mode
-
-Decide recommendation handling once near the start of the run and keep it consistent for the full outer loop invocation.
-
-- `solo` mode:
-  - enabled explicitly by `--solo`
-  - or inferred only when the user's request clearly authorizes unattended execution without confirmation prompts
-- `interactive` mode:
-  - the default when `--solo` is absent and the request does not clearly authorize unattended execution
-
-Examples of cues that may justify inferred solo mode:
-
-- "run unattended"
-- "don't ask me"
-- "keep going and decide for me"
-- "no confirmation prompts"
-
-Do not infer solo mode from the word "autonomous" alone. When the user asks to run the loop but does not clearly authorize unattended design decisions, default to interactive mode.
-
 ## Workflow
 
 1. Create the run log file for this autonomous-loop invocation.
@@ -140,13 +122,6 @@ Do not infer solo mode from the word "autonomous" alone. When the user asks to r
 - Reuse one feature branch/worktree across the sequential tasks of the same feature.
 - Respect review and verification gates inherited from wrapped skills instead of short-circuiting them in the loop controller.
 - Do not auto-defer blocked work.
-- Pass the run-log path into every spawned backlog-process sub-agent and require it to append to the same file.
-- Record every design choice presented during autonomous execution, not only the ones whose recommendations are accepted.
-- Auto-accept recommendations only in `solo` mode, and only when they do not conflict with direct user instructions already given.
-- In `interactive` mode, do not auto-accept recommendations. Surface the choice to the user and wait for their decision.
-- When a recommendation is accepted, rejected, deferred, or absent, record that outcome in the run log immediately with the recommendation and context that led to the decision.
-- Keep branch cleanup non-interactive only when the feature reaches `DONE`: local merge plus branch/worktree cleanup is the default policy.
-- Keep using the installed workflow skills instead of re-implementing their state transitions here.
 
 ## Stop Conditions
 

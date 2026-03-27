@@ -47,18 +47,8 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 
 ## Rules
 
-- `verification-before-completion` is a mandatory gate for this skill, not an optional check.
-- No completion claim without fresh verification evidence.
 - Verification and review are separate requirements: verification proves the completion claim, while review satisfies the execution-path quality gate.
 - Do not bypass review requirements inherited from the execution method that produced the task changes.
-- A task may move to `done` only after validation evidence is recorded in the feature file.
-- Leave the feature worktree clean before handing off to the next task.
-- A clean handoff usually means committing the task's intended changes, but the invariant is a clean feature worktree, not a fixed number of commits.
-- Do not finish, repurpose, or clean up the feature branch/worktree in this skill.
-- A task may be `done` while the feature remains `[IN_PROGRESS]`, including contract-or-test tasks whose broader feature suite is still intentionally red.
-- Completing the final top-level task does not make the feature `[DONE]`; it only hands off from task execution into `finish-feature`.
-- Use the repo feature file as the place to record evidence and handoff notes. Use OpenSpec as the task-definition and task-status authority, with `tasks.md` as the checked/unchecked ledger.
-- Execution context must be explicit. Provide the linked OpenSpec change directory plus the Markdown context file list to the executor instead of relying on implied context.
 
 ## Stop Conditions
 
