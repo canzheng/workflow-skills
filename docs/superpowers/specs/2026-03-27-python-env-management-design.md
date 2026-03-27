@@ -32,7 +32,7 @@ This change is for the development repository only. It does not change shipped s
   - Owns Python package dependencies for the repo.
   - Starts with `pytest` so the existing test commands work in the managed env.
 - `bin/run-python.sh`
-  - Repo-local entrypoint for running Python scripts or Python modules inside the `workflow` Conda env.
+  - Repo-local entrypoint for running Python scripts inside the managed Conda env declared by `environment.yml`.
   - Not shipped by `install.sh`.
 
 ### Modified
@@ -45,13 +45,13 @@ This change is for the development repository only. It does not change shipped s
 
 ## Command Convention
 
-Use `bin/run-python.sh` for Python entrypoints in this repo.
+Use `bin/run-python.sh` for repo Python script entrypoints in this repo.
 
 Examples:
 
 - `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
-- `bin/run-python.sh -m unittest tests.test_install_script -v`
-- `bin/run-python.sh -m pytest skills/_workflow/tests -q`
+- `bin/run-python.sh skills/start-task/scripts/resolve_start_task.py`
+- `bin/run-python.sh skills/autonomous-backlog-loop/scripts/resolve_autonomous_backlog_action.py --feature-id v1-f005`
 
 Manage environment contents only through the tracked env files:
 
@@ -63,23 +63,24 @@ Manage environment contents only through the tracked env files:
 `bin/run-python.sh` will:
 
 - resolve the repo root from its own path
+- read `environment.yml` and extract the managed env name from the top-level `name:` field
 - require Conda to be available
-- require the Conda env `workflow` to exist
-- accept either:
-  - a repo-relative `.py` path
-  - `-m <module> ...`
+- require the declared Conda env to exist
+- accept only a repo-relative `.py` path plus optional script arguments
 - reject:
   - absolute script paths
   - script paths outside the repo
+  - module-mode flags such as `-m`
   - non-Python entrypoints
-- execute through `conda run -n workflow ...`
+- execute through `conda run -n <env-name-from-environment.yml> ...`
 
 ## Error Handling
 
 The wrapper should fail with clear messages when:
 
 - `conda` is not installed or not on `PATH`
-- the `workflow` env does not exist yet
+- `environment.yml` is missing or does not declare a `name:`
+- the declared env does not exist yet
 - no entrypoint is provided
 - the script path is absolute or resolves outside the repo
 - the script path does not end in `.py`
@@ -89,11 +90,11 @@ The wrapper should fail with clear messages when:
 
 Use narrow verification first:
 
-- `bin/run-python.sh -m unittest tests.test_install_script -v`
-- `bin/run-python.sh -m pytest skills/_workflow/tests -q`
+- `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+- `bin/run-python.sh skills/start-task/scripts/resolve_start_task.py`
 - direct wrapper checks for:
-  - module mode
   - repo-relative script mode
+  - environment-name lookup from `environment.yml`
   - clear failure on invalid paths
 
 ## Risks
