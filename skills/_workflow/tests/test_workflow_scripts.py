@@ -797,6 +797,137 @@ def test_audit_workflow_reports_malformed_canonical_backlog_entries(tmp_path: Pa
     assert "malformed backlog entry" in result.stdout
 
 
+def test_audit_workflow_rejects_extra_canonical_section_after_defer(tmp_path: Path) -> None:
+    repo = _write_repo_fixture(tmp_path, task_statuses={"T01": "done", "T02": "done"})
+    backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+    feature_path = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f999-example.md"
+    backlog_path.write_text(
+        textwrap.dedent(
+            """\
+            # V1 Backlog
+
+            ## [BACKLOG]
+
+            None yet.
+
+            ## [SHAPING]
+
+            None yet.
+
+            ## [READY]
+
+            None yet.
+
+            ## [IN_PROGRESS]
+
+            ### `v1-f999` [Example](features/v1-f999-example.md)
+
+            ## [DONE]
+
+            None yet.
+
+            ## [DEFER]
+
+            None yet.
+
+            ## [BLOCKED]
+
+            None yet.
+            """
+        ),
+        encoding="utf-8",
+    )
+    feature_path.write_text(
+        textwrap.dedent(
+            """\
+            # Feature: Example
+
+            ## 0. Meta
+            - Feature ID: `v1-f999`
+            - Version: `v1`
+            - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+            - OpenSpec Change: `example-change`
+            - OpenSpec Specs:
+              - `openspec/specs/workflow-audit-and-repair/spec.md`
+            - Current Task: `none`
+
+            ## 1. Validation Log
+            - None yet.
+
+            ## 2. Handoff Notes
+            - None yet.
+            """
+        ),
+        encoding="utf-8",
+    )
+    (repo / "openspec" / "changes" / "example-change" / "tasks.md").write_text(
+        textwrap.dedent(
+            """\
+            - [x] 1 Completed fixture task
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "docs/planning/versions/v1/BACKLOG.md has section order" in result.stdout
+    assert "BLOCKED" in result.stdout
+
+
+def test_audit_workflow_rejects_promoted_feature_missing_openspec_specs(tmp_path: Path) -> None:
+    repo = _write_repo_fixture(tmp_path, feature_section="READY", task_statuses={"T01": "done", "T02": "todo"})
+    feature_path = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f999-example.md"
+    feature_path.write_text(
+        textwrap.dedent(
+            """\
+            # Feature: Example
+
+            ## 0. Meta
+            - Feature ID: `v1-f999`
+            - Version: `v1`
+            - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+            - OpenSpec Change: `example-change`
+            - Current Task: `none`
+
+            ## 1. Validation Log
+            - None yet.
+
+            ## 2. Handoff Notes
+            - None yet.
+            """
+        ),
+        encoding="utf-8",
+    )
+    (repo / "openspec" / "changes" / "example-change" / "tasks.md").write_text(
+        textwrap.dedent(
+            """\
+            - [x] 1 Completed prerequisite
+            - [ ] 2 Ready fixture task
+              - Depends On:
+                - `1`
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "docs/planning/versions/v1/features/v1-f999-example.md is missing OpenSpec Specs metadata" in result.stdout
+
+
 def test_resolve_autonomous_backlog_action_preserves_normal_precedence(tmp_path: Path) -> None:
     repo = _write_autonomous_repo_fixture(
         tmp_path,

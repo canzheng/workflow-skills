@@ -198,6 +198,155 @@ class DiagnoseWorkflowTests(unittest.TestCase):
             self.assertIn("legacy_inline_planning_sections", finding_codes)
             self.assertIn("no_ready_task", finding_codes)
 
+    def test_diagnose_workflow_reports_extra_canonical_section_after_defer(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    None yet.
+
+                    ## [READY]
+
+                    None yet.
+
+                    ## [IN_PROGRESS]
+
+                    None yet.
+
+                    ## [DONE]
+
+                    None yet.
+
+                    ## [DEFER]
+
+                    None yet.
+
+                    ## [BLOCKED]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "issues_found")
+            self.assertTrue(
+                any(
+                    finding["code"] == "invalid_backlog_section_order"
+                    and finding["path"] == "docs/planning/versions/v1/BACKLOG.md"
+                    and "BLOCKED" in finding["message"]
+                    for finding in payload["findings"]
+                )
+            )
+
+    def test_diagnose_workflow_reports_missing_promoted_feature_openspec_specs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    None yet.
+
+                    ## [READY]
+
+                    ### `v1-f001` [Spec-less feature](features/v1-f001-spec-less-feature.md)
+
+                    ## [IN_PROGRESS]
+
+                    None yet.
+
+                    ## [DONE]
+
+                    None yet.
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            feature_path = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-spec-less-feature.md"
+            feature_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # Feature: Spec-less feature
+
+                    ## 0. Meta
+                    - Feature ID: `v1-f001`
+                    - Version: `v1`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+                    - OpenSpec Change: `spec-less-change`
+                    - Current Task: `none`
+
+                    ## 1. Validation Log
+                    - None yet.
+
+                    ## 2. Handoff Notes
+                    - None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            change_dir = repo / "openspec" / "changes" / "spec-less-change"
+            change_dir.mkdir(parents=True, exist_ok=True)
+            (change_dir / "proposal.md").write_text("proposal", encoding="utf-8")
+            (change_dir / "design.md").write_text("design", encoding="utf-8")
+            (change_dir / "tasks.md").write_text("- [ ] 1 Fixture task\n", encoding="utf-8")
+
+            result = subprocess.run(
+                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "issues_found")
+            self.assertTrue(
+                any(
+                    finding["code"] == "missing_openspec_specs"
+                    and finding["path"] == "docs/planning/versions/v1/features/v1-f001-spec-less-feature.md"
+                    and finding["feature_id"] == "v1-f001"
+                    for finding in payload["findings"]
+                )
+            )
+
     def test_diagnose_workflow_reports_multiple_active_tasks_as_an_error(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"

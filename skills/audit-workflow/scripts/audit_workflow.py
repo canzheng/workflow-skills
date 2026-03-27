@@ -16,16 +16,17 @@ from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
     collect_openspec_change_linkage,
     compute_task_readiness_drift,
+    find_backlog_section_order_errors,
     find_openspec_task_structure_errors,
     find_legacy_inline_planning_sections,
     format_task_readiness_drift_messages,
     parse_backlog_document,
+    validate_promoted_feature_openspec_specs,
     parse_feature_openspec_status,
     parse_tasks,
     parse_feature_openspec_change,
 )
 
-SECTION_RE = re.compile(r"^## \[(?P<name>[A-Z_]+)\]$", re.MULTILINE)
 FEATURE_ID_RE = re.compile(r"^- Feature ID: `([^`]+)`$", re.MULTILINE)
 BACKLOG_REF_RE = re.compile(r"^- Backlog Reference: `([^`]+)`$", re.MULTILINE)
 TASK_STATUS_RE = re.compile(r"^- Status: `([^`]+)`$", re.MULTILINE)
@@ -103,11 +104,8 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     backlog_text = backlog.read_text(encoding="utf-8")
-    found_sections = [match.group("name") for match in SECTION_RE.finditer(backlog_text)]
-    if found_sections[: len(WORKFLOW_SECTIONS)] != WORKFLOW_SECTIONS:
-        errors.append(
-            f"{backlog.relative_to(root)} has section order {found_sections[:len(WORKFLOW_SECTIONS)]}, expected {WORKFLOW_SECTIONS}"
-        )
+    for section_error in find_backlog_section_order_errors(backlog_text):
+        errors.append(f"{backlog.relative_to(root)} {section_error}")
 
     version = current_path.name
     parsed_backlog = parse_backlog_document(backlog_text)
@@ -154,6 +152,12 @@ def main(argv: list[str] | None = None) -> int:
                     f"{feature_path.relative_to(root)} uses legacy inline planning sections: "
                     + ", ".join(legacy_inline_sections)
                 )
+
+            for specs_error in validate_promoted_feature_openspec_specs(feature_text, section_name=section_name):
+                if specs_error == "feature is missing OpenSpec Specs metadata":
+                    errors.append(f"{feature_path.relative_to(root)} is missing OpenSpec Specs metadata")
+                else:
+                    errors.append(f"{feature_path.relative_to(root)} {specs_error}")
 
             if section_name in {"SHAPING", "READY", "IN_PROGRESS"}:
                 if openspec_status == "legacy-exempt":

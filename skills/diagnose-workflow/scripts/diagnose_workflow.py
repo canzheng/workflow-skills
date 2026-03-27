@@ -17,12 +17,14 @@ from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
     collect_openspec_change_linkage,
     compute_task_readiness_drift,
+    find_backlog_section_order_errors,
     find_legacy_inline_planning_sections,
     parse_backlog_document,
     parse_current_task,
     parse_feature_openspec_change,
     parse_feature_openspec_status,
     parse_tasks,
+    validate_promoted_feature_openspec_specs,
 )
 
 
@@ -126,6 +128,17 @@ def _feature_summary(
             feature_id=feature_id,
             section=section_name,
             details={"sections": legacy_inline_sections},
+        )
+
+    for specs_error in validate_promoted_feature_openspec_specs(feature_text, section_name=section_name):
+        add_finding(
+            findings,
+            severity="error",
+            code="missing_openspec_specs",
+            message=specs_error,
+            path=relative_path,
+            feature_id=feature_id,
+            section=section_name,
         )
 
     if section_name in {"SHAPING", "READY", "IN_PROGRESS", "DEFER"}:
@@ -290,7 +303,16 @@ def diagnose(root: Path) -> dict[str, object]:
                 path=backlog_relative,
             )
         else:
-            parsed_backlog = parse_backlog_document(backlog_path.read_text(encoding="utf-8"))
+            backlog_text = backlog_path.read_text(encoding="utf-8")
+            parsed_backlog = parse_backlog_document(backlog_text)
+            for section_error in find_backlog_section_order_errors(backlog_text):
+                add_finding(
+                    findings,
+                    severity="error",
+                    code="invalid_backlog_section_order",
+                    message=section_error,
+                    path=backlog_relative,
+                )
             for malformed_entry in parsed_backlog.malformed_entries:
                 add_finding(
                     findings,

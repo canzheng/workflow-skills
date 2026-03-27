@@ -2,9 +2,9 @@
   - [x] 1.1 Detect extra or out-of-order canonical backlog sections, including sections appended after `[DEFER]`
   - [x] 1.2 Detect promoted-feature records that are missing linked `OpenSpec Specs` metadata
 
-- [ ] 2 Align audit and diagnosis with the stricter structural checks
-  - [ ] 2.1 Make `audit-workflow` fail on extra canonical sections and missing promoted-feature spec linkage
-  - [ ] 2.2 Make `diagnose-workflow` emit structured findings for those same states instead of returning a false healthy status
+- [x] 2 Align audit and diagnosis with the stricter structural checks
+  - [x] 2.1 Make `audit-workflow` fail on extra canonical sections and missing promoted-feature spec linkage
+  - [x] 2.2 Make `diagnose-workflow` emit structured findings for those same states instead of returning a false healthy status
   - Depends On:
     - `1`
 
