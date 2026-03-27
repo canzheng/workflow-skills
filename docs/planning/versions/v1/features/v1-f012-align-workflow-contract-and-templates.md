@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f012`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `v1-f012-align-workflow-contract-and-templates`
 - OpenSpec Specs:
   - `openspec/specs/task-execution-handoff/spec.md`
@@ -70,6 +70,17 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `the recorded evidence uses a reproducible generic path-leak scan and no machine-local user path remains in the tracked record`
   - Inspection: `git diff -- skills/_workflow/feature_file.py skills/shape-backlog-item/scripts/render_feature_file.py tests/test_shape_backlog_item_renderer.py docs/planning/versions/v1/features/v1-f008-clarify-workflow-owned-task-readiness.md docs/planning/versions/v1/features/v1-f012-align-workflow-contract-and-templates.md openspec/changes/v1-f012-align-workflow-contract-and-templates/tasks.md`
   - Result: `reviewed locally; the reopened fix is limited to repo-local template precedence, reproducible historical scan evidence, regression coverage, and workflow bookkeeping`
+- `2026-03-27` Feature Completion:
+  - Run: `openspec validate v1-f012-align-workflow-contract-and-templates --type change --json --no-interactive`
+  - Result: `pass; summary totals report 1 passed and 0 failed`
+  - Run: `openspec archive v1-f012-align-workflow-contract-and-templates -y`
+  - Result: `aborted cleanly because the delta spec headers already existed in the main specs, confirming the spec sync was already present`
+  - Run: `openspec archive v1-f012-align-workflow-contract-and-templates -y --skip-specs`
+  - Result: `pass; archived as openspec/changes/archive/2026-03-27-v1-f012-align-workflow-contract-and-templates`
+  - Run: `python skills/finish-feature/scripts/resolve_finish_feature.py --feature-id v1-f012`
+  - Result: `pass; active change path is gone and archive_path resolves to openspec/changes/archive/2026-03-27-v1-f012-align-workflow-contract-and-templates`
+  - Run: `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass after moving the feature to [DONE]`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -104,3 +115,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `clean`
   - Notes: Completed the reopened task `3` fix pass. The renderer now prefers the target repo template when rendering feature files, the historical `v1-f008` evidence records a real generic path-leak scan, and `finish-feature` is unblocked again while the feature remains `[IN_PROGRESS]`.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Feature completion was recorded after the linked OpenSpec change was confirmed archived at `openspec/changes/archive/2026-03-27-v1-f012-align-workflow-contract-and-templates`. The feature now belongs in `[DONE]`, and the remaining handoff is generic branch finalization.
