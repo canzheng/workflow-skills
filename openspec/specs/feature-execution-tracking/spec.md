@@ -30,14 +30,12 @@ Feature metadata SHALL identify whether a task is currently executing.
 #### Scenario: A task is actively executing
 - **WHEN** execution starts on a task for a feature
 - **THEN** the feature file records that task's top-level OpenSpec task ID as the current task
-- **AND** that `Current Task` field is the active `in_progress` marker used by the implemented workflow
-- **AND** the linked OpenSpec `tasks.md` remains the checked/unchecked task ledger
+- **AND** the executing task is marked `in_progress`
 
-#### Scenario: Final task is closed before feature completion
-- **WHEN** the final top-level task is closed for a feature
-- **THEN** the feature may still remain `[IN_PROGRESS]`
-- **AND** the feature file records `Current Task` as `none`
-- **AND** the handoff notes state whether the feature is ready for `finish-feature`
+#### Scenario: Invalid subtask identifier is rejected
+- **WHEN** a feature file records `Current Task` as a nested subtask identifier such as `1.1`
+- **THEN** workflow validation rejects that value as invalid metadata
+- **AND** the repository must repair the feature file before execution continues
 
 ### Requirement: Completed tasks include evidence
 Task completion SHALL be supported by recorded validation evidence.

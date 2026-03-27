@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f007`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `enforce-top-level-current-task-ids`
 - OpenSpec Specs:
   - `openspec/specs/feature-execution-tracking/spec.md`
@@ -17,6 +17,17 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Last Updated: `2026-03-27`
 
 ## 1. Validation Log
+- `2026-03-27` Feature Completion:
+  - Run: `openspec validate enforce-top-level-current-task-ids --type change --json --no-interactive`
+  - Result: `Passed with 1 change item valid and 0 failures.`
+  - Run: `openspec status --change enforce-top-level-current-task-ids --json`
+  - Result: `Passed with schemaName = spec-driven, isComplete = true, and all change artifacts reported as done.`
+  - Run: `openspec archive enforce-top-level-current-task-ids -y`
+  - Result: `Passed; OpenSpec archived the change as openspec/changes/archive/2026-03-27-enforce-top-level-current-task-ids and updated the stable OpenSpec specs.`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/finish-feature/scripts/resolve_finish_feature.py"`
+  - Result: `Passed after archive with archive_path = openspec/changes/archive/2026-03-27-enforce-top-level-current-task-ids and requires_archive = false.`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `Passed after moving the feature to [DONE].`
 - `2026-03-27` Task `3`:
   - Run: `PYTHONPATH=skills .local/venv/bin/pytest skills/_workflow/tests/test_workflow_state.py -q`
   - Result: `18 tests passed in the disposable local virtualenv used for workflow task execution because pytest is not installed on the base shell PATH in this environment.`
@@ -61,6 +72,10 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass`
 
 ## 2. Handoff Notes
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: `finish-feature` validated and archived `enforce-top-level-current-task-ids`, updated the stable OpenSpec specs, and moved the feature to `[DONE]`. The feature branch/worktree still exists for downstream branch finalization.
 - `2026-03-27`:
   - Current Task: `none`
   - Worktree State: `clean`

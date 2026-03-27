@@ -19,10 +19,11 @@ None yet.
 
 ## [IN_PROGRESS]
 
-### `v1-f007` [Enforce Top-Level Current Task IDs](features/v1-f007-enforce-top-level-current-task-ids.md)
+None yet.
 
 ## [DONE]
 
+### `v1-f007` [Enforce Top-Level Current Task IDs](features/v1-f007-enforce-top-level-current-task-ids.md)
 ### `v1-f001` [Legacy OpenSpec Audit Migration](features/v1-f001-legacy-openspec-audit-migration.md)
 ### `v1-f002` [Integrate OpenSpec Shaping Readiness](features/v1-f002-integrate-openspec-shaping-readiness.md)
 ### `v1-f003` [Resolve Cross-Feature Task Readiness](features/v1-f003-resolve-cross-feature-task-readiness.md)
