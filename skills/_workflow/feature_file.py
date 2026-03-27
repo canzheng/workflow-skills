@@ -5,6 +5,7 @@ from pathlib import Path
 
 _TRACKED_FEATURE_TEMPLATE_PATH = Path(__file__).resolve().parents[2] / "docs" / "planning" / "template" / "feature-template.md"
 _INSTALLED_FEATURE_TEMPLATE_PATH = Path(__file__).resolve().parent / "templates" / "feature-template.md"
+_REPO_FEATURE_TEMPLATE_RELATIVE_PATH = Path("docs") / "planning" / "template" / "feature-template.md"
 
 _FALLBACK_FEATURE_TEMPLATE = """# Feature: <title>
 
@@ -37,8 +38,13 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 """
 
 
-def _load_feature_template() -> str:
-    for template_path in (_TRACKED_FEATURE_TEMPLATE_PATH, _INSTALLED_FEATURE_TEMPLATE_PATH):
+def _load_feature_template(repo_root: Path | None = None) -> str:
+    candidate_paths: list[Path] = []
+    if repo_root is not None:
+        candidate_paths.append(repo_root / _REPO_FEATURE_TEMPLATE_RELATIVE_PATH)
+    candidate_paths.extend((_TRACKED_FEATURE_TEMPLATE_PATH, _INSTALLED_FEATURE_TEMPLATE_PATH))
+
+    for template_path in candidate_paths:
         if template_path.exists():
             return template_path.read_text(encoding="utf-8")
     return _FALLBACK_FEATURE_TEMPLATE
@@ -57,12 +63,13 @@ def render_feature_file(
     openspec_specs: list[str],
     created: str,
     last_updated: str,
+    repo_root: Path | None = None,
 ) -> str:
     if not openspec_specs:
         raise ValueError("openspec_specs must not be empty")
 
     spec_lines = "\n".join(f"  - `{path}`" for path in openspec_specs)
-    rendered = FEATURE_TEMPLATE
+    rendered = _load_feature_template(repo_root)
     replacements = (
         ("# Feature: <title>", f"# Feature: {title}"),
         ("- Feature ID: `v1-f001`", f"- Feature ID: `{feature_id}`"),

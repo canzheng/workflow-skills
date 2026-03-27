@@ -59,6 +59,17 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `no matches; the targeted historical record no longer leaks machine-local absolute-path markers`
   - Inspection: `git diff -- skills/_workflow/feature_file.py install.sh tests/test_shape_backlog_item_renderer.py tests/test_initialize_workflow_artifacts.py tests/test_install_script.py docs/planning/versions/v1/features/v1-f008-clarify-workflow-owned-task-readiness.md docs/planning/versions/v1/features/v1-f012-align-workflow-contract-and-templates.md openspec/changes/v1-f012-align-workflow-contract-and-templates/tasks.md openspec/changes/v1-f012-align-workflow-contract-and-templates/implementation-plans/3.md`
   - Result: `reviewed locally; task-scoped changes are limited to template single-sourcing, installed template propagation, targeted history repair, focused tests, and task-state bookkeeping`
+- `2026-03-27` Task `3` Reopened Fix Pass:
+  - Run: `bin/run-python.sh -m unittest tests.test_shape_backlog_item_renderer tests.test_initialize_workflow_artifacts tests.test_install_script tests.test_workflow_contract_docs -v`
+  - Result: `12 tests passed after proving the renderer consumes the target repo template and the historical path-scan evidence uses a real generic leak pattern`
+  - Run: `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass after reopening task 3 for the acceptance-gap repair`
+  - Run: `git diff --check`
+  - Result: `pass`
+  - Inspection: `rg -n "/Users/|/home/|file://|C:\\Users\\\\" docs/planning/versions/v1/features/v1-f008-clarify-workflow-owned-task-readiness.md -S`
+  - Result: `the recorded evidence uses a reproducible generic path-leak scan and no machine-local user path remains in the tracked record`
+  - Inspection: `git diff -- skills/_workflow/feature_file.py skills/shape-backlog-item/scripts/render_feature_file.py tests/test_shape_backlog_item_renderer.py docs/planning/versions/v1/features/v1-f008-clarify-workflow-owned-task-readiness.md docs/planning/versions/v1/features/v1-f012-align-workflow-contract-and-templates.md openspec/changes/v1-f012-align-workflow-contract-and-templates/tasks.md`
+  - Result: `reviewed locally; the reopened fix is limited to repo-local template precedence, reproducible historical scan evidence, regression coverage, and workflow bookkeeping`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -85,3 +96,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `clean`
   - Notes: Completed task `3`. Rendered feature files now inherit the tracked template guidance, installed workflow skills receive the same template asset, the targeted historical path leak is repaired, and `finish-feature` is the next workflow step while the feature remains `[IN_PROGRESS]`.
+- `2026-03-27`:
+  - Current Task: `3`
+  - Worktree State: `clean`
+  - Notes: Reopened task `3` after review found two acceptance gaps: the renderer still preferred the skill-owned template over the target repo template, and the historical path-scan evidence used a non-functional placeholder pattern. Execution is scoped to repairing those gaps and restoring finish-feature acceptance.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: Completed the reopened task `3` fix pass. The renderer now prefers the target repo template when rendering feature files, the historical `v1-f008` evidence records a real generic path-leak scan, and `finish-feature` is unblocked again while the feature remains `[IN_PROGRESS]`.
