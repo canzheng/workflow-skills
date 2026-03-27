@@ -21,13 +21,14 @@ None yet.
 None yet.
 ## [IN_PROGRESS]
 
-### `v1-f004` [Detect Orphan OpenSpec Changes](features/v1-f004-detect-orphan-openspec-changes.md)
+None yet.
 
 ## [DONE]
 
 ### `v1-f001` [Legacy OpenSpec Audit Migration](features/v1-f001-legacy-openspec-audit-migration.md)
 ### `v1-f002` [Integrate OpenSpec Shaping Readiness](features/v1-f002-integrate-openspec-shaping-readiness.md)
 ### `v1-f003` [Resolve Cross-Feature Task Readiness](features/v1-f003-resolve-cross-feature-task-readiness.md)
+### `v1-f004` [Detect Orphan OpenSpec Changes](features/v1-f004-detect-orphan-openspec-changes.md)
 ### `v1-f006` [Add Feature Completion Handoff Gate](features/v1-f006-add-feature-completion-handoff-gate.md)
 ### `v1-f008` [Clarify Workflow-Owned Task Readiness](features/v1-f008-clarify-workflow-owned-task-readiness.md)
 ### `v1-f009` [Respect Legacy-Exempt Features in Resolver Scans](features/v1-f009-respect-legacy-exempt-features-in-resolver-scans.md)

@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f004`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `detect-orphan-openspec-changes`
 - OpenSpec Specs:
   - `openspec/specs/workflow-audit-and-repair/spec.md`
@@ -59,6 +59,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `reviewed locally; task-scoped changes are limited to repaired-state coverage, shared test fixtures, and workflow bookkeeping`
   - Run: `git diff --check`
   - Result: `pass`
+- `2026-03-27` Feature Completion:
+  - Run: `openspec validate detect-orphan-openspec-changes --type change --json --no-interactive`
+  - Result: `pass; summary totals report 1 passed, 0 failed`
+  - Run: `openspec archive detect-orphan-openspec-changes -y`
+  - Result: `pass; change archived as openspec/changes/archive/2026-03-27-detect-orphan-openspec-changes and stable specs updated with the accepted requirements`
+  - Run: `python3 skills/finish-feature/scripts/resolve_finish_feature.py`
+  - Result: `pass; requires_archive=false, active_change_path=null, archive_path=openspec/changes/archive/2026-03-27-detect-orphan-openspec-changes`
+  - Run: `python3 skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass after moving the feature to [DONE]`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -89,3 +98,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `clean`
   - Notes: Completed task `3`. Diagnose and audit coverage now prove both orphaned and repaired active-change linkage states, all top-level OpenSpec tasks are done, and the next handoff is `finish-feature` while the feature remains `[IN_PROGRESS]`.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Notes: `finish-feature` archived `detect-orphan-openspec-changes`, synced the accepted OpenSpec deltas into the stable specs, and moved the feature to `[DONE]`. The feature branch/worktree remains available for downstream branch finalization.

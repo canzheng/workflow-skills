@@ -16,7 +16,7 @@ A backlog item SHALL become a feature when it leaves `[BACKLOG]` for active shap
 - **WHEN** a backlog item is promoted from `[BACKLOG]` to `[SHAPING]`
 - **THEN** a stable feature ID is assigned
 - **AND** a linked feature file is created for that feature
-- **AND** the feature file records one linked OpenSpec change as the shaping authority
+- **AND** the promoted feature links the active OpenSpec change that owns its shaping state
 
 ### Requirement: Feature execution starts only from ready
 Execution SHALL begin only after shaping has produced at least one executable task.
