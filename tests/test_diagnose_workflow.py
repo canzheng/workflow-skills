@@ -147,6 +147,11 @@ class DiagnoseWorkflowTests(unittest.TestCase):
             repo = Path(tmpdir) / "repo"
             initialize(repo, "v1")
             (repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md").unlink()
+            orphan_change = repo / "openspec" / "changes" / "orphan-change"
+            orphan_change.mkdir(parents=True, exist_ok=True)
+            (orphan_change / "proposal.md").write_text("proposal", encoding="utf-8")
+            (orphan_change / "design.md").write_text("design", encoding="utf-8")
+            (orphan_change / "tasks.md").write_text("- [ ] 1 Orphan work\n", encoding="utf-8")
 
             result = subprocess.run(
                 ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
@@ -165,6 +170,7 @@ class DiagnoseWorkflowTests(unittest.TestCase):
                     for finding in payload["findings"]
                 )
             )
+            self.assertFalse(any(finding["code"] == "orphan_active_change" for finding in payload["findings"]))
 
     def test_diagnose_workflow_reports_findings_without_failing_for_repairable_state(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

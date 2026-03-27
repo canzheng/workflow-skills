@@ -1601,6 +1601,85 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("is in [SHAPING] but linked OpenSpec change is missing design.md", result.stdout)
 
+    def test_audit_rejects_ready_feature_missing_baseline_artifact_with_ready_error_code(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    None yet.
+
+                    ## [READY]
+
+                    ### `v1-f001` [Ready feature](features/v1-f001-ready-feature.md)
+
+                    ## [IN_PROGRESS]
+
+                    None yet.
+
+                    ## [DONE]
+
+                    None yet.
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            feature_file = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-ready-feature.md"
+            feature_file.write_text(
+                textwrap.dedent(
+                    """\
+                    # Feature: Ready feature
+
+                    ## 0. Meta
+                    - Feature ID: `v1-f001`
+                    - Version: `v1`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+                    - OpenSpec Change: `ready-feature`
+                    - OpenSpec Specs:
+                      - `openspec/specs/openspec-change-integration/spec.md`
+                    - Current Task: `none`
+
+                    ## 1. Validation Log
+                    - None yet.
+
+                    ## 2. Handoff Notes
+                    - None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            change_dir = repo / "openspec" / "changes" / "ready-feature"
+            change_dir.mkdir(parents=True, exist_ok=True)
+            (change_dir / "proposal.md").write_text("proposal", encoding="utf-8")
+            (change_dir / "tasks.md").write_text("- [ ] 1 Draft work\n", encoding="utf-8")
+
+            result = subprocess.run(
+                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("is in [READY] but linked OpenSpec change is missing design.md", result.stdout)
+
     def test_audit_rejects_done_feature_without_archived_change_or_legacy_exemption(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"
@@ -1671,6 +1750,90 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("legacy-exempt", result.stdout)
+
+    def test_audit_rejects_done_feature_with_duplicate_archived_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    None yet.
+
+                    ## [READY]
+
+                    None yet.
+
+                    ## [IN_PROGRESS]
+
+                    None yet.
+
+                    ## [DONE]
+
+                    ### `v1-f001` [Archived feature](features/v1-f001-archived-feature.md)
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            feature_file = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-archived-feature.md"
+            feature_file.write_text(
+                textwrap.dedent(
+                    """\
+                    # Feature: Archived feature
+
+                    ## 0. Meta
+                    - Feature ID: `v1-f001`
+                    - Version: `v1`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
+                    - OpenSpec Change: `archived-feature`
+                    - OpenSpec Specs:
+                      - `openspec/specs/workflow-audit-and-repair/spec.md`
+                    - Current Task: `none`
+
+                    ## 1. Validation Log
+                    - Archived after completion.
+
+                    ## 2. Handoff Notes
+                    - None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            first_archive = repo / "openspec" / "changes" / "archive" / "2026-03-25-archived-feature"
+            first_archive.mkdir(parents=True, exist_ok=True)
+            (first_archive / "proposal.md").write_text("proposal", encoding="utf-8")
+            second_archive = repo / "openspec" / "changes" / "archive" / "2026-03-26-archived-feature"
+            second_archive.mkdir(parents=True, exist_ok=True)
+            (second_archive / "proposal.md").write_text("proposal", encoding="utf-8")
+
+            result = subprocess.run(
+                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn(
+                "is in [DONE] but expected exactly one archived OpenSpec change for archived-feature",
+                result.stdout,
+            )
 
     def test_audit_rejects_extra_section_after_defer_in_initialized_repo(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

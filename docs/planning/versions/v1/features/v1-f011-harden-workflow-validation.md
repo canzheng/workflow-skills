@@ -54,6 +54,18 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `git diff --check`
   - Result: `pass`
   - Review: `Focused local task review found no correctness, regression, or scope-drift issues in the task-2 diff; audit and diagnose now enforce the shaping baseline while the stronger [READY] gate and archived [DONE] checks remain intact.`
+- `2026-03-27` Task `3`:
+  - Run: `bin/run-python.sh -m pytest tests/test_diagnose_workflow.py -q`
+  - Result: `12 passed in 0.66s`
+  - Run: `bin/run-python.sh -m pytest tests/test_workflow_openspec_integration.py -q`
+  - Result: `27 passed in 1.48s`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass with the feature in [IN_PROGRESS] and task 3 active`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/complete-task/scripts/resolve_complete_task.py"`
+  - Result: `pass after closing nested checklist items 3.1, 3.2, and 3.3 while task 3 remained active; completion_handoff.decision = confirm_feature_acceptance, all_top_level_tasks_complete = true, and remaining_open_task_ids = []`
+  - Run: `git diff --check`
+  - Result: `pass`
+  - Review: `Spec-compliance review found no findings; code-quality review found no findings. Residual risk remains intentionally narrow to the targeted regression cases and current diagnostic wording.`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -76,3 +88,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `task-2 changes ready to commit on branch v1-f011-harden-workflow-validation in ../worktrees/workflow-skills/v1-f011-harden-workflow-validation`
   - Notes: Completed task `2`. `skills/audit-workflow/scripts/audit_workflow.py` and `skills/diagnose-workflow/scripts/diagnose_workflow.py` now require `proposal.md`, `design.md`, and `tasks.md` for [SHAPING] features, the stronger [READY] gate remains unchanged, and task `3` is the next ready execution unit while the feature stays in [IN_PROGRESS].
+- `2026-03-27`:
+  - Current Task: `3`
+  - Worktree State: `resumed clean feature worktree at ../worktrees/workflow-skills/v1-f011-harden-workflow-validation on branch v1-f011-harden-workflow-validation`
+  - Notes: Task `3` entered active execution after a passing workflow audit in the feature worktree and resolver confirmation that top-level OpenSpec task `3` is now ready. The task implementation plan now lives at `openspec/changes/v1-f011-harden-workflow-validation/implementation-plans/3.md`.
+- `2026-03-27`:
+  - Current Task: `none`
+  - Worktree State: `task-3 changes ready to commit on branch v1-f011-harden-workflow-validation in ../worktrees/workflow-skills/v1-f011-harden-workflow-validation`
+  - Notes: Completed task `3`. The task added regression coverage for scaffold-missing diagnosis fallback, preserved the distinct [READY] baseline-artifact path, and tightened the archived [DONE] contract around duplicate archive matches. All top-level OpenSpec tasks are now complete, so the next handoff is `finish-feature` while the feature remains in [IN_PROGRESS].

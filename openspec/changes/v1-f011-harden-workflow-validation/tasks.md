@@ -9,10 +9,10 @@
   - Depends On:
     - `1`
 
-- [ ] 3 Add focused regression coverage
-  - [ ] 3.1 Cover missing planning scaffold in diagnosis
-  - [ ] 3.2 Cover missing shaping artifacts in audit and diagnosis
-  - [ ] 3.3 Cover the clarified archived `[DONE]` contract
+- [x] 3 Add focused regression coverage
+  - [x] 3.1 Cover missing planning scaffold in diagnosis
+  - [x] 3.2 Cover missing shaping artifacts in audit and diagnosis
+  - [x] 3.3 Cover the clarified archived `[DONE]` contract
   - Depends On:
     - `1`
     - `2`
