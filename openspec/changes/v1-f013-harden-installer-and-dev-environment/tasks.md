@@ -3,9 +3,9 @@
   - [x] 1.2 Append the managed workflow section when an existing `AGENTS.md` lacks markers
   - [x] 1.3 Document the installer's `rsync` dependency
 
-- [ ] 2 Constrain the managed development environment
-  - [ ] 2.1 Declare an explicit Python floor compatible with repo code
-  - [ ] 2.2 Declare explicit Conda channels for repeatable resolution
+- [x] 2 Constrain the managed development environment
+  - [x] 2.1 Declare an explicit Python floor compatible with repo code
+  - [x] 2.2 Declare explicit Conda channels for repeatable resolution
   - Depends On:
     - `1`
 

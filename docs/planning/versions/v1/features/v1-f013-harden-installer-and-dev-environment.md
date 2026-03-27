@@ -36,6 +36,20 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass`
   - Review: `Focused local spec-compliance and code-quality review found no correctness, regression, or scope-drift issues in the task-1 diff.`
   - Review Follow-up: `A late spec-compliance pass identified that the installer-behavior TDD coverage overlapped the original task 3 wording, so the remaining task-3 scope was narrowed to the managed-environment regression work that still depends on task 2.`
+- `2026-03-28` Task `2`:
+  - Run: `python3 - <<'PY' ...`
+  - Result: `pass: environment.yml declares python>=3.10 and channels [conda-forge, defaults]`
+  - Run: `bin/run-python.sh -m unittest tests.test_run_python_wrapper -v`
+  - Result: `19 tests ran and all passed after the environment contract change`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass with the feature in [IN_PROGRESS] and task 2 active, then pass again after clearing Current Task and checking off OpenSpec task 2`
+  - Inspection: `git diff -- environment.yml openspec/changes/v1-f013-harden-installer-and-dev-environment/implementation-plans/2.md docs/planning/versions/v1/features/v1-f013-harden-installer-and-dev-environment.md`
+  - Result: `reviewed locally; task-scoped changes are limited to the Conda environment contract, the task implementation plan, and workflow bookkeeping`
+  - Run: `git diff --check`
+  - Result: `pass`
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/complete-task/scripts/resolve_complete_task.py"`
+  - Result: `pass after closing nested checklist items 2.1 and 2.2 while task 2 remained active; completion_handoff.decision = stay_in_progress, next_ready_task_ids = ['3'], and remaining_open_task_ids = ['3']`
+  - Review: `Focused local spec-compliance and code-quality review found no correctness, reproducibility, or scope-drift issues in the task-2 diff.`
 
 ## 2. Handoff Notes
 - `2026-03-27`:
@@ -50,3 +64,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `task-1 changes ready to commit on branch v1-f013-harden-installer-and-dev-environment in ../worktrees/workflow-skills/v1-f013-harden-installer-and-dev-environment`
   - Notes: Completed task `1`. `install.sh` now initializes an existing unmarked AGENTS.md while keeping the missing-file path strict, `README.md` now documents the installer's `rsync` dependency, and task `2` is the next ready execution unit while the remaining task-3 regression scope is limited to the managed-environment coverage that still depends on task `2`.
+- `2026-03-28`:
+  - Current Task: `2`
+  - Worktree State: `clean feature worktree at ../worktrees/workflow-skills/v1-f013-harden-installer-and-dev-environment on branch v1-f013-harden-installer-and-dev-environment`
+  - Notes: Task `2` entered active execution after `resolve_start_task.py --repo-root .` confirmed it as the next ready top-level OpenSpec task, task `1` was already checked off in `tasks.md`, and the task implementation plan was updated at `openspec/changes/v1-f013-harden-installer-and-dev-environment/implementation-plans/2.md`.
+- `2026-03-28`:
+  - Current Task: `none`
+  - Worktree State: `task-2 changes ready to commit on branch v1-f013-harden-installer-and-dev-environment in ../worktrees/workflow-skills/v1-f013-harden-installer-and-dev-environment`
+  - Notes: Completed task `2`. `environment.yml` now declares `python>=3.10` and the explicit Conda channels `conda-forge` and `defaults`, and task `3` is the next ready execution unit for the remaining managed-environment regression coverage.
