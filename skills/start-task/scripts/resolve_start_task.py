@@ -74,7 +74,26 @@ def read_backlog(root: Path):
     return backlog_path, parsed_backlog
 
 
-def resolve_task(root: Path) -> dict[str, object]:
+def _list_git_worktree_roots(root: Path) -> list[Path]:
+    resolved = subprocess.run(
+        ["git", "worktree", "list", "--porcelain"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if resolved.returncode != 0:
+        return []
+
+    worktree_roots: list[Path] = []
+    for line in resolved.stdout.splitlines():
+        if not line.startswith("worktree "):
+            continue
+        worktree_roots.append(Path(line.removeprefix("worktree ")).resolve())
+    return worktree_roots
+
+
+def _resolve_task_in_root(root: Path) -> dict[str, object]:
     backlog_path, parsed_backlog = read_backlog(root)
     feature_tasks: dict[tuple[str, str], tuple[Path, str, list[object]]] = {}
     active_tasks = 0
@@ -127,6 +146,7 @@ def resolve_task(root: Path) -> dict[str, object]:
                     "feature_id": feature_id,
                     "feature_path": str(feature_path.relative_to(root)),
                     "feature_section": section_name,
+                    "selected_repo_root": str(root),
                     "openspec_change_id": change_id,
                     "openspec_change_path": str(active_change_dir.relative_to(root)),
                     "implementation_plan_path": (
@@ -142,6 +162,44 @@ def resolve_task(root: Path) -> dict[str, object]:
                 }
 
     raise WorkflowError("no startable task found in [IN_PROGRESS] or [READY]")
+
+
+def resolve_task(root: Path) -> dict[str, object]:
+    current_payload: dict[str, object] | None = None
+    current_error: WorkflowError | None = None
+
+    try:
+        current_payload = _resolve_task_in_root(root)
+    except WorkflowError as exc:
+        current_error = exc
+
+    if current_payload is not None and current_payload["feature_section"] == "IN_PROGRESS":
+        return current_payload
+
+    candidate_payloads: list[dict[str, object]] = []
+    for worktree_root in _list_git_worktree_roots(root):
+        if worktree_root == root:
+            continue
+        try:
+            candidate_payloads.append(_resolve_task_in_root(worktree_root))
+        except WorkflowError:
+            continue
+
+    in_progress_candidates = [payload for payload in candidate_payloads if payload["feature_section"] == "IN_PROGRESS"]
+    if len(in_progress_candidates) == 1:
+        return in_progress_candidates[0]
+    if len(in_progress_candidates) > 1:
+        raise WorkflowError("multiple feature worktrees report startable tasks from [IN_PROGRESS]")
+
+    if current_payload is not None:
+        return current_payload
+    if len(candidate_payloads) == 1:
+        return candidate_payloads[0]
+    if len(candidate_payloads) > 1:
+        raise WorkflowError("multiple worktrees report startable tasks; re-run from the intended checkout")
+    if current_error is not None:
+        raise current_error
+    raise WorkflowError("no startable task found in the current checkout or any feature worktree")
 
 
 def main(argv: list[str] | None = None) -> int:

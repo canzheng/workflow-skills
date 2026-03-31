@@ -18,6 +18,7 @@ Executing features SHALL use one feature-scoped worktree reused across sequentia
 #### Scenario: Later execution task resumes on the same feature
 - **WHEN** a later task starts for a feature already in execution
 - **THEN** execution resumes in the same feature worktree
+- **AND** `start-task` resolves that later task from the reusable feature worktree rather than a stale primary checkout
 - **AND** that worktree is clean before the next task begins
 
 ### Requirement: Task execution uses top-level OpenSpec task IDs and a task-scoped implementation plan

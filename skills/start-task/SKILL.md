@@ -26,30 +26,42 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 
 1. Run `audit-workflow`.
 2. Confirm there is no repository task already marked `in_progress`.
-3. Resolve the target feature and task.
-   - require the resolver payload to include the linked OpenSpec change directory, the Markdown context file list under that change, and the task implementation-plan path
+3. Resolve the target feature and task from the correct checkout.
+   - if this is the first executing task for the feature, resolve from the primary checkout before creating the feature branch/worktree
+   - otherwise require the existing feature branch/worktree for that feature instead of the primary checkout
+   - do not continue later-task execution from the primary checkout
+   - if a later task belongs to an existing `[IN_PROGRESS]` feature but no feature worktree is found, stop and ask the user to choose between:
+     1. create a new feature worktree and continue there (recommended)
+     2. stop
+   - require the resolver payload to include the selected repo root, the linked OpenSpec change directory, the Markdown context file list under that change, and the task implementation-plan path
 4. Confirm the feature is `[IN_PROGRESS]` or `[READY]`, the linked top-level OpenSpec task resolves to workflow status `ready`, and the feature has no workflow-derived task-readiness drift against the shared dependency model.
 5. Write or update the task implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` using the linked change context before code execution starts.
-6. If this is the first executing task for the feature, confirm the primary checkout is clean so the worktree will be created from a clean commit. If the primary checkout is dirty, stop and resolve the changes explicitly instead of auto-committing them.
-7. Wrap `using-git-worktrees`:
+6. Perform a heuristic semantic consistency review across the selected change context before code execution starts.
+   - read `proposal.md`, `design.md`, linked specs, `tasks.md`, any other Markdown files under the linked change directory, and the task implementation plan
+   - check whether the task implementation plan still appears semantically consistent with the selected task, the change proposal, the design, and the linked spec intent
+   - treat this as a conservative gate: if you detect semantic inconsistency, ambiguity, or unresolved drift between those artifacts, stop and reject continuing execution until the artifacts are reconciled
+7. If this is the first executing task for the feature, confirm the primary checkout is clean so the worktree will be created from a clean commit. If the primary checkout is dirty, stop and resolve the changes explicitly instead of auto-committing them.
+8. Wrap `using-git-worktrees`:
    - use the repo's preferred worktree root
    - if this is the first executing task for the feature, create one feature branch/worktree
-   - otherwise re-enter or reuse the existing feature branch/worktree for that feature only
+   - otherwise re-enter or reuse the existing feature branch/worktree for that feature only; never fall back to the primary checkout for a later task
+   - if no feature worktree exists for a later task, ask the user whether to create one now or stop; recommend creating the worktree
    - if reusing an existing feature worktree, stop unless that worktree is already clean and ready for the next task
-8. Update the feature file to record active execution:
+9. Update the feature file to record active execution:
    - set `Current Task` to the selected top-level task ID
    - keep OpenSpec `tasks.md` as the checked/unchecked task ledger rather than inventing a separate native `in_progress` syntax
-9. If the feature is currently `[READY]`, move the backlog entry to the bottom of `[IN_PROGRESS]`. If the feature is already `[IN_PROGRESS]`, leave the backlog entry there.
-10. Re-run `audit-workflow`.
-11. Choose execution mode:
+10. If the feature is currently `[READY]`, move the backlog entry to the bottom of `[IN_PROGRESS]`. If the feature is already `[IN_PROGRESS]`, leave the backlog entry there.
+11. Re-run `audit-workflow`.
+12. Choose execution mode:
    - prefer `subagent-driven-development` when available and still scoped to this one task
    - otherwise use `executing-plans`
-12. Within the chosen execution mode, choose the work method:
+13. Within the chosen execution mode, choose the work method:
    - use `systematic-debugging` when the task is primarily a debug task
    - use `test-driven-development` when the task is implementation or bugfix work with tests in scope
-13. Execute the task work inside the selected feature worktree:
+14. Execute the task work inside the selected feature worktree:
+   - if the resolver selected an existing feature worktree, re-enter that repo root before writing the implementation plan or editing code
    - keep execution scoped to this one task
-   - read the files listed as context before starting work, including `proposal.md`, `design.md`, `tasks.md`, any other Markdown files under the linked change directory, and the task implementation plan after you write or update it
+   - use the already-reviewed change context as the execution baseline, and if later edits introduce new semantic inconsistency between the task plan and the linked change artifacts, stop and reconcile before continuing
    - apply the chosen work method inside the chosen execution mode
    - stop only when the task is ready for `complete-task`, or when the task must be marked `blocked` or `cancelled`
 
@@ -66,7 +78,9 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 - The task is not `ready`
 - Task scope is missing or invalid
 - The task implementation plan cannot be written or updated before execution begins
+- The heuristic semantic consistency review finds inconsistency, ambiguity, or unresolved drift between the task implementation plan and the linked proposal, design, specs, or selected task
 - The primary checkout is dirty when the first feature worktree must be created
+- A later task for an existing `[IN_PROGRESS]` feature has no feature worktree and the user chooses to stop instead of creating one
 - The existing feature worktree is dirty when resuming a later task
 - Worktree creation fails
 - `audit-workflow` reports an invalid workflow state
