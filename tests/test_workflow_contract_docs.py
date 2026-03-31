@@ -32,6 +32,18 @@ class WorkflowContractDocsTests(unittest.TestCase):
             autonomous_loop_skill,
         )
 
+    def test_autonomous_backlog_loop_clarifies_continue_vs_stop_after_complete_task(self) -> None:
+        autonomous_loop_skill = AUTONOMOUS_BACKLOG_LOOP_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn(
+            "if the feature remains `IN_PROGRESS` and another task is `ready`, continue the feature loop",
+            autonomous_loop_skill,
+        )
+        self.assertIn(
+            "if the feature remains `IN_PROGRESS` but no next task is `ready`, stop the feature loop and return control",
+            autonomous_loop_skill,
+        )
+
     def test_autonomous_backlog_loop_design_mode_meaning_is_sanity_only(self) -> None:
         autonomous_loop_skill = AUTONOMOUS_BACKLOG_LOOP_SKILL.read_text(encoding="utf-8")
 

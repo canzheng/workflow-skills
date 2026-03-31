@@ -95,12 +95,12 @@ Use design mode when the user request is clearly design-only, explicitly asks to
    - otherwise, inside the same backlog-process sub-agent:
      - call `start-task` for the named feature/task so execution stays on the selected feature and feature worktree
      - if the task finishes cleanly, call `complete-task`
-     - if `complete-task` reports that `finish-feature` is startable, call `finish-feature` before any downstream cleanup
-     - do not bypass any review or verification gates owned by the wrapped execution skill, `complete-task`, or `finish-feature`
-     - if `finish-feature` moves the feature to `[DONE]`, perform the default finishing behavior equivalent to local merge plus branch/worktree cleanup, then stop the feature loop and return control
-     - if the feature remains `IN_PROGRESS` with more task work available, continue the feature loop on the same feature branch/worktree
-     - if the feature remains `IN_PROGRESS` after `complete-task` because `finish-feature` is not yet startable, stop the feature loop and return control instead of skipping directly to cleanup
-     - if the task ends `blocked` or `cancelled`, leave the feature branch/worktree in place, then stop the feature loop and return control
+    - if `complete-task` reports that `finish-feature` is startable, call `finish-feature` before any downstream cleanup
+    - do not bypass any review or verification gates owned by the wrapped execution skill, `complete-task`, or `finish-feature`
+    - if `finish-feature` moves the feature to `[DONE]`, perform the default finishing behavior equivalent to local merge plus branch/worktree cleanup, then stop the feature loop and return control
+    - if the feature remains `IN_PROGRESS` and another task is `ready`, continue the feature loop on the same feature branch/worktree
+    - if the feature remains `IN_PROGRESS` but no next task is `ready`, stop the feature loop and return control
+    - if the task ends `blocked` or `cancelled`, leave the feature branch/worktree in place, then stop the feature loop and return control
 10. When a feature-scoped sub-agent raises a design choice:
    - in `solo` mode, auto-accept the recommendation only if one was offered and it does not conflict with direct user instructions already given
    - in `interactive` mode, pause and surface the choice to the user with concise context, the recommendation if any, and the concrete options that need a decision
