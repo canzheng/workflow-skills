@@ -20,6 +20,16 @@ _SPEC.loader.exec_module(_MODULE)
 initialize = _MODULE.initialize
 
 
+def _git(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["git", *args],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
 def _write_finishable_feature(
     repo: Path,
     *,
@@ -90,6 +100,62 @@ def _write_finishable_feature(
 
 
 class FinishFeatureResolverTests(unittest.TestCase):
+    def test_resolver_rejects_primary_checkout_and_requires_feature_worktree(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+            _write_finishable_feature(repo)
+
+            change_dir = repo / "openspec" / "changes" / "finish-feature-gate"
+            change_dir.mkdir(parents=True, exist_ok=True)
+            (change_dir / "proposal.md").write_text("proposal", encoding="utf-8")
+            (change_dir / "tasks.md").write_text("- [x] 1 Done\n- [x] 2 Done\n", encoding="utf-8")
+
+            init_result = _git(repo, "init", "-b", "main")
+            self.assertEqual(init_result.returncode, 0, init_result.stdout + init_result.stderr)
+            self.assertEqual(_git(repo, "config", "user.name", "Test User").returncode, 0)
+            self.assertEqual(_git(repo, "config", "user.email", "test@example.com").returncode, 0)
+            self.assertEqual(_git(repo, "add", ".").returncode, 0)
+            commit_result = _git(repo, "commit", "-m", "initial workflow state")
+            self.assertEqual(commit_result.returncode, 0, commit_result.stdout + commit_result.stderr)
+
+            worktree_root = Path(tmpdir) / "worktrees"
+            worktree_root.mkdir()
+            feature_worktree = worktree_root / "v1-f001-finish-feature-gate"
+            add_worktree_result = _git(
+                repo,
+                "worktree",
+                "add",
+                "-b",
+                "v1-f001-finish-feature-gate",
+                str(feature_worktree),
+            )
+            self.assertEqual(add_worktree_result.returncode, 0, add_worktree_result.stdout + add_worktree_result.stderr)
+
+            primary_result = subprocess.run(
+                ["python3", str(FINISH_RESOLVER)],
+                cwd=repo,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(primary_result.returncode, 0)
+            self.assertIn("finish-feature must run from the feature worktree", primary_result.stderr)
+
+            worktree_result = subprocess.run(
+                ["python3", str(FINISH_RESOLVER)],
+                cwd=feature_worktree,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(worktree_result.returncode, 0, worktree_result.stdout + worktree_result.stderr)
+            payload = json.loads(worktree_result.stdout)
+            self.assertTrue(payload["requires_archive"])
+            self.assertEqual(payload["feature_id"], "v1-f001")
+
     def test_resolver_reports_active_change_that_still_requires_archive(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"

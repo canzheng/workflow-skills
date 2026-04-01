@@ -136,6 +136,16 @@ def _resolve_task_in_root(root: Path) -> dict[str, object]:
                     feature_file=feature_path,
                     repo_root=root,
                 )
+                if implementation_plan_path is None or not implementation_plan_path.exists():
+                    relative_plan_path = (
+                        str(implementation_plan_path.relative_to(root))
+                        if implementation_plan_path is not None
+                        else f"openspec/changes/{change_id}/implementation-plans/{task.task_id}.md"
+                    )
+                    raise WorkflowError(
+                        "task implementation plan is missing: "
+                        f"{relative_plan_path}. Write or update the implementation plan before executing the task."
+                    )
                 context_files = list_openspec_change_context_files(
                     feature_text,
                     task_id=task.task_id,

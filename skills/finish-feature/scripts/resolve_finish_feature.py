@@ -52,6 +52,32 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _ensure_not_primary_checkout(root: Path) -> None:
+    git_dir_result = subprocess.run(
+        ["git", "rev-parse", "--git-dir"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    common_dir_result = subprocess.run(
+        ["git", "rev-parse", "--git-common-dir"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if git_dir_result.returncode != 0 or common_dir_result.returncode != 0:
+        return
+
+    git_dir = (root / git_dir_result.stdout.strip()).resolve()
+    common_dir = (root / common_dir_result.stdout.strip()).resolve()
+    if git_dir == common_dir:
+        raise WorkflowError(
+            "finish-feature must run from the feature worktree, not the primary checkout"
+        )
+
+
 def _read_in_progress_features(root: Path) -> tuple[Path, list[tuple[str, Path]]]:
     current_version = root / "docs" / "planning" / "current_version"
     if not current_version.exists():
@@ -135,6 +161,7 @@ def _finishability_error(
 
 
 def resolve_finish_feature(root: Path, feature_id: str | None = None) -> dict[str, object]:
+    _ensure_not_primary_checkout(root)
     backlog_path, in_progress_features = _read_in_progress_features(root)
     finishable_features: list[tuple[str, Path]] = []
     explicit_match: tuple[str, Path] | None = None
