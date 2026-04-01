@@ -7,9 +7,9 @@ description: Use when a feature in `[IN_PROGRESS]` has satisfied its feature-lev
 
 ## Overview
 
-This skill is the workflow-owned preflight for moving a feature from `[IN_PROGRESS]` to `[DONE]`.
+This skill is the workflow-owned preflight for moving a feature from `[IN_PROGRESS]` to `[DONE]` and finalizing its development branch.
 
-It enforces the acceptance-plus-OpenSpec validate/archive gate for the linked change after task execution is complete, before handing off to the generic `finishing-a-development-branch` skill.
+It enforces the acceptance-plus-OpenSpec validate/archive gate for the linked change after task execution is complete, then hands off to the generic `finishing-a-development-branch` skill as the final branch/worktree step owned by `finish-feature`.
 
 `finish-feature` is intentionally strict: completing the final task is not enough on its own. The expected handoff is that `complete-task` leaves the feature in `[IN_PROGRESS]`, and only a feature whose top-level OpenSpec tasks are all done and whose `Current Task` is `none` is startable here.
 
@@ -36,11 +36,13 @@ It enforces the acceptance-plus-OpenSpec validate/archive gate for the linked ch
    - move the feature from `[IN_PROGRESS]` to `[DONE]` only after acceptance is confirmed
 7. Record the archive result and feature-completion evidence in the feature file when that evidence is not already present.
 8. Re-run `audit-workflow` if the feature file changed.
-9. Only after the linked change is validated and archived, invoke `finishing-a-development-branch`.
+9. Move the feature from `[IN_PROGRESS]` to `[DONE]` only after the linked change is validated and archived and feature-level acceptance is confirmed.
+10. Only after the feature has been moved to `[DONE]`, invoke `finishing-a-development-branch`.
 
 ## Rules
 
 - Do not call `finishing-a-development-branch` before the linked OpenSpec change is archived.
+- `finish-feature` owns the terminal feature transition and the handoff into generic branch finalization.
 - This skill must run `openspec-archive-change` when the linked change is still active.
 - Archive proof is filesystem state, not memory:
   - `openspec/changes/<change-id>/` must not exist
