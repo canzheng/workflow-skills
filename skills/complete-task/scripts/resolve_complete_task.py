@@ -16,7 +16,9 @@ if str(SKILLS_ROOT) not in sys.path:
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
     compute_completion_handoff,
+    is_primary_checkout,
     list_open_openspec_nested_items,
+    list_git_worktree_roots,
     linked_openspec_implementation_plan_path,
     list_openspec_change_context_files,
     parse_backlog_document,
@@ -172,10 +174,56 @@ def resolve_active_task(root: Path) -> dict[str, object]:
     return active_payloads[0]
 
 
+def resolve_active_task_across_worktrees(root: Path) -> dict[str, object]:
+    current_payload: dict[str, object] | None = None
+    current_error: WorkflowError | None = None
+
+    try:
+        current_payload = resolve_active_task(root)
+    except WorkflowError as exc:
+        current_error = exc
+
+    candidate_payloads: list[dict[str, object]] = []
+    for worktree_root in list_git_worktree_roots(root):
+        if worktree_root == root:
+            continue
+        try:
+            candidate_payload = resolve_active_task(worktree_root)
+        except WorkflowError:
+            continue
+        candidate_payloads.append(
+            {
+                **candidate_payload,
+                "selected_repo_root": str(worktree_root.resolve()),
+            }
+        )
+
+    feature_worktree_candidates = [
+        payload for payload in candidate_payloads if not is_primary_checkout(Path(payload["selected_repo_root"]))
+    ]
+    if len(feature_worktree_candidates) == 1:
+        return feature_worktree_candidates[0]
+    if len(feature_worktree_candidates) > 1:
+        raise WorkflowError("multiple feature worktrees report active tasks; re-run from the intended checkout")
+
+    if current_payload is not None:
+        return {
+            **current_payload,
+            "selected_repo_root": str(root.resolve()),
+        }
+    if len(candidate_payloads) == 1:
+        return candidate_payloads[0]
+    if len(candidate_payloads) > 1:
+        raise WorkflowError("multiple worktrees report active tasks; re-run from the intended checkout")
+    if current_error is not None:
+        raise current_error
+    raise WorkflowError("repository has no task with status `in_progress`")
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
     try:
-        payload = resolve_active_task(repo_root(args.repo_root))
+        payload = resolve_active_task_across_worktrees(repo_root(args.repo_root))
     except WorkflowError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1

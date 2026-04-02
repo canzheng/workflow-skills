@@ -179,7 +179,7 @@ def parse_backlog_document(text: str) -> ParsedBacklogDocument:
     )
 
 
-def _list_git_worktree_roots(root: Path) -> list[Path]:
+def list_git_worktree_roots(root: Path) -> list[Path]:
     resolved = subprocess.run(
         ["git", "worktree", "list", "--porcelain"],
         cwd=root,
@@ -200,7 +200,7 @@ def _list_git_worktree_roots(root: Path) -> list[Path]:
     return worktree_roots
 
 
-def _is_primary_checkout(root: Path) -> bool:
+def is_primary_checkout(root: Path) -> bool:
     git_dir_result = subprocess.run(
         ["git", "rev-parse", "--git-dir"],
         cwd=root,
@@ -242,7 +242,7 @@ def _locate_feature_in_repo(root: Path, feature_id: str) -> FeatureLocation | No
 
 def resolve_feature_repo_root(root: Path, feature_id: str) -> Path:
     locations: list[FeatureLocation] = []
-    for candidate_root in _list_git_worktree_roots(root):
+    for candidate_root in list_git_worktree_roots(root):
         location = _locate_feature_in_repo(candidate_root, feature_id)
         if location is not None:
             locations.append(location)
@@ -250,7 +250,7 @@ def resolve_feature_repo_root(root: Path, feature_id: str) -> Path:
     feature_worktree_locations = [
         location
         for location in locations
-        if location.feature_section == "IN_PROGRESS" and not _is_primary_checkout(location.repo_root)
+        if location.feature_section == "IN_PROGRESS" and not is_primary_checkout(location.repo_root)
     ]
     if len(feature_worktree_locations) == 1:
         return feature_worktree_locations[0].repo_root
