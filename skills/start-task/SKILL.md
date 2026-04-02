@@ -28,7 +28,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 2. Confirm there is no repository task already marked `in_progress`.
 3. Resolve the target feature and task from the correct checkout.
    - if this is the first executing task for the feature, resolve from the primary checkout before creating the feature branch/worktree
-   - otherwise require the existing feature branch/worktree for that feature instead of the primary checkout
+   - otherwise prefer the existing feature branch/worktree for that feature and require it instead of the primary checkout
    - do not continue later-task execution from the primary checkout
    - if a later task belongs to an existing `[IN_PROGRESS]` feature but no feature worktree is found, stop and ask the user to choose between:
      1. create a new feature worktree and continue there (recommended)

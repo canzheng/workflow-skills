@@ -17,6 +17,7 @@ from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
     parse_backlog_document,
     parse_tasks,
+    resolve_feature_repo_root,
     validate_active_feature_execution,
     WorkflowStateError,
 )
@@ -233,8 +234,14 @@ def resolve_action(
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
     try:
+        root = repo_root(args.repo_root)
+        if args.feature_id is not None:
+            try:
+                root = resolve_feature_repo_root(root, args.feature_id)
+            except WorkflowStateError as exc:
+                raise WorkflowError(str(exc)) from exc
         payload = resolve_action(
-            repo_root(args.repo_root),
+            root,
             feature_id=args.feature_id,
             design_mode=args.design_mode,
             completed_count=args.completed_count,

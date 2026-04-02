@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -116,6 +117,12 @@ class OpenSpecChangeLinkage:
     orphan_active_change_ids: list[str]
 
 
+@dataclass(frozen=True)
+class FeatureLocation:
+    repo_root: Path
+    feature_section: str
+
+
 def parse_backlog_document(text: str) -> ParsedBacklogDocument:
     feature_sections: dict[str, list[BacklogFeatureEntry]] = {name: [] for name in WORKFLOW_SECTIONS}
     backlog_items: list[BacklogItemEntry] = []
@@ -170,6 +177,93 @@ def parse_backlog_document(text: str) -> ParsedBacklogDocument:
         backlog_items=backlog_items,
         malformed_entries=malformed_entries,
     )
+
+
+def _list_git_worktree_roots(root: Path) -> list[Path]:
+    resolved = subprocess.run(
+        ["git", "worktree", "list", "--porcelain"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if resolved.returncode != 0:
+        return [root.resolve()]
+
+    worktree_roots = [root.resolve()]
+    for line in resolved.stdout.splitlines():
+        if not line.startswith("worktree "):
+            continue
+        candidate_root = Path(line.removeprefix("worktree ")).resolve()
+        if candidate_root not in worktree_roots:
+            worktree_roots.append(candidate_root)
+    return worktree_roots
+
+
+def _is_primary_checkout(root: Path) -> bool:
+    git_dir_result = subprocess.run(
+        ["git", "rev-parse", "--git-dir"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    common_dir_result = subprocess.run(
+        ["git", "rev-parse", "--git-common-dir"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if git_dir_result.returncode != 0 or common_dir_result.returncode != 0:
+        return False
+
+    git_dir = (root / git_dir_result.stdout.strip()).resolve()
+    common_dir = (root / common_dir_result.stdout.strip()).resolve()
+    return git_dir == common_dir
+
+
+def _locate_feature_in_repo(root: Path, feature_id: str) -> FeatureLocation | None:
+    current_version = root / "docs" / "planning" / "current_version"
+    if not current_version.exists() or not current_version.is_symlink():
+        return None
+
+    backlog_path = current_version.resolve() / "BACKLOG.md"
+    if not backlog_path.exists():
+        return None
+
+    parsed_backlog = parse_backlog_document(backlog_path.read_text(encoding="utf-8"))
+    for section_name in WORKFLOW_SECTIONS[1:]:
+        for entry in parsed_backlog.feature_sections.get(section_name, []):
+            if entry.feature_id == feature_id:
+                return FeatureLocation(repo_root=root.resolve(), feature_section=section_name)
+    return None
+
+
+def resolve_feature_repo_root(root: Path, feature_id: str) -> Path:
+    locations: list[FeatureLocation] = []
+    for candidate_root in _list_git_worktree_roots(root):
+        location = _locate_feature_in_repo(candidate_root, feature_id)
+        if location is not None:
+            locations.append(location)
+
+    feature_worktree_locations = [
+        location
+        for location in locations
+        if location.feature_section == "IN_PROGRESS" and not _is_primary_checkout(location.repo_root)
+    ]
+    if len(feature_worktree_locations) == 1:
+        return feature_worktree_locations[0].repo_root
+    if len(feature_worktree_locations) > 1:
+        raise WorkflowStateError(
+            f"multiple feature worktrees report {feature_id} in [IN_PROGRESS]; re-run from the intended checkout"
+        )
+
+    current_location = _locate_feature_in_repo(root.resolve(), feature_id)
+    if current_location is not None:
+        return current_location.repo_root
+
+    return root.resolve()
 
 
 def find_backlog_section_order_errors(text: str) -> list[str]:

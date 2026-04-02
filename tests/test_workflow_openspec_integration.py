@@ -15,6 +15,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 INIT_SCRIPT = REPO_ROOT / "skills" / "initialize-workflow-artifacts" / "scripts" / "init_workflow_artifacts.py"
 AUDIT_SCRIPT = REPO_ROOT / "skills" / "audit-workflow" / "scripts" / "audit_workflow.py"
 START_TASK_SCRIPT = REPO_ROOT / "skills" / "start-task" / "scripts" / "resolve_start_task.py"
+AUTONOMOUS_RESOLVER_SCRIPT = (
+    REPO_ROOT / "skills" / "autonomous-backlog-loop" / "scripts" / "resolve_autonomous_backlog_action.py"
+)
 COMPLETE_TASK_SCRIPT = REPO_ROOT / "skills" / "complete-task" / "scripts" / "resolve_complete_task.py"
 FINISH_FEATURE_SCRIPT = REPO_ROOT / "skills" / "finish-feature" / "scripts" / "resolve_finish_feature.py"
 
@@ -756,6 +759,174 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             self.assertEqual(payload["feature_section"], "IN_PROGRESS")
             self.assertEqual(payload["task_id"], "2")
             self.assertEqual(payload["selected_repo_root"], str(feature_worktree.resolve()))
+
+    def test_autonomous_resolver_prefers_existing_feature_worktree_for_feature_continuation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    None yet.
+
+                    ## [READY]
+
+                    None yet.
+
+                    ## [IN_PROGRESS]
+
+                    ### `v1-f001` [OpenSpec integration](features/v1-f001-openspec-integration.md)
+
+                    ## [DONE]
+
+                    None yet.
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            feature_file = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-openspec-integration.md"
+            feature_file.write_text(
+                textwrap.dedent(
+                    """\
+                    # Feature: OpenSpec integration
+
+                    ## 0. Meta
+                    - Feature ID: `v1-f001`
+                    - Version: `v1`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+                    - OpenSpec Change: `integrate-openspec-shaping-readiness`
+                    - OpenSpec Specs:
+                      - `openspec/specs/workflow-board-lifecycle/spec.md`
+                    - Current Task: `none`
+
+                    ## 1. Validation Log
+                    - None yet.
+
+                    ## 2. Handoff Notes
+                    - None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            change_dir = repo / "openspec" / "changes" / "integrate-openspec-shaping-readiness"
+            change_dir.mkdir(parents=True, exist_ok=True)
+            (change_dir / "proposal.md").write_text("## Why\n\nTest\n", encoding="utf-8")
+            (change_dir / "design.md").write_text("## Context\n\nTest\n", encoding="utf-8")
+            (change_dir / "tasks.md").write_text(
+                textwrap.dedent(
+                    """\
+                    ## 1. Setup
+
+                    - [ ] 1 Seed baseline
+                      - [ ] 1.1 Capture current behavior
+                    - [ ] 2 Wire task parsing
+                      - [ ] 2.1 Update helper code
+                      - Depends On:
+                        - `1`
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            init_result = _git(repo, "init", "-b", "main")
+            self.assertEqual(init_result.returncode, 0, init_result.stdout + init_result.stderr)
+            self.assertEqual(_git(repo, "config", "user.name", "Test User").returncode, 0)
+            self.assertEqual(_git(repo, "config", "user.email", "test@example.com").returncode, 0)
+            self.assertEqual(_git(repo, "add", ".").returncode, 0)
+            commit_result = _git(repo, "commit", "-m", "initial workflow state")
+            self.assertEqual(commit_result.returncode, 0, commit_result.stdout + commit_result.stderr)
+
+            worktree_root = Path(tmpdir) / "worktrees"
+            worktree_root.mkdir()
+            feature_worktree = worktree_root / "v1-f001-openspec-integration"
+            add_worktree_result = _git(
+                repo,
+                "worktree",
+                "add",
+                "-b",
+                "v1-f001-openspec-integration",
+                str(feature_worktree),
+            )
+            self.assertEqual(add_worktree_result.returncode, 0, add_worktree_result.stdout + add_worktree_result.stderr)
+
+            feature_worktree_file = (
+                feature_worktree / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-openspec-integration.md"
+            )
+            feature_worktree_file.write_text(
+                textwrap.dedent(
+                    """\
+                    # Feature: OpenSpec integration
+
+                    ## 0. Meta
+                    - Feature ID: `v1-f001`
+                    - Version: `v1`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+                    - OpenSpec Change: `integrate-openspec-shaping-readiness`
+                    - OpenSpec Specs:
+                      - `openspec/specs/workflow-board-lifecycle/spec.md`
+                    - Current Task: `none`
+
+                    ## 1. Validation Log
+                    - 2026-03-28: task 1 completed on the feature branch
+
+                    ## 2. Handoff Notes
+                    - Feature worktree is ready for the next task.
+                    """
+                ),
+                encoding="utf-8",
+            )
+            (feature_worktree / "openspec" / "changes" / "integrate-openspec-shaping-readiness" / "tasks.md").write_text(
+                textwrap.dedent(
+                    """\
+                    ## 1. Setup
+
+                    - [x] 1 Seed baseline
+                      - [x] 1.1 Capture current behavior
+                    - [ ] 2 Wire task parsing
+                      - [ ] 2.1 Update helper code
+                      - Depends On:
+                        - `1`
+                    """
+                ),
+                encoding="utf-8",
+            )
+            self.assertEqual(_git(feature_worktree, "add", ".").returncode, 0)
+            worktree_commit_result = _git(feature_worktree, "commit", "-m", "progress task state on feature branch")
+            self.assertEqual(
+                worktree_commit_result.returncode,
+                0,
+                worktree_commit_result.stdout + worktree_commit_result.stderr,
+            )
+
+            result = subprocess.run(
+                ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--feature-id", "v1-f001"],
+                cwd=repo,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["feature_id"], "v1-f001")
+            self.assertEqual(payload["feature_section"], "IN_PROGRESS")
+            self.assertEqual(payload["task_id"], "2")
 
     def test_start_task_rejects_missing_implementation_plan(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

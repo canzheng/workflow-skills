@@ -61,6 +61,8 @@ Optional resolver flags:
 - `--design-mode` to run only design-stage work from `[SHAPING]` and `[BACKLOG]`; it does not act on active execution work in `[READY]` or `[IN_PROGRESS]`, and the resolver still sanity-checks `[READY]` and `[IN_PROGRESS]` features for invalid workflow state before continuing
 - `--feature-id <feature-id>` for continuing a selected feature's task loop
 
+When `--feature-id` is used for a feature already in execution, first resolve the effective repo root for that feature and prefer the reusable feature worktree over a stale primary checkout. Run both `audit-workflow` and the resolver from that selected root.
+
 Resolver precedence:
 
 1. first `[IN_PROGRESS]` feature with a `ready` task
@@ -90,13 +92,17 @@ Use design mode when the user request is clearly design-only, explicitly asks to
 7. If the resolver returns `run_task_loop`, spawn one backlog-process sub-agent for that feature.
 8. The backlog-process sub-agent owns only that one feature and must not start another feature.
 9. Inside that backlog-process agent, loop:
-   - run the resolver with `--feature-id <feature-id>`
+   - before each feature-scoped `audit-workflow` or resolver call, revalidate the effective repo root for `<feature-id>` and prefer the existing feature worktree whenever it exists
+   - if the active feature worktree no longer exists, stop with a workflow error instead of silently falling back to the primary checkout
+   - run feature-scoped `audit-workflow` from that selected repo root
+   - run the resolver with `--feature-id <feature-id>` from that same repo root
    - if the resolver returns `feature_exhausted`, stop the feature loop and return control
    - otherwise, inside the same backlog-process sub-agent:
      - call `start-task` for the named feature/task so execution stays on the selected feature and feature worktree
      - if the task finishes cleanly, call `complete-task`
-     - if `complete-task` reports that `finish-feature` is startable, call `finish-feature`
+     - if `complete-task` reports that `finish-feature` is startable, call `finish-feature` before any downstream cleanup
      - do not bypass any review or verification gates owned by the wrapped execution skill, `complete-task`, or `finish-feature`
+     - if `finish-feature` moves the feature to `[DONE]`, perform the default finishing behavior
      - if `finish-feature` completes successfully, stop the feature loop and return control
      - if the feature remains `IN_PROGRESS` and another task is `ready`, continue the feature loop on the same feature branch/worktree
      - if the feature remains `IN_PROGRESS` but no next task is `ready`, stop the feature loop and return control
@@ -109,7 +115,7 @@ Use design mode when the user request is clearly design-only, explicitly asks to
 11. Wait for the backlog-process sub-agent to finish before starting the next outer step.
 12. If the resolver returns `ready_feature`, spawn one backlog-process sub-agent that runs `ready-feature` on the selected feature, then return.
 13. If the resolver returns `shape_backlog_item`, spawn one backlog-process sub-agent that runs `shape-backlog-item` on the selected first backlog item, then return.
-14. After each completed step agent, re-run `audit-workflow` and resolve again.
+14. After each completed step agent, re-run `audit-workflow` and resolve again. If the next step continues the same active feature, resolve the effective repo root again first and keep the audit/resolver pair on that feature worktree rather than the primary checkout.
 15. Stop when the resolver returns:
    - `stop` with `reason == completion_limit_reached`
    - `stop` with `reason == no_eligible_work`

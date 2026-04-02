@@ -60,6 +60,12 @@ class WorkflowContractDocsTests(unittest.TestCase):
             autonomous_loop_skill,
         )
 
+    def test_autonomous_backlog_loop_reuses_feature_worktree_for_continuation(self) -> None:
+        autonomous_loop_skill = AUTONOMOUS_BACKLOG_LOOP_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn("revalidate the effective repo root for `<feature-id>`", autonomous_loop_skill)
+        self.assertIn("run feature-scoped `audit-workflow` from that selected repo root", autonomous_loop_skill)
+
     def test_stable_handoff_spec_mentions_autonomous_finish_feature_gate(self) -> None:
         task_execution_handoff_spec = TASK_EXECUTION_HANDOFF_SPEC.read_text(encoding="utf-8")
 
@@ -71,6 +77,7 @@ class WorkflowContractDocsTests(unittest.TestCase):
 
         self.assertIn("Later execution task resumes on the same feature", task_execution_handoff_spec)
         self.assertIn("resolves that later task from the reusable feature worktree", task_execution_handoff_spec)
+        self.assertIn("Autonomous continuation reuses the same feature worktree", task_execution_handoff_spec)
 
 
 if __name__ == "__main__":

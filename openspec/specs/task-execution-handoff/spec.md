@@ -21,6 +21,11 @@ Executing features SHALL use one feature-scoped worktree reused across sequentia
 - **AND** `start-task` resolves that later task from the reusable feature worktree rather than a stale primary checkout
 - **AND** that worktree is clean before the next task begins
 
+#### Scenario: Autonomous continuation reuses the same feature worktree
+- **WHEN** autonomous orchestration continues execution for an already-active feature
+- **THEN** it resolves the feature-scoped audit and task selection from the reusable feature worktree
+- **AND** it does not silently fall back to a stale primary checkout while that feature worktree still exists
+
 ### Requirement: Task execution uses top-level OpenSpec task IDs and a task-scoped implementation plan
 Executable workflow tasks SHALL be top-level OpenSpec task IDs, and each task SHALL be executed with a task-scoped implementation plan stored under the linked change.
 
