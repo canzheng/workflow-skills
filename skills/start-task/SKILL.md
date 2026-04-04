@@ -35,11 +35,15 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
      2. stop
    - require the resolver payload to include the selected repo root, the linked OpenSpec change directory, the Markdown context file list under that change, and the task implementation-plan path
 4. Confirm the feature is `[IN_PROGRESS]` or `[READY]`, the linked top-level OpenSpec task resolves to workflow status `ready`, and the feature has no workflow-derived task-readiness drift against the shared dependency model.
-5. Write or update the task implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` using the linked change context before code execution starts.
-6. Perform a heuristic semantic consistency review across the selected change context before code execution starts.
-   - read `proposal.md`, `design.md`, linked specs, `tasks.md`, any other Markdown files under the linked change directory, and the task implementation plan
-   - check whether the task implementation plan still appears semantically consistent with the selected task, the change proposal, the design, and the linked spec intent
-   - treat this as a conservative gate: if you detect semantic inconsistency, ambiguity, or unresolved drift between those artifacts, stop and reject continuing execution until the artifacts are reconciled
+5. Read the linked change context before updating the task implementation plan.
+   - read `proposal.md`, `design.md`, linked specs, `tasks.md`, and any other Markdown files under the linked change directory before drafting or updating the task implementation plan
+   - use that context to update the task implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution starts
+   - keep the implementation plan's validation section aligned with the selected task and the linked change intent
+6. Perform a semantic consistency and coverage review across the selected change context before code execution starts.
+   - read the task implementation plan after updating it
+   - spawn a `gpt-5.4-mini` reviewer subagent to review whether the task implementation plan and its validation section are semantically consistent with the selected task, the change proposal, the design, and the linked spec intent
+   - require that review to confirm the plan and its validation section fully cover the selected task's intended change and proof obligations before execution continues
+   - if the review finds semantic inconsistency, ambiguity, uncovered change intent, or missing validation coverage, return to step 5 to update the implementation plan and rerun this review until it passes
 7. If this is the first executing task for the feature, confirm the primary checkout is clean so the worktree will be created from a clean commit. If the primary checkout is dirty, stop and resolve the changes explicitly instead of auto-committing them.
 8. Wrap `using-git-worktrees`:
    - use the repo's preferred worktree root
@@ -59,11 +63,11 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
    - use `systematic-debugging` when the task is primarily a debug task
    - use `test-driven-development` when the task is implementation or bugfix work with tests in scope
 14. Execute the task work inside the selected feature worktree:
-   - if the resolver selected an existing feature worktree, re-enter that repo root before writing the implementation plan or editing code
+   - if the resolver selected an existing feature worktree, re-enter that repo root before reading change context, updating the implementation plan, or editing code
    - keep execution scoped to this one task
    - use the already-reviewed change context as the execution baseline, and if later edits introduce new semantic inconsistency between the task plan and the linked change artifacts, stop and reconcile before continuing
    - apply the chosen work method inside the chosen execution mode
-   - stop only when the task is ready for `complete-task`, or when the task must be marked `blocked` or `cancelled`
+   - stop only when the selected task's implementation work is complete and every step in the implementation plan's validation section has been completed successfully, leaving only the fresh completion-time verification gate owned by `complete-task`, or when the task must be marked `blocked` or `cancelled`
 
 ## Rules
 
@@ -78,7 +82,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 - The task is not `ready`
 - Task scope is missing or invalid
 - The task implementation plan cannot be written or updated before execution begins
-- The heuristic semantic consistency review finds inconsistency, ambiguity, or unresolved drift between the task implementation plan and the linked proposal, design, specs, or selected task
+- The `gpt-5.4-mini` semantic consistency and coverage review finds inconsistency, ambiguity, unresolved drift, or missing validation coverage between the task implementation plan and the linked proposal, design, specs, or selected task
 - The primary checkout is dirty when the first feature worktree must be created
 - A later task for an existing `[IN_PROGRESS]` feature has no feature worktree and the user chooses to stop instead of creating one
 - The existing feature worktree is dirty when resuming a later task

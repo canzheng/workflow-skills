@@ -18,6 +18,26 @@ class WorkflowContractDocsTests(unittest.TestCase):
         self.assertIn("otherwise prefer the existing feature branch/worktree", start_task_skill)
         self.assertIn("require the resolver payload to include the selected repo root", start_task_skill)
 
+    def test_start_task_skill_reads_change_context_before_updating_plan(self) -> None:
+        start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn("Read the linked change context before updating the task implementation plan", start_task_skill)
+        self.assertIn("read `proposal.md`, `design.md`, linked specs, `tasks.md`", start_task_skill)
+        self.assertIn("use that context to update the task implementation plan", start_task_skill)
+
+    def test_start_task_skill_requires_gpt_5_4_mini_plan_review_loop(self) -> None:
+        start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn("spawn a `gpt-5.4-mini` reviewer subagent", start_task_skill)
+        self.assertIn("fully cover the selected task's intended change and proof obligations", start_task_skill)
+        self.assertIn("return to step 5 to update the implementation plan and rerun this review until it passes", start_task_skill)
+
+    def test_start_task_skill_requires_validation_section_completion_before_handoff(self) -> None:
+        start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn("every step in the implementation plan's validation section has been completed successfully", start_task_skill)
+        self.assertIn("leaving only the fresh completion-time verification gate owned by `complete-task`", start_task_skill)
+
     def test_finish_feature_skill_describes_in_progress_completion_gate(self) -> None:
         finish_feature_skill = FINISH_FEATURE_SKILL.read_text(encoding="utf-8")
 
