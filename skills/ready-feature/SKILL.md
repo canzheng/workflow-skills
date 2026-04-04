@@ -30,11 +30,12 @@ It is a workflow wrapper around linked OpenSpec shaping artifacts, with optional
    - `design.md`
    - `tasks.md`
    - relevant linked spec paths
-7. Confirm at least one linked top-level OpenSpec task resolves to workflow status `ready` under the workflow task dependency convention.
-8. Update the feature file first, then move the backlog entry from `[SHAPING]` to the bottom of `[READY]`.
-9. Re-run `audit-workflow`.
-10. Commit the intentional planning-state changes when needed to leave the primary checkout clean before exiting.
-11. Confirm the primary checkout is clean before exit.
+7. Review corresponding existing documentation for consistency with the shaped change, update any documentation that must change before the feature can honestly be considered ready, and otherwise make the no-update-needed conclusion explicit in the linked OpenSpec change.
+8. Confirm at least one linked top-level OpenSpec task resolves to workflow status `ready` under the workflow task dependency convention.
+9. Update the feature file first, then move the backlog entry from `[SHAPING]` to the bottom of `[READY]`.
+10. Re-run `audit-workflow`.
+11. Commit the intentional planning-state changes when needed to leave the primary checkout clean before exiting.
+12. Confirm the primary checkout is clean before exit.
 
 ## Rules
 
@@ -44,6 +45,7 @@ It is a workflow wrapper around linked OpenSpec shaping artifacts, with optional
 - A clean planning exit usually means committing the intentional readiness changes, but the invariant is a clean primary checkout.
 - `brainstorming` owns any design-review gates used to strengthen the feature before planning.
 - Preserve inherited validation and review gates. OpenSpec shaping does not relax audit, review, or verification requirements.
+- Do not promote a feature to `[READY]` while known documentation drift remains in corresponding existing docs that should already reflect the shaped change.
 - Do not promote the feature to `[READY]` unless at least one linked top-level OpenSpec task resolves to workflow status `ready`.
 - Preserve the existing feature file and update only relevant sections.
 

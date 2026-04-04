@@ -51,7 +51,8 @@ This document is the canonical reference for workflow definitions, status models
 
 - `BACKLOG`: an idea-level work item that is still unclear or not yet shaped into a ready feature. No feature ID or feature file is required yet.
 - `SHAPING`: a real feature exists, its feature ID is assigned, its feature file exists, and one linked OpenSpec change owns active proposal/spec/design/task shaping work before execution begins.
-- `READY`: shaping is complete, the linked OpenSpec change has the required shaping artifacts, and at least one linked top-level OpenSpec task resolves to workflow status `ready` under the workflow task-status rules.
+- During `SHAPING`, identify the corresponding existing documentation and spec surfaces likely affected by the feature and capture the relevant paths in the linked OpenSpec change.
+- `READY`: shaping is complete, the linked OpenSpec change has the required shaping artifacts, corresponding existing documentation has been reviewed for consistency with the shaped change, any documentation that must change for readiness has been updated, and at least one linked top-level OpenSpec task resolves to workflow status `ready` under the workflow task-status rules.
 - `IN_PROGRESS`: execution has started on at least one task for the feature, and the feature is not yet complete or deferred. Once a feature enters `IN_PROGRESS`, keep it there until the feature reaches `DONE` or `DEFER`, even if there is a handoff gap where no task is currently `in_progress`.
 - `DONE`: feature-level acceptance is satisfied.
 - Historical `[DONE]` features that predate OpenSpec adoption may remain valid when explicitly marked `OpenSpec Status: legacy-exempt`.
