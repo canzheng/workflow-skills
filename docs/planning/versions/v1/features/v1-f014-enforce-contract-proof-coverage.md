@@ -65,5 +65,5 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Notes: Started task `2` after writing `openspec/changes/v1-f014-enforce-contract-proof-coverage/implementation-plans/2.md`. Execution is scoped to aligning shaping, readiness, task guidance, and the workflow reference around explicit proof obligations and the shared validation taxonomy.
 - `2026-04-05`:
   - Current Task: `none`
-  - Worktree State: `dirty feature worktree on branch v1-f014-enforce-contract-proof-coverage in ../worktrees/workflow-skills/v1-f014-enforce-contract-proof-coverage`
+  - Worktree State: `clean feature worktree on branch v1-f014-enforce-contract-proof-coverage in ../worktrees/workflow-skills/v1-f014-enforce-contract-proof-coverage`
   - Notes: Completed task `2`. Shaping, readiness, task start, task completion, the feature template, and the workflow reference now describe the shared proof-obligation / validation-taxonomy contract; task `3` is the next ready execution unit while the feature remains `[IN_PROGRESS]`.
