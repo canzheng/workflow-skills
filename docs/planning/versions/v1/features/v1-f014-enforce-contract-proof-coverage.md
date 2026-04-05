@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f014`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
 - OpenSpec Change: `v1-f014-enforce-contract-proof-coverage`
 - OpenSpec Specs:
   - `openspec/specs/task-execution-handoff/spec.md`
@@ -26,9 +26,29 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `proposal.md`, `design.md`, `tasks.md`, and the linked stable spec paths are present for the new feature.`
   - Inspection: `openspec/changes/v1-f014-enforce-contract-proof-coverage/tasks.md`
   - Result: `top-level task 1 is immediately startable; task 2 remains blocked on task 1.`
+- `2026-04-05` Task `1`:
+  - Run: `rtk bin/run-python.sh -m pytest skills/_workflow/tests/test_workflow_state.py skills/_workflow/tests/test_workflow_scripts.py tests/test_workflow_openspec_integration.py -q -k 'implementation_plan or start_task or complete_task or selects_cross_feature_ready_task'`
+  - Result: `24 passed, 65 deselected in 2.37s`
+  - Run: `rtk bin/run-python.sh -m pytest skills/_workflow/tests/test_workflow_state.py skills/_workflow/tests/test_workflow_scripts.py tests/test_workflow_openspec_integration.py -q`
+  - Result: `89 passed in 5.37s`
+  - Run: `rtk bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass with the feature in [IN_PROGRESS] and task 1 active, then pass again after task-1 completion bookkeeping`
+  - Run: `rtk python3 skills/complete-task/scripts/resolve_complete_task.py --repo-root .`
+  - Result: `pass; completion_handoff.decision = stay_in_progress, next_ready_task_ids = ['2'], and remaining_open_task_ids = ['2']`
+  - Run: `rtk git diff --check`
+  - Result: `pass`
+  - Review: `Focused local review found the diff stayed within the task-1 scope: shared implementation-plan validation, resolver gate wiring, and fixture/test updates for the stronger contract.`
 
 ## 2. Handoff Notes
 - `2026-04-05`:
   - Current Task: `none`
   - Worktree State: `n/a`
   - Notes: Feature `v1-f014` was created to harden workflow validation against surrogate lower-level contracts. Task `1` is ready to execute once the feature worktree is created.
+- `2026-04-05`:
+  - Current Task: `1`
+  - Worktree State: `clean feature worktree at ../worktrees/workflow-skills/v1-f014-enforce-contract-proof-coverage on branch v1-f014-enforce-contract-proof-coverage`
+  - Notes: Started task `1` after writing `openspec/changes/v1-f014-enforce-contract-proof-coverage/implementation-plans/1.md` and confirming with `resolve_start_task.py` that the task is the next ready execution unit.
+- `2026-04-05`:
+  - Current Task: `none`
+  - Worktree State: `task-1 changes ready to commit on branch v1-f014-enforce-contract-proof-coverage in ../worktrees/workflow-skills/v1-f014-enforce-contract-proof-coverage`
+  - Notes: Completed task `1`. The workflow now validates implementation-plan proof structure through shared helpers used by both start and completion resolvers, stale cross-feature fixtures now carry compliant plans, and task `2` is the next ready execution unit while the feature remains `[IN_PROGRESS]`.

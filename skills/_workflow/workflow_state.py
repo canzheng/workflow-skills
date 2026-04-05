@@ -123,6 +123,35 @@ class FeatureLocation:
     feature_section: str
 
 
+@dataclass(frozen=True)
+class ImplementationPlanSummary:
+    contract_surface_lines: tuple[str, ...]
+    proof_obligation_lines: tuple[str, ...]
+    required_validation_classes: tuple[str, ...]
+    unit_only_justification: str | None
+
+
+RUNTIME_FACING_VALIDATION_CLASSES = {
+    "integration",
+    "runtime-path",
+    "runtime_path",
+    "manual-inspection",
+    "manual inspection",
+    "manual-artifact-inspection",
+    "artifact-inspection",
+}
+RUNTIME_FACING_SURFACE_KEYWORDS = (
+    "behavioral",
+    "orchestration",
+    "persistence",
+    "repair",
+    "prompt-interface",
+    "prompt interface",
+    "runtime",
+    "artifact mutation",
+)
+
+
 def parse_backlog_document(text: str) -> ParsedBacklogDocument:
     feature_sections: dict[str, list[BacklogFeatureEntry]] = {name: [] for name in WORKFLOW_SECTIONS}
     backlog_items: list[BacklogItemEntry] = []
@@ -516,6 +545,118 @@ def linked_openspec_change_dir(
     if resolved_repo_root is None:
         return None
     return _find_openspec_change_dir(resolved_repo_root, change_id)
+
+
+def _collect_markdown_section(lines: list[str], *, title: str, level: int) -> list[str] | None:
+    heading = f"{'#' * level} {title}"
+    collected: list[str] = []
+    collecting = False
+
+    for line in lines:
+        if not collecting:
+            if line.strip() == heading:
+                collecting = True
+            continue
+
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            marker = stripped.split(maxsplit=1)[0]
+            if set(marker) == {"#"} and len(marker) <= level:
+                break
+        collected.append(line)
+
+    return collected if collecting else None
+
+
+def _meaningful_markdown_lines(lines: list[str] | None) -> list[str]:
+    if lines is None:
+        return []
+    meaningful: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("<!--") and stripped.endswith("-->"):
+            continue
+        meaningful.append(stripped)
+    return meaningful
+
+
+def _parse_bullet_values(lines: list[str]) -> list[str]:
+    values: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped.startswith("- "):
+            continue
+        value = stripped[2:].strip()
+        if value.startswith("`") and value.endswith("`") and len(value) >= 2:
+            value = value[1:-1]
+        values.append(value.rstrip("."))
+    return values
+
+
+def _requires_runtime_facing_validation(contract_surface_lines: list[str]) -> bool:
+    joined = " ".join(contract_surface_lines).lower()
+    return any(keyword in joined for keyword in RUNTIME_FACING_SURFACE_KEYWORDS)
+
+
+def validate_implementation_plan_file(plan_path: Path) -> ImplementationPlanSummary:
+    lines = plan_path.read_text(encoding="utf-8").splitlines()
+    plan_label = str(plan_path)
+
+    contract_surface = _meaningful_markdown_lines(
+        _collect_markdown_section(lines, title="Contract Surface", level=2)
+    )
+    if not contract_surface:
+        raise ValueError(f"{plan_label} is missing required section `## Contract Surface`")
+
+    proof_obligations = _meaningful_markdown_lines(
+        _collect_markdown_section(lines, title="Proof Obligations", level=2)
+    )
+    if not proof_obligations:
+        raise ValueError(f"{plan_label} is missing required section `## Proof Obligations`")
+
+    validation_plan = _collect_markdown_section(lines, title="Validation Plan", level=2)
+    if validation_plan is None:
+        raise ValueError(f"{plan_label} is missing required section `## Validation Plan`")
+
+    required_validation_lines = _meaningful_markdown_lines(
+        _collect_markdown_section(validation_plan, title="Required Validation Classes", level=3)
+    )
+    required_validation_classes = tuple(
+        value.lower()
+        for value in _parse_bullet_values(required_validation_lines)
+    )
+    if not required_validation_classes:
+        raise ValueError(
+            f"{plan_label} is missing required validation classes under `### Required Validation Classes`"
+        )
+
+    justification_lines = _meaningful_markdown_lines(
+        _collect_markdown_section(validation_plan, title="Unit-Only Justification", level=3)
+    )
+    unit_only_justification = " ".join(justification_lines).strip() or None
+
+    if _requires_runtime_facing_validation(contract_surface):
+        has_runtime_facing_class = any(
+            validation_class in RUNTIME_FACING_VALIDATION_CLASSES
+            for validation_class in required_validation_classes
+        )
+        has_unit_only_justification = bool(unit_only_justification) and unit_only_justification.lower() not in {
+            "none",
+            "none.",
+        }
+        if not has_runtime_facing_class and not has_unit_only_justification:
+            raise ValueError(
+                f"{plan_label} requires a runtime-facing validation class or an explicit unit-only justification"
+            )
+
+    return ImplementationPlanSummary(
+        contract_surface_lines=tuple(contract_surface),
+        proof_obligation_lines=tuple(proof_obligations),
+        required_validation_classes=required_validation_classes,
+        unit_only_justification=unit_only_justification,
+    )
 
 
 def validate_active_feature_execution(

@@ -17,11 +17,11 @@ None yet.
 
 ## [READY]
 
-### `v1-f014` [Enforce Contract-Proof Coverage](features/v1-f014-enforce-contract-proof-coverage.md)
+None yet.
 
 ## [IN_PROGRESS]
 
-None yet.
+### `v1-f014` [Enforce Contract-Proof Coverage](features/v1-f014-enforce-contract-proof-coverage.md)
 
 ## [DONE]
 

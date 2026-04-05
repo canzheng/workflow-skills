@@ -1,9 +1,9 @@
 ## 1. Enforce implementation-plan proof structure
 
-- [ ] 1 Enforce implementation-plan proof structure in execution helpers
-  - [ ] 1.1 Add shared workflow-state helpers to parse and validate task implementation plans
-  - [ ] 1.2 Fail `start-task` and `complete-task` resolution when the linked implementation plan lacks required proof-coverage sections
-  - [ ] 1.3 Update workflow tests and fixture plan writers to use the stronger implementation-plan contract
+- [x] 1 Enforce implementation-plan proof structure in execution helpers
+  - [x] 1.1 Add shared workflow-state helpers to parse and validate task implementation plans
+  - [x] 1.2 Fail `start-task` and `complete-task` resolution when the linked implementation plan lacks required proof-coverage sections
+  - [x] 1.3 Update workflow tests and fixture plan writers to use the stronger implementation-plan contract
 
 ## 2. Align shaping and readiness guidance
 

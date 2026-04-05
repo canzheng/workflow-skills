@@ -25,6 +25,7 @@ from _workflow.workflow_state import (
     parse_feature_openspec_change,
     parse_feature_openspec_status,
     parse_tasks,
+    validate_implementation_plan_file,
 )
 
 
@@ -134,6 +135,10 @@ def resolve_active_task(root: Path) -> dict[str, object]:
                         "task implementation plan is missing: "
                         f"{relative_plan_path}. Write or update the implementation plan before completing the task."
                     )
+                try:
+                    validate_implementation_plan_file(implementation_plan_path)
+                except ValueError as exc:
+                    raise WorkflowError(f"task implementation plan is invalid: {exc}") from exc
                 context_files = list_openspec_change_context_files(
                     feature_text,
                     task_id=task.task_id,

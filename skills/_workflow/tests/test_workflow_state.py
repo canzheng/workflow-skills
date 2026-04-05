@@ -15,6 +15,7 @@ from _workflow.workflow_state import (
     parse_backlog_document,
     parse_current_task,
     parse_tasks,
+    validate_implementation_plan_file,
     validate_active_feature_execution,
 )
 
@@ -180,6 +181,91 @@ def test_compute_task_readiness_drift_uses_openspec_tasks_with_feature_context(t
     assert drift.promotable_task_ids == []
     assert drift.invalid_ready_task_ids == []
     assert drift.unknown_dependency_errors == []
+
+
+def test_validate_implementation_plan_file_accepts_structured_proof_sections(tmp_path: Path) -> None:
+    plan_path = tmp_path / "1.md"
+    plan_path.write_text(
+        textwrap.dedent(
+            """\
+            # Task 1 Implementation Plan
+
+            ## Objective
+
+            Exercise workflow validation.
+
+            ## Contract Surface
+
+            - Change Type: `behavioral`
+            - Workflow Surface: `resolver path`
+
+            ## Proof Obligations
+
+            - The plan must declare proof obligations explicitly.
+
+            ## Validation Plan
+
+            ### Required Validation Classes
+
+            - `unit`
+            - `integration`
+
+            ### Unit-Only Justification
+
+            None.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    summary = validate_implementation_plan_file(plan_path)
+
+    assert summary.required_validation_classes == ("unit", "integration")
+    assert summary.unit_only_justification == "None."
+
+
+def test_validate_implementation_plan_file_rejects_behavioral_plan_without_runtime_validation_or_justification(
+    tmp_path: Path,
+) -> None:
+    plan_path = tmp_path / "1.md"
+    plan_path.write_text(
+        textwrap.dedent(
+            """\
+            # Task 1 Implementation Plan
+
+            ## Objective
+
+            Exercise workflow validation.
+
+            ## Contract Surface
+
+            - Change Type: `behavioral`
+            - Workflow Surface: `resolver path`
+
+            ## Proof Obligations
+
+            - The plan must declare proof obligations explicitly.
+
+            ## Validation Plan
+
+            ### Required Validation Classes
+
+            - `unit`
+
+            ### Unit-Only Justification
+
+            None.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    try:
+        validate_implementation_plan_file(plan_path)
+    except ValueError as exc:
+        assert "runtime-facing validation class or an explicit unit-only justification" in str(exc)
+    else:
+        raise AssertionError("expected behavioral plan without runtime validation to be rejected")
 
 
 def test_validate_active_feature_execution_rejects_missing_openspec_change_metadata(tmp_path: Path) -> None:

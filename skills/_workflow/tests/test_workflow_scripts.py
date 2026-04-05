@@ -17,6 +17,43 @@ AUTONOMOUS_RESOLVER_SCRIPT = (
 )
 
 
+def _write_implementation_plan(change_dir: Path, task_id: str) -> None:
+    implementation_plan_dir = change_dir / "implementation-plans"
+    implementation_plan_dir.mkdir(parents=True, exist_ok=True)
+    (implementation_plan_dir / f"{task_id}.md").write_text(
+        textwrap.dedent(
+            f"""\
+            # Task {task_id} Implementation Plan
+
+            ## Objective
+
+            Execute task {task_id}.
+
+            ## Contract Surface
+
+            - Change Type: `behavioral`
+            - Workflow Surface: `resolver fixture`
+
+            ## Proof Obligations
+
+            - Resolver fixtures must satisfy the workflow implementation-plan contract.
+
+            ## Validation Plan
+
+            ### Required Validation Classes
+
+            - `unit`
+            - `integration`
+
+            ### Unit-Only Justification
+
+            None.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+
 def _write_repo_fixture(
     tmp_path: Path,
     *,
@@ -330,6 +367,7 @@ def _write_cross_feature_openspec_repo_fixture(tmp_path: Path, *, archived_upstr
         ),
         encoding="utf-8",
     )
+    _write_implementation_plan(downstream_change_dir, "1")
 
     upstream_tasks_text = textwrap.dedent(
         """\
