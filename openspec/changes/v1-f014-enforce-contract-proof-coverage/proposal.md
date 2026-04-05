@@ -5,9 +5,12 @@ Workflow execution currently proves that a task has *some* implementation plan a
 ## What Changes
 
 - Require task-scoped implementation plans to declare contract surface, proof obligations, required validation classes, and any unit-only justification before execution starts.
-- Tighten task start and completion workflow gates so they reject implementation plans that do not expose those proof obligations explicitly.
-- Align workflow shaping and readiness guidance so promoted work captures proof obligations early enough to prevent lower-level tests from silently redefining acceptance.
-- Add focused regression coverage for implementation-plan validation and update fixture plans that currently encode the older weaker contract.
+- Tighten task start workflow gates so they reject anti-surrogate validation plans such as helper-only proof for orchestration behavior, file-presence proof for structured assets, bookkeeping-only proof for repair behavior, and isolated helper proof without real execution-path coverage.
+- Tighten readiness guidance so a feature cannot become `[READY]` unless at least one startable task has proof planning aligned to the shaped contract, not only dependency-derived readiness.
+- Tighten completion workflow gates so task closure reconciles proof obligations to categorized evidence rather than accepting any narrow validation log as sufficient by default.
+- Add a workflow review question for test changes that asks whether new or modified tests narrow the contract relative to the shaped task plan.
+- Update workflow reference and skill guidance to define a validation taxonomy and prefer canonical end-to-end fixtures over minimized local fixtures when contract behavior is at stake.
+- Add focused regression coverage for implementation-plan validation, evidence reconciliation, review guidance, and fixture strategy so stale tests do not normalize the weaker contract again.
 
 ## Capabilities
 
@@ -17,12 +20,12 @@ Workflow execution currently proves that a task has *some* implementation plan a
 
 ### Modified Capabilities
 
-- `task-execution-handoff`: task start and completion now require implementation plans that make proof obligations and validation classes explicit.
-- `feature-execution-tracking`: task evidence guidance now records validation against explicit proof obligations rather than treating any narrow validation log as sufficient by default.
-- `openspec-change-integration`: shaping and readiness now require linked OpenSpec work to expose proof obligations and intended validation coverage for executable tasks.
+- `task-execution-handoff`: task start and completion now require implementation plans that make proof obligations and validation classes explicit, reject anti-surrogate proof patterns for behavioral work, and reconcile completion against categorized evidence.
+- `feature-execution-tracking`: task evidence guidance now records categorized validation against explicit proof obligations rather than treating any narrow validation log as sufficient by default.
+- `openspec-change-integration`: shaping and readiness now require linked OpenSpec work to expose proof obligations and intended validation coverage for executable tasks before those tasks become ready.
 
 ## Impact
 
-- Affected code: `skills/_workflow/workflow_state.py`, `skills/start-task/scripts/resolve_start_task.py`, `skills/complete-task/scripts/resolve_complete_task.py`, and workflow-skill documentation for shaping, readiness, task start, and task completion.
-- Affected tests: workflow-state tests, resolver/integration tests, and any fixture helper that writes implementation plans.
-- Affected process: new workflow-managed tasks must author richer implementation plans before execution can begin.
+- Affected code: `skills/_workflow/workflow_state.py`, `skills/start-task/scripts/resolve_start_task.py`, `skills/complete-task/scripts/resolve_complete_task.py`, workflow feature templates, and workflow-skill documentation for shaping, readiness, task start, and task completion.
+- Affected tests: workflow-state tests, resolver/integration tests, fixture helpers that write implementation plans or evidence, and review/process coverage for test-contract narrowing.
+- Affected process: new workflow-managed tasks must author richer proof plans before execution, record categorized evidence at completion, and review test changes against the shaped contract instead of only the implementation.

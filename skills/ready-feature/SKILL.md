@@ -31,7 +31,7 @@ It is a workflow wrapper around linked OpenSpec shaping artifacts, with optional
    - `tasks.md`
    - relevant linked spec paths
 7. Review corresponding existing documentation for consistency with the shaped change, update any documentation that must change before the feature can honestly be considered ready, and otherwise make the no-update-needed conclusion explicit in the linked OpenSpec change.
-8. Confirm at least one linked top-level OpenSpec task resolves to workflow status `ready` under the workflow task dependency convention.
+8. Confirm at least one linked top-level OpenSpec task resolves to workflow status `ready` under the workflow task dependency convention and that its proof obligations and validation coverage still match the shaped contract surface.
 9. Update the feature file first, then move the backlog entry from `[SHAPING]` to the bottom of `[READY]`.
 10. Re-run `audit-workflow`.
 11. Commit the intentional planning-state changes when needed to leave the primary checkout clean before exiting.
@@ -48,6 +48,7 @@ It is a workflow wrapper around linked OpenSpec shaping artifacts, with optional
 - Do not promote a feature to `[READY]` while known documentation drift remains in corresponding existing docs that should already reflect the shaped change.
 - Do not promote the feature to `[READY]` unless at least one linked top-level OpenSpec task resolves to workflow status `ready`.
 - Preserve the existing feature file and update only relevant sections.
+- Treat proof obligations and the validation taxonomy as part of the readiness contract, not as later execution-time details.
 
 ## Stop Conditions
 

@@ -43,6 +43,7 @@ This document is the canonical reference for workflow definitions, status models
 - Assign the feature ID when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Once created, a feature ID must never be reused for a different feature.
 - The feature file contains `Meta`, `Validation Log`, and `Handoff Notes`.
+- The feature file should record proof obligations and validation evidence using the same contract language that shaping, readiness, task start, and task completion guidance use.
 - The feature file must record one linked OpenSpec change plus the affected OpenSpec spec paths, except for historical `[DONE]` features explicitly marked `OpenSpec Status: legacy-exempt` during midstream adoption.
 - Active workflow feature files must use the thin execution-record format. Legacy inline planning sections such as `Problem`, `Goal`, `Design Spec`, `Implementation Plan`, or embedded `Tasks` are invalid unless the feature is an explicitly marked `legacy-exempt` historical completed feature.
 - Do not duplicate OpenSpec proposal, design, spec, or task prose inside the feature file.
@@ -72,4 +73,6 @@ This document is the canonical reference for workflow definitions, status models
 - Optional `Depends On` blocks under top-level tasks are a workflow-layer markdown convention interpreted by this repository's helpers; they are not native OpenSpec task semantics.
 - Unchecked top-level OpenSpec tasks are treated as workflow-`ready` work only when their workflow prerequisites and any `Depends On` references are satisfied. Otherwise they remain `todo`.
 - `Current Task` in the feature file identifies the one top-level OpenSpec task currently `in_progress`; this feature-file field is the active execution marker in the implemented workflow.
+- Feature validation evidence should be written against the declared proof obligations and validation taxonomy instead of only naming a successful command.
 - Checked OpenSpec tasks are treated as `done`.
+- The shared validation taxonomy should stay readable in Markdown and may distinguish helper proof, schema proof, composed runtime proof, persistence proof, negative-path proof, and manual inspection proof where that distinction matters.

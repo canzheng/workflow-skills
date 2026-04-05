@@ -20,9 +20,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - `<YYYY-MM-DD>` Task `<task-id>`:
   - Run: `<command or inspection step>`
   - Result: `<pass/fail and notable details>`
+  - Evidence: `<what proof obligation or validation category this evidence satisfied>`
 
 ## 2. Handoff Notes
 - `<YYYY-MM-DD>`:
   - Current Task: `<task-id like 1 or none>`
   - Worktree State: `<clean/dirty>`
   - Notes: <handoff summary>
+  - Proof Obligations: `<short note about the active task's proof-obligation surface when relevant>`

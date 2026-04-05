@@ -38,6 +38,13 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `rtk git diff --check`
   - Result: `pass`
   - Review: `Focused local review found the diff stayed within the task-1 scope: shared implementation-plan validation, resolver gate wiring, and fixture/test updates for the stronger contract.`
+- `2026-04-05` Task `2`:
+  - Run: `rtk bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass; workflow audit passed for docs/planning/versions/v1`
+  - Run: `rtk git diff --check`
+  - Result: `pass`
+  - Run: `rtk rg -n "proof obligation|proof obligations|validation taxonomy|Current Task|Evidence:" skills docs/planning -g '*.md'`
+  - Result: `pass; matched the updated guidance in shape-backlog-item, ready-feature, start-task, complete-task, docs/planning/WORKFLOW_REFERENCE.md, and docs/planning/template/feature-template.md`
 
 ## 2. Handoff Notes
 - `2026-04-05`:
@@ -52,3 +59,11 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `task-1 changes ready to commit on branch v1-f014-enforce-contract-proof-coverage in ../worktrees/workflow-skills/v1-f014-enforce-contract-proof-coverage`
   - Notes: Completed task `1`. The workflow now validates implementation-plan proof structure through shared helpers used by both start and completion resolvers, stale cross-feature fixtures now carry compliant plans, and task `2` is the next ready execution unit while the feature remains `[IN_PROGRESS]`.
+- `2026-04-05`:
+  - Current Task: `2`
+  - Worktree State: `dirty feature worktree on branch v1-f014-enforce-contract-proof-coverage in ../worktrees/workflow-skills/v1-f014-enforce-contract-proof-coverage`
+  - Notes: Started task `2` after writing `openspec/changes/v1-f014-enforce-contract-proof-coverage/implementation-plans/2.md`. Execution is scoped to aligning shaping, readiness, task guidance, and the workflow reference around explicit proof obligations and the shared validation taxonomy.
+- `2026-04-05`:
+  - Current Task: `none`
+  - Worktree State: `dirty feature worktree on branch v1-f014-enforce-contract-proof-coverage in ../worktrees/workflow-skills/v1-f014-enforce-contract-proof-coverage`
+  - Notes: Completed task `2`. Shaping, readiness, task start, task completion, the feature template, and the workflow reference now describe the shared proof-obligation / validation-taxonomy contract; task `3` is the next ready execution unit while the feature remains `[IN_PROGRESS]`.

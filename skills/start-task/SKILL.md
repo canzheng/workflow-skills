@@ -38,11 +38,11 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 5. Read the linked change context before updating the task implementation plan.
    - read `proposal.md`, `design.md`, linked specs, `tasks.md`, and any other Markdown files under the linked change directory before drafting or updating the task implementation plan
    - use that context to update the task implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution starts
-   - keep the implementation plan's validation section aligned with the selected task and the linked change intent
+   - keep the implementation plan's validation section aligned with the selected task, the linked change intent, and the proof-obligation / validation-taxonomy language used by shaping and readiness guidance
 6. Perform a semantic consistency and coverage review across the selected change context before code execution starts.
    - read the task implementation plan after updating it
    - spawn a `gpt-5.4-mini` reviewer subagent to review whether the task implementation plan and its validation section are semantically consistent with the selected task, the change proposal, the design, and the linked spec intent
-   - require that review to confirm the plan and its validation section fully cover the selected task's intended change and proof obligations before execution continues
+   - require that review to confirm the plan and its validation section fully cover the selected task's intended change and proof obligations before execution continues, using the same validation taxonomy that the workflow reference and feature template describe
    - if the review finds semantic inconsistency, ambiguity, uncovered change intent, or missing validation coverage, return to step 5 to update the implementation plan and rerun this review until it passes
 7. If this is the first executing task for the feature, confirm the primary checkout is clean so the worktree will be created from a clean commit. If the primary checkout is dirty, stop and resolve the changes explicitly instead of auto-committing them.
 8. Wrap `using-git-worktrees`:
