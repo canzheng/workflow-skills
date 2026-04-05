@@ -6,10 +6,12 @@ from pathlib import Path
 from _workflow.workflow_state import (
     WorkflowStateError,
     collect_openspec_change_linkage,
+    collect_task_validation_evidence,
     compute_task_readiness_drift,
     find_backlog_section_order_errors,
     find_openspec_task_structure_errors,
     parse_feature_openspec_specs,
+    required_validation_evidence_categories_for_plan,
     validate_promoted_feature_openspec_specs,
     list_open_openspec_nested_items,
     parse_backlog_document,
@@ -222,6 +224,40 @@ def test_validate_implementation_plan_file_accepts_structured_proof_sections(tmp
 
     assert summary.required_validation_classes == ("unit", "integration")
     assert summary.unit_only_justification == "None."
+    assert required_validation_evidence_categories_for_plan(summary) == ("runtime_path",)
+
+
+def test_collect_task_validation_evidence_normalizes_categorized_validation_log_entries() -> None:
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Example
+
+        ## 0. Meta
+        - Feature ID: `v1-f999`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+        - Current Task: `none`
+
+        ## 1. Validation Log
+        - `2026-04-05` Task `3` Completion:
+          - Run: `python -m pytest`
+          - Result: `pass`
+          - Evidence: `runtime path`, helper proof, negative-case
+        - `2026-04-05` Task `2` Completion:
+          - Run: `python -m pytest`
+          - Result: `pass`
+          - Evidence: `schema`
+
+        ## 2. Handoff Notes
+        - None yet.
+        """
+    )
+
+    evidence = collect_task_validation_evidence(feature_text, "3")
+
+    assert evidence.task_id == "3"
+    assert evidence.evidence_lines == ("`runtime path`, helper proof, negative-case",)
+    assert evidence.evidence_categories == ("runtime_path", "negative_case")
 
 
 def test_validate_implementation_plan_file_rejects_behavioral_plan_without_runtime_validation_or_justification(

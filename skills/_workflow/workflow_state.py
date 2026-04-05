@@ -131,6 +131,13 @@ class ImplementationPlanSummary:
     unit_only_justification: str | None
 
 
+@dataclass(frozen=True)
+class ValidationEvidenceSummary:
+    task_id: str
+    evidence_lines: tuple[str, ...]
+    evidence_categories: tuple[str, ...]
+
+
 RUNTIME_FACING_VALIDATION_CLASSES = {
     "integration",
     "runtime-path",
@@ -150,6 +157,31 @@ RUNTIME_FACING_SURFACE_KEYWORDS = (
     "runtime",
     "artifact mutation",
 )
+VALIDATION_EVIDENCE_CATEGORY_ALIASES = {
+    "schema": "schema",
+    "schema proof": "schema",
+    "runtime path": "runtime_path",
+    "runtime-path": "runtime_path",
+    "runtime_path": "runtime_path",
+    "runtime path proof": "runtime_path",
+    "artifact repair": "artifact_repair",
+    "artifact-repair": "artifact_repair",
+    "artifact_repair": "artifact_repair",
+    "prompt contract": "prompt_contract",
+    "prompt-contract": "prompt_contract",
+    "prompt_contract": "prompt_contract",
+    "orchestration": "orchestration",
+    "composed runtime proof": "runtime_path",
+    "composed-runtime-proof": "runtime_path",
+    "negative path": "negative_case",
+    "negative-path": "negative_case",
+    "negative case": "negative_case",
+    "negative_case": "negative_case",
+    "manual inspection": "manual_inspection",
+    "manual-inspection": "manual_inspection",
+    "manual inspection proof": "manual_inspection",
+    "manual-inspection-proof": "manual_inspection",
+}
 
 
 def parse_backlog_document(text: str) -> ParsedBacklogDocument:
@@ -548,13 +580,13 @@ def linked_openspec_change_dir(
 
 
 def _collect_markdown_section(lines: list[str], *, title: str, level: int) -> list[str] | None:
-    heading = f"{'#' * level} {title}"
+    heading_re = re.compile(rf"^{'#' * level}(?:\s+\d+(?:\.\d+)*)?\.?\s+{re.escape(title)}\s*$")
     collected: list[str] = []
     collecting = False
 
     for line in lines:
         if not collecting:
-            if line.strip() == heading:
+            if heading_re.match(line.strip()):
                 collecting = True
             continue
 
@@ -598,6 +630,107 @@ def _parse_bullet_values(lines: list[str]) -> list[str]:
 def _requires_runtime_facing_validation(contract_surface_lines: list[str]) -> bool:
     joined = " ".join(contract_surface_lines).lower()
     return any(keyword in joined for keyword in RUNTIME_FACING_SURFACE_KEYWORDS)
+
+
+def _collect_validation_log_task_block(feature_text: str, task_id: str) -> list[str]:
+    validation_log = _collect_markdown_section(feature_text.splitlines(), title="Validation Log", level=2)
+    if validation_log is None:
+        return []
+
+    task_block: list[str] = []
+    collecting = False
+
+    for line in validation_log:
+        task_heading = re.match(r"^- `[^`]+` Task `(?P<task_id>\d+)`[^:]*:$", line.strip())
+        if task_heading:
+            if collecting and task_heading.group("task_id") != task_id:
+                break
+            collecting = task_heading.group("task_id") == task_id
+            if collecting:
+                task_block.append(line)
+            continue
+
+        if not collecting:
+            continue
+
+        if line.startswith("- ") and not line.startswith("  - "):
+            break
+        task_block.append(line)
+
+    return task_block
+
+
+def _normalize_validation_evidence_category(text: str) -> str | None:
+    normalized = re.sub(r"[_\-]+", " ", text.lower()).strip()
+    normalized = re.sub(r"\s+", " ", normalized)
+    for alias, category in VALIDATION_EVIDENCE_CATEGORY_ALIASES.items():
+        alias_normalized = re.sub(r"[_\-]+", " ", alias.lower()).strip()
+        alias_normalized = re.sub(r"\s+", " ", alias_normalized)
+        if alias_normalized and re.search(rf"(?<!\w){re.escape(alias_normalized)}(?!\w)", normalized):
+            return category
+    return None
+
+
+def _parse_validation_evidence_lines(task_block: list[str]) -> list[str]:
+    evidence_lines: list[str] = []
+    for line in task_block:
+        stripped = line.strip()
+        if "Evidence:" not in stripped:
+            continue
+        evidence_lines.append(stripped.split("Evidence:", 1)[1].strip())
+    return evidence_lines
+
+
+def _parse_validation_evidence_categories(evidence_lines: list[str]) -> tuple[str, ...]:
+    categories: list[str] = []
+    for evidence_line in evidence_lines:
+        for segment in re.split(r",|;|/|\band\b", evidence_line, flags=re.IGNORECASE):
+            segment = segment.strip(" `.-")
+            if not segment:
+                continue
+            category = _normalize_validation_evidence_category(segment)
+            if category is None or category in categories:
+                continue
+            categories.append(category)
+    return tuple(categories)
+
+
+def collect_task_validation_evidence(feature_text: str, task_id: str) -> ValidationEvidenceSummary:
+    task_block = _collect_validation_log_task_block(feature_text, task_id)
+    evidence_lines = _parse_validation_evidence_lines(task_block)
+    evidence_categories = _parse_validation_evidence_categories(evidence_lines)
+    return ValidationEvidenceSummary(
+        task_id=task_id,
+        evidence_lines=tuple(evidence_lines),
+        evidence_categories=evidence_categories,
+    )
+
+
+def required_validation_evidence_categories_for_plan(summary: ImplementationPlanSummary) -> tuple[str, ...]:
+    contract_surface = " ".join((*summary.contract_surface_lines, *summary.proof_obligation_lines)).lower()
+    required_categories: list[str] = []
+
+    def add(category: str) -> None:
+        if category not in required_categories:
+            required_categories.append(category)
+
+    if any(keyword in contract_surface for keyword in ("prompt", "prompt interface", "prompt-interface")):
+        add("prompt_contract")
+    if any(keyword in contract_surface for keyword in ("repair", "artifact mutation")):
+        add("artifact_repair")
+    if any(keyword in contract_surface for keyword in ("schema", "persistence")):
+        add("schema")
+    if any(keyword in contract_surface for keyword in ("documentation/process", "documentation", "process", "review", "guidance")):
+        add("manual_inspection")
+    if any(keyword in contract_surface for keyword in ("orchestration", "runtime", "behavioral", "completion", "resolver")):
+        add("runtime_path")
+    if any(keyword in contract_surface for keyword in ("negative", "reject", "drift", "narrow proof")):
+        add("negative_case")
+
+    if not required_categories:
+        add("runtime_path")
+
+    return tuple(required_categories)
 
 
 def validate_implementation_plan_file(plan_path: Path) -> ImplementationPlanSummary:

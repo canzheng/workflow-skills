@@ -20,7 +20,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - `<YYYY-MM-DD>` Task `<task-id>`:
   - Run: `<command or inspection step>`
   - Result: `<pass/fail and notable details>`
-  - Evidence: `<what proof obligation or validation category this evidence satisfied>`
+  - Evidence: `<comma-separated validation categories such as schema, runtime_path, artifact_repair, prompt_contract, orchestration, negative_case>`
 
 ## 2. Handoff Notes
 - `<YYYY-MM-DD>`:

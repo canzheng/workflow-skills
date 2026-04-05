@@ -65,6 +65,29 @@ def _write_implementation_plan(change_dir: Path, task_id: str) -> None:
     )
 
 
+def _write_task_validation_log(feature_file: Path, *, task_id: str, evidence_categories: str) -> None:
+    feature_text = feature_file.read_text(encoding="utf-8")
+    validation_log_start = feature_text.index("## 1. Validation Log")
+    handoff_notes_start = feature_text.index("## 2. Handoff Notes")
+    feature_file.write_text(
+        (
+            feature_text[:validation_log_start]
+            + textwrap.dedent(
+                f"""\
+                ## 1. Validation Log
+                - `2026-04-05` Task `{task_id}` Completion:
+                  - Run: `python -m pytest`
+                  - Result: `pass`
+                  - Evidence: `{evidence_categories}`
+
+                """
+            )
+            + feature_text[handoff_notes_start:]
+        ),
+        encoding="utf-8",
+    )
+
+
 def _git(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["git", *args],
@@ -339,7 +362,10 @@ def _write_complete_task_legacy_exempt_fixture(repo: Path, *, missing_active_cha
             "- Current Task: `1`",
             "",
             "## 1. Validation Log",
-            "- None yet.",
+            "- `2026-04-05` Task `1` Completion:",
+            "  - Run: `python -m pytest`",
+            "  - Result: `pass`",
+            "  - Evidence: `runtime_path`",
             "",
             "## 2. Handoff Notes",
             "- None yet.",
@@ -1310,6 +1336,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             )
             (change_dir / "notes.md").write_text("# Notes\n\nExtra context\n", encoding="utf-8")
             _write_implementation_plan(change_dir, "2")
+            _write_task_validation_log(feature_file, task_id="2", evidence_categories="runtime_path")
 
             result = subprocess.run(
                 ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
@@ -1564,6 +1591,97 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             self.assertIn("task implementation plan is invalid:", result.stderr)
             self.assertIn("## Contract Surface", result.stderr)
 
+    def test_complete_task_rejects_completion_evidence_with_wrong_category(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    None yet.
+
+                    ## [READY]
+
+                    None yet.
+
+                    ## [IN_PROGRESS]
+
+                    ### `v1-f001` [OpenSpec integration](features/v1-f001-openspec-integration.md)
+
+                    ## [DONE]
+
+                    None yet.
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            feature_file = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-openspec-integration.md"
+            feature_file.write_text(
+                textwrap.dedent(
+                    """\
+                    # Feature: OpenSpec integration
+
+                    ## 0. Meta
+                    - Feature ID: `v1-f001`
+                    - Version: `v1`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+                    - OpenSpec Change: `integrate-openspec-shaping-readiness`
+                    - OpenSpec Specs:
+                      - `openspec/specs/workflow-board-lifecycle/spec.md`
+                    - Current Task: `1`
+
+                    ## 1. Validation Log
+                    - None yet.
+
+                    ## 2. Handoff Notes
+                    - None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            change_dir = repo / "openspec" / "changes" / "integrate-openspec-shaping-readiness"
+            change_dir.mkdir(parents=True, exist_ok=True)
+            (change_dir / "proposal.md").write_text("## Why\n\nTest\n", encoding="utf-8")
+            (change_dir / "design.md").write_text("## Context\n\nTest\n", encoding="utf-8")
+            (change_dir / "tasks.md").write_text(
+                textwrap.dedent(
+                    """\
+                    ## 1. Setup
+
+                    - [ ] 1 Seed baseline
+                    """
+                ),
+                encoding="utf-8",
+            )
+            _write_implementation_plan(change_dir, "1")
+            _write_task_validation_log(feature_file, task_id="1", evidence_categories="schema")
+
+            result = subprocess.run(
+                ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("task completion evidence does not satisfy declared proof obligations", result.stderr)
+
     def test_complete_task_still_rejects_active_feature_missing_change_with_done_legacy_exempt_feature(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"
@@ -1756,6 +1874,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
             _write_implementation_plan(change_dir, "1")
+            _write_task_validation_log(feature_file, task_id="1", evidence_categories="runtime_path")
 
             result = subprocess.run(
                 ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
@@ -1858,6 +1977,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
             _write_implementation_plan(change_dir, "1")
+            _write_task_validation_log(feature_file, task_id="1", evidence_categories="runtime_path")
 
             init_result = _git(repo, "init", "-b", "main")
             self.assertEqual(init_result.returncode, 0, init_result.stdout + init_result.stderr)
@@ -1906,6 +2026,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            _write_task_validation_log(feature_worktree_file, task_id="2", evidence_categories="runtime_path")
             (feature_worktree / "openspec" / "changes" / "integrate-openspec-shaping-readiness" / "tasks.md").write_text(
                 textwrap.dedent(
                     """\
@@ -2028,6 +2149,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
             _write_implementation_plan(change_dir, "1")
+            _write_task_validation_log(feature_file, task_id="1", evidence_categories="runtime_path")
 
             result = subprocess.run(
                 ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
@@ -2130,6 +2252,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
             _write_implementation_plan(change_dir, "2")
+            _write_task_validation_log(feature_file, task_id="2", evidence_categories="runtime_path")
 
             complete_result = subprocess.run(
                 ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],

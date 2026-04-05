@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f014`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `v1-f014-enforce-contract-proof-coverage`
 - OpenSpec Specs:
   - `openspec/specs/task-execution-handoff/spec.md`
@@ -45,6 +45,38 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Result: `pass`
   - Run: `rtk rg -n "proof obligation|proof obligations|validation taxonomy|Current Task|Evidence:" skills docs/planning -g '*.md'`
   - Result: `pass; matched the updated guidance in shape-backlog-item, ready-feature, start-task, complete-task, docs/planning/WORKFLOW_REFERENCE.md, and docs/planning/template/feature-template.md`
+- `2026-04-05` Task `3` Completion:
+  - Run: `rtk bin/run-python.sh -m pytest skills/_workflow/tests/test_workflow_state.py tests/test_workflow_openspec_integration.py -q -k 'complete_task or evidence'`
+  - Result: `11 passed, 54 deselected in 0.99s`
+  - Run: `rtk bin/run-python.sh -m pytest skills/_workflow/tests/test_workflow_state.py skills/_workflow/tests/test_workflow_scripts.py tests/test_workflow_openspec_integration.py -q`
+  - Result: `91 passed in 4.86s`
+  - Run: `rtk bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass; workflow audit passed for docs/planning/versions/v1`
+  - Run: `rtk git diff --check`
+  - Result: `pass`
+  - Run: `rtk python3 skills/complete-task/scripts/resolve_complete_task.py --repo-root .`
+  - Result: `pass; completion_handoff.decision = stay_in_progress, next_ready_task_ids = ['4'], and remaining_open_task_ids = ['4']`
+  - Evidence: `runtime_path, negative_case`
+- `2026-04-05` Task `4`:
+  - Run: `rtk bin/run-python.sh -m unittest tests.test_workflow_contract_docs -v`
+  - Result: `13 tests passed; review question and canonical fixture preference wording are locked in`
+  - Run: `rtk bin/run-python.sh -m unittest tests.test_install_script -v`
+  - Result: `3 tests passed; installed template propagation still matches the tracked workflow template`
+  - Run: `rtk bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass; workflow audit passed for docs/planning/versions/v1`
+  - Run: `rtk git diff --check`
+  - Result: `pass`
+  - Run: `rtk python3 skills/complete-task/scripts/resolve_complete_task.py --repo-root .`
+  - Result: `pass; completion_handoff.decision = confirm_feature_acceptance, all_top_level_tasks_complete = true, next_ready_task_ids = [], and remaining_open_task_ids = []`
+  - Evidence: `manual_inspection`
+- `2026-04-05` Feature Completion:
+  - Run: `rtk openspec validate v1-f014-enforce-contract-proof-coverage --type change --json --no-interactive`
+  - Result: `pass; summary.totals.passed = 1 and summary.totals.failed = 0`
+  - Run: `rtk openspec archive v1-f014-enforce-contract-proof-coverage -y`
+  - Result: `pass; change archived as openspec/changes/archive/2026-04-05-v1-f014-enforce-contract-proof-coverage`
+  - Run: `rtk python3 skills/finish-feature/scripts/resolve_finish_feature.py --repo-root . --feature-id v1-f014`
+  - Result: `pass; active_change_path = null, archive_path = openspec/changes/archive/2026-04-05-v1-f014-enforce-contract-proof-coverage, and requires_archive = false`
+  - Evidence: `manual_inspection`
 
 ## 2. Handoff Notes
 - `2026-04-05`:
@@ -67,3 +99,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Current Task: `none`
   - Worktree State: `clean feature worktree on branch v1-f014-enforce-contract-proof-coverage in ../worktrees/workflow-skills/v1-f014-enforce-contract-proof-coverage`
   - Notes: Completed task `2`. Shaping, readiness, task start, task completion, the feature template, and the workflow reference now describe the shared proof-obligation / validation-taxonomy contract; task `3` is the next ready execution unit while the feature remains `[IN_PROGRESS]`.
+- `2026-04-05`:
+  - Current Task: `none`
+  - Worktree State: `task-3 changes ready to commit on branch v1-f014-enforce-contract-proof-coverage in ../worktrees/workflow-skills/v1-f014-enforce-contract-proof-coverage`
+  - Notes: Completed task `3`. Completion evidence now reconciles the active task's proof obligations with categorized validation evidence, and task `4` is the next ready execution unit while the feature remains `[IN_PROGRESS]`.
+- `2026-04-05`:
+  - Current Task: `4`
+  - Worktree State: `clean feature worktree on branch v1-f014-enforce-contract-proof-coverage in ../worktrees/workflow-skills/v1-f014-enforce-contract-proof-coverage`
+  - Notes: Started task `4` after writing `openspec/changes/v1-f014-enforce-contract-proof-coverage/implementation-plans/4.md`. Execution is scoped to preventing review and fixtures from normalizing weaker local contracts when workflow behavior is under test.
+- `2026-04-05`:
+  - Current Task: `none`
+  - Worktree State: `feature complete and ready for branch finalization on branch v1-f014-enforce-contract-proof-coverage in ../worktrees/workflow-skills/v1-f014-enforce-contract-proof-coverage`
+  - Notes: Completed task `4`, validated the change, archived the linked OpenSpec change, and moved `v1-f014` to `[DONE]`. The remaining work is generic branch finalization.

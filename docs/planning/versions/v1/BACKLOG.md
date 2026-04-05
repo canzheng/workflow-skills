@@ -21,9 +21,11 @@ None yet.
 
 ## [IN_PROGRESS]
 
-### `v1-f014` [Enforce Contract-Proof Coverage](features/v1-f014-enforce-contract-proof-coverage.md)
+None yet.
 
 ## [DONE]
+
+### `v1-f014` [Enforce Contract-Proof Coverage](features/v1-f014-enforce-contract-proof-coverage.md)
 
 ### `v1-f013` [REVIEW] [Harden Installer And Dev Environment](features/v1-f013-harden-installer-and-dev-environment.md)
 ### `v1-f011` [REVIEW] [Harden Workflow Validation](features/v1-f011-harden-workflow-validation.md)

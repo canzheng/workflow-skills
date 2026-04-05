@@ -25,6 +25,8 @@ from _workflow.workflow_state import (
     parse_feature_openspec_change,
     parse_feature_openspec_status,
     parse_tasks,
+    collect_task_validation_evidence,
+    required_validation_evidence_categories_for_plan,
     validate_implementation_plan_file,
 )
 
@@ -100,6 +102,7 @@ def resolve_active_task(root: Path) -> dict[str, object]:
             if change_id is None:
                 raise WorkflowError(f"{feature_path.relative_to(root)} is missing OpenSpec Change metadata")
             change_path = root / "openspec" / "changes" / change_id
+            feature_label = str(feature_path.relative_to(root))
             context_files = list_openspec_change_context_files(
                 feature_text,
                 feature_file=feature_path,
@@ -136,9 +139,23 @@ def resolve_active_task(root: Path) -> dict[str, object]:
                         f"{relative_plan_path}. Write or update the implementation plan before completing the task."
                     )
                 try:
-                    validate_implementation_plan_file(implementation_plan_path)
+                    plan_summary = validate_implementation_plan_file(implementation_plan_path)
                 except ValueError as exc:
                     raise WorkflowError(f"task implementation plan is invalid: {exc}") from exc
+                evidence_summary = collect_task_validation_evidence(feature_text, task.task_id)
+                if not evidence_summary.evidence_categories:
+                    raise WorkflowError(
+                        "task completion evidence is missing categorized proof: "
+                        f"{feature_label} task {task.task_id} must record categorized evidence in Validation Log"
+                    )
+                required_evidence_categories = required_validation_evidence_categories_for_plan(plan_summary)
+                if not set(evidence_summary.evidence_categories).intersection(required_evidence_categories):
+                    raise WorkflowError(
+                        "task completion evidence does not satisfy declared proof obligations: "
+                        f"{feature_label} task {task.task_id} needs one of "
+                        f"{', '.join(required_evidence_categories)}, got "
+                        f"{', '.join(evidence_summary.evidence_categories)}"
+                    )
                 context_files = list_openspec_change_context_files(
                     feature_text,
                     task_id=task.task_id,

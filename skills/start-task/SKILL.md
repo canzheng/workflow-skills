@@ -43,6 +43,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
    - read the task implementation plan after updating it
    - spawn a `gpt-5.4-mini` reviewer subagent to review whether the task implementation plan and its validation section are semantically consistent with the selected task, the change proposal, the design, and the linked spec intent
    - require that review to confirm the plan and its validation section fully cover the selected task's intended change and proof obligations before execution continues, using the same validation taxonomy that the workflow reference and feature template describe
+   - if tests are being added or modified, ask the mandatory review question "changed tests narrowed contract?" and compare the new assertions to the task plan, not just the implementation
    - if the review finds semantic inconsistency, ambiguity, uncovered change intent, or missing validation coverage, return to step 5 to update the implementation plan and rerun this review until it passes
 7. If this is the first executing task for the feature, confirm the primary checkout is clean so the worktree will be created from a clean commit. If the primary checkout is dirty, stop and resolve the changes explicitly instead of auto-committing them.
 8. Wrap `using-git-worktrees`:

@@ -9,6 +9,7 @@ START_TASK_SKILL = REPO_ROOT / "skills" / "start-task" / "SKILL.md"
 FINISH_FEATURE_SKILL = REPO_ROOT / "skills" / "finish-feature" / "SKILL.md"
 AUTONOMOUS_BACKLOG_LOOP_SKILL = REPO_ROOT / "skills" / "autonomous-backlog-loop" / "SKILL.md"
 TASK_EXECUTION_HANDOFF_SPEC = REPO_ROOT / "openspec" / "specs" / "task-execution-handoff" / "spec.md"
+WORKFLOW_REFERENCE = REPO_ROOT / "docs" / "planning" / "WORKFLOW_REFERENCE.md"
 
 
 class WorkflowContractDocsTests(unittest.TestCase):
@@ -37,6 +38,12 @@ class WorkflowContractDocsTests(unittest.TestCase):
 
         self.assertIn("every step in the implementation plan's validation section has been completed successfully", start_task_skill)
         self.assertIn("leaving only the fresh completion-time verification gate owned by `complete-task`", start_task_skill)
+
+    def test_start_task_skill_requires_changed_tests_narrowed_contract_review_question(self) -> None:
+        start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn("changed tests narrowed contract?", start_task_skill)
+        self.assertIn("compare the new assertions to the task plan", start_task_skill)
 
     def test_finish_feature_skill_describes_in_progress_completion_gate(self) -> None:
         finish_feature_skill = FINISH_FEATURE_SKILL.read_text(encoding="utf-8")
@@ -85,6 +92,12 @@ class WorkflowContractDocsTests(unittest.TestCase):
 
         self.assertIn("revalidate the effective repo root for `<feature-id>`", autonomous_loop_skill)
         self.assertIn("run feature-scoped `audit-workflow` from that selected repo root", autonomous_loop_skill)
+
+    def test_workflow_reference_prefers_canonical_end_to_end_fixtures_for_contract_tests(self) -> None:
+        workflow_reference = WORKFLOW_REFERENCE.read_text(encoding="utf-8")
+
+        self.assertIn("prefer canonical end-to-end fixtures", workflow_reference)
+        self.assertIn("workflow contract behavior is under test", workflow_reference)
 
     def test_stable_handoff_spec_mentions_autonomous_finish_feature_gate(self) -> None:
         task_execution_handoff_spec = TASK_EXECUTION_HANDOFF_SPEC.read_text(encoding="utf-8")
