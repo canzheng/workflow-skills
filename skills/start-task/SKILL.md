@@ -67,8 +67,9 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
    - if the resolver selected an existing feature worktree, re-enter that repo root before reading change context, updating the implementation plan, or editing code
    - keep execution scoped to this one task
    - use the already-reviewed change context as the execution baseline, and if later edits introduce new semantic inconsistency between the task plan and the linked change artifacts, stop and reconcile before continuing
+   - as each planned validation step completes, record its `Run`, `Result`, and `Evidence` entry in the feature file's validation log instead of deferring evidence capture to `complete-task`
    - apply the chosen work method inside the chosen execution mode
-   - stop only when the selected task's implementation work is complete and every step in the implementation plan's validation section has been completed successfully, leaving only the fresh completion-time verification gate owned by `complete-task`, or when the task must be marked `blocked` or `cancelled`
+   - stop only when the selected task's implementation work is complete, every step in the implementation plan's validation section has been completed successfully, and the corresponding execution-time evidence has been recorded, leaving only the fresh completion-time reconciliation gate owned by `complete-task`, or when the task must be marked `blocked` or `cancelled`
 
 ## Rules
 

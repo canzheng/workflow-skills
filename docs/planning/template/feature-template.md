@@ -17,6 +17,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Last Updated: `YYYY-MM-DD`
 
 ## 1. Validation Log
+- Treat this section as the running execution evidence ledger for the active task. Add entries as planned validation steps complete; do not wait until task closure to write all evidence at once.
 - `<YYYY-MM-DD>` Task `<task-id>`:
   - Run: `<command or inspection step>`
   - Result: `<pass/fail and notable details>`

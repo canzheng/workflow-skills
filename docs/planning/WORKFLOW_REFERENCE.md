@@ -74,6 +74,7 @@ This document is the canonical reference for workflow definitions, status models
 - Optional `Depends On` blocks under top-level tasks are a workflow-layer markdown convention interpreted by this repository's helpers; they are not native OpenSpec task semantics.
 - Unchecked top-level OpenSpec tasks are treated as workflow-`ready` work only when their workflow prerequisites and any `Depends On` references are satisfied. Otherwise they remain `todo`.
 - `Current Task` in the feature file identifies the one top-level OpenSpec task currently `in_progress`; this feature-file field is the active execution marker in the implemented workflow.
+- During task execution, record validation evidence in the feature file as planned proof steps complete; `complete-task` reconciles that ledger instead of acting as the primary place where evidence is first authored.
 - Feature validation evidence should be written against the declared proof obligations and validation taxonomy, using explicit evidence categories such as `schema`, `runtime_path`, `artifact_repair`, `prompt_contract`, `orchestration`, and `negative_case` instead of only naming a successful command.
 - When workflow contract behavior is under test, prefer canonical end-to-end fixtures over hand-minimized local fixtures.
 - Checked OpenSpec tasks are treated as `done`.

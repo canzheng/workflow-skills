@@ -170,7 +170,8 @@ def _resolve_task_in_root(root: Path) -> dict[str, object]:
                     "openspec_context_files": [str(path.relative_to(root)) for path in context_files],
                     "execution_instruction": (
                         "Read the files listed as context, then write or update the implementation plan at the "
-                        "provided path before executing the task."
+                        "provided path before executing the task. Record validation evidence during execution as "
+                        "planned proof steps complete."
                     ),
                     "task_id": task.task_id,
                     "task_title": task.task_title,

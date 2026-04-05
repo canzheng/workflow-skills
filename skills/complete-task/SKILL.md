@@ -7,7 +7,7 @@ description: Use when closing the active task, writing verification evidence, an
 
 ## Overview
 
-This skill verifies one active task, records evidence, and updates task and feature state.
+This skill verifies one active task, reconciles already-recorded evidence, and updates task and feature state.
 
 It does not merge or clean up the feature branch/worktree. Branch finalization is separate and should use `finish-feature` once the feature is complete.
 
@@ -31,7 +31,8 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 6. Confirm the active feature worktree contains only intended task changes and will be left clean after completion. Use repo-appropriate checks such as `git status --short` and `git diff --check`.
    - read the files listed as context before completing the task so validation and task closure are checked against the authoritative change artifacts
 7. Update the feature file:
-   - write exact validation evidence using the same proof-obligation and validation-taxonomy language the task plan used
+   - reconcile the existing validation log against the same proof-obligation and validation-taxonomy language the task plan used
+   - add any missing completion-time verification evidence that was produced only at this gate
    - clear or update `Current Task`
    - record any handoff notes needed for the next task
 8. Update the linked OpenSpec change:
@@ -49,6 +50,7 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 ## Rules
 
 - Verification and review are separate requirements: verification proves the completion claim, while review satisfies the execution-path quality gate.
+- Completion is a reconciliation gate over the running evidence ledger built during execution; it should not depend on reconstructing the task's proof surface from memory at the end.
 - Completion evidence should stay aligned to the declared proof obligations instead of drifting into a narrower local contract.
 - Do not bypass review requirements inherited from the execution method that produced the task changes.
 

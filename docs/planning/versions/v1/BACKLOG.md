@@ -17,7 +17,7 @@ None yet.
 
 ## [READY]
 
-### `v1-f015` [Record Execution-Time Validation Evidence](features/v1-f015-record-execution-evidence.md)
+None yet.
 
 ## [IN_PROGRESS]
 
@@ -25,6 +25,7 @@ None yet.
 
 ## [DONE]
 
+### `v1-f015` [Record Execution-Time Validation Evidence](features/v1-f015-record-execution-evidence.md)
 ### `v1-f014` [Enforce Contract-Proof Coverage](features/v1-f014-enforce-contract-proof-coverage.md)
 
 ### `v1-f013` [REVIEW] [Harden Installer And Dev Environment](features/v1-f013-harden-installer-and-dev-environment.md)

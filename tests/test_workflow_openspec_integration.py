@@ -8,6 +8,7 @@ import textwrap
 import unittest
 from pathlib import Path
 
+from skills._workflow.feature_file import append_task_validation_entry
 from skills._workflow.workflow_state import find_openspec_task_structure_errors
 
 
@@ -66,26 +67,111 @@ def _write_implementation_plan(change_dir: Path, task_id: str) -> None:
 
 
 def _write_task_validation_log(feature_file: Path, *, task_id: str, evidence_categories: str) -> None:
-    feature_text = feature_file.read_text(encoding="utf-8")
-    validation_log_start = feature_text.index("## 1. Validation Log")
-    handoff_notes_start = feature_text.index("## 2. Handoff Notes")
-    feature_file.write_text(
-        (
-            feature_text[:validation_log_start]
-            + textwrap.dedent(
-                f"""\
-                ## 1. Validation Log
-                - `2026-04-05` Task `{task_id}` Completion:
-                  - Run: `python -m pytest`
-                  - Result: `pass`
-                  - Evidence: `{evidence_categories}`
-
-                """
-            )
-            + feature_text[handoff_notes_start:]
-        ),
-        encoding="utf-8",
+    append_task_validation_entry(
+        feature_file,
+        entry_date="2026-04-05",
+        task_id=task_id,
+        run="python -m pytest",
+        result="pass",
+        evidence=evidence_categories,
     )
+
+
+class TestStartTaskExecutionInstruction(unittest.TestCase):
+    def test_start_task_execution_instruction_requires_recording_evidence_during_execution(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    None yet.
+
+                    ## [READY]
+
+                    ### `v1-f001` [Execution evidence](features/v1-f001-execution-evidence.md)
+
+                    ## [IN_PROGRESS]
+
+                    None yet.
+
+                    ## [DONE]
+
+                    None yet.
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            feature_file = repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-execution-evidence.md"
+            feature_file.write_text(
+                textwrap.dedent(
+                    """\
+                    # Feature: Execution evidence
+
+                    ## 0. Meta
+                    - Feature ID: `v1-f001`
+                    - Version: `v1`
+                    - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+                    - OpenSpec Change: `execution-evidence`
+                    - OpenSpec Specs:
+                      - `openspec/specs/task-execution-handoff/spec.md`
+                    - Current Task: `none`
+
+                    ## 1. Validation Log
+                    - None yet.
+
+                    ## 2. Handoff Notes
+                    - None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            change_dir = repo / "openspec" / "changes" / "execution-evidence"
+            change_dir.mkdir(parents=True, exist_ok=True)
+            (change_dir / "proposal.md").write_text("## Why\n\nTest\n", encoding="utf-8")
+            (change_dir / "design.md").write_text("## Context\n\nTest\n", encoding="utf-8")
+            (change_dir / "tasks.md").write_text(
+                textwrap.dedent(
+                    """\
+                    ## 1. Work
+
+                    - [ ] 1 Record execution evidence
+                      - [ ] 1.1 Add helper
+                    """
+                ),
+                encoding="utf-8",
+            )
+            _write_implementation_plan(change_dir, "1")
+
+            result = subprocess.run(
+                ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertIn(
+                "record validation evidence during execution",
+                payload["execution_instruction"].lower(),
+            )
 
 
 def _git(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:

@@ -83,3 +83,57 @@ def render_feature_file(
     for old, new in replacements:
         rendered = rendered.replace(old, new, 1)
     return rendered if rendered.endswith("\n") else f"{rendered}\n"
+
+
+def _format_validation_entry(*, entry_date: str, task_id: str, run: str, result: str, evidence: str) -> str:
+    return (
+        f"- `{entry_date}` Task `{task_id}`:\n"
+        f"  - Run: `{run}`\n"
+        f"  - Result: `{result}`\n"
+        f"  - Evidence: `{evidence}`\n"
+    )
+
+
+def append_task_validation_entry(
+    feature_file: Path,
+    *,
+    entry_date: str,
+    task_id: str,
+    run: str,
+    result: str,
+    evidence: str,
+) -> None:
+    feature_text = feature_file.read_text(encoding="utf-8")
+    validation_log_header = "## 1. Validation Log\n"
+    handoff_notes_header = "## 2. Handoff Notes\n"
+
+    validation_log_start = feature_text.index(validation_log_header)
+    handoff_notes_start = feature_text.index(handoff_notes_header)
+    validation_body = feature_text[
+        validation_log_start + len(validation_log_header):handoff_notes_start
+    ]
+
+    if validation_body.strip() == "- None yet.":
+        new_validation_body = _format_validation_entry(
+            entry_date=entry_date,
+            task_id=task_id,
+            run=run,
+            result=result,
+            evidence=evidence,
+        )
+    else:
+        new_validation_body = validation_body.rstrip() + "\n" + _format_validation_entry(
+            entry_date=entry_date,
+            task_id=task_id,
+            run=run,
+            result=result,
+            evidence=evidence,
+        )
+
+    updated = (
+        feature_text[: validation_log_start + len(validation_log_header)]
+        + new_validation_body
+        + "\n"
+        + feature_text[handoff_notes_start:]
+    )
+    feature_file.write_text(updated, encoding="utf-8")
