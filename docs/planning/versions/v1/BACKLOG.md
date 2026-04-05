@@ -17,7 +17,7 @@ None yet.
 
 ## [READY]
 
-None yet.
+### `v1-f015` [Record Execution-Time Validation Evidence](features/v1-f015-record-execution-evidence.md)
 
 ## [IN_PROGRESS]
 
