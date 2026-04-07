@@ -1,4 +1,0 @@
-interface:
-  display_name: "Capture Lessons"
-  short_description: "Capture retrospective lesson candidates"
-  default_prompt: "Use $capture-lessons to record concise lesson candidates after task completion."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Retrieve Lessons"
-  short_description: "Retrieve and update active lessons"
-  default_prompt: 'Use $retrieve-lessons to select up to three active lessons for the current task and update their retrieval metadata in docs/lessons/lessons.md.'

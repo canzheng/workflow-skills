@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import importlib.util
-import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -9,7 +8,6 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INIT_SCRIPT = REPO_ROOT / "skills" / "initialize-workflow-artifacts" / "scripts" / "init_workflow_artifacts.py"
-LESSON_INIT_SCRIPT = REPO_ROOT / "bin" / "init-lessons.sh"
 
 _SPEC = importlib.util.spec_from_file_location("init_workflow_artifacts", INIT_SCRIPT)
 assert _SPEC is not None and _SPEC.loader is not None
@@ -39,65 +37,6 @@ class InitializeWorkflowArtifactsTests(unittest.TestCase):
             ).read_text(encoding="utf-8")
 
             self.assertEqual(template, tracked_template)
-
-    def test_lesson_init_script_creates_empty_lesson_files(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            repo = Path(tmpdir) / "repo"
-            repo.mkdir(parents=True)
-
-            subprocess.run([str(LESSON_INIT_SCRIPT), "--tools", "codex"], cwd=repo, check=True)
-
-            lessons_file = repo / "docs" / "lessons" / "lessons.md"
-            candidates_file = repo / "docs" / "lessons" / "lesson-candidates.md"
-
-            self.assertTrue(lessons_file.is_file())
-            self.assertTrue(candidates_file.is_file())
-            self.assertEqual(lessons_file.read_text(encoding="utf-8"), "")
-            self.assertEqual(candidates_file.read_text(encoding="utf-8"), "")
-
-    def test_lesson_init_script_rejects_unsupported_tools(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            repo = Path(tmpdir) / "repo"
-            repo.mkdir(parents=True)
-
-            result = subprocess.run(
-                [str(LESSON_INIT_SCRIPT), "--tools", "gemini"],
-                cwd=repo,
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-
-            self.assertNotEqual(result.returncode, 0)
-            self.assertIn("unsupported tool", result.stderr)
-
-    def test_initialize_delegates_lesson_bootstrap(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            repo = Path(tmpdir) / "repo"
-            calls: list[tuple[str, Path]] = []
-
-            original_run_openspec_init = _MODULE.run_openspec_init
-            original_run_lessons_init = _MODULE.run_lessons_init
-
-            def fake_run_openspec_init(root: Path) -> str:
-                calls.append(("openspec", root))
-                return "RUN openspec init"
-
-            def fake_run_lessons_init(root: Path) -> str:
-                calls.append(("lessons", root))
-                return "RUN bin/init-lessons.sh --tools codex"
-
-            try:
-                _MODULE.run_openspec_init = fake_run_openspec_init
-                _MODULE.run_lessons_init = fake_run_lessons_init
-
-                results = initialize(repo, "v1")
-            finally:
-                _MODULE.run_openspec_init = original_run_openspec_init
-                _MODULE.run_lessons_init = original_run_lessons_init
-
-            self.assertEqual(calls, [("openspec", repo), ("lessons", repo)])
-            self.assertIn("RUN bin/init-lessons.sh --tools codex", results)
 
     def test_initialize_creates_thin_feature_template_with_openspec_links(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -132,8 +71,6 @@ class InitializeWorkflowArtifactsTests(unittest.TestCase):
             self.assertTrue((repo / "openspec" / "specs").is_dir())
             self.assertTrue((repo / "openspec" / "changes" / "archive").is_dir())
             self.assertTrue((repo / ".codex").is_dir())
-            self.assertTrue((repo / "docs" / "lessons" / "lessons.md").is_file())
-            self.assertTrue((repo / "docs" / "lessons" / "lesson-candidates.md").is_file())
 
     def test_initialize_creates_workflow_reference_doc(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

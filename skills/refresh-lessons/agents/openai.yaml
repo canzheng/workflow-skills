@@ -1,4 +1,0 @@
-interface:
-  display_name: "Refresh Lessons"
-  short_description: "Refresh and curate promoted lessons"
-  default_prompt: "Use $refresh-lessons to review active lessons and keep docs/lessons/lessons.md small, current, and high-signal."
