@@ -128,13 +128,35 @@ def workflow_reference_template() -> str:
     return WORKFLOW_REFERENCE_TEMPLATE_PATH.read_text(encoding="utf-8")
 
 
+def run_openspec_init(root: Path) -> str:
+    command = ["openspec", "init", str(root), "--tools", "codex"]
+    try:
+        subprocess.run(command, cwd=root, check=True)
+    except subprocess.CalledProcessError as exc:
+        raise WorkflowError(f"openspec init failed with exit code {exc.returncode}") from exc
+    return f"RUN {' '.join(command)}"
+
+
+def run_lessons_init(root: Path) -> str:
+    lesson_init_script = Path(__file__).resolve().parents[3] / "bin" / "init-lessons.sh"
+    command = [str(lesson_init_script), "--tools", "codex"]
+    try:
+        subprocess.run(command, cwd=root, check=True)
+    except subprocess.CalledProcessError as exc:
+        raise WorkflowError(f"lesson init failed with exit code {exc.returncode}") from exc
+    return f"RUN {' '.join(command)}"
+
+
 def initialize(root: Path, version: str) -> list[str]:
+    root.mkdir(parents=True, exist_ok=True)
     planning_root = root / "docs" / "planning"
     version_root = planning_root / "versions" / version
     feature_root = version_root / "features"
     openspec_root = root / "openspec"
     results = []
 
+    results.append(run_openspec_init(root))
+    results.append(run_lessons_init(root))
     feature_root.mkdir(parents=True, exist_ok=True)
     results.append(f"ENSURE {feature_root}")
     (openspec_root / "specs").mkdir(parents=True, exist_ok=True)
