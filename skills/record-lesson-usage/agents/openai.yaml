@@ -1,0 +1,4 @@
+interface:
+  display_name: "Record Lesson Usage"
+  short_description: "Record how retrieved lessons were used"
+  default_prompt: "Use $record-lesson-usage to record whether retrieved lessons were applied, partially applied, or not applied after the task completes and update docs/lessons/lessons.md."

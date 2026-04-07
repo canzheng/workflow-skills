@@ -1,0 +1,4 @@
+interface:
+  display_name: "Promote Lessons"
+  short_description: "Promote high-signal lesson candidates"
+  default_prompt: "Use $promote-lessons to review lesson candidates and promote a small, evidence-backed set of reusable lessons into docs/lessons/lessons.md."
