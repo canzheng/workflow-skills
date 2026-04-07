@@ -24,20 +24,21 @@ It enforces the acceptance-plus-OpenSpec validate/archive gate for the linked ch
 2. Resolve the target feature in `[IN_PROGRESS]`.
    - require all top-level OpenSpec tasks to be done and `Current Task` to be `none`
 3. Read the linked feature file and confirm it records exactly one OpenSpec change.
-4. Run the finish-feature resolver script to inspect active-vs-archived state for that change.
-5. If the linked change is still active:
-   - run the relevant OpenSpec validation command for the linked change
+4. Run `openspec-verify-change` with the name of the openspec change to verify the change against the specs
+5. Run the finish-feature resolver script to inspect active-vs-archived state for that change.
+6. If the linked change is still active:
+   - run `openspec-sync-specs` with the name of the openspec change, this will sync the delta specs to openspec main specs.
    - run `openspec-archive-change` for that exact change
    - rerun the resolver script and confirm the active change directory is gone and exactly one archive directory now exists
    - move the feature from `[IN_PROGRESS]` to `[DONE]` only after acceptance plus archive succeed
-6. If the linked change is already archived:
+7. If the linked change is already archived:
    - confirm no active change directory still exists
    - confirm exactly one matching archive directory exists
    - move the feature from `[IN_PROGRESS]` to `[DONE]` only after acceptance is confirmed
-7. Record the archive result and feature-completion evidence in the feature file when that evidence is not already present.
-8. Re-run `audit-workflow` if the feature file changed.
-9. Move the feature from `[IN_PROGRESS]` to `[DONE]` only after the linked change is validated and archived and feature-level acceptance is confirmed.
-10. Only after the feature has been moved to `[DONE]`, invoke `finishing-a-development-branch`.
+8. Record the archive result and feature-completion evidence in the feature file when that evidence is not already present.
+9. Re-run `audit-workflow` if the feature file changed.
+10. Move the feature from `[IN_PROGRESS]` to `[DONE]` only after the linked change is validated and archived and feature-level acceptance is confirmed.
+11. Only after the feature has been moved to `[DONE]`, invoke `finishing-a-development-branch`.
 
 ## Rules
 
