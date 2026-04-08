@@ -36,10 +36,18 @@
   - Run: `rtk bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
   - Result: `pass`
   - Evidence: `schema`
+- `2026-04-08` Task `2`:
+  - Run: `rtk git status --short`
+  - Result: `pass; feature file and backlog entry reflect the current lesson workflow handoff state`
+  - Evidence: `schema`
+- `2026-04-08` Task `3`:
+  - Run: `rtk bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
+  - Result: `pass`
+  - Evidence: `schema`
 
 ## 2. Handoff Notes
 - `2026-04-08`:
   - Current Task: `none`
   - Worktree State: `clean`
-  - Notes: Completed task `1`. The workflow now integrates lesson retrieval at task start, lesson usage reconciliation at task completion, and lesson promotion at feature finish. The next ready task is `2`.
+  - Notes: Completed task `3`. The workflow now integrates lesson retrieval at task start, lesson usage reconciliation at task completion, and lesson promotion at feature finish. All top-level OpenSpec tasks are now done, so the next handoff target is `finish-feature`.
   - Proof Obligations: `The workflow must carry retrieved lesson IDs through the feature file so complete-task can reconcile usage, then capture and promote lessons at the correct lifecycle points without automating refresh-lessons.`

@@ -4,8 +4,8 @@
 
 ## 2. Workflow Integration
 
-- [ ] 2 Ensure the feature file and backlog entry reflect the READY-state lesson workflow change and preserve the lesson handoff state description
+- [x] 2 Ensure the feature file and backlog entry reflect the READY-state lesson workflow change and preserve the lesson handoff state description
 
 ## 3. Board and Validation
 
-- [ ] 3 Validate the updated workflow with `audit-workflow` and task-resolution checks
+- [x] 3 Validate the updated workflow with `audit-workflow` and task-resolution checks
