@@ -21,9 +21,11 @@ None yet.
 
 ## [IN_PROGRESS]
 
-### `v1-f016` [Integrate Lessons With Workflow](features/v1-f016-integrate-lessons-with-workflow.md)
+None yet.
 
 ## [DONE]
+
+### `v1-f016` [Integrate Lessons With Workflow](features/v1-f016-integrate-lessons-with-workflow.md)
 
 ### `v1-f015` [Record Execution-Time Validation Evidence](features/v1-f015-record-execution-evidence.md)
 ### `v1-f014` [Enforce Contract-Proof Coverage](features/v1-f014-enforce-contract-proof-coverage.md)

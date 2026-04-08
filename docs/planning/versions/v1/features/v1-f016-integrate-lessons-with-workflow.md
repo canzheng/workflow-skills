@@ -3,7 +3,7 @@
 ## 0. Meta
 - Feature ID: `v1-f016`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `integrate-lessons-with-workflow`
 - OpenSpec Specs:
   - `openspec/specs/task-execution-handoff/spec.md`
@@ -36,6 +36,18 @@
   - Run: `rtk bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py`
   - Result: `pass`
   - Evidence: `schema`
+- `2026-04-08` Feature completion:
+  - Run: `openspec validate integrate-lessons-with-workflow --type change --json --no-interactive`
+  - Result: `pass`
+  - Evidence: `schema`
+- `2026-04-08` Feature completion:
+  - Run: `openspec archive integrate-lessons-with-workflow -y`
+  - Result: `pass; archived as openspec/changes/archive/2026-04-08-integrate-lessons-with-workflow`
+  - Evidence: `artifact_repair`
+- `2026-04-08` Feature completion:
+  - Run: `python "${CODEX_HOME:-$HOME/.codex}/skills/finish-feature/scripts/resolve_finish_feature.py" --repo-root /Users/canzheng/.config/superpowers/worktrees/workflow-skills/v1-f016-lesson-lifecycle-workflow`
+  - Result: `pass; active_change_path = null, archive_path = openspec/changes/archive/2026-04-08-integrate-lessons-with-workflow, and requires_archive = false`
+  - Evidence: `schema`
 - `2026-04-08` Task `2`:
   - Run: `rtk git status --short`
   - Result: `pass; feature file and backlog entry reflect the current lesson workflow handoff state`
@@ -49,5 +61,5 @@
 - `2026-04-08`:
   - Current Task: `none`
   - Worktree State: `clean`
-  - Notes: Completed task `3`. The workflow now integrates lesson retrieval at task start, lesson usage reconciliation at task completion, and lesson promotion at feature finish. All top-level OpenSpec tasks are now done, so the next handoff target is `finish-feature`.
+  - Notes: Completed task `3`. The workflow now integrates lesson retrieval at task start, lesson usage reconciliation at task completion, and lesson promotion at feature finish. The linked OpenSpec change is archived, so the feature is done and branch finalization is the remaining handoff.
   - Proof Obligations: `The workflow must carry retrieved lesson IDs through the feature file so complete-task can reconcile usage, then capture and promote lessons at the correct lifecycle points without automating refresh-lessons.`
