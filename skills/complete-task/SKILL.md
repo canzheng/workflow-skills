@@ -30,11 +30,15 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
    - if the task ran through `executing-plans`, wrap `requesting-code-review` whenever this task closes a review batch, materially completes a feature, or otherwise reaches a review checkpoint
 6. Confirm the active feature worktree contains only intended task changes and will be left clean after completion. Use repo-appropriate checks such as `git status --short` and `git diff --check`.
    - read the files listed as context before completing the task so validation and task closure are checked against the authoritative change artifacts
+6.5. Reconcile lesson usage before closing the task.
+   - read any lesson IDs recorded by `start-task` in the feature file handoff notes
+   - call `record-lesson-usage` for those lesson IDs before the task is marked done
+   - capture any strong new lesson candidates after usage reconciliation and before the task is closed
 7. Update the feature file:
    - reconcile the existing validation log against the same proof-obligation and validation-taxonomy language the task plan used
    - add any missing completion-time verification evidence that was produced only at this gate
    - clear or update `Current Task`
-   - record any handoff notes needed for the next task
+   - record any handoff notes needed for the next task, including the lesson usage outcome when lessons were retrieved
 8. Update the linked OpenSpec change:
    - mark the completed task `done`
    - rely on the workflow `Depends On` convention parsed from the linked OpenSpec task file to expose downstream ready work

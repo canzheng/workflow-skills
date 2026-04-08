@@ -36,6 +36,9 @@ It enforces the acceptance-plus-OpenSpec validate/archive gate for the linked ch
    - confirm exactly one matching archive directory exists
    - move the feature from `[IN_PROGRESS]` to `[DONE]` only after acceptance is confirmed
 8. Record the archive result and feature-completion evidence in the feature file when that evidence is not already present.
+8.5. Promote durable lessons before branch finalization.
+   - call `promote-lessons` after the linked OpenSpec change is validated and archived and before branch finalization begins
+   - keep `refresh-lessons` user-triggered; do not auto-run it here
 9. Re-run `audit-workflow` if the feature file changed.
 10. Move the feature from `[IN_PROGRESS]` to `[DONE]` only after the linked change is validated and archived and feature-level acceptance is confirmed.
 11. Only after the feature has been moved to `[DONE]`, invoke `finishing-a-development-branch`.

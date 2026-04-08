@@ -38,6 +38,8 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 5. Read the linked change context before updating the task implementation plan.
    - read `proposal.md`, `design.md`, linked specs, `tasks.md`, and any other Markdown files under the linked change directory before drafting or updating the task implementation plan
    - use that context to update the task implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution starts
+   - before drafting or updating the task implementation plan, retrieve relevant active lessons for the task
+   - record the returned lesson IDs in the feature file handoff notes so complete-task can reconcile usage later
    - keep the implementation plan's validation section aligned with the selected task, the linked change intent, and the proof-obligation / validation-taxonomy language used by shaping and readiness guidance
 6. Perform a semantic consistency and coverage review across the selected change context before code execution starts.
    - read the task implementation plan after updating it
