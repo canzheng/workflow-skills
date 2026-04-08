@@ -129,11 +129,20 @@ def workflow_reference_template() -> str:
 
 
 def run_openspec_init(root: Path) -> str:
-    command = ["openspec", "init", str(root), "--tools", "codex"]
+    command = ["openspec", "init", "--tools", "codex"]
     try:
         subprocess.run(command, cwd=root, check=True)
     except subprocess.CalledProcessError as exc:
         raise WorkflowError(f"openspec init failed with exit code {exc.returncode}") from exc
+    return f"RUN {' '.join(command)}"
+
+
+def run_lessons_init(root: Path) -> str:
+    command = ["lessons", "init", "--tools", "codex"]
+    try:
+        subprocess.run(command, cwd=root, check=True)
+    except subprocess.CalledProcessError as exc:
+        raise WorkflowError(f"lessons init failed with exit code {exc.returncode}") from exc
     return f"RUN {' '.join(command)}"
 
 
@@ -146,6 +155,7 @@ def initialize(root: Path, version: str) -> list[str]:
     results = []
 
     results.append(run_openspec_init(root))
+    results.append(run_lessons_init(root))
     feature_root.mkdir(parents=True, exist_ok=True)
     results.append(f"ENSURE {feature_root}")
     (openspec_root / "specs").mkdir(parents=True, exist_ok=True)

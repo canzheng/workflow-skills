@@ -4,6 +4,8 @@ import importlib.util
 import tempfile
 import unittest
 from pathlib import Path
+import subprocess
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -71,6 +73,27 @@ class InitializeWorkflowArtifactsTests(unittest.TestCase):
             self.assertTrue((repo / "openspec" / "specs").is_dir())
             self.assertTrue((repo / "openspec" / "changes" / "archive").is_dir())
             self.assertTrue((repo / ".codex").is_dir())
+
+    def test_initialize_runs_lessons_init_from_repo_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+
+            with mock.patch.object(_MODULE.subprocess, "run") as run_mock:
+                run_mock.return_value = subprocess.CompletedProcess(args=[], returncode=0)
+
+                initialize(repo, "v1")
+
+            self.assertGreaterEqual(run_mock.call_count, 2)
+            self.assertEqual(
+                run_mock.call_args_list[0].args[0],
+                ["openspec", "init", "--tools", "codex"],
+            )
+            self.assertEqual(run_mock.call_args_list[0].kwargs["cwd"], repo)
+            self.assertEqual(
+                run_mock.call_args_list[1].args[0],
+                ["lessons", "init", "--tools", "codex"],
+            )
+            self.assertEqual(run_mock.call_args_list[1].kwargs["cwd"], repo)
 
     def test_initialize_creates_workflow_reference_doc(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
