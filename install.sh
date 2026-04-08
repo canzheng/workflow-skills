@@ -48,6 +48,7 @@ for skill in "${SKILLS[@]}"; do
   )
 
   if [[ "${skill}" == "_workflow" ]]; then
+    rm -rf "${target_dir}/tests"
     rsync_args+=(--exclude tests)
   fi
 

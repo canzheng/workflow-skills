@@ -111,6 +111,22 @@ class InstallScriptTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("Missing target AGENTS.md", result.stdout + result.stderr)
 
+    def test_install_script_removes_stale_workflow_tests_from_target(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            codex_home = Path(tmpdir) / "codex-home"
+            agents_path = codex_home / "AGENTS.md"
+            agents_path.parent.mkdir(parents=True, exist_ok=True)
+            agents_path.write_text("# Global Instructions\n", encoding="utf-8")
+
+            stale_tests_dir = codex_home / "skills" / "_workflow" / "tests"
+            stale_tests_dir.mkdir(parents=True, exist_ok=True)
+            (stale_tests_dir / "stale_test.py").write_text("print('stale')\n", encoding="utf-8")
+
+            result = _run_install(codex_home)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertFalse(stale_tests_dir.exists())
+
 
 if __name__ == "__main__":
     unittest.main()
