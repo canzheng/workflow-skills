@@ -39,7 +39,9 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
    - read `proposal.md`, `design.md`, linked specs, `tasks.md`, and any other Markdown files under the linked change directory before drafting or updating the task implementation plan
    - use that context to update the task implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution starts
    - before drafting or updating the task implementation plan, retrieve relevant active lessons for the task
-   - record the returned lesson IDs in the feature file handoff notes so complete-task can reconcile usage later
+   - record the returned lesson IDs in the feature file handoff notes under a task-scoped canonical `Retrieved Lesson IDs: ...` line for the active task so complete-task can reconcile usage later
+   - write `Retrieved Lesson IDs: none` when no lessons were returned; otherwise write the IDs as a comma-separated list in returned order, for example `Retrieved Lesson IDs: L-001, L-014`
+   - do not rename, regroup, or renumber lesson IDs when recording the handoff; record the exact IDs returned by retrieval
    - keep the implementation plan's validation section aligned with the selected task, the linked change intent, and the proof-obligation / validation-taxonomy language used by shaping and readiness guidance
 6. Perform a semantic consistency and coverage review across the selected change context before code execution starts.
    - read the task implementation plan after updating it

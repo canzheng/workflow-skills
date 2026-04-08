@@ -31,8 +31,10 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 6. Confirm the active feature worktree contains only intended task changes and will be left clean after completion. Use repo-appropriate checks such as `git status --short` and `git diff --check`.
    - read the files listed as context before completing the task so validation and task closure are checked against the authoritative change artifacts
 6.5. Reconcile lesson usage before closing the task.
-   - read any lesson IDs recorded by `start-task` in the feature file handoff notes
-   - call `record-lesson-usage` for those lesson IDs before the task is marked done
+   - read the task-scoped canonical `Retrieved Lesson IDs: ...` line recorded by `start-task` in the feature file handoff notes for the active task
+   - treat `Retrieved Lesson IDs: none` as meaning no usage reconciliation is needed
+   - otherwise parse the comma-separated lesson IDs in returned order, call `record-lesson-usage` for those exact IDs before the task is marked done, and point it at the task completion summary and evidence block in the feature file so it can judge usage from that evidence plus the related work done in the repo
+   - if the canonical line is missing while lessons were supposed to have been retrieved, stop and repair the feature-file handoff notes before closing the task
    - capture any strong new lesson candidates after usage reconciliation and before the task is closed
 7. Update the feature file:
    - reconcile the existing validation log against the same proof-obligation and validation-taxonomy language the task plan used
