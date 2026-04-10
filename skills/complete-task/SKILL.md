@@ -10,6 +10,7 @@ description: Use when closing the active task, writing verification evidence, an
 This skill verifies one active task, reconciles already-recorded evidence, and updates task and feature state.
 
 It does not merge or clean up the feature branch/worktree. Branch finalization is separate and should use `finish-feature` once the feature is complete.
+It also does not start the next task; downstream task execution must go through a later explicit `start-task` invocation.
 
 ## Defaults
 
@@ -39,16 +40,16 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 7. Update the feature file:
    - reconcile the existing validation log against the same proof-obligation and validation-taxonomy language the task plan used
    - add any missing completion-time verification evidence that was produced only at this gate
-   - clear or update `Current Task`
-   - record any handoff notes needed for the next task, including the lesson usage outcome when lessons were retrieved
+   - clear `Current Task` to `none`; do not set it to a new task ID in this skill
+   - record any task-completion handoff notes, including the lesson usage outcome when lessons were retrieved
 8. Update the linked OpenSpec change:
    - mark the completed task `done`
    - rely on the workflow `Depends On` convention parsed from the linked OpenSpec task file to expose downstream ready work
-9. Commit the intended task changes, including the task-state updates that live on the feature branch, whenever needed to leave the feature worktree clean for the next handoff.
-10. Confirm the feature worktree is clean and ready for reuse on the next task.
+9. Commit the intended task changes, including the task-state updates that live on the feature branch, whenever needed to leave the feature worktree clean for handoff reporting.
+10. Confirm the feature worktree is clean and ready for later reuse by an explicit `start-task` invocation.
 11. Keep the feature in `[IN_PROGRESS]` after task closure.
    - treat the final-task handoff as an explicit decision point:
-     - if the completed task was not the last top-level OpenSpec task, the feature stays `[IN_PROGRESS]` and the next ready task becomes the handoff target
+     - if the completed task was not the last top-level OpenSpec task, the feature stays `[IN_PROGRESS]`; report ready downstream task IDs as handoff context only, and do not start another task
      - if the completed task was the last top-level OpenSpec task, the feature still remains `[IN_PROGRESS]` and `finish-feature` becomes the handoff target once `Current Task` is cleared
 12. Re-run `audit-workflow`.
 13. Report explicitly that the feature branch/worktree still exists and is not finalized.
@@ -59,6 +60,7 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 - Completion is a reconciliation gate over the running evidence ledger built during execution; it should not depend on reconstructing the task's proof surface from memory at the end.
 - Completion evidence should stay aligned to the declared proof obligations instead of drifting into a narrower local contract.
 - Do not bypass review requirements inherited from the execution method that produced the task changes.
+- `complete-task` is terminal for the active task: it must not launch `start-task` or mark another task `in_progress`.
 
 ## Stop Conditions
 
@@ -68,4 +70,5 @@ It does not merge or clean up the feature branch/worktree. Branch finalization i
 - The required execution-path review has not been satisfied
 - The feature worktree cannot be left clean for the next handoff
 - The target task is not `in_progress`
+- The flow attempts to start another task during this `complete-task` invocation
 - `audit-workflow` reports an invalid workflow state

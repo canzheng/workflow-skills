@@ -6,6 +6,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 START_TASK_SKILL = REPO_ROOT / "skills" / "start-task" / "SKILL.md"
+COMPLETE_TASK_SKILL = REPO_ROOT / "skills" / "complete-task" / "SKILL.md"
 FINISH_FEATURE_SKILL = REPO_ROOT / "skills" / "finish-feature" / "SKILL.md"
 AUTONOMOUS_BACKLOG_LOOP_SKILL = REPO_ROOT / "skills" / "autonomous-backlog-loop" / "SKILL.md"
 TASK_EXECUTION_HANDOFF_SPEC = REPO_ROOT / "openspec" / "specs" / "task-execution-handoff" / "spec.md"
@@ -52,6 +53,14 @@ class WorkflowContractDocsTests(unittest.TestCase):
             "Use when a feature in `[IN_PROGRESS]` has satisfied its feature-level acceptance bar",
             finish_feature_skill,
         )
+
+    def test_complete_task_skill_forbids_starting_next_task(self) -> None:
+        complete_task_skill = COMPLETE_TASK_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn("does not start the next task", complete_task_skill)
+        self.assertIn("clear `Current Task` to `none`", complete_task_skill)
+        self.assertIn("do not start another task", complete_task_skill)
+        self.assertIn("Do not call `start-task` from `complete-task`", complete_task_skill)
 
     def test_autonomous_backlog_loop_routes_completion_through_finish_feature(self) -> None:
         autonomous_loop_skill = AUTONOMOUS_BACKLOG_LOOP_SKILL.read_text(encoding="utf-8")
