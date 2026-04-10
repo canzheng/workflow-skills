@@ -100,6 +100,8 @@ Use design mode when the user request is clearly design-only, explicitly asks to
    - otherwise, inside the same backlog-process sub-agent:
      - call `start-task` for the named feature/task so execution stays on the selected feature and feature worktree
      - if the task finishes cleanly, call `complete-task`
+     - complete `complete-task` before resolving or starting any downstream top-level task
+     - after `complete-task`, confirm `git status --short` is clean from the selected feature worktree before continuing the feature loop
      - if `complete-task` reports that `finish-feature` is startable, call `finish-feature` before any downstream cleanup
      - do not bypass any review or verification gates owned by the wrapped execution skill, `complete-task`, or `finish-feature`
      - if `finish-feature` moves the feature to `[DONE]`, perform the default finishing behavior

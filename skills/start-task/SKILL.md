@@ -64,6 +64,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 12. Choose execution mode:
    - prefer `subagent-driven-development` when available and still scoped to this one task
    - otherwise use `executing-plans`
+   - when wrapping either execution mode, explicitly override its generic "execute all tasks" or "commit" guidance with this workflow boundary: Execute only the selected top-level OpenSpec task from `openspec/changes/<change-id>/implementation-plans/<task-id>.md`; do not mark the selected OpenSpec task checkbox done, do not clear `Current Task`, do not commit task-closure state, and do not start implementation work for any downstream top-level OpenSpec task
 13. Within the chosen execution mode, choose the work method:
    - use `systematic-debugging` when the task is primarily a debug task
    - use `test-driven-development` when the task is implementation or bugfix work with tests in scope
@@ -78,6 +79,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 ## Rules
 
 - Keep any `subagent-driven-development` execution scoped to the one active task only.
+- `start-task` owns task execution, not task closure: the selected OpenSpec task checkbox, `Current Task: none`, and closure commit belong to `complete-task`.
 - Treat `systematic-debugging` and `test-driven-development` as task methods inside the chosen execution mode, not as peer replacements for that mode.
 - Do not finish the feature branch/worktree in this skill.
 
@@ -92,5 +94,6 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 - The primary checkout is dirty when the first feature worktree must be created
 - A later task for an existing `[IN_PROGRESS]` feature has no feature worktree and the user chooses to stop instead of creating one
 - The existing feature worktree is dirty when resuming a later task
+- The execution flow attempts to mark the selected task done, commit task-closure state, or start another top-level OpenSpec task before `complete-task`
 - Worktree creation fails
 - `audit-workflow` reports an invalid workflow state

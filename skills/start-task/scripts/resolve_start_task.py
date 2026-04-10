@@ -15,6 +15,7 @@ if str(SKILLS_ROOT) not in sys.path:
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
     WorkflowStateError,
+    ensure_clean_feature_worktree_for_handoff,
     linked_openspec_implementation_plan_path,
     list_openspec_change_context_files,
     parse_backlog_document,
@@ -131,6 +132,11 @@ def _resolve_task_in_root(root: Path) -> dict[str, object]:
             for task in tasks:
                 if task.status != "ready":
                     continue
+                if section_name == "IN_PROGRESS":
+                    try:
+                        ensure_clean_feature_worktree_for_handoff(root, feature_id)
+                    except WorkflowStateError as exc:
+                        raise WorkflowError(str(exc)) from exc
                 implementation_plan_path = linked_openspec_implementation_plan_path(
                     feature_text,
                     task.task_id,
@@ -198,7 +204,9 @@ def resolve_task(root: Path) -> dict[str, object]:
             continue
         try:
             candidate_payloads.append(_resolve_task_in_root(worktree_root))
-        except WorkflowError:
+        except WorkflowError as exc:
+            if "uncommitted handoff changes" in str(exc):
+                raise
             continue
 
     in_progress_candidates = [payload for payload in candidate_payloads if payload["feature_section"] == "IN_PROGRESS"]

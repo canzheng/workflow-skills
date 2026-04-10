@@ -15,6 +15,7 @@ if str(SKILLS_ROOT) not in sys.path:
 
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
+    ensure_clean_feature_worktree_for_handoff,
     parse_backlog_document,
     parse_tasks,
     resolve_feature_repo_root,
@@ -139,9 +140,12 @@ def validated_first_ready_task(root: Path, feature: FeatureRecord):
             feature_file=feature.feature_path,
             repo_root=root,
         )
+        task = first_ready_task(feature.tasks)
+        if task is not None and feature.feature_section == "IN_PROGRESS":
+            ensure_clean_feature_worktree_for_handoff(root, feature.feature_id)
     except WorkflowStateError as exc:
         raise WorkflowError(str(exc)) from exc
-    return first_ready_task(feature.tasks)
+    return task
 
 
 def build_task_payload(root: Path, feature: FeatureRecord, task) -> dict[str, str]:

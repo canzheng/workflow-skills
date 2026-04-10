@@ -38,7 +38,15 @@ class WorkflowContractDocsTests(unittest.TestCase):
         start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
 
         self.assertIn("every step in the implementation plan's validation section has been completed successfully", start_task_skill)
-        self.assertIn("leaving only the fresh completion-time verification gate owned by `complete-task`", start_task_skill)
+        self.assertIn("leaving only the fresh completion-time reconciliation gate owned by `complete-task`", start_task_skill)
+
+    def test_start_task_skill_forbids_task_agent_from_continuing_to_next_workflow_task(self) -> None:
+        start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn("Execute only the selected top-level OpenSpec task", start_task_skill)
+        self.assertIn("do not mark the selected OpenSpec task checkbox done", start_task_skill)
+        self.assertIn("do not start implementation work for any downstream top-level OpenSpec task", start_task_skill)
+        self.assertIn("do not commit task-closure state", start_task_skill)
 
     def test_start_task_skill_requires_changed_tests_narrowed_contract_review_question(self) -> None:
         start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
@@ -78,6 +86,10 @@ class WorkflowContractDocsTests(unittest.TestCase):
     def test_autonomous_backlog_loop_clarifies_continue_vs_stop_after_complete_task(self) -> None:
         autonomous_loop_skill = AUTONOMOUS_BACKLOG_LOOP_SKILL.read_text(encoding="utf-8")
 
+        self.assertIn(
+            "complete `complete-task` before resolving or starting any downstream top-level task",
+            autonomous_loop_skill,
+        )
         self.assertIn(
             "if the feature remains `IN_PROGRESS` and another task is `ready`, continue the feature loop",
             autonomous_loop_skill,

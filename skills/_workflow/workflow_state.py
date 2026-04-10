@@ -284,6 +284,23 @@ def is_primary_checkout(root: Path) -> bool:
     return git_dir == common_dir
 
 
+def ensure_clean_feature_worktree_for_handoff(root: Path, feature_id: str) -> None:
+    status_result = subprocess.run(
+        ["git", "status", "--porcelain"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if status_result.returncode != 0:
+        return
+    if status_result.stdout.strip():
+        raise WorkflowStateError(
+            f"feature worktree has uncommitted handoff changes for {feature_id}; "
+            "run/finish complete-task before starting the next task"
+        )
+
+
 def _locate_feature_in_repo(root: Path, feature_id: str) -> FeatureLocation | None:
     current_version = root / "docs" / "planning" / "current_version"
     if not current_version.exists() or not current_version.is_symlink():
