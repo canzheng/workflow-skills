@@ -30,3 +30,4 @@ None.
 - `openspec/specs/openspec-change-integration/spec.md`
 - `openspec/specs/feature-execution-tracking/spec.md`
 - `openspec/specs/task-execution-handoff/spec.md`
+- No additional corresponding existing docs required content changes beyond the workflow metadata already updated in the feature file and backlog entry.

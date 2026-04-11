@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f017`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#shaping`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
 - OpenSpec Change: `extend-lessons-into-shaping-and-ready`
 - OpenSpec Specs:
   - `openspec/specs/openspec-change-integration/spec.md`
@@ -23,6 +23,10 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `rtk openspec validate extend-lessons-into-shaping-and-ready --type change --json --no-interactive`
   - Result: `pass`
   - Evidence: `schema`
+- `2026-04-11` Readiness review:
+  - Run: independent `gpt-5.4-mini` review of `proposal.md`, `design.md`, `tasks.md`, linked specs, `WORKFLOW_REFERENCE.md`, and `skills/ready-feature/SKILL.md`
+  - Result: `pass`
+  - Evidence: `contract_surface`
 
 ## 2. Handoff Notes
 - `2026-04-11`:
@@ -30,3 +34,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Worktree State: `n/a`
   - Notes: Shaping artifacts are now present for `extend-lessons-into-shaping-and-ready`. The feature is linked to an active OpenSpec change and remains in `[SHAPING]` until readiness work decides whether the planning-stage lesson lifecycle is specified clearly enough for promotion.
   - Proof Obligations: `The workflow should retrieve, apply, record, and capture lessons during `shaping` and `ready` without introducing a separate planning-only lesson system or weakening the existing execution-stage lesson lifecycle.`
+- `2026-04-11`:
+  - Current Task: `none`
+  - Worktree State: `n/a`
+  - Notes: Readiness review passed. The shaping artifacts define enough contract surface for `start-task` to draft against safely, and the feature can move to `[READY]`.

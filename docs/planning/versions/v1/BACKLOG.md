@@ -13,9 +13,9 @@ None yet.
 
 ## [SHAPING]
 
-### `v1-f017` [Extend Lessons Into Shaping And Ready](features/v1-f017-extend-lessons-into-shaping-and-ready.md)
-
 ## [READY]
+
+### `v1-f017` [Extend Lessons Into Shaping And Ready](features/v1-f017-extend-lessons-into-shaping-and-ready.md)
 
 None yet.
 
