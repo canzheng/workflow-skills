@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f017`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `extend-lessons-into-shaping-and-ready`
 - OpenSpec Specs:
   - `openspec/specs/openspec-change-integration/spec.md`
@@ -43,8 +43,17 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `rtk git diff --check`
   - Result: `pass`
   - Evidence: `manual_inspection`
+- `2026-04-11` Feature archive:
+  - Run: `rtk openspec archive extend-lessons-into-shaping-and-ready -y`
+  - Result: `archived as 2026-04-11-extend-lessons-into-shaping-and-ready`
+  - Evidence: `archive`
 
 ## 2. Handoff Notes
+- `2026-04-11` Feature completion:
+  - Current Task: `none`
+  - Worktree State: `dirty`
+  - Notes: OpenSpec change archived as `2026-04-11-extend-lessons-into-shaping-and-ready`; feature-level acceptance is satisfied and the branch is ready for final cleanup.
+  - Proof Obligations: `Archive gate passed; remaining work is branch finalization only.`
 - `2026-04-11` Task `3`:
   - Current Task: `none`
   - Worktree State: `dirty`
