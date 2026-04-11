@@ -31,6 +31,10 @@ For non-micro tasks:
 - Always prefer updating existing workflow artifacts in place over creating parallel files or duplicate summaries.
 - Do not mix levels.
 
+
+## Workflow Model Selection
+- Default exploration/research subagents to gpt-5.4-mini; use stronger models only for broad design judgment, cross-file integration, or repeated blocker recovery.
+
 ## Workflow Skill Routing
 - Use `initialize-workflow-artifacts` when a repository wants to adopt this workflow but does not yet have the required scaffold.
 - Use `diagnose-workflow` for a non-blocking workflow health snapshot before deciding whether to audit, repair, defer, or continue.
