@@ -3594,6 +3594,10 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             )
 
             self.assertNotEqual(result.returncode, 0)
+            self.assertIn(
+                "tasks.md has nested checklist items but no top-level executable tasks",
+                result.stdout,
+            )
             self.assertIn("nested checklist item `1.1` is missing parent top-level executable task `1`", result.stdout)
 
     def test_audit_rejects_ready_feature_with_nested_only_openspec_tasks(self) -> None:
@@ -3684,6 +3688,10 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             )
 
             self.assertNotEqual(result.returncode, 0)
+            self.assertIn(
+                "tasks.md has nested checklist items but no top-level executable tasks",
+                result.stdout,
+            )
             self.assertIn("nested checklist item `1.1` is missing parent top-level executable task `1`", result.stdout)
 
     def test_audit_rejects_orphan_active_change_not_linked_from_promoted_feature(self) -> None:

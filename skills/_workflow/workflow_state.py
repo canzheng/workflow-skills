@@ -951,6 +951,7 @@ def find_openspec_task_structure_errors(tasks_text: str) -> list[str]:
         for task in _parse_openspec_tasks_text(tasks_text)
     }
     errors: list[str] = []
+    nested_task_ids: list[str] = []
 
     for line in tasks_text.splitlines():
         nested_match = OPEN_SPEC_NESTED_TASK_RE.match(line)
@@ -958,12 +959,20 @@ def find_openspec_task_structure_errors(tasks_text: str) -> list[str]:
             continue
 
         nested_task_id = nested_match.group("id")
+        nested_task_ids.append(nested_task_id)
         parent_task_id = nested_task_id.split(".", 1)[0]
         if parent_task_id in top_level_task_ids:
             continue
 
         errors.append(
             f"nested checklist item `{nested_task_id}` is missing parent top-level executable task `{parent_task_id}`"
+        )
+
+    if nested_task_ids and not top_level_task_ids:
+        errors.insert(
+            0,
+            "tasks.md has nested checklist items but no top-level executable tasks; "
+            "add parent tasks like `- [ ] 1 ...` before nested items such as `1.1`",
         )
 
     return errors

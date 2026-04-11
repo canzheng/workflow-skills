@@ -1053,6 +1053,7 @@ def test_find_openspec_task_structure_errors_reports_nested_only_tasks() -> None
     )
 
     assert errors == [
+        "tasks.md has nested checklist items but no top-level executable tasks; add parent tasks like `- [ ] 1 ...` before nested items such as `1.1`",
         "nested checklist item `1.1` is missing parent top-level executable task `1`",
         "nested checklist item `1.2` is missing parent top-level executable task `1`",
     ]
