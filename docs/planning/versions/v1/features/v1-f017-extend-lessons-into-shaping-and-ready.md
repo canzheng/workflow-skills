@@ -35,8 +35,28 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `rtk git diff --check`
   - Result: `pass`
   - Evidence: `manual_inspection`
+- `2026-04-11` Task `2`:
+  - Run: `rtk python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass`
+  - Evidence: `artifact_inspection`
+- `2026-04-11` Task `2`:
+  - Run: `rtk git diff --check`
+  - Result: `pass`
+  - Evidence: `manual_inspection`
 
 ## 2. Handoff Notes
+- `2026-04-11` Task `2`:
+  - Current Task: `none`
+  - Worktree State: `dirty`
+  - Retrieved Lesson IDs: `none`
+  - Notes: Task `2` is complete in the feature worktree; the planning-stage workflow skills now describe the same lesson lifecycle as the planning docs.
+  - Proof Obligations: `The planning-stage lesson lifecycle is now explicit in the workflow skills without splitting into a separate planning-only lesson system.`
+- `2026-04-11` Task `2`:
+  - Current Task: `2`
+  - Worktree State: `dirty`
+  - Retrieved Lesson IDs: `none`
+  - Notes: Starting task `2` in the feature worktree; the planning-stage workflow skills will be updated to retrieve lessons before stage decisions and to keep finish-stage lesson handling coherent.
+  - Proof Obligations: `The workflow skills must retrieve, apply, record, and capture lessons during shaping and readiness without creating a separate planning-only lesson system or weakening execution-stage lesson handling.`
 - `2026-04-11` Task `1`:
   - Current Task: `none`
   - Worktree State: `dirty`
