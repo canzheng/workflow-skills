@@ -1,9 +1,9 @@
 ## 1. Contract Updates
 
-- [ ] 1 Update `docs/planning/WORKFLOW_REFERENCE.md` and any affected feature-file guidance so the canonical lesson lifecycle explicitly includes shaping-stage and readiness-stage retrieval, usage reconciliation, lesson capture, and consistent stage-scoped handoff-note lines
-  - [ ] 1.1 Update `docs/planning/WORKFLOW_REFERENCE.md` so the canonical lesson lifecycle explicitly includes shaping-stage retrieval, usage reconciliation, and lesson capture
-  - [ ] 1.2 Update `docs/planning/WORKFLOW_REFERENCE.md` so the canonical lesson lifecycle explicitly includes readiness-stage retrieval, usage reconciliation, and lesson capture
-  - [ ] 1.3 Update any affected feature-file guidance or templates so planning-stage lesson handoff notes use consistent stage-scoped canonical lines
+- [x] 1 Update `docs/planning/WORKFLOW_REFERENCE.md` and any affected feature-file guidance so the canonical lesson lifecycle explicitly includes shaping-stage and readiness-stage retrieval, usage reconciliation, lesson capture, and consistent stage-scoped handoff-note lines
+  - [x] 1.1 Update `docs/planning/WORKFLOW_REFERENCE.md` so the canonical lesson lifecycle explicitly includes shaping-stage retrieval, usage reconciliation, and lesson capture
+  - [x] 1.2 Update `docs/planning/WORKFLOW_REFERENCE.md` so the canonical lesson lifecycle explicitly includes readiness-stage retrieval, usage reconciliation, and lesson capture
+  - [x] 1.3 Update any affected feature-file guidance or templates so planning-stage lesson handoff notes use consistent stage-scoped canonical lines
 
 ## 2. Workflow Skill Integration
 

@@ -27,5 +27,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - `<YYYY-MM-DD>`:
   - Current Task: `<task-id like 1 or none>`
   - Worktree State: `<clean/dirty>`
+  - Retrieved Lesson IDs: `<none or comma-separated lesson IDs>`
+  - Lesson Usage: `<concise status summary keyed to the retrieved IDs>`
   - Notes: <handoff summary>
   - Proof Obligations: `<short note about the active task's proof-obligation surface when relevant>`
