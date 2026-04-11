@@ -45,6 +45,18 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Evidence: `manual_inspection`
 
 ## 2. Handoff Notes
+- `2026-04-11` Task `3`:
+  - Current Task: `none`
+  - Worktree State: `dirty`
+  - Retrieved Lesson IDs: `none`
+  - Notes: Task `3` is complete; the planning-stage lesson handoff contract is now covered by docs tests, and the feature is ready for `finish-feature` once the worktree is clean.
+  - Proof Obligations: `The narrowed doc-contract validation passes and the feature is now at the final in-progress handoff point.`
+- `2026-04-11` Task `3`:
+  - Current Task: `3`
+  - Worktree State: `dirty`
+  - Retrieved Lesson IDs: `none`
+  - Notes: Starting task `3` in the feature worktree; the validation coverage will stay narrow and focus on the planning-stage lesson handoff contract surface.
+  - Proof Obligations: `Add focused validation for the planning-stage lesson handoff wording and verify the workflow contracts without broadening into unrelated runtime coverage.`
 - `2026-04-11` Task `2`:
   - Current Task: `none`
   - Worktree State: `dirty`

@@ -11,6 +11,7 @@ FINISH_FEATURE_SKILL = REPO_ROOT / "skills" / "finish-feature" / "SKILL.md"
 AUTONOMOUS_BACKLOG_LOOP_SKILL = REPO_ROOT / "skills" / "autonomous-backlog-loop" / "SKILL.md"
 TASK_EXECUTION_HANDOFF_SPEC = REPO_ROOT / "openspec" / "specs" / "task-execution-handoff" / "spec.md"
 WORKFLOW_REFERENCE = REPO_ROOT / "docs" / "planning" / "WORKFLOW_REFERENCE.md"
+FEATURE_TEMPLATE = REPO_ROOT / "docs" / "planning" / "template" / "feature-template.md"
 
 
 class WorkflowContractDocsTests(unittest.TestCase):
@@ -68,7 +69,7 @@ class WorkflowContractDocsTests(unittest.TestCase):
         self.assertIn("does not start the next task", complete_task_skill)
         self.assertIn("clear `Current Task` to `none`", complete_task_skill)
         self.assertIn("do not start another task", complete_task_skill)
-        self.assertIn("Do not call `start-task` from `complete-task`", complete_task_skill)
+        self.assertIn("downstream task execution must go through a later explicit `start-task` invocation", complete_task_skill)
 
     def test_autonomous_backlog_loop_routes_completion_through_finish_feature(self) -> None:
         autonomous_loop_skill = AUTONOMOUS_BACKLOG_LOOP_SKILL.read_text(encoding="utf-8")
@@ -119,6 +120,25 @@ class WorkflowContractDocsTests(unittest.TestCase):
 
         self.assertIn("prefer canonical end-to-end fixtures", workflow_reference)
         self.assertIn("workflow contract behavior is under test", workflow_reference)
+
+    def test_planning_stage_lesson_lifecycle_docs_expose_canonical_handoff_lines(self) -> None:
+        shape_backlog_item_skill = (REPO_ROOT / "skills" / "shape-backlog-item" / "SKILL.md").read_text(encoding="utf-8")
+        ready_feature_skill = (REPO_ROOT / "skills" / "ready-feature" / "SKILL.md").read_text(encoding="utf-8")
+        finish_feature_skill = FINISH_FEATURE_SKILL.read_text(encoding="utf-8")
+        workflow_reference = WORKFLOW_REFERENCE.read_text(encoding="utf-8")
+        feature_template = FEATURE_TEMPLATE.read_text(encoding="utf-8")
+
+        self.assertIn("retrieve relevant active lessons", shape_backlog_item_skill)
+        self.assertIn("task-scoped canonical `Retrieved Lesson IDs: ...` line for `shaping`", shape_backlog_item_skill)
+        self.assertIn("capture any strong new lesson candidates", shape_backlog_item_skill)
+        self.assertIn("before the independent readiness review", ready_feature_skill)
+        self.assertIn("task-scoped canonical `Retrieved Lesson IDs: ...` line for `ready`", ready_feature_skill)
+        self.assertIn("capture any strong new lesson candidates", ready_feature_skill)
+        self.assertIn("Retrieved Lesson IDs", feature_template)
+        self.assertIn("Lesson Usage", feature_template)
+        self.assertIn("Lesson lifecycle integrates with shaping, readiness, task execution, and feature completion", workflow_reference)
+        self.assertIn("same lesson lifecycle used during shaping, readiness, and task execution still ends here", finish_feature_skill)
+        self.assertIn("does not create a separate promotion path", finish_feature_skill)
 
     def test_stable_handoff_spec_mentions_autonomous_finish_feature_gate(self) -> None:
         task_execution_handoff_spec = TASK_EXECUTION_HANDOFF_SPEC.read_text(encoding="utf-8")

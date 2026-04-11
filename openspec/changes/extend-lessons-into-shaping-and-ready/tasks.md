@@ -14,6 +14,6 @@
 
 ## 3. Validation
 
-- [ ] 3 Add the narrowest relevant validation coverage for planning-stage lesson handoff behavior and verify the updated workflow contracts
-  - [ ] 3.1 Add or update narrow workflow tests for any helper, template, or parser behavior introduced by planning-stage lesson handoff state
-  - [ ] 3.2 Validate the updated workflow docs and skill contracts with the narrowest relevant checks, including `audit-workflow` and any affected repo tests
+- [x] 3 Add the narrowest relevant validation coverage for planning-stage lesson handoff behavior and verify the updated workflow contracts
+  - [x] 3.1 Add or update narrow workflow tests for any helper, template, or parser behavior introduced by planning-stage lesson handoff state
+  - [x] 3.2 Validate the updated workflow docs and skill contracts with the narrowest relevant checks, including `audit-workflow` and any affected repo tests
