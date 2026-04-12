@@ -38,10 +38,16 @@ Promoted lesson schema:
 - task_type: list[string], required
 - scope: list[string], required
 - tags: list[string], required
+- situation: string, required
+- signal: string, required
+- what_worked: string, optional, use "" if empty
+- what_did_not_work: string, optional, use "" if empty
 - lesson: string, required
 - applies_when: string, required
 - rationale: string, required
 - source_evidence: string, required
+- do_differently_next_time: string, optional, use "" if empty
+- catch_earlier_by: string, optional, use "" if empty
 - confidence: low|medium|high, required
 - retrieved_count: integer >= 0, required
 - applied_count: float >= 0, required
@@ -58,7 +64,12 @@ Embedded retrieval index:
   - task_type
   - scope
   - tags
+  - situation
+  - signal
+  - lesson
   - applies_when
+  - do_differently_next_time
+  - catch_earlier_by
   - confidence
   - retrieved_count
   - applied_count
@@ -74,7 +85,7 @@ Counting rules:
 - Do not change applied_count outside post-task usage recording.
 
 Update behavior:
-- Append new entries when creating new candidates or lessons.
+- Append new entries when creating new lessons.
 - Update in place when revising an existing lesson.
 - Merge overlapping lessons instead of duplicating them.
 - Do not modify unrelated entries.

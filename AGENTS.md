@@ -28,3 +28,93 @@ The repo is the development source of truth. Keep the managed workflow policy bl
 
 Environment changes happen only through `environment.yml` and `requirements.txt`.
 `bin/run-python.sh` is dev-repo-only and is not part of installed skills.
+
+
+<!-- BEGIN LESSONS NOTES POLICY -->
+## Execution Notes
+
+During execution, preserve high-signal observations in `docs/lessons/notes.md`. Notes are the in-flight capture layer. They are not lessons.
+
+### Purpose
+
+- Use notes to preserve context that may be hard to reconstruct later from the repo alone.
+- Prefer notes for observations, fragile decisions, near-misses, repeated uncertainty, surprising evidence, and failed paths.
+- Distill notes into reusable lessons at feature close.
+- Keep notes selective. Do not use them as a changelog or diary.
+
+### When To Write A Note
+
+Write a note when at least one of these is true:
+
+- unexpected friction: The work involves back-and-forth changes, reversions, or repeated rethinking before the path becomes clear.
+- misleading path: A plausible direction seems right, but there is risk it may later prove wrong.
+- near-miss: Something almost caused a bug, bad edit, broken contract, or wasted effort.
+- repeated uncertainty: The agent has to re-evaluate the same question multiple times.
+- repeated user correction: The user has to correct or restate the same guidance more than once.
+- surprising evidence: A test, error, diff, or behavior changes the current understanding.
+- possible reusable pattern: Something starts to look like it may generalize beyond this feature.
+- a fragile or under-evidenced decision whose rationale may matter later, especially when the decision depends on an assumption, incomplete evidence, or a non-obvious tradeoff
+
+Do not write a note for:
+
+- routine successful execution
+- obvious mechanics visible from the final diff
+- ordinary command output
+- low-value local details with no likely reuse
+
+### Fragile Decisions
+
+Do not try to predict every decision that may later prove wrong.
+
+Instead, write a note when a decision is fragile or under-evidenced, especially when:
+
+- it depends on an assumption not directly validated
+- evidence is incomplete or indirect
+- multiple plausible options remain
+- the downside of being wrong is meaningful
+- the rationale will likely be hard to reconstruct later
+
+### What A Note Should Contain
+
+A note should preserve the moment, not force a finished lesson.
+
+At note-taking time, prefer capturing:
+
+- `context`: what we were doing
+- `observation`: what happened
+- `why_notable`: why this is worth preserving
+- `current_hypothesis`: what this may mean right now, if useful
+- `artifacts`: relevant files, tests, diffs, commits, logs, or docs
+- `next_check`: what would confirm or disprove the current interpretation
+
+Do not require a finished lesson at note time.
+
+### Later Resolution
+
+Notes may later be updated with retrospective understanding. At feature close, review each note and classify it as one of:
+
+- `distilled`: produced one or more reusable lessons
+- `invalidated`: later evidence showed the original interpretation was wrong or incomplete
+- `discarded`: not useful enough to keep
+- `resolved`: understood locally but not worth promoting to a lesson
+
+Invalidated notes may still produce valuable negative lessons or guardrail lessons.
+
+### Relationship To Lessons
+
+- Notes are execution memory recorded in `docs/lessons/notes.md`.
+- Lessons are distilled reusable guidance.
+- Notes may depend on repo context, diffs, tests, and implementation history for interpretation.
+- The repo remains the source of truth for implementation reality.
+- Notes remain the source of truth for what was noticed during execution.
+
+### Cleanup
+
+At feature close:
+
+- review all open notes
+- distill reusable lessons from the notes
+- update note statuses
+- remove or archive noise
+- preserve invalidated notes when they teach a reusable negative or diagnostic lesson
+<!-- END LESSONS NOTES POLICY -->
