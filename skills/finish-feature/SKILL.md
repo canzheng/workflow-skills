@@ -10,7 +10,7 @@ description: Use when a feature in `[IN_PROGRESS]` has satisfied its feature-lev
 This skill is the workflow-owned preflight for moving a feature from `[IN_PROGRESS]` to `[DONE]` and finalizing its development branch.
 
 It enforces the acceptance-plus-OpenSpec validate/archive gate for the linked change after task execution is complete, then hands off to the generic `finishing-a-development-branch` skill as the final branch/worktree step owned by `finish-feature`.
-The same lesson lifecycle used during shaping, readiness, and task execution still ends here with `promote-lessons`; this skill does not create a separate promotion path.
+Earlier workflow stages record lesson usage and high-signal notes only. `finish-feature` is the only workflow stage that runs `distill-lessons`, after validation and archive succeed and before branch finalization begins.
 
 `finish-feature` is intentionally strict: completing the final task is not enough on its own. The expected handoff is that `complete-task` leaves the feature in `[IN_PROGRESS]`, and only a feature whose top-level OpenSpec tasks are all done and whose `Current Task` is `none` is startable here.
 
@@ -37,8 +37,8 @@ The same lesson lifecycle used during shaping, readiness, and task execution sti
    - confirm exactly one matching archive directory exists
    - move the feature from `[IN_PROGRESS]` to `[DONE]` only after acceptance is confirmed
 8. Record the archive result and feature-completion evidence in the feature file when that evidence is not already present.
-8.5. Promote durable lessons before branch finalization.
-   - call `promote-lessons` after the linked OpenSpec change is validated and archived and before branch finalization begins
+8.5. Distill durable lessons before branch finalization.
+   - call `distill-lessons` after the linked OpenSpec change is validated and archived and before branch finalization begins
    - keep `refresh-lessons` user-triggered; do not auto-run it here
 9. Re-run `audit-workflow` if the feature file changed.
 10. Move the feature from `[IN_PROGRESS]` to `[DONE]` only after the linked change is validated and archived and feature-level acceptance is confirmed.

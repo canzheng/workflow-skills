@@ -1,19 +1,19 @@
 ## Context
 
-The repository already has separate skills for lesson retrieval, lesson capture, lesson promotion, lesson usage recording, and manual lesson refresh. What is missing is a canonical workflow contract that explains where those skills sit in the task lifecycle and how lesson IDs move from task start to task completion.
+The repository already has separate skills for lesson retrieval, lesson usage recording, feature-final lesson distillation, and manual lesson refresh. It also records in-flight observations in `docs/lessons/notes.md`. What is missing is a canonical workflow contract that explains where those steps sit in the task lifecycle and how lesson IDs move from task start to task completion.
 
 ## Goals / Non-Goals
 
 **Goals:**
 - Make lesson retrieval part of task start.
 - Make lesson usage recording part of task completion.
-- Make lesson capture part of task closure.
-- Make lesson promotion part of feature finalization.
+- Make high-signal note recording part of task closure.
+- Make lesson distillation part of feature finalization.
 - Preserve the existing manual `refresh-lessons` workflow.
 - Use the feature file as the handoff location for retrieved lesson IDs.
 
 **Non-Goals:**
-- Changing the lesson candidate or lesson schemas.
+- Changing the lessons or notes schemas.
 - Adding new lesson metadata fields.
 - Automating `refresh-lessons`.
 - Changing feature-board lifecycle rules outside the lesson integration itself.
@@ -38,8 +38,8 @@ The repository already has separate skills for lesson retrieval, lesson capture,
   - Mitigation: make the handoff requirement explicit in `start-task` and `complete-task`, and surface it in the feature file.
 - Keeping the lesson lifecycle in both the workflow reference and the skills can create duplication.
   - Mitigation: keep the reference short and leave the operational details in the skills.
-- Lesson capture at task completion may produce noisy candidates if the threshold is too permissive.
-  - Mitigation: keep the strong-case gate narrow and let `promote-lessons` remain conservative.
+- Note recording at task completion may produce noise if the threshold is too permissive.
+  - Mitigation: keep note recording limited to reusable lessons, near-misses, and fragile decisions, and let `distill-lessons` remain the only feature-final distillation step.
 
 ## Open Questions
 

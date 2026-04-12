@@ -36,7 +36,7 @@ It also does not start the next task; downstream task execution must go through 
    - treat `Retrieved Lesson IDs: none` as meaning no usage reconciliation is needed
    - otherwise parse the comma-separated lesson IDs in returned order, call `record-lesson-usage` for those exact IDs before the task is marked done, and point it at the task completion summary and evidence block in the feature file so it can judge usage from that evidence plus the related work done in the repo
    - if the canonical line is missing while lessons were supposed to have been retrieved, stop and repair the feature-file handoff notes before closing the task
-   - capture any strong new lesson candidates after usage reconciliation and before the task is closed
+   - record any warranted high-signal notes in `docs/lessons/notes.md` after usage reconciliation and before the task is closed
 7. Update the feature file:
    - reconcile the existing validation log against the same proof-obligation and validation-taxonomy language the task plan used
    - add any missing completion-time verification evidence that was produced only at this gate

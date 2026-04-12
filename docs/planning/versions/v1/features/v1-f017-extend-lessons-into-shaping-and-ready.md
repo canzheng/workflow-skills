@@ -77,30 +77,30 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Worktree State: `dirty`
   - Retrieved Lesson IDs: `none`
   - Notes: Starting task `2` in the feature worktree; the planning-stage workflow skills will be updated to retrieve lessons before stage decisions and to keep finish-stage lesson handling coherent.
-  - Proof Obligations: `The workflow skills must retrieve, apply, record, and capture lessons during shaping and readiness without creating a separate planning-only lesson system or weakening execution-stage lesson handling.`
+  - Proof Obligations: `The workflow skills must retrieve, apply, record usage for, and record high-signal notes about lessons during shaping and readiness without creating a separate planning-only lesson system or weakening execution-stage lesson handling.`
 - `2026-04-11` Task `1`:
   - Current Task: `none`
   - Worktree State: `dirty`
   - Retrieved Lesson IDs: `none`
   - Notes: Task `1` is complete in the feature worktree; the OpenSpec task ledger and workflow docs now reflect the canonical planning-stage lesson handoff lines.
-  - Proof Obligations: `The workflow reference and feature template now make planning-stage lesson retrieval, usage reconciliation, and capture explicit without introducing a separate planning-only lesson system.`
+  - Proof Obligations: `The workflow reference and feature template now make planning-stage lesson retrieval, usage reconciliation, and note recording explicit without introducing a separate planning-only lesson system.`
 - `2026-04-11` Task `1`:
   - Current Task: `1`
   - Worktree State: `dirty`
   - Retrieved Lesson IDs: `none`
   - Notes: Task `1` execution started in the feature worktree; updating the workflow reference and feature template to make planning-stage lesson handoffs canonical.
-  - Proof Obligations: `Canonicalize planning-stage lesson retrieval, usage reconciliation, capture, and feature-file handoff lines without creating a separate planning-only lesson system.`
+  - Proof Obligations: `Canonicalize planning-stage lesson retrieval, usage reconciliation, note recording, and feature-file handoff lines without creating a separate planning-only lesson system.`
 - `2026-04-11` Task `1`:
   - Current Task: `none`
   - Worktree State: `n/a`
   - Retrieved Lesson IDs: `none`
   - Notes: Preparing the implementation plan for task `1`; no active lessons were returned for this task boundary.
-  - Proof Obligations: `Update the workflow reference and feature-template guidance so planning-stage lesson retrieval, usage reconciliation, and capture are canonicalized in the docs and feature-file handoff notes.`
+  - Proof Obligations: `Update the workflow reference and feature-template guidance so planning-stage lesson retrieval, usage reconciliation, and note recording are canonicalized in the docs and feature-file handoff notes.`
 - `2026-04-11`:
   - Current Task: `none`
   - Worktree State: `n/a`
-  - Notes: Shaping artifacts are now present for `extend-lessons-into-shaping-and-ready`. The feature is linked to an active OpenSpec change and remains in `[SHAPING]` until readiness work decides whether the planning-stage lesson lifecycle is specified clearly enough for promotion.
-  - Proof Obligations: `The workflow should retrieve, apply, record, and capture lessons during `shaping` and `ready` without introducing a separate planning-only lesson system or weakening the existing execution-stage lesson lifecycle.`
+  - Notes: Shaping artifacts are now present for `extend-lessons-into-shaping-and-ready`. The feature is linked to an active OpenSpec change and remains in `[SHAPING]` until readiness work decides whether the planning-stage lesson lifecycle is specified clearly enough for advancement.
+  - Proof Obligations: `The workflow should retrieve, apply, record usage for, and record high-signal notes about lessons during `shaping` and `ready` without introducing a separate planning-only lesson system or weakening the existing execution-stage lesson lifecycle.`
 - `2026-04-11`:
   - Current Task: `none`
   - Worktree State: `n/a`

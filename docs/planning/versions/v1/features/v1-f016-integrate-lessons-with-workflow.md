@@ -61,5 +61,5 @@
 - `2026-04-08`:
   - Current Task: `none`
   - Worktree State: `clean`
-  - Notes: Completed task `3`. The workflow now integrates lesson retrieval at task start, lesson usage reconciliation at task completion, and lesson promotion at feature finish. The linked OpenSpec change is archived, so the feature is done and branch finalization is the remaining handoff.
-  - Proof Obligations: `The workflow must carry retrieved lesson IDs through the feature file so complete-task can reconcile usage, then capture and promote lessons at the correct lifecycle points without automating refresh-lessons.`
+  - Notes: Completed task `3`. The workflow now integrates lesson retrieval at task start, lesson usage reconciliation at task completion, note recording during execution, and lesson distillation only at feature finish. The linked OpenSpec change is archived, so the feature is done and branch finalization is the remaining handoff.
+  - Proof Obligations: `The workflow must carry retrieved lesson IDs through the feature file so complete-task can reconcile usage, record high-signal notes at earlier stages, and run distillation only at feature completion without automating refresh-lessons.`

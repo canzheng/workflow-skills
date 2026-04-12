@@ -1,15 +1,15 @@
 ## 1. Contract Updates
 
-- [x] 1 Update `docs/planning/WORKFLOW_REFERENCE.md` and any affected feature-file guidance so the canonical lesson lifecycle explicitly includes shaping-stage and readiness-stage retrieval, usage reconciliation, lesson capture, and consistent stage-scoped handoff-note lines
-  - [x] 1.1 Update `docs/planning/WORKFLOW_REFERENCE.md` so the canonical lesson lifecycle explicitly includes shaping-stage retrieval, usage reconciliation, and lesson capture
-  - [x] 1.2 Update `docs/planning/WORKFLOW_REFERENCE.md` so the canonical lesson lifecycle explicitly includes readiness-stage retrieval, usage reconciliation, and lesson capture
+- [x] 1 Update `docs/planning/WORKFLOW_REFERENCE.md` and any affected feature-file guidance so the canonical lesson lifecycle explicitly includes shaping-stage and readiness-stage retrieval, usage reconciliation, stage note recording, and consistent stage-scoped handoff-note lines
+  - [x] 1.1 Update `docs/planning/WORKFLOW_REFERENCE.md` so the canonical lesson lifecycle explicitly includes shaping-stage retrieval, usage reconciliation, and stage note recording
+  - [x] 1.2 Update `docs/planning/WORKFLOW_REFERENCE.md` so the canonical lesson lifecycle explicitly includes readiness-stage retrieval, usage reconciliation, and stage note recording
   - [x] 1.3 Update any affected feature-file guidance or templates so planning-stage lesson handoff notes use consistent stage-scoped canonical lines
 
 ## 2. Workflow Skill Integration
 
-- [x] 2 Update the planning-stage workflow skills so they retrieve lessons before stage decisions, record usage before exit, and capture reusable planning lessons without introducing a separate planning-only lesson system
-  - [x] 2.1 Update `skills/shape-backlog-item/SKILL.md` to retrieve relevant lessons before shaping is finalized, record planning-stage lesson usage before exit, and capture new reusable lessons at stage close
-  - [x] 2.2 Update `skills/ready-feature/SKILL.md` to retrieve relevant lessons before the independent readiness review, record readiness-stage lesson usage before exit, and capture new reusable lessons at stage close
+- [x] 2 Update the planning-stage workflow skills so they retrieve lessons before stage decisions, record usage before exit, and record reusable planning observations in `docs/lessons/notes.md` without introducing a separate planning-only lesson system
+  - [x] 2.1 Update `skills/shape-backlog-item/SKILL.md` to retrieve relevant lessons before shaping is finalized, record planning-stage lesson usage before exit, and record reusable observations at stage close
+  - [x] 2.2 Update `skills/ready-feature/SKILL.md` to retrieve relevant lessons before the independent readiness review, record readiness-stage lesson usage before exit, and record reusable observations at stage close
   - [x] 2.3 Keep the execution and finish-stage lesson lifecycle docs coherent with the new planning-stage flow without introducing a separate planning-only lesson system
 
 ## 3. Validation

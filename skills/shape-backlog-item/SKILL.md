@@ -27,7 +27,7 @@ It is a workflow wrapper around `brainstorming` plus linked OpenSpec change crea
    - multiple features below the 5-feature split limit
    - or smaller backlog items first
    - do not continue until the wrapped `brainstorming` flow has completed its required review gates for the chosen shaping output
-   - once the shaping output is clear, retrieve relevant active lessons and record the returned lesson IDs in the feature file handoff notes under a task-scoped canonical `Retrieved Lesson IDs: ...` line for `shaping`; use `none` when no lessons are returned
+   - once the shaping output is clear, call `retrieve-lessons` to retrieve relevant active lessons and record the returned lesson IDs in the feature file handoff notes under a task-scoped canonical `Retrieved Lesson IDs: ...` line for `shaping`; use `none` when no lessons are returned
 5. For each promoted feature:
    - assign the next feature ID
    - run `openspec-propose` to create or update exactly one linked OpenSpec change for the feature's shaping authority
@@ -37,7 +37,8 @@ It is a workflow wrapper around `brainstorming` plus linked OpenSpec change crea
    - create the feature file under `features/` by running `python "${CODEX_HOME:-$HOME/.codex}/skills/shape-backlog-item/scripts/render_feature_file.py"`
    - pass the authoritative OpenSpec change and affected spec paths as explicit inputs to the renderer
    - do not duplicate proposal, design, spec, or task prose from OpenSpec inside the feature file
-   - before the stage exits, reconcile whether the retrieved lessons materially influenced the shaped output and capture any strong new lesson candidates that would improve future shaping decisions
+   - before the stage exits, call `record-lesson-usage` for the retrieved lesson IDs to reconcile whether they materially influenced the shaped output
+   - then record any warranted high-signal notes in `docs/lessons/notes.md`
 6. Update feature files first, then update `BACKLOG.md`.
 7. Place promoted features at the bottom of `[SHAPING]`, preserving the existing top-to-bottom order of earlier items.
 8. Re-run `audit-workflow`.

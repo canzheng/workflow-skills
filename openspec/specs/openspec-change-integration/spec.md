@@ -86,15 +86,15 @@ Workflow-managed readiness SHALL retrieve relevant active lessons before the ind
 - **THEN** it retrieves relevant active lessons before the review decides whether the shaped contract is sufficiently clear
 - **AND** those lessons may influence documentation consistency checks, acceptance-boundary review, proof-obligation clarity, and surrogate-proof risk judgment
 
-### Requirement: Planning stages capture lesson outcomes before exit
-Workflow-managed shaping and readiness SHALL record lesson usage and capture reusable new planning lessons before the stage exits.
+### Requirement: Planning stages record lesson outcomes before exit
+Workflow-managed shaping and readiness SHALL record lesson usage and record any warranted high-signal notes in `docs/lessons/notes.md` before the stage exits.
 
 #### Scenario: Shape-backlog-item closes with lesson reconciliation
 - **WHEN** `shape-backlog-item` completes its shaping work for a promoted feature
 - **THEN** it records whether each retrieved lesson materially influenced the shaping decisions
-- **AND** it captures any high-value reusable planning lessons before the stage exits
+- **AND** it records any warranted high-signal notes in `docs/lessons/notes.md` before the stage exits
 
 #### Scenario: Ready-feature closes with lesson reconciliation
 - **WHEN** `ready-feature` finishes its readiness work for a shaped feature
 - **THEN** it records whether each retrieved lesson materially influenced the readiness decision
-- **AND** it captures any high-value reusable readiness lessons before the stage exits
+- **AND** it records any warranted high-signal notes in `docs/lessons/notes.md` before the stage exits

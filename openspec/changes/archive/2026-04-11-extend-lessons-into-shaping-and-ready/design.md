@@ -1,6 +1,6 @@
 ## Context
 
-The repository already has a complete lesson toolchain: `retrieve-lessons`, `record-lesson-usage`, `capture-lessons`, `promote-lessons`, and `refresh-lessons`. The current workflow wires those skills into execution and feature finish, but not into the planning stages where shaping decisions and readiness judgment are made.
+The repository already has a complete lesson toolchain: `retrieve-lessons`, `record-lesson-usage`, `distill-lessons`, and `refresh-lessons`, plus `docs/lessons/notes.md` for in-flight observations. The current workflow wires lesson retrieval and usage into execution and distillation into feature finish, but not the planning-stage note-recording behavior where shaping decisions and readiness judgment are made.
 
 That gap matters because shaping and readiness already own high-leverage decisions: feature splitting, affected spec/doc surfaces, proof obligations, validation intent, and readiness contract clarity. If lessons are only applied once execution starts, the workflow misses a chance to prevent weak shaping output earlier.
 
@@ -10,31 +10,32 @@ That gap matters because shaping and readiness already own high-leverage decisio
 - Make relevant active lessons available during `shape-backlog-item` before shaping output is finalized.
 - Make relevant active lessons available during `ready-feature` before the independent readiness review runs.
 - Record whether retrieved lessons materially influenced shaping or readiness decisions.
-- Capture reusable new lessons discovered during shaping or readiness without waiting for execution.
-- Reuse existing lesson skills, lesson schemas, and feature-file storage surfaces.
+- Record reusable planning observations in `docs/lessons/notes.md` during shaping or readiness without waiting for execution.
+- Reuse existing lesson skills, lessons/notes schemas, and feature-file storage surfaces.
 
 **Non-Goals:**
 - Creating a separate planning-only lesson database or schema.
-- Changing lesson ranking fields or lesson/candidate schemas.
+- Changing lesson ranking fields or the lessons/notes schemas.
 - Automating `refresh-lessons`.
 - Expanding shaping or readiness into broad curation passes over all active lessons.
 
 ## Decisions
 
-### Decision: Reuse the existing lesson lifecycle skills at planning stages
+### Decision: Reuse the existing lesson lifecycle at planning stages without introducing direct distillation
 
-`shape-backlog-item` and `ready-feature` will call the same lesson skills already used later in the workflow:
+`shape-backlog-item` and `ready-feature` will reuse the same lesson lifecycle already used later in the workflow:
 - `retrieve-lessons` at stage entry
 - `record-lesson-usage` before stage exit
-- `capture-lessons` before stage exit when the stage produces reusable insight
+- note recording in `docs/lessons/notes.md` before stage exit when the stage produces reusable insight
 
 Rationale:
 - This preserves one lesson system instead of creating a second planning-specific mechanism.
 - The lesson schemas already support planning-stage retrieval because they index on `domain`, `task_type`, `scope`, `tags`, and `applies_when`.
 - The same usage accounting model works for planning stages if "applied" is interpreted as materially influencing shaping or readiness decisions.
+- Distillation remains a feature-completion step only; planning stages should contribute notes, not directly distill or promote lessons.
 
 Alternatives considered:
-- Create planning-specific lesson skills. Rejected because they would duplicate existing selection, usage, and capture behavior.
+- Create planning-specific lesson skills. Rejected because they would duplicate existing selection, usage, and note-recording behavior.
 - Restrict lessons to execution only and copy a few stable lessons into `AGENTS.md`. Rejected because that only helps with very broad defaults and misses stage-specific retrieval.
 
 ### Decision: Persist planning-stage lesson state in the feature file handoff notes
@@ -67,23 +68,23 @@ Alternatives considered:
 - Retrieve lessons after shaping/readiness decisions. Rejected because this turns retrieval into documentation rather than guidance.
 - Record usage immediately at retrieval time. Rejected because it would inflate applied counts without evidence that the stage was materially changed.
 
-### Decision: Keep planning-stage capture conservative
+### Decision: Keep planning-stage note recording conservative
 
-`capture-lessons` should run at the end of shaping and readiness only for lessons that would change future planning defaults, such as how shaping defines proof obligations, how readiness checks for ambiguity, or how affected doc/spec surfaces are identified.
+Planning stages should record notes in `docs/lessons/notes.md` only when the stage surfaced reusable lessons, near-misses, or fragile decisions that would change future planning defaults, such as how shaping defines proof obligations, how readiness checks for ambiguity, or how affected doc/spec surfaces are identified.
 
 Rationale:
 - Planning produces lots of observations, but most are feature-specific and should not become reusable lessons.
-- A strict capture bar keeps the lesson pool high-signal.
+- A strict note-recording bar keeps later distillation high-signal.
 
 Alternatives considered:
-- Capture every notable shaping/readiness observation. Rejected because it would create noisy candidates with low reuse value.
+- Record every notable shaping/readiness observation. Rejected because it would create noisy notes with low reuse value.
 
 ## Risks / Trade-offs
 
 - [Planning-stage retrieval adds ceremony] -> Keep retrieval capped at three lessons and use it only at the boundary of `shape-backlog-item` and `ready-feature`, not throughout every intermediate shaping conversation.
 - [Usage judgments during planning are less obvious than execution usage] -> Define "applied" as materially changing shaping output, readiness judgment, proof obligations, or validation expectations, and keep the recorded usage summary concise.
 - [Feature-file handoff notes could become inconsistent across stages] -> Standardize stage-scoped canonical lines in the workflow docs and skill text so both stages record the same shape.
-- [Planning lessons could drift into duplicate execution lessons] -> Keep `capture-lessons` conservative and let `promote-lessons` continue to merge overlapping ideas before activation.
+- [Planning lessons could drift into duplicate execution lessons] -> Keep planning-stage note recording conservative and leave `distill-lessons` as the only feature-completion distillation step.
 
 ## Open Questions
 

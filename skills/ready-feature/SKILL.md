@@ -23,7 +23,7 @@ It is a workflow wrapper around linked OpenSpec shaping artifacts, with optional
 2. Resolve the target feature.
 3. Confirm the feature is in `[SHAPING]`.
 4. Review the feature file and linked OpenSpec change.
-   - before the independent readiness review, retrieve relevant active lessons and record the returned lesson IDs in the feature file handoff notes under a task-scoped canonical `Retrieved Lesson IDs: ...` line for `ready`; use `none` when no lessons are returned
+   - before the independent readiness review, call `retrieve-lessons` to retrieve relevant active lessons and record the returned lesson IDs in the feature file handoff notes under a task-scoped canonical `Retrieved Lesson IDs: ...` line for `ready`; use `none` when no lessons are returned
 5. If the linked OpenSpec change is too weak to justify readiness, wrap `brainstorming` only long enough to strengthen the shaping output.
    - if `brainstorming` is used here, do not continue until its required review gates have passed
 6. Confirm the linked OpenSpec change has the required shaping artifacts:
@@ -39,7 +39,8 @@ It is a workflow wrapper around linked OpenSpec shaping artifacts, with optional
    - require that review to check for unresolved ambiguity, missing acceptance boundaries, or surrogate-proof risk that would force `start-task` to decide scope instead of inheriting it
    - do not promote the feature to `[READY]` unless the independent review passes
    - if the review finds gaps, return to shaping and strengthen the linked OpenSpec artifacts before retrying readiness
-   - after the review and before promotion, reconcile whether the retrieved lessons materially influenced the readiness judgment and capture any strong new lesson candidates that would improve future readiness reviews
+   - after the review and before promotion, call `record-lesson-usage` for the retrieved lesson IDs to reconcile whether they materially influenced the readiness judgment
+   - then record any warranted high-signal notes in `docs/lessons/notes.md`
 10. Update the feature file first, then move the backlog entry from `[SHAPING]` to the bottom of `[READY]`.
 11. Re-run `audit-workflow`.
 12. Commit the intentional planning-state changes when needed to leave the primary checkout clean before exiting.

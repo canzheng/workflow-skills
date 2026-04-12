@@ -210,7 +210,7 @@ Workflow task execution SHALL record validation evidence while the task is being
 - **AND** it treats reconciliation as a closure gate rather than as the primary moment when evidence is first authored
 
 ### Requirement: Task execution integrates the lesson lifecycle
-The workflow lesson lifecycle SHALL retrieve relevant lessons before shaping, readiness, and execution work begins, carry the retrieved lesson IDs through feature-file handoff state, record stage-exit usage for those lesson IDs, capture new lesson candidates before each stage is finalized, and promote durable lessons at feature finish.
+The workflow lesson lifecycle SHALL retrieve relevant lessons before shaping, readiness, and execution work begins, carry the retrieved lesson IDs through feature-file handoff state, record stage-exit usage for those lesson IDs, record any warranted high-signal notes in `docs/lessons/notes.md`, and run `distill-lessons` only during feature completion.
 
 #### Scenario: Shape-backlog-item retrieves lessons for shaping
 - **WHEN** `shape-backlog-item` has gathered the initial context for a promoted backlog item
@@ -231,22 +231,21 @@ The workflow lesson lifecycle SHALL retrieve relevant lessons before shaping, re
 - **WHEN** `shape-backlog-item` finishes shaping work for the promoted feature
 - **THEN** it reads the retrieved lesson IDs from the `shaping` handoff state
 - **AND** it records whether each lesson was applied, partially applied, or not applied before the stage exits
-- **AND** it captures high-value lesson candidates after usage reconciliation and before the shaping stage is finalized
+- **AND** it records any warranted high-signal notes in `docs/lessons/notes.md` after usage reconciliation and before the shaping stage is finalized
 
 #### Scenario: Ready-feature reconciles lesson usage before stage exit
 - **WHEN** `ready-feature` finishes readiness work for the shaped feature
 - **THEN** it reads the retrieved lesson IDs from the `ready` handoff state
 - **AND** it records whether each lesson was applied, partially applied, or not applied before the stage exits
-- **AND** it captures high-value lesson candidates after usage reconciliation and before the feature is promoted to `[READY]`
+- **AND** it records any warranted high-signal notes in `docs/lessons/notes.md` after usage reconciliation and before the feature is promoted to `[READY]`
 
 #### Scenario: Complete-task reconciles lesson usage before closure
 - **WHEN** `complete-task` closes the active task
 - **THEN** it reads the retrieved lesson IDs from the feature file handoff state
 - **AND** it records whether each lesson was applied, partially applied, or not applied before completion is finalized
-- **AND** it captures high-value lesson candidates after usage reconciliation and before the task is marked complete
+- **AND** it records any warranted high-signal notes in `docs/lessons/notes.md` after usage reconciliation and before the task is marked complete
 
-#### Scenario: Finish-feature promotes durable lessons
+#### Scenario: Finish-feature distills durable lessons only at feature completion
 - **WHEN** `finish-feature` validates and archives the linked OpenSpec change
-- **THEN** it promotes only the small set of durable high-value lessons before branch finalization
+- **THEN** it runs `distill-lessons` to review `docs/lessons/notes.md` and distill only the small set of durable reusable lessons before branch finalization
 - **AND** `refresh-lessons` remains explicitly user-triggered rather than part of the automated workflow
-
