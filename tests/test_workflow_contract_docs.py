@@ -181,27 +181,28 @@ class WorkflowContractDocsTests(unittest.TestCase):
     def test_stable_handoff_spec_requires_later_tasks_to_resolve_from_feature_worktree(self) -> None:
         task_execution_handoff_spec = TASK_EXECUTION_HANDOFF_SPEC.read_text(encoding="utf-8")
 
-        self.assertIn("Later execution task resumes on the same feature", task_execution_handoff_spec)
-        self.assertIn("resolves that later task from the reusable feature worktree", task_execution_handoff_spec)
-        self.assertIn("Autonomous continuation reuses the same feature worktree", task_execution_handoff_spec)
+        self.assertIn("Selected-feature continuation fails when the intended worktree is missing", task_execution_handoff_spec)
+        self.assertIn("later task execution or autonomous continuation targets a selected feature already in `[IN_PROGRESS]`", task_execution_handoff_spec)
+        self.assertIn("it does not silently continue from the primary or current checkout", task_execution_handoff_spec)
 
     def test_stable_handoff_spec_defines_continuation_payload(self) -> None:
         task_execution_handoff_spec = TASK_EXECUTION_HANDOFF_SPEC.read_text(encoding="utf-8")
 
-        self.assertIn("fields `action`, `target_feature_id`, `target_task_id`, `reason`, and `requires_human_decision`", task_execution_handoff_spec)
-        self.assertIn("action=finish_feature", task_execution_handoff_spec)
+        self.assertIn("canonical `completion_handoff` payload", task_execution_handoff_spec)
         self.assertIn("action=start_task", task_execution_handoff_spec)
         self.assertIn("requires_human_decision=true", task_execution_handoff_spec)
+        self.assertIn("the workflow reports that `finish-feature` is startable", task_execution_handoff_spec)
 
     def test_stable_handoff_spec_requires_task_completion_review_verdict_lines(self) -> None:
-        task_execution_handoff_spec = TASK_EXECUTION_HANDOFF_SPEC.read_text(encoding="utf-8")
+        feature_execution_tracking_spec = FEATURE_EXECUTION_TRACKING_SPEC.read_text(encoding="utf-8")
 
-        self.assertIn("Task completion records canonical review verdict lines", task_execution_handoff_spec)
-        self.assertIn("Review Scope", task_execution_handoff_spec)
-        self.assertIn("Review Target", task_execution_handoff_spec)
-        self.assertIn("Review Verdict", task_execution_handoff_spec)
-        self.assertIn("Blocking Findings", task_execution_handoff_spec)
-        self.assertIn("Review Terminal", task_execution_handoff_spec)
+        self.assertIn("Workflow stages emit the canonical review-verdict lines they own", feature_execution_tracking_spec)
+        self.assertIn("ready-feature` or `complete-task` passes through a required review gate", feature_execution_tracking_spec)
+        self.assertIn("Review Scope", feature_execution_tracking_spec)
+        self.assertIn("Review Target", feature_execution_tracking_spec)
+        self.assertIn("Review Verdict", feature_execution_tracking_spec)
+        self.assertIn("Blocking Findings", feature_execution_tracking_spec)
+        self.assertIn("Review Terminal", feature_execution_tracking_spec)
 
     def test_feature_execution_tracking_spec_defines_structured_review_verdict_fields(self) -> None:
         feature_execution_tracking_spec = FEATURE_EXECUTION_TRACKING_SPEC.read_text(encoding="utf-8")
@@ -214,11 +215,13 @@ class WorkflowContractDocsTests(unittest.TestCase):
         self.assertIn("Review Terminal", feature_execution_tracking_spec)
 
     def test_workflow_audit_and_repair_spec_allows_selected_feature_scoping_with_diagnostics(self) -> None:
+        task_execution_handoff_spec = TASK_EXECUTION_HANDOFF_SPEC.read_text(encoding="utf-8")
         workflow_audit_and_repair_spec = WORKFLOW_AUDIT_AND_REPAIR_SPEC.read_text(encoding="utf-8")
 
-        self.assertIn("Execution-scoped helpers block on selected-feature integrity", workflow_audit_and_repair_spec)
-        self.assertIn("Execution-scoped helpers report unrelated active drift separately", workflow_audit_and_repair_spec)
-        self.assertIn("direct `audit-workflow` remains the global pass/fail integrity gate", workflow_audit_and_repair_spec)
+        self.assertIn("Selected-feature helper fails closed on missing worktree", workflow_audit_and_repair_spec)
+        self.assertIn("it does not silently reuse the current checkout as a substitute for the missing feature worktree", workflow_audit_and_repair_spec)
+        self.assertIn("Selected-feature continuation reports unrelated drift without blocking", task_execution_handoff_spec)
+        self.assertIn("the unrelated drift is surfaced as diagnostic workflow information rather than a selected-feature stop condition", task_execution_handoff_spec)
 
 
 if __name__ == "__main__":
