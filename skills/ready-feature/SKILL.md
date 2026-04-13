@@ -39,6 +39,7 @@ It is a workflow wrapper around linked OpenSpec shaping artifacts, with optional
    - require that review to check for unresolved ambiguity, missing acceptance boundaries, or surrogate-proof risk that would force `start-task` to decide scope instead of inheriting it
    - do not promote the feature to `[READY]` unless the independent review passes
    - if the review finds gaps, return to shaping and strengthen the linked OpenSpec artifacts before retrying readiness
+   - record the readiness review verdict in the feature file handoff notes using canonical `Review Scope`, `Review Target`, `Review Verdict`, `Blocking Findings`, and `Review Terminal` lines so the result can be consumed without prose inference
    - after the review and before promotion, call `record-lesson-usage` for the retrieved lesson IDs to reconcile whether they materially influenced the readiness judgment
    - then record any warranted high-signal notes in `docs/lessons/notes.md`
 10. Update the feature file first, then move the backlog entry from `[SHAPING]` to the bottom of `[READY]`.

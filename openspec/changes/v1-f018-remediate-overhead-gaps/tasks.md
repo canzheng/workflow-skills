@@ -1,8 +1,8 @@
 ## 1. Contract Alignment
 
-- [ ] 1 Update workflow guidance and stable specs so the reopened `v1-f018` remediation scope is explicit
-  - [ ] 1.1 Align `skills/complete-task/SKILL.md` and contract-doc assertions with the canonical `completion_handoff` continuation model
-  - [ ] 1.2 Align `skills/ready-feature/SKILL.md`, `skills/complete-task/SKILL.md`, and stable specs on required canonical structured review-verdict emission
+- [x] 1 Update workflow guidance and stable specs so the reopened `v1-f018` remediation scope is explicit
+  - [x] 1.1 Align `skills/complete-task/SKILL.md` and contract-doc assertions with the canonical `completion_handoff` continuation model
+  - [x] 1.2 Align `skills/ready-feature/SKILL.md`, `skills/complete-task/SKILL.md`, and stable specs on required canonical structured review-verdict emission
 
 ## 2. Runtime Remediation
 

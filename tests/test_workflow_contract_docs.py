@@ -7,6 +7,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 START_TASK_SKILL = REPO_ROOT / "skills" / "start-task" / "SKILL.md"
 COMPLETE_TASK_SKILL = REPO_ROOT / "skills" / "complete-task" / "SKILL.md"
+READY_FEATURE_SKILL = REPO_ROOT / "skills" / "ready-feature" / "SKILL.md"
 FINISH_FEATURE_SKILL = REPO_ROOT / "skills" / "finish-feature" / "SKILL.md"
 AUTONOMOUS_BACKLOG_LOOP_SKILL = REPO_ROOT / "skills" / "autonomous-backlog-loop" / "SKILL.md"
 TASK_EXECUTION_HANDOFF_SPEC = REPO_ROOT / "openspec" / "specs" / "task-execution-handoff" / "spec.md"
@@ -69,9 +70,23 @@ class WorkflowContractDocsTests(unittest.TestCase):
         complete_task_skill = COMPLETE_TASK_SKILL.read_text(encoding="utf-8")
 
         self.assertIn("does not start the next task", complete_task_skill)
+        self.assertIn("canonical `completion_handoff` payload", complete_task_skill)
         self.assertIn("clear `Current Task` to `none`", complete_task_skill)
         self.assertIn("do not start another task", complete_task_skill)
         self.assertIn("downstream task execution must go through a later explicit `start-task` invocation", complete_task_skill)
+
+    def test_complete_task_skill_requires_canonical_review_verdict_lines(self) -> None:
+        complete_task_skill = COMPLETE_TASK_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn("canonical `Review Scope`, `Review Target`, `Review Verdict`, `Blocking Findings`, and `Review Terminal` lines", complete_task_skill)
+        self.assertIn("downstream workflow can consume it without prose inference", complete_task_skill)
+
+    def test_ready_feature_skill_requires_canonical_review_verdict_lines(self) -> None:
+        ready_feature_skill = READY_FEATURE_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn("record the readiness review verdict", ready_feature_skill)
+        self.assertIn("canonical `Review Scope`, `Review Target`, `Review Verdict`, `Blocking Findings`, and `Review Terminal` lines", ready_feature_skill)
+        self.assertIn("consumed without prose inference", ready_feature_skill)
 
     def test_autonomous_backlog_loop_routes_completion_through_finish_feature(self) -> None:
         autonomous_loop_skill = AUTONOMOUS_BACKLOG_LOOP_SKILL.read_text(encoding="utf-8")
@@ -177,6 +192,16 @@ class WorkflowContractDocsTests(unittest.TestCase):
         self.assertIn("action=finish_feature", task_execution_handoff_spec)
         self.assertIn("action=start_task", task_execution_handoff_spec)
         self.assertIn("requires_human_decision=true", task_execution_handoff_spec)
+
+    def test_stable_handoff_spec_requires_task_completion_review_verdict_lines(self) -> None:
+        task_execution_handoff_spec = TASK_EXECUTION_HANDOFF_SPEC.read_text(encoding="utf-8")
+
+        self.assertIn("Task completion records canonical review verdict lines", task_execution_handoff_spec)
+        self.assertIn("Review Scope", task_execution_handoff_spec)
+        self.assertIn("Review Target", task_execution_handoff_spec)
+        self.assertIn("Review Verdict", task_execution_handoff_spec)
+        self.assertIn("Blocking Findings", task_execution_handoff_spec)
+        self.assertIn("Review Terminal", task_execution_handoff_spec)
 
     def test_feature_execution_tracking_spec_defines_structured_review_verdict_fields(self) -> None:
         feature_execution_tracking_spec = FEATURE_EXECUTION_TRACKING_SPEC.read_text(encoding="utf-8")

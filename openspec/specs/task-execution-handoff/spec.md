@@ -68,6 +68,12 @@ Completing a task SHALL leave the feature ready for the next handoff.
 - **AND** intended task changes are committed when needed to leave the feature worktree clean
 - **AND** downstream workflow-derived task readiness is synchronized from checkbox completion state plus any workflow `Depends On` references
 
+#### Scenario: Task completion records canonical review verdict lines
+- **WHEN** `complete-task` finishes evaluating the active task handoff
+- **AND** the task execution passed through a review gate
+- **THEN** the feature file records `Review Scope`, `Review Target`, `Review Verdict`, `Blocking Findings`, and `Review Terminal` in the task-completion handoff notes
+- **AND** wrappers can consume that verdict state without inferring it from prose-only notes
+
 #### Scenario: Final task completion can continue without a status-only relay turn
 - **WHEN** `complete-task` finishes the final top-level task for a feature
 - **AND** all required task-level gates have passed

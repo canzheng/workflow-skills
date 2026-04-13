@@ -11,7 +11,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - `openspec/specs/task-execution-handoff/spec.md`
   - `openspec/specs/feature-execution-tracking/spec.md`
   - `openspec/specs/workflow-audit-and-repair/spec.md`
-- Current Task: `none`
+- Current Task: `1`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
   - This field is the active execution marker for the implemented workflow; OpenSpec `tasks.md` remains the checked/unchecked task ledger.
@@ -115,6 +115,18 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Inspection: `post-merge review of the shipped v1-f018 implementation against the archived design, implementation plans, and landed code/tests`
   - Result: `reopened feature execution under a new remediation change because structured review-verdict behavior remained parser-only, selected-feature worktree continuation did not fully fail closed, and complete-task guidance/tests still reflected the old terminal handoff model`
   - Evidence: `artifact_inspection, prompt_contract`
+- `2026-04-14` Task `1`:
+  - Run: `rtk python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass`
+  - Evidence: `artifact_inspection`
+- `2026-04-14` Task `1`:
+  - Run: `rtk python -m unittest tests.test_workflow_contract_docs -v`
+  - Result: `pass; 23 contract-doc tests preserved the canonical completion_handoff wording and review-verdict emission requirements for ready-feature and complete-task`
+  - Evidence: `prompt_contract`
+- `2026-04-14` Task `1`:
+  - Run: `rtk git diff --check`
+  - Result: `pass`
+  - Evidence: `artifact_inspection`
 
 ## 2. Handoff Notes
 - `2026-04-13`:
@@ -224,3 +236,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Lesson Usage: `not_applicable; docs/lessons/lessons.md is currently empty`
   - Notes: Reopened `v1-f018` after post-merge review found implementation drift against the accepted design and implementation-plan scope. The new linked change narrows remediation to three items only: canonical structured review-verdict emission/consumption, fail-closed selected-feature worktree resolution, and complete-task contract-doc alignment with the shipped continuation payload.
   - Proof Obligations: `Restore consistency between the reopened feature contract and shipped behavior without expanding scope beyond the review findings, then return the feature to finish-feature once the remediation change is implemented and validated.`
+- `2026-04-14`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `not_applicable; docs/lessons/lessons.md is currently empty`
+  - Review Scope: `task_execution`
+  - Review Target: `1`
+  - Review Verdict: `approved`
+  - Blocking Findings: `none`
+  - Review Terminal: `true`
+  - Notes: Started remediation task `1` on the dedicated feature worktree. This task is limited to contract and stable-spec alignment so the reopened remediation scope is explicit before runtime behavior changes begin.
+  - Proof Obligations: `Task 1 completed the contract-alignment slice for the reopened remediation scope. The next step is task 2: runtime remediation for fail-closed worktree resolution and structured review-verdict emission/consumption.`

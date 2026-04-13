@@ -10,7 +10,7 @@ description: Use when closing the active task, writing verification evidence, an
 This skill verifies one active task, reconciles already-recorded evidence, and updates task and feature state.
 
 It does not merge or clean up the feature branch/worktree. Branch finalization is separate and should use `finish-feature` once the feature is complete.
-It also does not start the next task; downstream task execution must go through a later explicit `start-task` invocation.
+It also does not start the next task; downstream task execution must go through a later explicit `start-task` invocation. The downstream continuation contract is the canonical `completion_handoff` payload, which wrappers may use when `requires_human_decision=false`.
 
 ## Defaults
 
@@ -37,6 +37,7 @@ It also does not start the next task; downstream task execution must go through 
    - otherwise parse the comma-separated lesson IDs in returned order, call `record-lesson-usage` for those exact IDs before the task is marked done, and point it at the task completion summary and evidence block in the feature file so it can judge usage from that evidence plus the related work done in the repo
    - if the canonical line is missing while lessons were supposed to have been retrieved, stop and repair the feature-file handoff notes before closing the task
    - record any warranted high-signal notes in `docs/lessons/notes.md` after usage reconciliation and before the task is closed
+   - if the task crossed a review gate, record the completion review verdict in the feature file handoff notes using canonical `Review Scope`, `Review Target`, `Review Verdict`, `Blocking Findings`, and `Review Terminal` lines so downstream workflow can consume it without prose inference
 7. Update the feature file:
    - reconcile the existing validation log against the same proof-obligation and validation-taxonomy language the task plan used
    - add any missing completion-time verification evidence that was produced only at this gate
