@@ -10,6 +10,8 @@ COMPLETE_TASK_SKILL = REPO_ROOT / "skills" / "complete-task" / "SKILL.md"
 FINISH_FEATURE_SKILL = REPO_ROOT / "skills" / "finish-feature" / "SKILL.md"
 AUTONOMOUS_BACKLOG_LOOP_SKILL = REPO_ROOT / "skills" / "autonomous-backlog-loop" / "SKILL.md"
 TASK_EXECUTION_HANDOFF_SPEC = REPO_ROOT / "openspec" / "specs" / "task-execution-handoff" / "spec.md"
+FEATURE_EXECUTION_TRACKING_SPEC = REPO_ROOT / "openspec" / "specs" / "feature-execution-tracking" / "spec.md"
+WORKFLOW_AUDIT_AND_REPAIR_SPEC = REPO_ROOT / "openspec" / "specs" / "workflow-audit-and-repair" / "spec.md"
 WORKFLOW_REFERENCE = REPO_ROOT / "docs" / "planning" / "WORKFLOW_REFERENCE.md"
 FEATURE_TEMPLATE = REPO_ROOT / "docs" / "planning" / "template" / "feature-template.md"
 
@@ -120,6 +122,17 @@ class WorkflowContractDocsTests(unittest.TestCase):
 
         self.assertIn("prefer canonical end-to-end fixtures", workflow_reference)
         self.assertIn("workflow contract behavior is under test", workflow_reference)
+        self.assertIn("canonical machine-readable payload", workflow_reference)
+        self.assertIn("structured review verdicts", workflow_reference)
+
+    def test_feature_template_includes_structured_review_verdict_fields(self) -> None:
+        feature_template = FEATURE_TEMPLATE.read_text(encoding="utf-8")
+
+        self.assertIn("Review Scope", feature_template)
+        self.assertIn("Review Target", feature_template)
+        self.assertIn("Review Verdict", feature_template)
+        self.assertIn("Blocking Findings", feature_template)
+        self.assertIn("Review Terminal", feature_template)
 
     def test_planning_stage_lesson_lifecycle_docs_expose_canonical_handoff_lines(self) -> None:
         shape_backlog_item_skill = (REPO_ROOT / "skills" / "shape-backlog-item" / "SKILL.md").read_text(encoding="utf-8")
@@ -148,6 +161,7 @@ class WorkflowContractDocsTests(unittest.TestCase):
 
         self.assertIn("### Requirement: Autonomous orchestration routes completion through finish-feature", task_execution_handoff_spec)
         self.assertIn("#### Scenario: Autonomous loop completes the final task for a feature", task_execution_handoff_spec)
+        self.assertIn("Autonomous continuation stays inside one feature-scoped agent", task_execution_handoff_spec)
 
     def test_stable_handoff_spec_requires_later_tasks_to_resolve_from_feature_worktree(self) -> None:
         task_execution_handoff_spec = TASK_EXECUTION_HANDOFF_SPEC.read_text(encoding="utf-8")
@@ -155,6 +169,31 @@ class WorkflowContractDocsTests(unittest.TestCase):
         self.assertIn("Later execution task resumes on the same feature", task_execution_handoff_spec)
         self.assertIn("resolves that later task from the reusable feature worktree", task_execution_handoff_spec)
         self.assertIn("Autonomous continuation reuses the same feature worktree", task_execution_handoff_spec)
+
+    def test_stable_handoff_spec_defines_continuation_payload(self) -> None:
+        task_execution_handoff_spec = TASK_EXECUTION_HANDOFF_SPEC.read_text(encoding="utf-8")
+
+        self.assertIn("fields `action`, `target_feature_id`, `target_task_id`, `reason`, and `requires_human_decision`", task_execution_handoff_spec)
+        self.assertIn("action=finish_feature", task_execution_handoff_spec)
+        self.assertIn("action=start_task", task_execution_handoff_spec)
+        self.assertIn("requires_human_decision=true", task_execution_handoff_spec)
+
+    def test_feature_execution_tracking_spec_defines_structured_review_verdict_fields(self) -> None:
+        feature_execution_tracking_spec = FEATURE_EXECUTION_TRACKING_SPEC.read_text(encoding="utf-8")
+
+        self.assertIn("### Requirement: Feature files carry structured review verdict state", feature_execution_tracking_spec)
+        self.assertIn("Review Scope", feature_execution_tracking_spec)
+        self.assertIn("Review Target", feature_execution_tracking_spec)
+        self.assertIn("Review Verdict", feature_execution_tracking_spec)
+        self.assertIn("Blocking Findings", feature_execution_tracking_spec)
+        self.assertIn("Review Terminal", feature_execution_tracking_spec)
+
+    def test_workflow_audit_and_repair_spec_allows_selected_feature_scoping_with_diagnostics(self) -> None:
+        workflow_audit_and_repair_spec = WORKFLOW_AUDIT_AND_REPAIR_SPEC.read_text(encoding="utf-8")
+
+        self.assertIn("Execution-scoped helpers block on selected-feature integrity", workflow_audit_and_repair_spec)
+        self.assertIn("Execution-scoped helpers report unrelated active drift separately", workflow_audit_and_repair_spec)
+        self.assertIn("direct `audit-workflow` remains the global pass/fail integrity gate", workflow_audit_and_repair_spec)
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f018`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
 - OpenSpec Change: `v1-f018-reduce-status-only-workflow-overhead`
 - OpenSpec Specs:
   - `openspec/specs/task-execution-handoff/spec.md`
@@ -31,6 +31,22 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `independent gpt-5.4-mini review of task 1 against the linked OpenSpec shaping artifacts, stable workflow docs, and affected workflow skill docs`
   - Result: `pass after tightening the canonical continuation payload schema and the structured review-verdict schema`
   - Evidence: `contract_surface`
+- `2026-04-13` Task `1`:
+  - Run: `rtk python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass`
+  - Evidence: `artifact_inspection`
+- `2026-04-13` Task `1`:
+  - Run: `rtk python -m unittest tests.test_workflow_contract_docs -v`
+  - Result: `pass; 20 contract-doc tests preserved the continuation-payload, review-verdict, and selected-feature scoping wording`
+  - Evidence: `prompt_contract`
+- `2026-04-13` Task `1`:
+  - Run: `rtk git diff --check`
+  - Result: `pass`
+  - Evidence: `artifact_inspection`
+- `2026-04-13` Task `1`:
+  - Run: `manual inspection of docs/planning/WORKFLOW_REFERENCE.md, docs/planning/template/feature-template.md, openspec/specs/task-execution-handoff/spec.md, openspec/specs/feature-execution-tracking/spec.md, openspec/specs/workflow-audit-and-repair/spec.md, and tests/test_workflow_contract_docs.py`
+  - Result: `the stable docs/spec/template and contract-doc tests use the same continuation-payload fields, structured review-verdict lines, and selected-feature scoping language`
+  - Evidence: `prompt_contract`
 
 ## 2. Handoff Notes
 - `2026-04-13`:
@@ -52,3 +68,22 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `true`
   - Notes: Readiness review passed. The linked shaping artifacts now pin the continuation payload fields, the structured review-verdict schema, and the selected-feature scoping boundary clearly enough that `start-task` can draft task `1` without inventing or narrowing the contract.
   - Proof Obligations: `Keep the continuation payload and review-verdict schemas canonical as implementation starts, and preserve the feature-scoped resolver boundary so autonomous continuation can proceed without status-only relay turns or unrelated-drift blocking.`
+- `2026-04-13`:
+  - Current Task: `1`
+  - Worktree State: `clean`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `not_applicable; docs/lessons/lessons.md is currently empty`
+  - Notes: Started task `1` on the dedicated feature worktree. This task is limited to canonical workflow docs, stable specs, and feature-template guidance for deterministic continuation payloads, structured review verdict state, and selected-feature execution scoping.
+  - Proof Obligations: `Land the accepted contract and template language for continuation payloads, review-verdict persistence, and execution-scoped drift handling without changing resolver implementation behavior yet.`
+- `2026-04-13`:
+  - Current Task: `none`
+  - Worktree State: `dirty`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `not_applicable; docs/lessons/lessons.md is currently empty`
+  - Review Scope: `task_execution`
+  - Review Target: `1`
+  - Review Verdict: `approved`
+  - Blocking Findings: `none`
+  - Review Terminal: `true`
+  - Notes: Task `1` completed the stable contract surface for deterministic continuation payloads, structured review verdict state, and selected-feature execution scoping. The start-task plan review initially rejected plan scope and doc-test coverage gaps; after tightening the plan and broadening contract-doc tests, the execution review passed without narrowing the contract. Next handoff target is top-level task `2`.
+  - Proof Obligations: `Task 1 now leaves task 2 as the next implementation step: runtime workflow helpers and resolver scripts must emit and consume the documented continuation payload and structured review-verdict state without blocking selected-feature execution on unrelated sibling drift.`

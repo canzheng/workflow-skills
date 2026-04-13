@@ -29,5 +29,10 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Worktree State: `<clean/dirty>`
   - Retrieved Lesson IDs: `<none or comma-separated lesson IDs>`
   - Lesson Usage: `<concise status summary keyed to the retrieved IDs>`
+  - Review Scope: `<ready | task_execution | task_completion>`
+  - Review Target: `<feature-id | top-level-task-id>`
+  - Review Verdict: `<approved | changes_requested | blocked>`
+  - Blocking Findings: `<none or comma-separated stable finding ids or labels>`
+  - Review Terminal: `<true | false>`
   - Notes: <handoff summary>
   - Proof Obligations: `<short note about the active task's proof-obligation surface when relevant>`

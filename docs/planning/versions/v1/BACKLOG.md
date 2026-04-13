@@ -15,11 +15,11 @@ None yet.
 
 ## [READY]
 
-### `v1-f018` [Reduce Status-Only Workflow Coordination Overhead](features/v1-f018-reduce-status-only-workflow-coordination-overhead.md)
+None yet.
 
 ## [IN_PROGRESS]
 
-None yet.
+### `v1-f018` [Reduce Status-Only Workflow Coordination Overhead](features/v1-f018-reduce-status-only-workflow-coordination-overhead.md)
 
 ## [DONE]
 

@@ -1,8 +1,8 @@
 ## 1. Contract And Metadata
 
-- [ ] 1 Update the workflow docs and stable specs so status-only continuation, structured review verdicts, and selected-feature execution scoping are part of the accepted workflow contract
-  - [ ] 1.1 Update `docs/planning/WORKFLOW_REFERENCE.md` and any affected feature-file guidance so deterministic next-step continuation and structured review verdict state are documented canonically
-  - [ ] 1.2 Update the stable specs for `task-execution-handoff`, `feature-execution-tracking`, and `workflow-audit-and-repair` to reflect the new continuation and scoping behavior
+- [x] 1 Update the workflow docs and stable specs so status-only continuation, structured review verdicts, and selected-feature execution scoping are part of the accepted workflow contract
+  - [x] 1.1 Update `docs/planning/WORKFLOW_REFERENCE.md` and any affected feature-file guidance so deterministic next-step continuation and structured review verdict state are documented canonically
+  - [x] 1.2 Update the stable specs for `task-execution-handoff`, `feature-execution-tracking`, and `workflow-audit-and-repair` to reflect the new continuation and scoping behavior
 
 ## 2. Resolver And Workflow-State Changes
 
