@@ -19,7 +19,7 @@
 
 ## 4. Validation
 
-- [ ] 4 Add the narrowest relevant tests and workflow checks for deterministic continuation, structured review verdicts, selected-feature scoping, and autonomous-loop reuse
-  - [ ] 4.1 Add or update integration coverage for final-task continuation into `finish-feature` and non-final continuation into the next ready task
-  - [ ] 4.2 Add or update contract coverage for structured review verdict state and feature-scoped resolver behavior
-  - [ ] 4.3 Run the narrow workflow validation needed for the shaped change, including `audit-workflow`, `git diff --check`, and any affected repo tests
+- [x] 4 Add the narrowest relevant tests and workflow checks for deterministic continuation, structured review verdicts, selected-feature scoping, and autonomous-loop reuse
+  - [x] 4.1 Add or update integration coverage for final-task continuation into `finish-feature` and non-final continuation into the next ready task
+  - [x] 4.2 Add or update contract coverage for structured review verdict state and feature-scoped resolver behavior
+  - [x] 4.3 Run the narrow workflow validation needed for the shaped change, including `audit-workflow`, `git diff --check`, and any affected repo tests

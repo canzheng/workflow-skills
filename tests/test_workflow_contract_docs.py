@@ -78,7 +78,7 @@ class WorkflowContractDocsTests(unittest.TestCase):
 
         self.assertIn("if the task finishes cleanly, call `complete-task`", autonomous_loop_skill)
         self.assertIn(
-            "if `complete-task` reports that `finish-feature` is startable, call `finish-feature` before any downstream cleanup",
+            "if `completion_handoff.action` is `finish_feature`, call `finish-feature` before any downstream cleanup",
             autonomous_loop_skill,
         )
         self.assertIn(
@@ -94,11 +94,11 @@ class WorkflowContractDocsTests(unittest.TestCase):
             autonomous_loop_skill,
         )
         self.assertIn(
-            "if the feature remains `IN_PROGRESS` and another task is `ready`, continue the feature loop",
+            "if `completion_handoff.action` is `start_task`, continue the feature loop",
             autonomous_loop_skill,
         )
         self.assertIn(
-            "if the feature remains `IN_PROGRESS` but no next task is `ready`, stop the feature loop and return control",
+            "if `completion_handoff.action` is `stop`, stop the feature loop and return control",
             autonomous_loop_skill,
         )
 

@@ -79,6 +79,22 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `manual inspection of skills/autonomous-backlog-loop/SKILL.md, skills/_workflow/tests/test_workflow_scripts.py, and tests/test_workflow_openspec_integration.py`
   - Result: `the autonomous-loop contract now consumes canonical completion_handoff branches directly and loop-scoped tests preserve the final-task finish_feature path without reopening broader workflow surfaces`
   - Evidence: `prompt_contract`
+- `2026-04-13` Task `4`:
+  - Run: `rtk python -m pytest tests/test_workflow_openspec_integration.py skills/_workflow/tests/test_workflow_state.py skills/_workflow/tests/test_workflow_scripts.py tests/test_finish_feature.py tests/test_workflow_contract_docs.py -q`
+  - Result: `pass; 125 tests covered deterministic continuation payloads, structured review-verdict parsing, selected-feature scoping, autonomous-loop continuation branches, finish-feature resolution, and updated contract-doc wording`
+  - Evidence: `runtime_path, prompt_contract`
+- `2026-04-13` Task `4`:
+  - Run: `rtk python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass`
+  - Evidence: `artifact_inspection`
+- `2026-04-13` Task `4`:
+  - Run: `rtk git diff --check`
+  - Result: `pass`
+  - Evidence: `artifact_inspection`
+- `2026-04-13` Task `4`:
+  - Run: `manual inspection of tests/test_workflow_contract_docs.py, openspec/changes/v1-f018-reduce-status-only-workflow-overhead/tasks.md, and the feature-file evidence ledger`
+  - Result: `the remaining contract-doc assertions now match the canonical autonomous-loop continuation wording, the validation task stayed narrow, and all top-level feature tasks are ready for closeout into finish-feature`
+  - Evidence: `prompt_contract`
 
 ## 2. Handoff Notes
 - `2026-04-13`:
@@ -157,3 +173,22 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `true`
   - Notes: Task `3` completed the autonomous-loop contract updates so same-agent continuation now branches on canonical completion_handoff actions instead of prose-only handoff summaries. The task-3 plan initially over-scoped broader workflow surfaces, but after narrowing to the loop contract and loop-facing tests the execution review passed.
   - Proof Obligations: `Only the feature-level validation/finish path remains: confirm the aggregate feature validation task and then hand the feature into finish-feature once all top-level tasks are done.`
+- `2026-04-13`:
+  - Current Task: `4`
+  - Worktree State: `clean`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `not_applicable; docs/lessons/lessons.md is currently empty`
+  - Notes: Started task `4` on the existing feature worktree. This task is validation-only and owns the final narrow evidence reconciliation before the feature can move into `finish-feature`.
+  - Proof Obligations: `Run the combined feature validation slice and record the closeout evidence cleanly so the feature can move from task execution into finish-feature without reopening implementation scope.`
+- `2026-04-13`:
+  - Current Task: `none`
+  - Worktree State: `dirty`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `not_applicable; docs/lessons/lessons.md is currently empty`
+  - Review Scope: `task_execution`
+  - Review Target: `4`
+  - Review Verdict: `approved`
+  - Blocking Findings: `none`
+  - Review Terminal: `true`
+  - Notes: Task `4` completed the validation-only closeout for the feature. The combined workflow validation slice and the updated contract-doc assertions passed without reopening implementation scope, so the next workflow handoff is `finish-feature`.
+  - Proof Obligations: `All top-level feature tasks are now done; the remaining obligation is feature-level acceptance plus OpenSpec archive through finish-feature.`
