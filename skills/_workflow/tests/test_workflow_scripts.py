@@ -15,6 +15,7 @@ START_TASK_SCRIPT = SKILLS_ROOT / "start-task" / "scripts" / "resolve_start_task
 AUTONOMOUS_RESOLVER_SCRIPT = (
     SKILLS_ROOT / "autonomous-backlog-loop" / "scripts" / "resolve_autonomous_backlog_action.py"
 )
+AUTONOMOUS_BACKLOG_LOOP_SKILL = SKILLS_ROOT / "autonomous-backlog-loop" / "SKILL.md"
 
 
 def _write_implementation_plan(change_dir: Path, task_id: str) -> None:
@@ -772,6 +773,16 @@ def test_resolve_autonomous_backlog_action_fails_when_feature_has_task_readiness
 
     assert result.returncode == 1
     assert "workflow-derived task readiness drift" in result.stderr.lower()
+
+
+def test_autonomous_backlog_loop_skill_consumes_completion_handoff_payload() -> None:
+    skill_text = AUTONOMOUS_BACKLOG_LOOP_SKILL.read_text(encoding="utf-8")
+
+    assert "read the canonical `completion_handoff` payload returned by `complete-task`" in skill_text
+    assert "if `completion_handoff.requires_human_decision` is `true`" in skill_text
+    assert "if `completion_handoff.action` is `finish_feature`" in skill_text
+    assert "if `completion_handoff.action` is `start_task`" in skill_text
+    assert "if `completion_handoff.action` is `stop`" in skill_text
 
 
 def test_resolve_autonomous_backlog_action_feature_id_path_fails_when_feature_has_task_readiness_drift(

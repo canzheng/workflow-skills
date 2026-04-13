@@ -63,6 +63,22 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `manual inspection of skills/_workflow/workflow_state.py, skills/start-task/scripts/resolve_start_task.py, skills/complete-task/scripts/resolve_complete_task.py, skills/finish-feature/scripts/resolve_finish_feature.py, and the task-2 tests`
   - Result: `shared helpers and resolver payloads now match the canonical continuation contract, parse structured review-verdict lines, and scope selected-feature continuation without blocking on unrelated malformed siblings`
   - Evidence: `runtime_path`
+- `2026-04-13` Task `3`:
+  - Run: `rtk python -m pytest tests/test_workflow_openspec_integration.py skills/_workflow/tests/test_workflow_scripts.py -q`
+  - Result: `pass; 67 loop-scoped integration and workflow-script tests covered autonomous-loop continuation wording, final-task finish-feature handoff preservation, and explicit completion_handoff action branches`
+  - Evidence: `prompt_contract`
+- `2026-04-13` Task `3`:
+  - Run: `rtk python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass`
+  - Evidence: `artifact_inspection`
+- `2026-04-13` Task `3`:
+  - Run: `rtk git diff --check`
+  - Result: `pass`
+  - Evidence: `artifact_inspection`
+- `2026-04-13` Task `3`:
+  - Run: `manual inspection of skills/autonomous-backlog-loop/SKILL.md, skills/_workflow/tests/test_workflow_scripts.py, and tests/test_workflow_openspec_integration.py`
+  - Result: `the autonomous-loop contract now consumes canonical completion_handoff branches directly and loop-scoped tests preserve the final-task finish_feature path without reopening broader workflow surfaces`
+  - Evidence: `prompt_contract`
 
 ## 2. Handoff Notes
 - `2026-04-13`:
@@ -122,3 +138,22 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `true`
   - Notes: Task `2` completed the runtime helper and resolver changes for canonical `completion_handoff` payloads, structured review-verdict parsing, selected-feature continuation, and explicit-feature finish resolution. Review initially rejected the missing `stop` branch; after adding the `stop` regression and helper behavior, the execution review passed. Next handoff target is top-level task `3`.
   - Proof Obligations: `Task 3 now owns autonomous-loop consumption of the new continuation contract so relay-only transitions stay inside the same feature-scoped agent without extra outer-step churn.`
+- `2026-04-13`:
+  - Current Task: `3`
+  - Worktree State: `clean`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `not_applicable; docs/lessons/lessons.md is currently empty`
+  - Notes: Started task `3` on the existing feature worktree. This task is limited to autonomous-loop consumption of the canonical continuation payload and loop contract/integration updates for same-agent relay-only continuation.
+  - Proof Obligations: `Make the autonomous loop follow `start_task`, `finish_feature`, and `stop` payload actions directly so relay-only boundaries no longer force extra outer-step coordination.`
+- `2026-04-13`:
+  - Current Task: `none`
+  - Worktree State: `dirty`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `not_applicable; docs/lessons/lessons.md is currently empty`
+  - Review Scope: `task_execution`
+  - Review Target: `3`
+  - Review Verdict: `approved`
+  - Blocking Findings: `none`
+  - Review Terminal: `true`
+  - Notes: Task `3` completed the autonomous-loop contract updates so same-agent continuation now branches on canonical completion_handoff actions instead of prose-only handoff summaries. The task-3 plan initially over-scoped broader workflow surfaces, but after narrowing to the loop contract and loop-facing tests the execution review passed.
+  - Proof Obligations: `Only the feature-level validation/finish path remains: confirm the aggregate feature validation task and then hand the feature into finish-feature once all top-level tasks are done.`

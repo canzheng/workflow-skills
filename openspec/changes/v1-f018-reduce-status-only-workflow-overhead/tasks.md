@@ -13,9 +13,9 @@
 
 ## 3. Autonomous Loop Integration
 
-- [ ] 3 Update `autonomous-backlog-loop` so it consumes the new continuation contract and keeps feature-local relay-only transitions inside the same feature-scoped agent
-  - [ ] 3.1 Add `autonomous-backlog-loop` to the change surface for final-task continuation so autonomous execution does not stop at a status-only `finish-feature` handoff
-  - [ ] 3.2 Reduce outer-step or subagent lifecycle churn for feature-local continuation when no human decision is needed
+- [x] 3 Update `autonomous-backlog-loop` so it consumes the new continuation contract and keeps feature-local relay-only transitions inside the same feature-scoped agent
+  - [x] 3.1 Add `autonomous-backlog-loop` to the change surface for final-task continuation so autonomous execution does not stop at a status-only `finish-feature` handoff
+  - [x] 3.2 Reduce outer-step or subagent lifecycle churn for feature-local continuation when no human decision is needed
 
 ## 4. Validation
 

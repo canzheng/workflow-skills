@@ -102,12 +102,14 @@ Use design mode when the user request is clearly design-only, explicitly asks to
      - if the task finishes cleanly, call `complete-task`
      - complete `complete-task` before resolving or starting any downstream top-level task
      - after `complete-task`, confirm `git status --short` is clean from the selected feature worktree before continuing the feature loop
-     - if `complete-task` reports that `finish-feature` is startable, call `finish-feature` before any downstream cleanup
+     - read the canonical `completion_handoff` payload returned by `complete-task`
+     - if `completion_handoff.requires_human_decision` is `true`, stop the feature loop and return control instead of inferring the next step
+     - if `completion_handoff.action` is `finish_feature`, call `finish-feature` before any downstream cleanup
      - do not bypass any review or verification gates owned by the wrapped execution skill, `complete-task`, or `finish-feature`
      - if `finish-feature` moves the feature to `[DONE]`, perform the default finishing behavior
      - if `finish-feature` completes successfully, stop the feature loop and return control
-     - if the feature remains `IN_PROGRESS` and another task is `ready`, continue the feature loop on the same feature branch/worktree
-     - if the feature remains `IN_PROGRESS` but no next task is `ready`, stop the feature loop and return control
+     - if `completion_handoff.action` is `start_task`, continue the feature loop on the same feature-scoped agent and feature branch/worktree
+     - if `completion_handoff.action` is `stop`, stop the feature loop and return control
      - if the task ends `blocked` or `cancelled`, leave the feature branch/worktree in place, then stop the feature loop and return control
 10. When a feature-scoped sub-agent raises a design choice:
    - in `solo` mode, auto-accept the recommendation only if one was offered and it does not conflict with direct user instructions already given
