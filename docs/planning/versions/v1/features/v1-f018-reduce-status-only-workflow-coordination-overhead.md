@@ -5,8 +5,8 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f018`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
-- OpenSpec Change: `v1-f018-reduce-status-only-workflow-overhead`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- OpenSpec Change: `v1-f018-remediate-overhead-gaps`
 - OpenSpec Specs:
   - `openspec/specs/task-execution-handoff/spec.md`
   - `openspec/specs/feature-execution-tracking/spec.md`
@@ -16,7 +16,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
   - This field is the active execution marker for the implemented workflow; OpenSpec `tasks.md` remains the checked/unchecked task ledger.
 - Created: `2026-04-13`
-- Last Updated: `2026-04-13`
+- Last Updated: `2026-04-14`
 
 ## 1. Validation Log
 - `2026-04-13` Task `shape`:
@@ -111,6 +111,10 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Inspection: `docs/lessons/notes.md` and `docs/lessons/lessons.md`
   - Result: `no-op for distill-lessons; both files are empty so there were no notes to distill before branch finalization`
   - Evidence: `artifact_inspection`
+- `2026-04-14` Review-driven remediation reopen:
+  - Inspection: `post-merge review of the shipped v1-f018 implementation against the archived design, implementation plans, and landed code/tests`
+  - Result: `reopened feature execution under a new remediation change because structured review-verdict behavior remained parser-only, selected-feature worktree continuation did not fully fail closed, and complete-task guidance/tests still reflected the old terminal handoff model`
+  - Evidence: `artifact_inspection, prompt_contract`
 
 ## 2. Handoff Notes
 - `2026-04-13`:
@@ -213,3 +217,10 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Worktree State: `dirty`
   - Notes: `finish-feature` validated and archived `v1-f018-reduce-status-only-workflow-overhead`, moved the feature to `[DONE]`, and left the feature worktree available for downstream branch finalization. Archive used `--skip-specs` because the accepted stable-spec changes were already present in the tracked worktree state.
   - Proof Obligations: `Feature-level acceptance and archive proof are complete; remaining work is only downstream branch/worktree cleanup outside the workflow-owned finish step.`
+- `2026-04-14`:
+  - Current Task: `none`
+  - Worktree State: `n/a`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `not_applicable; docs/lessons/lessons.md is currently empty`
+  - Notes: Reopened `v1-f018` after post-merge review found implementation drift against the accepted design and implementation-plan scope. The new linked change narrows remediation to three items only: canonical structured review-verdict emission/consumption, fail-closed selected-feature worktree resolution, and complete-task contract-doc alignment with the shipped continuation payload.
+  - Proof Obligations: `Restore consistency between the reopened feature contract and shipped behavior without expanding scope beyond the review findings, then return the feature to finish-feature once the remediation change is implemented and validated.`
