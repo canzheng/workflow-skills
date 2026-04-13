@@ -19,9 +19,9 @@ None yet.
 
 ## [IN_PROGRESS]
 
-### `v1-f018` [Reduce Status-Only Workflow Coordination Overhead](features/v1-f018-reduce-status-only-workflow-coordination-overhead.md)
-
 ## [DONE]
+
+### `v1-f018` [Reduce Status-Only Workflow Coordination Overhead](features/v1-f018-reduce-status-only-workflow-coordination-overhead.md)
 
 ### `v1-f017` [Extend Lessons Into Shaping And Ready](features/v1-f017-extend-lessons-into-shaping-and-ready.md)
 

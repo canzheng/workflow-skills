@@ -1,5 +1,5 @@
 - id: N-001
-  status: open
+  status: distilled
   created_at: 2026-04-14
   updated_at: 2026-04-14
   feature_ref: v1-f018
@@ -18,16 +18,17 @@
     - skills/_workflow/workflow_state.py
     - skills/_workflow/tests/test_workflow_state.py
   next_check: Update the emitting skills and their end-to-end tests so readiness and task-completion review actually record canonical verdict lines, then add at least one downstream consumer check that uses those emitted lines instead of prose-only notes.
-  outcome: ""
-  what_worked: ""
-  what_did_not_work: ""
-  reusable_insight: ""
-  do_differently_next_time: ""
-  catch_earlier_by: ""
-  distilled_into: []
+  outcome: The reopened remediation updated the owning skill guidance and added a real start-task resolver consumer for canonical readiness review verdict state.
+  what_worked: Requiring both emission guidance and a runtime consumer path closed the parser-only gap cleanly.
+  what_did_not_work: Treating schema text, template fields, and parser coverage as sufficient proof left the original feature incomplete.
+  reusable_insight: Workflow metadata changes need an emitter path and a consumer path in the same feature.
+  do_differently_next_time: Add a proof obligation that names the runtime consumer before closing the original implementation task.
+  catch_earlier_by: Ask during review whether any runtime resolver or downstream workflow step reads the new metadata outside parser-only tests.
+  distilled_into:
+    - L-001
 
 - id: N-002
-  status: open
+  status: distilled
   created_at: 2026-04-14
   updated_at: 2026-04-14
   feature_ref: v1-f018
@@ -44,10 +45,11 @@
     - skills/autonomous-backlog-loop/scripts/resolve_autonomous_backlog_action.py
     - tests/test_workflow_openspec_integration.py
   next_check: Decide whether the helper should truly fail closed when the intended feature worktree is missing or ambiguous, then add a regression test for that exact missing-worktree path in autonomous continuation and any other resolver that depends on the shared helper.
-  outcome: ""
-  what_worked: ""
-  what_did_not_work: ""
-  reusable_insight: ""
-  do_differently_next_time: ""
-  catch_earlier_by: ""
-  distilled_into: []
+  outcome: The reopened remediation changed the shared worktree-resolution helper to fail closed and added the missing autonomous-resolver regression for the absent-worktree path.
+  what_worked: Adding the exact negative-path test exposed and removed the stale checkout fallback.
+  what_did_not_work: Happy-path and dirty-worktree coverage alone did not prove the helper enforced the stronger contract.
+  reusable_insight: Resolver hardening for worktree targeting needs explicit missing-resource tests.
+  do_differently_next_time: Add missing-worktree and ambiguous-worktree tests whenever a feature-scoped resolver is supposed to fail closed.
+  catch_earlier_by: Review the shared helper and ask what happens when no unique active worktree exists.
+  distilled_into:
+    - L-002

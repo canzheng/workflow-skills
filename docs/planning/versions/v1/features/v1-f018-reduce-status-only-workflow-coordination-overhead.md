@@ -5,13 +5,13 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f018`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `v1-f018-remediate-overhead-gaps`
 - OpenSpec Specs:
   - `openspec/specs/task-execution-handoff/spec.md`
   - `openspec/specs/feature-execution-tracking/spec.md`
   - `openspec/specs/workflow-audit-and-repair/spec.md`
-- Current Task: `1`
+- Current Task: `none`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
   - This field is the active execution marker for the implemented workflow; OpenSpec `tasks.md` remains the checked/unchecked task ledger.
@@ -151,10 +151,22 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `rtk git diff --check`
   - Result: `pass`
   - Evidence: `artifact_inspection`
+- `2026-04-14` Feature completion:
+  - Run: `rtk openspec validate v1-f018-remediate-overhead-gaps --type change --json --no-interactive`
+  - Result: `pass; summary totals report 1 passed and 0 failed before the remediation change was archived`
+  - Evidence: `archive`
+- `2026-04-14` Feature completion:
+  - Run: `rtk openspec archive v1-f018-remediate-overhead-gaps -y`
+  - Result: `pass; synced stable specs and archived the remediation change as openspec/changes/archive/2026-04-13-v1-f018-remediate-overhead-gaps`
+  - Evidence: `archive`
+- `2026-04-14` Feature completion:
+  - Inspection: `docs/lessons/notes.md` and `docs/lessons/lessons.md`
+  - Result: `distilled the reopened review-loop notes into lessons L-001 and L-002, then marked both source notes as distilled`
+  - Evidence: `artifact_inspection`
 
 ## 2. Handoff Notes
 - `2026-04-13`:
-- Current Task: `3`
+- Current Task: `none`
   - Worktree State: `n/a`
   - Retrieved Lesson IDs: `none`
   - Lesson Usage: `not_applicable; docs/lessons/lessons.md is currently empty`
@@ -296,3 +308,10 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `true`
   - Notes: Task `3` completed the combined remediation validation slice. The reopened feature now has aligned contract guidance, fail-closed selected-feature worktree resolution, and a real runtime consumer of structured review-verdict state, so the next workflow handoff is `finish-feature`.
   - Proof Obligations: `All remediation tasks are done; the remaining obligation is feature-level acceptance plus OpenSpec archive through finish-feature.`
+- `2026-04-14`:
+  - Current Task: `none`
+  - Worktree State: `dirty`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `not_applicable; no retrieval step ran during remediation execution, but review-loop notes were distilled into L-001 and L-002 before closeout`
+  - Notes: `finish-feature` reclose succeeded for the reopened remediation. The follow-up change validated cleanly, archived to `openspec/changes/archive/2026-04-13-v1-f018-remediate-overhead-gaps`, and returned `v1-f018` to `[DONE]` with the structured review-verdict, fail-closed worktree-resolution, and contract-alignment gaps closed.
+  - Proof Obligations: `Feature-level remediation and archive proof are complete; remaining work is only downstream branch/worktree finalization outside the workflow-owned finish step.`

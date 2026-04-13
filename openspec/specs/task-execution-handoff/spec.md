@@ -11,20 +11,11 @@ Task execution SHALL remain globally serialized at the repository level.
 ### Requirement: Feature execution uses a dedicated reusable worktree
 Executing features SHALL use one feature-scoped worktree reused across sequential tasks.
 
-#### Scenario: First execution task for a feature starts
-- **WHEN** a feature starts its first executing task
-- **THEN** a dedicated feature branch and worktree are created from a clean primary checkout
-
-#### Scenario: Later execution task resumes on the same feature
-- **WHEN** a later task starts for a feature already in execution
-- **THEN** execution resumes in the same feature worktree
-- **AND** `start-task` resolves that later task from the reusable feature worktree rather than a stale primary checkout
-- **AND** that worktree is clean before the next task begins
-
-#### Scenario: Autonomous continuation reuses the same feature worktree
-- **WHEN** autonomous orchestration continues execution for an already-active feature
-- **THEN** it resolves the feature-scoped audit and task selection from the reusable feature worktree
-- **AND** it does not silently fall back to a stale primary checkout while that feature worktree still exists
+#### Scenario: Selected-feature continuation fails when the intended worktree is missing
+- **WHEN** later task execution or autonomous continuation targets a selected feature already in `[IN_PROGRESS]`
+- **AND** no unique active non-primary feature worktree can be resolved for that feature
+- **THEN** the workflow stops with a worktree-resolution error
+- **AND** it does not silently continue from the primary or current checkout
 
 ### Requirement: Task execution uses top-level OpenSpec task IDs and a task-scoped implementation plan
 Executable workflow tasks SHALL be top-level OpenSpec task IDs, and each task SHALL be executed with a task-scoped implementation plan stored under the linked change.
@@ -55,42 +46,10 @@ Workflow task readiness SHALL be derived by repository helpers from top-level Op
 ### Requirement: Task completion leaves a clean handoff
 Completing a task SHALL leave the feature ready for the next handoff.
 
-#### Scenario: Completion exposes a canonical continuation payload
-- **WHEN** `complete-task` finishes evaluating the active task handoff
-- **THEN** it emits one canonical continuation object with fields `action`, `target_feature_id`, `target_task_id`, `reason`, and `requires_human_decision`
-- **AND** `action` is one of `start_task`, `finish_feature`, or `stop`
-- **AND** `target_task_id` is null unless `action` is `start_task`
-- **AND** wrappers rely on that object instead of inferring continuation from prose-only handoff notes
-
-#### Scenario: Task is completed successfully
-- **WHEN** `complete-task` finishes a task
-- **THEN** verification is run and evidence is recorded before completion is claimed
-- **AND** intended task changes are committed when needed to leave the feature worktree clean
-- **AND** downstream workflow-derived task readiness is synchronized from checkbox completion state plus any workflow `Depends On` references
-
-#### Scenario: Task completion records canonical review verdict lines
-- **WHEN** `complete-task` finishes evaluating the active task handoff
-- **AND** the task execution passed through a review gate
-- **THEN** the feature file records `Review Scope`, `Review Target`, `Review Verdict`, `Blocking Findings`, and `Review Terminal` in the task-completion handoff notes
-- **AND** wrappers can consume that verdict state without inferring it from prose-only notes
-
-#### Scenario: Final task completion can continue without a status-only relay turn
-- **WHEN** `complete-task` finishes the final top-level task for a feature
-- **AND** all required task-level gates have passed
-- **THEN** the workflow produces a continuation object with `action=finish_feature`, `target_feature_id=<feature-id>`, `target_task_id=null`, `reason=all_tasks_complete`, and `requires_human_decision=false`
-- **AND** wrappers such as `autonomous-backlog-loop` may continue directly to that step without requiring a separate status-only relay turn
-
-#### Scenario: Final task completes but feature completion remains downstream
-- **WHEN** `complete-task` closes the final top-level task for a feature
-- **THEN** the feature remains `[IN_PROGRESS]`
-- **AND** `Current Task` is `none`
-- **AND** the workflow reports whether `finish-feature` is now startable
-
-#### Scenario: Top-level task closure is blocked by open nested checklist items
-- **WHEN** `complete-task` attempts to close a top-level OpenSpec task
-- **AND** any nested checklist item under that task is still unchecked
-- **THEN** the top-level task is not closed
-- **AND** the workflow reports that nested checklist closure is required first
+#### Scenario: Complete-task guidance follows the canonical continuation payload
+- **WHEN** operator-facing workflow guidance describes the result of `complete-task`
+- **THEN** it describes the canonical `completion_handoff` payload rather than a prose-only terminal handoff model
+- **AND** it still makes clear that `complete-task` itself does not launch downstream task execution
 
 ### Requirement: Feature completion is distinct from branch finalization
 Finishing a task or feature SHALL remain separate from final branch/worktree cleanup decisions.

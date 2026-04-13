@@ -1,6 +1,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: Feature execution uses a dedicated reusable worktree
+Executing features SHALL use one feature-scoped worktree reused across sequential tasks.
 
 #### Scenario: Selected-feature continuation fails when the intended worktree is missing
 - **WHEN** later task execution or autonomous continuation targets a selected feature already in `[IN_PROGRESS]`
@@ -9,6 +10,7 @@
 - **AND** it does not silently continue from the primary or current checkout
 
 ### Requirement: Task completion leaves a clean handoff
+Completing a task SHALL leave the feature ready for the next handoff.
 
 #### Scenario: Complete-task guidance follows the canonical continuation payload
 - **WHEN** operator-facing workflow guidance describes the result of `complete-task`

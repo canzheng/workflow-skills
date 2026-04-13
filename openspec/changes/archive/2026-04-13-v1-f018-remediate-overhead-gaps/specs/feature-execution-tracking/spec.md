@@ -1,6 +1,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: Feature files carry structured review verdict state
+Feature execution records SHALL preserve machine-readable review verdicts for workflow gates that currently depend on approval outcomes.
 
 #### Scenario: Workflow stages emit the canonical review-verdict lines they own
 - **WHEN** `ready-feature` or `complete-task` passes through a required review gate

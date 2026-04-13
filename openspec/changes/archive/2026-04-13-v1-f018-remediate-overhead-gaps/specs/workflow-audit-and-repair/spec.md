@@ -1,6 +1,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: Autonomous orchestration does not bypass workflow integrity checks
+Automation helpers SHALL not route around workflow integrity rules that manual wrappers enforce.
 
 #### Scenario: Selected-feature helper fails closed on missing worktree
 - **WHEN** an execution helper continues a selected feature by feature ID
