@@ -13,6 +13,6 @@
 
 ## 3. Validation And Reclose
 
-- [ ] 3 Run the narrowest combined validation slice for the reopened remediation scope
-  - [ ] 3.1 Re-run workflow audit and the affected contract/runtime test targets
-  - [ ] 3.2 Record the remediation evidence in the feature file so `v1-f018` can return to `finish-feature` cleanly
+- [x] 3 Run the narrowest combined validation slice for the reopened remediation scope
+  - [x] 3.1 Re-run workflow audit and the affected contract/runtime test targets
+  - [x] 3.2 Record the remediation evidence in the feature file so `v1-f018` can return to `finish-feature` cleanly

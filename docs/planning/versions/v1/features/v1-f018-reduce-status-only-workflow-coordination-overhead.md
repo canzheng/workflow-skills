@@ -139,10 +139,22 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `rtk git diff --check`
   - Result: `pass`
   - Evidence: `artifact_inspection`
+- `2026-04-14` Task `3`:
+  - Run: `rtk python -m pytest tests/test_workflow_contract_docs.py skills/_workflow/tests/test_workflow_state.py tests/test_workflow_openspec_integration.py -q`
+  - Result: `pass; 97 tests covered the reopened contract-doc guidance, the shared workflow-state helper updates, and the selected-feature resolver/runtime integration paths together`
+  - Evidence: `runtime_path, prompt_contract`
+- `2026-04-14` Task `3`:
+  - Run: `rtk python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass`
+  - Evidence: `artifact_inspection`
+- `2026-04-14` Task `3`:
+  - Run: `rtk git diff --check`
+  - Result: `pass`
+  - Evidence: `artifact_inspection`
 
 ## 2. Handoff Notes
 - `2026-04-13`:
-  - Current Task: `none`
+- Current Task: `3`
   - Worktree State: `n/a`
   - Retrieved Lesson IDs: `none`
   - Lesson Usage: `not_applicable; docs/lessons/lessons.md is currently empty`
@@ -272,3 +284,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `true`
   - Notes: Task `2` completed the runtime remediation slice. Selected-feature continuation now fails closed when no active feature worktree can be resolved, and start-task now surfaces the latest canonical readiness review verdict as structured runtime state instead of leaving verdict parsing unused.
   - Proof Obligations: `Only task 3 remains: run the combined remediation validation slice, record the feature-level reclose evidence, and hand the reopened feature back into finish-feature.`
+- `2026-04-14`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `not_applicable; docs/lessons/lessons.md is currently empty`
+  - Review Scope: `task_execution`
+  - Review Target: `3`
+  - Review Verdict: `approved`
+  - Blocking Findings: `none`
+  - Review Terminal: `true`
+  - Notes: Task `3` completed the combined remediation validation slice. The reopened feature now has aligned contract guidance, fail-closed selected-feature worktree resolution, and a real runtime consumer of structured review-verdict state, so the next workflow handoff is `finish-feature`.
+  - Proof Obligations: `All remediation tasks are done; the remaining obligation is feature-level acceptance plus OpenSpec archive through finish-feature.`
