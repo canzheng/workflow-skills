@@ -8,6 +8,7 @@ from _workflow.workflow_state import (
     collect_openspec_change_linkage,
     collect_task_validation_evidence,
     compute_task_readiness_drift,
+    parse_handoff_review_verdicts,
     find_backlog_section_order_errors,
     find_openspec_task_structure_errors,
     parse_feature_openspec_specs,
@@ -1350,3 +1351,41 @@ def test_validate_promoted_feature_openspec_specs_allows_legacy_exempt_done_feat
     )
 
     assert validate_promoted_feature_openspec_specs(feature_text, section_name="DONE") == []
+
+
+def test_parse_handoff_review_verdicts_reads_canonical_review_lines() -> None:
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Example
+
+        ## 0. Meta
+        - Feature ID: `v1-f018`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+        - Current Task: `none`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - `2026-04-13`:
+          - Current Task: `none`
+          - Worktree State: `clean`
+          - Review Scope: `task_execution`
+          - Review Target: `2`
+          - Review Verdict: `approved`
+          - Blocking Findings: `none`
+          - Review Terminal: `true`
+          - Notes: Example
+        """
+    )
+
+    verdicts = parse_handoff_review_verdicts(feature_text)
+
+    assert len(verdicts) == 1
+    verdict = verdicts[0]
+    assert verdict.scope == "task_execution"
+    assert verdict.target == "2"
+    assert verdict.verdict == "approved"
+    assert verdict.blocking_findings == ()
+    assert verdict.terminal is True

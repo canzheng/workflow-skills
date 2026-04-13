@@ -22,6 +22,7 @@ FEATURE_ID_RE = re.compile(r"^- Feature ID: `([^`]+)`$", re.MULTILINE)
 OPEN_SPEC_CHANGE_RE = re.compile(r"^- OpenSpec Change: `([^`]+)`$", re.MULTILINE)
 OPEN_SPEC_STATUS_RE = re.compile(r"^- OpenSpec Status: `([^`]+)`$", re.MULTILINE)
 CURRENT_TASK_RE = re.compile(r"^- Current Task: `([^`]+)`$", re.MULTILINE)
+BRANCH_FEATURE_ID_RE = re.compile(r"^(v\d+-f\d+)(?:$|[-/])")
 TOP_LEVEL_TASK_ID_RE = re.compile(r"^\d+$")
 OPEN_SPEC_TASK_RE = re.compile(r"^- \[(?P<done>[ xX])\]\s+(?P<id>\d+)\s+(?P<title>.+)$")
 OPEN_SPEC_NESTED_TASK_RE = re.compile(
@@ -75,10 +76,20 @@ class TaskReadinessDrift:
 
 @dataclass(frozen=True)
 class CompletionHandoff:
-    all_top_level_tasks_complete: bool
-    decision: str
-    next_ready_task_ids: list[str]
-    remaining_open_task_ids: list[str]
+    action: str
+    target_feature_id: str | None
+    target_task_id: str | None
+    reason: str
+    requires_human_decision: bool
+
+
+@dataclass(frozen=True)
+class ReviewVerdict:
+    scope: str
+    target: str
+    verdict: str
+    blocking_findings: tuple[str, ...]
+    terminal: bool
 
 
 @dataclass(frozen=True)
@@ -284,6 +295,25 @@ def is_primary_checkout(root: Path) -> bool:
     return git_dir == common_dir
 
 
+def infer_selected_feature_id(root: Path) -> str | None:
+    branch_result = subprocess.run(
+        ["git", "branch", "--show-current"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if branch_result.returncode != 0:
+        return None
+    branch_name = branch_result.stdout.strip()
+    if not branch_name:
+        return None
+    match = BRANCH_FEATURE_ID_RE.match(branch_name)
+    if match:
+        return match.group(1)
+    return None
+
+
 def ensure_clean_feature_worktree_for_handoff(root: Path, feature_id: str) -> None:
     status_result = subprocess.run(
         ["git", "status", "--porcelain"],
@@ -451,6 +481,80 @@ def parse_current_task(feature_text: str) -> str | None:
             f"Current Task must be `none` or a top-level OpenSpec task ID, got `{current_task}`"
         )
     return current_task
+
+
+def parse_handoff_review_verdicts(feature_text: str) -> list[ReviewVerdict]:
+    handoff_notes_header = "## 2. Handoff Notes\n"
+    handoff_start = feature_text.find(handoff_notes_header)
+    if handoff_start == -1:
+        return []
+
+    handoff_text = feature_text[handoff_start + len(handoff_notes_header):]
+    verdicts: list[ReviewVerdict] = []
+    current_scope: str | None = None
+    current_target: str | None = None
+    current_verdict: str | None = None
+    current_blocking_findings: tuple[str, ...] = ()
+    current_terminal: bool | None = None
+
+    def flush() -> None:
+        nonlocal current_scope, current_target, current_verdict, current_blocking_findings, current_terminal
+        if (
+            current_scope is None
+            or current_target is None
+            or current_verdict is None
+            or current_terminal is None
+        ):
+            current_scope = None
+            current_target = None
+            current_verdict = None
+            current_blocking_findings = ()
+            current_terminal = None
+            return
+        verdicts.append(
+            ReviewVerdict(
+                scope=current_scope,
+                target=current_target,
+                verdict=current_verdict,
+                blocking_findings=current_blocking_findings,
+                terminal=current_terminal,
+            )
+        )
+        current_scope = None
+        current_target = None
+        current_verdict = None
+        current_blocking_findings = ()
+        current_terminal = None
+
+    for raw_line in handoff_text.splitlines():
+        line = raw_line.strip()
+        if line.startswith("- `") and line.endswith("`:"):
+            flush()
+            continue
+        if line.startswith("- Review Scope: `") and line.endswith("`"):
+            current_scope = line.removeprefix("- Review Scope: `").removesuffix("`")
+            continue
+        if line.startswith("- Review Target: `") and line.endswith("`"):
+            current_target = line.removeprefix("- Review Target: `").removesuffix("`")
+            continue
+        if line.startswith("- Review Verdict: `") and line.endswith("`"):
+            current_verdict = line.removeprefix("- Review Verdict: `").removesuffix("`")
+            continue
+        if line.startswith("- Blocking Findings: `") and line.endswith("`"):
+            raw_findings = line.removeprefix("- Blocking Findings: `").removesuffix("`")
+            if raw_findings == "none":
+                current_blocking_findings = ()
+            else:
+                current_blocking_findings = tuple(
+                    finding.strip() for finding in raw_findings.split(",") if finding.strip()
+                )
+            continue
+        if line.startswith("- Review Terminal: `") and line.endswith("`"):
+            raw_terminal = line.removeprefix("- Review Terminal: `").removesuffix("`").lower()
+            current_terminal = raw_terminal == "true"
+
+    flush()
+    return verdicts
 
 
 def find_legacy_inline_planning_sections(feature_text: str) -> list[str]:
@@ -1247,13 +1351,10 @@ def compute_completion_handoff(
     tasks = parse_tasks(feature_text, feature_file=feature_file, repo_root=repo_root)
     local_tasks_by_id = {task.task_id: task for task in tasks}
     local_feature_id = parse_feature_id(feature_text, feature_file=feature_file)
-    feature_file_cache: dict[str, Path | None] = {}
-    task_cache: dict[Path, dict[str, TaskRecord]] = {}
     done_task_ids = {task.task_id for task in tasks if task.status == "done"}
     done_task_ids.add(completed_task_id)
-
-    next_ready_task_ids: list[str] = []
-    remaining_open_task_ids: list[str] = []
+    feature_file_cache: dict[str, Path | None] = {}
+    task_cache: dict[Path, dict[str, TaskRecord]] = {}
 
     for task in tasks:
         if task.task_id in done_task_ids:
@@ -1286,17 +1387,30 @@ def compute_completion_handoff(
                 dependencies_satisfied = False
                 break
 
-        remaining_open_task_ids.append(task.task_id)
         if dependencies_satisfied:
-            next_ready_task_ids.append(task.task_id)
+            return CompletionHandoff(
+                action="start_task",
+                target_feature_id=local_feature_id,
+                target_task_id=task.task_id,
+                reason="next_ready_task",
+                requires_human_decision=False,
+            )
 
-    all_top_level_tasks_complete = not remaining_open_task_ids
-    decision = "confirm_feature_acceptance" if all_top_level_tasks_complete else "stay_in_progress"
+    if any(task.task_id not in done_task_ids for task in tasks):
+        return CompletionHandoff(
+            action="stop",
+            target_feature_id=local_feature_id,
+            target_task_id=None,
+            reason="no_ready_task",
+            requires_human_decision=True,
+        )
+
     return CompletionHandoff(
-        all_top_level_tasks_complete=all_top_level_tasks_complete,
-        decision=decision,
-        next_ready_task_ids=next_ready_task_ids,
-        remaining_open_task_ids=remaining_open_task_ids,
+        action="finish_feature",
+        target_feature_id=local_feature_id,
+        target_task_id=None,
+        reason="all_tasks_complete",
+        requires_human_decision=False,
     )
 
 

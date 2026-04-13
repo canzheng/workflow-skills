@@ -274,6 +274,65 @@ class FinishFeatureResolverTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("expected exactly one finishable feature in [IN_PROGRESS]", result.stderr)
 
+    def test_resolver_with_feature_id_ignores_unrelated_invalid_in_progress_feature(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            initialize(repo, "v1")
+            _write_finishable_feature(repo, feature_id="v1-f001", change_id="change-one")
+            _write_finishable_feature(repo, feature_id="v1-f002", change_id="change-two")
+
+            backlog_path = repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md"
+            backlog_path.write_text(
+                textwrap.dedent(
+                    """\
+                    # V1 Backlog
+
+                    ## [BACKLOG]
+
+                    None yet.
+
+                    ## [SHAPING]
+
+                    None yet.
+
+                    ## [READY]
+
+                    None yet.
+
+                    ## [IN_PROGRESS]
+
+                    ### `v1-f001` [Finish feature gate](features/v1-f001-finish-feature-gate.md)
+                    ### `v1-f002` [Finish feature gate](features/v1-f002-finish-feature-gate.md)
+
+                    ## [DONE]
+
+                    None yet.
+
+                    ## [DEFER]
+
+                    None yet.
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            change_one_dir = repo / "openspec" / "changes" / "change-one"
+            change_one_dir.mkdir(parents=True, exist_ok=True)
+            (change_one_dir / "tasks.md").write_text("- [x] 1 Done\n", encoding="utf-8")
+            # Intentionally leave change-two missing to make the sibling feature malformed.
+
+            result = subprocess.run(
+                ["python3", str(FINISH_RESOLVER), "--repo-root", str(repo), "--feature-id", "v1-f001"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["feature_id"], "v1-f001")
+            self.assertEqual(payload["change_id"], "change-one")
+
     def test_resolver_rejects_feature_when_current_task_is_still_active(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"

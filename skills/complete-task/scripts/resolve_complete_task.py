@@ -16,6 +16,7 @@ if str(SKILLS_ROOT) not in sys.path:
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
     compute_completion_handoff,
+    infer_selected_feature_id,
     is_primary_checkout,
     list_open_openspec_nested_items,
     list_git_worktree_roots,
@@ -82,13 +83,15 @@ def read_backlog(root: Path):
     return backlog_path, parsed_backlog
 
 
-def resolve_active_task(root: Path) -> dict[str, object]:
+def resolve_active_task(root: Path, *, selected_feature_id: str | None = None) -> dict[str, object]:
     backlog_path, parsed_backlog = read_backlog(root)
     active_payloads: list[dict[str, object]] = []
 
     for section_name in WORKFLOW_SECTIONS[1:]:
         for entry in parsed_backlog.feature_sections.get(section_name, []):
             feature_id = entry.feature_id
+            if selected_feature_id is not None and feature_id != selected_feature_id:
+                continue
             feature_path = (backlog_path.parent / entry.link).resolve()
             if not feature_path.exists():
                 raise WorkflowError(
@@ -199,9 +202,10 @@ def resolve_active_task(root: Path) -> dict[str, object]:
 def resolve_active_task_across_worktrees(root: Path) -> dict[str, object]:
     current_payload: dict[str, object] | None = None
     current_error: WorkflowError | None = None
+    current_selected_feature_id = None if is_primary_checkout(root) else infer_selected_feature_id(root)
 
     try:
-        current_payload = resolve_active_task(root)
+        current_payload = resolve_active_task(root, selected_feature_id=current_selected_feature_id)
     except WorkflowError as exc:
         current_error = exc
 
@@ -210,7 +214,8 @@ def resolve_active_task_across_worktrees(root: Path) -> dict[str, object]:
         if worktree_root == root:
             continue
         try:
-            candidate_payload = resolve_active_task(worktree_root)
+            selected_feature_id = None if is_primary_checkout(worktree_root) else infer_selected_feature_id(worktree_root)
+            candidate_payload = resolve_active_task(worktree_root, selected_feature_id=selected_feature_id)
         except WorkflowError:
             continue
         candidate_payloads.append(

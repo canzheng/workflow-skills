@@ -47,6 +47,22 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `manual inspection of docs/planning/WORKFLOW_REFERENCE.md, docs/planning/template/feature-template.md, openspec/specs/task-execution-handoff/spec.md, openspec/specs/feature-execution-tracking/spec.md, openspec/specs/workflow-audit-and-repair/spec.md, and tests/test_workflow_contract_docs.py`
   - Result: `the stable docs/spec/template and contract-doc tests use the same continuation-payload fields, structured review-verdict lines, and selected-feature scoping language`
   - Evidence: `prompt_contract`
+- `2026-04-13` Task `2`:
+  - Run: `rtk python -m pytest tests/test_workflow_openspec_integration.py skills/_workflow/tests/test_workflow_state.py tests/test_finish_feature.py -q`
+  - Result: `pass; 78 targeted helper, resolver, and integration tests covered canonical completion handoff payloads, structured review-verdict parsing, selected-feature continuation, explicit feature finish resolution, and the no-ready-task stop branch`
+  - Evidence: `runtime_path`
+- `2026-04-13` Task `2`:
+  - Run: `rtk python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass`
+  - Evidence: `artifact_inspection`
+- `2026-04-13` Task `2`:
+  - Run: `rtk git diff --check`
+  - Result: `pass`
+  - Evidence: `artifact_inspection`
+- `2026-04-13` Task `2`:
+  - Run: `manual inspection of skills/_workflow/workflow_state.py, skills/start-task/scripts/resolve_start_task.py, skills/complete-task/scripts/resolve_complete_task.py, skills/finish-feature/scripts/resolve_finish_feature.py, and the task-2 tests`
+  - Result: `shared helpers and resolver payloads now match the canonical continuation contract, parse structured review-verdict lines, and scope selected-feature continuation without blocking on unrelated malformed siblings`
+  - Evidence: `runtime_path`
 
 ## 2. Handoff Notes
 - `2026-04-13`:
@@ -87,3 +103,22 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `true`
   - Notes: Task `1` completed the stable contract surface for deterministic continuation payloads, structured review verdict state, and selected-feature execution scoping. The start-task plan review initially rejected plan scope and doc-test coverage gaps; after tightening the plan and broadening contract-doc tests, the execution review passed without narrowing the contract. Next handoff target is top-level task `2`.
   - Proof Obligations: `Task 1 now leaves task 2 as the next implementation step: runtime workflow helpers and resolver scripts must emit and consume the documented continuation payload and structured review-verdict state without blocking selected-feature execution on unrelated sibling drift.`
+- `2026-04-13`:
+  - Current Task: `2`
+  - Worktree State: `clean`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `not_applicable; docs/lessons/lessons.md is currently empty`
+  - Notes: Started task `2` on the existing feature worktree. This task owns the shared helper and resolver implementation for canonical continuation payloads, structured review-verdict parsing, and selected-feature scoping in `start-task`, `complete-task`, and `finish-feature`.
+  - Proof Obligations: `Make helper and resolver behavior match the documented continuation contract and selected-feature scoping rules, with tests that fail on the old payload shape and pass only on the new behavior.`
+- `2026-04-13`:
+  - Current Task: `none`
+  - Worktree State: `dirty`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `not_applicable; docs/lessons/lessons.md is currently empty`
+  - Review Scope: `task_execution`
+  - Review Target: `2`
+  - Review Verdict: `approved`
+  - Blocking Findings: `none`
+  - Review Terminal: `true`
+  - Notes: Task `2` completed the runtime helper and resolver changes for canonical `completion_handoff` payloads, structured review-verdict parsing, selected-feature continuation, and explicit-feature finish resolution. Review initially rejected the missing `stop` branch; after adding the `stop` regression and helper behavior, the execution review passed. Next handoff target is top-level task `3`.
+  - Proof Obligations: `Task 3 now owns autonomous-loop consumption of the new continuation contract so relay-only transitions stay inside the same feature-scoped agent without extra outer-step churn.`

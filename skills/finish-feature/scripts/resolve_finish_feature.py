@@ -169,6 +169,8 @@ def resolve_finish_feature(root: Path, feature_id: str | None = None) -> dict[st
     for candidate_id, feature_path in in_progress_features:
         if candidate_id == feature_id:
             explicit_match = (candidate_id, feature_path)
+        if feature_id is not None and candidate_id != feature_id:
+            continue
         if not feature_path.exists():
             raise WorkflowError(
                 f"{backlog_path.relative_to(root)} links missing feature file {feature_path.relative_to(root)}"

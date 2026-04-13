@@ -6,10 +6,10 @@
 
 ## 2. Resolver And Workflow-State Changes
 
-- [ ] 2 Update the workflow helpers and resolver scripts so selected-feature execution can continue deterministically without status-only relay turns
-  - [ ] 2.1 Extend `complete-task` handoff data so callers can deterministically continue to the next ready task or `finish-feature`
-  - [ ] 2.2 Persist structured review verdict state in the feature-file execution metadata and expose it through workflow helpers where needed
-  - [ ] 2.3 Tighten `start-task`, `complete-task`, and `finish-feature` resolver behavior so selected-feature continuation uses the intended worktree and is not blocked by unrelated malformed sibling features
+- [x] 2 Update the workflow helpers and resolver scripts so selected-feature execution can continue deterministically without status-only relay turns
+  - [x] 2.1 Extend `complete-task` handoff data so callers can deterministically continue to the next ready task or `finish-feature`
+  - [x] 2.2 Persist structured review verdict state in the feature-file execution metadata and expose it through workflow helpers where needed
+  - [x] 2.3 Tighten `start-task`, `complete-task`, and `finish-feature` resolver behavior so selected-feature continuation uses the intended worktree and is not blocked by unrelated malformed sibling features
 
 ## 3. Autonomous Loop Integration
 

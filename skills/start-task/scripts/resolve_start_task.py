@@ -16,6 +16,8 @@ from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
     WorkflowStateError,
     ensure_clean_feature_worktree_for_handoff,
+    infer_selected_feature_id,
+    is_primary_checkout,
     linked_openspec_implementation_plan_path,
     list_openspec_change_context_files,
     parse_backlog_document,
@@ -95,7 +97,7 @@ def _list_git_worktree_roots(root: Path) -> list[Path]:
     return worktree_roots
 
 
-def _resolve_task_in_root(root: Path) -> dict[str, object]:
+def _resolve_task_in_root(root: Path, *, selected_feature_id: str | None = None) -> dict[str, object]:
     backlog_path, parsed_backlog = read_backlog(root)
     feature_tasks: dict[tuple[str, str], tuple[Path, str, list[object]]] = {}
     active_tasks = 0
@@ -120,6 +122,8 @@ def _resolve_task_in_root(root: Path) -> dict[str, object]:
     for section_name in ("IN_PROGRESS", "READY"):
         for entry in parsed_backlog.feature_sections.get(section_name, []):
             feature_id = entry.feature_id
+            if selected_feature_id is not None and feature_id != selected_feature_id:
+                continue
             feature_path, feature_text, tasks = feature_tasks[(section_name, feature_id)]
             try:
                 change_id, active_change_dir = validate_active_feature_execution(
@@ -189,9 +193,10 @@ def _resolve_task_in_root(root: Path) -> dict[str, object]:
 def resolve_task(root: Path) -> dict[str, object]:
     current_payload: dict[str, object] | None = None
     current_error: WorkflowError | None = None
+    current_selected_feature_id = None if is_primary_checkout(root) else infer_selected_feature_id(root)
 
     try:
-        current_payload = _resolve_task_in_root(root)
+        current_payload = _resolve_task_in_root(root, selected_feature_id=current_selected_feature_id)
     except WorkflowError as exc:
         current_error = exc
 
@@ -203,7 +208,10 @@ def resolve_task(root: Path) -> dict[str, object]:
         if worktree_root == root:
             continue
         try:
-            candidate_payloads.append(_resolve_task_in_root(worktree_root))
+            selected_feature_id = None if is_primary_checkout(worktree_root) else infer_selected_feature_id(worktree_root)
+            candidate_payloads.append(
+                _resolve_task_in_root(worktree_root, selected_feature_id=selected_feature_id)
+            )
         except WorkflowError as exc:
             if "uncommitted handoff changes" in str(exc):
                 raise
