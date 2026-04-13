@@ -62,6 +62,22 @@ Capture rules:
 - Prefer adding `current_hypothesis`, `artifacts`, and `next_check` when they would help later distillation.
 - Do not require `what_worked`, `what_did_not_work`, `reusable_insight`, `do_differently_next_time`, or `catch_earlier_by` at note creation time.
 - If a note later proves wrong or incomplete, update it in place and use `status: invalidated` instead of deleting it automatically.
+- When review feedback triggers rework, append a note for that rejection signal.
+- For review-rejection notes: Answer briefly in process terms. Prefer workflow, review, validation, and decision-making causes over patch-level detail unless implementation detail is necessary to explain the issue.
+- Capture these rejection-time questions when they are known:
+  - What specific concern or deficiency did the review raise?
+  - What underlying gap in the work caused that concern?
+  - Why was that gap not caught before review?
+  - What kind of rework is now required to address it?
+  - What is the current best guess for preventing or catching this earlier next time?
+- At task completion, if review-driven rework occurred, append a follow-up note.
+- This follow-up note is also warranted when later review implicitly stopped raising the earlier issue even if no explicit acceptance event was recorded.
+- For task-completion follow-up notes: Answer briefly in process terms. Prefer workflow, review, validation, and decision-making causes over patch-level detail unless implementation detail is necessary to explain the issue.
+- Capture these completion-time questions when they are known:
+  - What changed during rework?
+  - Which part of the rework actually addressed the earlier review concern?
+  - What turned out to be unnecessary or misdirected?
+  - What lesson seems reusable now that the task is complete?
 
 Distillation rules:
 - Review notes at feature close and decide whether each note should be distilled into lessons, resolved locally, invalidated, or discarded.

@@ -52,6 +52,7 @@ Write a note when at least one of these is true:
 - repeated uncertainty: The agent has to re-evaluate the same question multiple times.
 - repeated user correction: The user has to correct or restate the same guidance more than once.
 - surprising evidence: A test, error, diff, or behavior changes the current understanding.
+- review-loop signal: review feedback triggers rework, or task completion confirms what mattered after review-driven rework.
 - possible reusable pattern: Something starts to look like it may generalize beyond this feature.
 - a fragile or under-evidenced decision whose rationale may matter later, especially when the decision depends on an assumption, incomplete evidence, or a non-obvious tradeoff
 
@@ -88,6 +89,27 @@ At note-taking time, prefer capturing:
 - `next_check`: what would confirm or disprove the current interpretation
 
 Do not require a finished lesson at note time.
+
+### Review-Loop Notes
+
+- When review feedback triggers rework, append a note for that rejection signal.
+- At task completion, if review-driven rework occurred, append a follow-up note. This is also warranted when later review implicitly stopped raising the earlier issue even without an explicit acceptance event.
+- Answer briefly in process terms. Prefer workflow, review, validation, and decision-making causes over low-level patch detail unless implementation detail is necessary for clarity.
+
+For review-rejection notes, capture:
+
+- What specific concern or deficiency did the review raise?
+- What underlying gap in the work caused that concern?
+- Why was that gap not caught before review?
+- What kind of rework is now required to address it?
+- What is the current best guess for preventing or catching this earlier next time?
+
+For task-completion follow-up notes, capture:
+
+- What changed during rework?
+- Which part of the rework actually addressed the earlier review concern?
+- What turned out to be unnecessary or misdirected?
+- What lesson seems reusable now that the task is complete?
 
 ### Later Resolution
 
