@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f018`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#done`
 - OpenSpec Change: `v1-f018-reduce-status-only-workflow-overhead`
 - OpenSpec Specs:
   - `openspec/specs/task-execution-handoff/spec.md`
@@ -95,6 +95,22 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `manual inspection of tests/test_workflow_contract_docs.py, openspec/changes/v1-f018-reduce-status-only-workflow-overhead/tasks.md, and the feature-file evidence ledger`
   - Result: `the remaining contract-doc assertions now match the canonical autonomous-loop continuation wording, the validation task stayed narrow, and all top-level feature tasks are ready for closeout into finish-feature`
   - Evidence: `prompt_contract`
+- `2026-04-13` Feature completion:
+  - Run: `rtk openspec validate v1-f018-reduce-status-only-workflow-overhead --type change --json --no-interactive`
+  - Result: `pass; summary totals report 1 passed and 0 failed`
+  - Evidence: `archive`
+- `2026-04-13` Feature completion:
+  - Run: `rtk openspec status --change v1-f018-reduce-status-only-workflow-overhead --json`
+  - Result: `pass; schemaName=spec-driven, isComplete=true, and proposal/design/specs/tasks all reported status done before archive`
+  - Evidence: `archive`
+- `2026-04-13` Feature completion:
+  - Run: `rtk openspec archive v1-f018-reduce-status-only-workflow-overhead -y --skip-specs`
+  - Result: `pass; archive succeeded with --skip-specs because the accepted stable-spec updates were already present in the worktree, and the change was archived as openspec/changes/archive/2026-04-13-v1-f018-reduce-status-only-workflow-overhead`
+  - Evidence: `archive`
+- `2026-04-13` Feature completion:
+  - Inspection: `docs/lessons/notes.md` and `docs/lessons/lessons.md`
+  - Result: `no-op for distill-lessons; both files are empty so there were no notes to distill before branch finalization`
+  - Evidence: `artifact_inspection`
 
 ## 2. Handoff Notes
 - `2026-04-13`:
@@ -192,3 +208,8 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `true`
   - Notes: Task `4` completed the validation-only closeout for the feature. The combined workflow validation slice and the updated contract-doc assertions passed without reopening implementation scope, so the next workflow handoff is `finish-feature`.
   - Proof Obligations: `All top-level feature tasks are now done; the remaining obligation is feature-level acceptance plus OpenSpec archive through finish-feature.`
+- `2026-04-13`:
+  - Current Task: `none`
+  - Worktree State: `dirty`
+  - Notes: `finish-feature` validated and archived `v1-f018-reduce-status-only-workflow-overhead`, moved the feature to `[DONE]`, and left the feature worktree available for downstream branch finalization. Archive used `--skip-specs` because the accepted stable-spec changes were already present in the tracked worktree state.
+  - Proof Obligations: `Feature-level acceptance and archive proof are complete; remaining work is only downstream branch/worktree cleanup outside the workflow-owned finish step.`
