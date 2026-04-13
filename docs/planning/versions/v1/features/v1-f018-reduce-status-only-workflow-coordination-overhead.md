@@ -127,6 +127,18 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `rtk git diff --check`
   - Result: `pass`
   - Evidence: `artifact_inspection`
+- `2026-04-14` Task `2`:
+  - Run: `rtk python -m pytest skills/_workflow/tests/test_workflow_state.py tests/test_workflow_openspec_integration.py -q`
+  - Result: `pass; 74 tests covered fail-closed selected-feature worktree resolution, readiness review-verdict consumption in start-task, and the existing completion-handoff/runtime regression surface`
+  - Evidence: `runtime_path`
+- `2026-04-14` Task `2`:
+  - Run: `rtk python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"`
+  - Result: `pass`
+  - Evidence: `artifact_inspection`
+- `2026-04-14` Task `2`:
+  - Run: `rtk git diff --check`
+  - Result: `pass`
+  - Evidence: `artifact_inspection`
 
 ## 2. Handoff Notes
 - `2026-04-13`:
@@ -248,3 +260,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `true`
   - Notes: Started remediation task `1` on the dedicated feature worktree. This task is limited to contract and stable-spec alignment so the reopened remediation scope is explicit before runtime behavior changes begin.
   - Proof Obligations: `Task 1 completed the contract-alignment slice for the reopened remediation scope. The next step is task 2: runtime remediation for fail-closed worktree resolution and structured review-verdict emission/consumption.`
+- `2026-04-14`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `not_applicable; docs/lessons/lessons.md is currently empty`
+  - Review Scope: `task_execution`
+  - Review Target: `2`
+  - Review Verdict: `approved`
+  - Blocking Findings: `none`
+  - Review Terminal: `true`
+  - Notes: Task `2` completed the runtime remediation slice. Selected-feature continuation now fails closed when no active feature worktree can be resolved, and start-task now surfaces the latest canonical readiness review verdict as structured runtime state instead of leaving verdict parsing unused.
+  - Proof Obligations: `Only task 3 remains: run the combined remediation validation slice, record the feature-level reclose evidence, and hand the reopened feature back into finish-feature.`

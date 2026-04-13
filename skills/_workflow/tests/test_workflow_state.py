@@ -8,9 +8,10 @@ from _workflow.workflow_state import (
     collect_openspec_change_linkage,
     collect_task_validation_evidence,
     compute_task_readiness_drift,
-    parse_handoff_review_verdicts,
     find_backlog_section_order_errors,
     find_openspec_task_structure_errors,
+    latest_review_verdict,
+    parse_handoff_review_verdicts,
     parse_feature_openspec_specs,
     required_validation_evidence_categories_for_plan,
     validate_promoted_feature_openspec_specs,
@@ -1386,6 +1387,52 @@ def test_parse_handoff_review_verdicts_reads_canonical_review_lines() -> None:
     verdict = verdicts[0]
     assert verdict.scope == "task_execution"
     assert verdict.target == "2"
+    assert verdict.verdict == "approved"
+    assert verdict.blocking_findings == ()
+    assert verdict.terminal is True
+
+
+def test_latest_review_verdict_returns_latest_matching_scope_and_target() -> None:
+    feature_text = textwrap.dedent(
+        """\
+        # Feature: Example
+
+        ## 0. Meta
+        - Feature ID: `v1-f018`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+        - Current Task: `none`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - `2026-04-13`:
+          - Current Task: `none`
+          - Worktree State: `clean`
+          - Review Scope: `ready`
+          - Review Target: `v1-f018`
+          - Review Verdict: `changes_requested`
+          - Blocking Findings: `gap-1`
+          - Review Terminal: `false`
+          - Notes: Earlier review
+        - `2026-04-14`:
+          - Current Task: `none`
+          - Worktree State: `clean`
+          - Review Scope: `ready`
+          - Review Target: `v1-f018`
+          - Review Verdict: `approved`
+          - Blocking Findings: `none`
+          - Review Terminal: `true`
+          - Notes: Latest review
+        """
+    )
+
+    verdict = latest_review_verdict(feature_text, scope="ready", target="v1-f018")
+
+    assert verdict is not None
+    assert verdict.scope == "ready"
+    assert verdict.target == "v1-f018"
     assert verdict.verdict == "approved"
     assert verdict.blocking_findings == ()
     assert verdict.terminal is True

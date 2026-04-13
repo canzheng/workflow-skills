@@ -6,10 +6,10 @@
 
 ## 2. Runtime Remediation
 
-- [ ] 2 Implement the missing runtime behavior behind the reopened `v1-f018` obligations
-  - [ ] 2.1 Make selected-feature continuation fail closed when the intended active feature worktree is missing or ambiguous
-  - [ ] 2.2 Add end-to-end structured review-verdict emission and at least one downstream consumer path that reads the emitted verdict state
-  - [ ] 2.3 Add or update regression tests for the fail-closed worktree path, structured verdict emission/consumption, and the aligned `complete-task` contract
+- [x] 2 Implement the missing runtime behavior behind the reopened `v1-f018` obligations
+  - [x] 2.1 Make selected-feature continuation fail closed when the intended active feature worktree is missing or ambiguous
+  - [x] 2.2 Add end-to-end structured review-verdict emission and at least one downstream consumer path that reads the emitted verdict state
+  - [x] 2.3 Add or update regression tests for the fail-closed worktree path, structured verdict emission/consumption, and the aligned `complete-task` contract
 
 ## 3. Validation And Reclose
 

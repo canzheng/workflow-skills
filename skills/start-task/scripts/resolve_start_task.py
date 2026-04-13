@@ -18,6 +18,7 @@ from _workflow.workflow_state import (
     ensure_clean_feature_worktree_for_handoff,
     infer_selected_feature_id,
     is_primary_checkout,
+    latest_review_verdict,
     linked_openspec_implementation_plan_path,
     list_openspec_change_context_files,
     parse_backlog_document,
@@ -167,6 +168,11 @@ def _resolve_task_in_root(root: Path, *, selected_feature_id: str | None = None)
                     feature_file=feature_path,
                     repo_root=root,
                 )
+                ready_review_verdict = latest_review_verdict(
+                    feature_text,
+                    scope="ready",
+                    target=feature_id,
+                )
                 return {
                     "feature_id": feature_id,
                     "feature_path": str(feature_path.relative_to(root)),
@@ -178,6 +184,17 @@ def _resolve_task_in_root(root: Path, *, selected_feature_id: str | None = None)
                         str(implementation_plan_path.relative_to(root)) if implementation_plan_path is not None else None
                     ),
                     "openspec_context_files": [str(path.relative_to(root)) for path in context_files],
+                    "ready_review_verdict": (
+                        {
+                            "scope": ready_review_verdict.scope,
+                            "target": ready_review_verdict.target,
+                            "verdict": ready_review_verdict.verdict,
+                            "blocking_findings": list(ready_review_verdict.blocking_findings),
+                            "terminal": ready_review_verdict.terminal,
+                        }
+                        if ready_review_verdict is not None
+                        else None
+                    ),
                     "execution_instruction": (
                         "Read the files listed as context, then write or update the implementation plan at the "
                         "provided path before executing the task. Record validation evidence during execution as "

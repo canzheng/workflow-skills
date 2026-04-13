@@ -369,6 +369,11 @@ def resolve_feature_repo_root(root: Path, feature_id: str) -> Path:
 
     current_location = _locate_feature_in_repo(root.resolve(), feature_id)
     if current_location is not None:
+        if current_location.feature_section == "IN_PROGRESS" and is_primary_checkout(current_location.repo_root):
+            raise WorkflowStateError(
+                f"no active feature worktree found for {feature_id} in [IN_PROGRESS]; "
+                "create or re-enter the intended worktree"
+            )
         return current_location.repo_root
 
     return root.resolve()
@@ -555,6 +560,16 @@ def parse_handoff_review_verdicts(feature_text: str) -> list[ReviewVerdict]:
 
     flush()
     return verdicts
+
+
+def latest_review_verdict(feature_text: str, *, scope: str, target: str | None = None) -> ReviewVerdict | None:
+    for verdict in reversed(parse_handoff_review_verdicts(feature_text)):
+        if verdict.scope != scope:
+            continue
+        if target is not None and verdict.target != target:
+            continue
+        return verdict
+    return None
 
 
 def find_legacy_inline_planning_sections(feature_text: str) -> list[str]:
