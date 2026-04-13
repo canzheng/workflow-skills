@@ -38,6 +38,19 @@ Rationale:
 - This preserves the same gates while cutting the admin-only baton pass.
 - It gives `autonomous-backlog-loop` and future wrappers a stable machine interface instead of prose-only handoff notes.
 
+The continuation contract will use a single explicit object shape rather than an enum-only shortcut. Required fields:
+
+- `action`: one of `start_task`, `finish_feature`, or `stop`
+- `target_feature_id`: the owning feature id
+- `target_task_id`: the next top-level task id when `action` is `start_task`, otherwise `null`
+- `reason`: a short stable reason such as `next_ready_task`, `all_tasks_complete`, `no_ready_task`, or `human_decision_required`
+- `requires_human_decision`: `true` or `false`
+
+Interpretation:
+- wrappers may continue automatically only when `requires_human_decision` is `false`
+- `complete-task` uses `start_task` for direct non-final continuation, `finish_feature` for the final-task path, and `stop` when continuation is not yet determined
+- the contract remains payload-first, so wrappers do not need to infer the next action from prose notes
+
 ### Decision: Store review outcomes as structured verdict state
 
 Readiness review and execution/closure review should stop relying on free-form "approved / not approved / issues found" summaries as their only durable output. The workflow should add a minimal structured verdict model that can be persisted in the feature file and resolver payloads, with fields such as:
@@ -51,6 +64,20 @@ Readiness review and execution/closure review should stop relying on free-form "
 Rationale:
 - This preserves the existing human-readable notes while giving automation deterministic state.
 - It reduces the need for notification turns whose only content is relaying a verdict.
+
+The structured verdict state will be persisted in the feature file `Handoff Notes` section on the relevant stage or task entry, using canonical lines:
+
+- `Review Scope: ready | task_execution | task_completion`
+- `Review Target: <feature-id | top-level-task-id>`
+- `Review Verdict: approved | changes_requested | blocked`
+- `Blocking Findings: none | <comma-separated stable finding ids or labels>`
+- `Review Terminal: true | false`
+
+Emission rules:
+- `ready-feature` writes a `ready` verdict on the stage-scoped readiness handoff entry
+- task-scoped execution or completion review writes the verdict on the active task handoff entry or the matching completion handoff entry
+- `Review Terminal: true` means the current boundary is fully resolved and downstream workflow may rely on the verdict without waiting for another review relay turn
+- `Review Terminal: false` means the verdict is advisory or incomplete and automation must stop instead of inferring approval
 
 ### Decision: Execution resolvers should block on selected-feature integrity, not unrelated active drift
 
@@ -87,4 +114,4 @@ Rationale:
 
 ## Open Questions
 
-- The continuation contract should expose enough state for wrappers to decide whether to auto-continue. The main remaining design choice is whether that should be a single `next_workflow_action` enum or a slightly richer object with explicit `action`, `target_feature_id`, `target_task_id`, and `reason` fields. Implementation can finalize that detail as long as the result is deterministic and testable.
+- None.
