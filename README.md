@@ -117,7 +117,7 @@ For a legacy repo adopting OpenSpec midstream:
 - historical completed features may be marked `OpenSpec Status: legacy-exempt`
 - current `[SHAPING]`, `[READY]`, and `[IN_PROGRESS]` work should get active OpenSpec changes for the remaining work
 
-### 1. Workflow Diagnosis
+### 2. Workflow Diagnosis
 
 Use:
 - `diagnose-workflow`
@@ -133,7 +133,7 @@ It complements, but does not replace:
 - `audit-workflow` for pass/fail gating
 - `repair-drift` for minimal structural fixes
 
-### 2. Shaping
+### 3. Shaping
 
 Use:
 - `shape-backlog-item`
@@ -157,7 +157,7 @@ OpenSpec tools used during shaping:
 
 OpenSpec `apply` is not part of this workflow.
 
-### 3. Ready
+### 4. Ready
 
 Use:
 - `ready-feature`
@@ -176,7 +176,7 @@ Responsibilities:
 - move the board item to `[READY]`
 - leave the primary checkout clean
 
-### 4. Execution
+### 5. Execution
 
 Use:
 - `start-task`
@@ -211,7 +211,7 @@ OpenSpec `apply` is intentionally not used here. Execution stays under workflow 
 - explicit validation evidence
 - clean handoff rules
 
-### 5. Feature Completion
+### 6. Feature Completion
 
 When the feature-level acceptance bar is met:
 - the feature remains `[IN_PROGRESS]` until `finish-feature` runs
@@ -229,7 +229,7 @@ Current OpenSpec CLI note:
 - this workflow uses `openspec validate ...` as the verification step before archive
 - if a future wrapper introduces an `openspec verify` command, it should remain additive rather than replacing workflow validation gates
 
-### 6. Deferral
+### 7. Deferral
 
 Use:
 - `defer-feature`

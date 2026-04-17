@@ -221,6 +221,23 @@ class WorkflowContractDocsTests(unittest.TestCase):
         self.assertIn("Blocking Findings", feature_execution_tracking_spec)
         self.assertIn("Review Terminal", feature_execution_tracking_spec)
 
+    def test_feature_template_fallback_matches_tracked_template(self) -> None:
+        import sys
+
+        skills_root = REPO_ROOT / "skills"
+        if str(skills_root) not in sys.path:
+            sys.path.insert(0, str(skills_root))
+        from _workflow.feature_file import _FALLBACK_FEATURE_TEMPLATE  # type: ignore[attr-defined]
+
+        tracked = FEATURE_TEMPLATE.read_text(encoding="utf-8")
+        self.assertEqual(
+            _FALLBACK_FEATURE_TEMPLATE,
+            tracked,
+            "_FALLBACK_FEATURE_TEMPLATE in skills/_workflow/feature_file.py is out of sync "
+            "with docs/planning/template/feature-template.md. Update the Python constant to "
+            "match the tracked template so the fallback does not silently downgrade content.",
+        )
+
     def test_workflow_reference_template_matches_live_reference(self) -> None:
         live = WORKFLOW_REFERENCE.read_text(encoding="utf-8")
         template = WORKFLOW_REFERENCE_TEMPLATE.read_text(encoding="utf-8")

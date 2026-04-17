@@ -26,15 +26,25 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - Last Updated: `YYYY-MM-DD`
 
 ## 1. Validation Log
+- Treat this section as the running execution evidence ledger for the active task. Add entries as planned validation steps complete; do not wait until task closure to write all evidence at once.
 - `<YYYY-MM-DD>` Task `<task-id>`:
   - Run: `<command or inspection step>`
   - Result: `<pass/fail and notable details>`
+  - Evidence: `<comma-separated validation categories such as schema, runtime_path, artifact_repair, prompt_contract, orchestration, negative_case>`
 
 ## 2. Handoff Notes
 - `<YYYY-MM-DD>`:
   - Current Task: `<task-id like 1 or none>`
   - Worktree State: `<clean/dirty>`
+  - Retrieved Lesson IDs: `<none or comma-separated lesson IDs>`
+  - Lesson Usage: `<concise status summary keyed to the retrieved IDs>`
+  - Review Scope: `<ready | task_execution | task_completion>`
+  - Review Target: `<feature-id | top-level-task-id>`
+  - Review Verdict: `<approved | changes_requested | blocked>`
+  - Blocking Findings: `<none or comma-separated stable finding ids or labels>`
+  - Review Terminal: `<true | false>`
   - Notes: <handoff summary>
+  - Proof Obligations: `<short note about the active task's proof-obligation surface when relevant>`
 """
 
 
