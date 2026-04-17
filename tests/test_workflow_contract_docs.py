@@ -14,6 +14,13 @@ TASK_EXECUTION_HANDOFF_SPEC = REPO_ROOT / "openspec" / "specs" / "task-execution
 FEATURE_EXECUTION_TRACKING_SPEC = REPO_ROOT / "openspec" / "specs" / "feature-execution-tracking" / "spec.md"
 WORKFLOW_AUDIT_AND_REPAIR_SPEC = REPO_ROOT / "openspec" / "specs" / "workflow-audit-and-repair" / "spec.md"
 WORKFLOW_REFERENCE = REPO_ROOT / "docs" / "planning" / "WORKFLOW_REFERENCE.md"
+WORKFLOW_REFERENCE_TEMPLATE = (
+    REPO_ROOT
+    / "skills"
+    / "initialize-workflow-artifacts"
+    / "templates"
+    / "WORKFLOW_REFERENCE.md"
+)
 FEATURE_TEMPLATE = REPO_ROOT / "docs" / "planning" / "template" / "feature-template.md"
 
 
@@ -34,7 +41,7 @@ class WorkflowContractDocsTests(unittest.TestCase):
     def test_start_task_skill_requires_gpt_5_4_mini_plan_review_loop(self) -> None:
         start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
 
-        self.assertIn("spawn a `gpt-5.4-mini` reviewer subagent", start_task_skill)
+        self.assertIn("spawn a lightweight independent reviewer subagent", start_task_skill)
         self.assertIn("fully cover the selected task's intended change and proof obligations", start_task_skill)
         self.assertIn("return to step 5 to update the implementation plan and rerun this review until it passes", start_task_skill)
 
@@ -213,6 +220,19 @@ class WorkflowContractDocsTests(unittest.TestCase):
         self.assertIn("Review Verdict", feature_execution_tracking_spec)
         self.assertIn("Blocking Findings", feature_execution_tracking_spec)
         self.assertIn("Review Terminal", feature_execution_tracking_spec)
+
+    def test_workflow_reference_template_matches_live_reference(self) -> None:
+        live = WORKFLOW_REFERENCE.read_text(encoding="utf-8")
+        template = WORKFLOW_REFERENCE_TEMPLATE.read_text(encoding="utf-8")
+
+        self.assertEqual(
+            template,
+            live,
+            "skills/initialize-workflow-artifacts/templates/WORKFLOW_REFERENCE.md is out of sync "
+            "with docs/planning/WORKFLOW_REFERENCE.md — run "
+            "`cp docs/planning/WORKFLOW_REFERENCE.md "
+            "skills/initialize-workflow-artifacts/templates/WORKFLOW_REFERENCE.md`.",
+        )
 
     def test_workflow_audit_and_repair_spec_allows_selected_feature_scoping_with_diagnostics(self) -> None:
         task_execution_handoff_spec = TASK_EXECUTION_HANDOFF_SPEC.read_text(encoding="utf-8")

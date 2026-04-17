@@ -33,7 +33,7 @@ For non-micro tasks:
 
 
 ## Workflow Model Selection
-- Default exploration/research subagents to gpt-5.4-mini; use stronger models only for broad design judgment, cross-file integration, or repeated blocker recovery.
+- Default exploration/research subagents to a lightweight model available in the host harness; reserve stronger models for broad design judgment, cross-file integration, or repeated blocker recovery.
 
 ## Workflow Skill Routing
 - Use `initialize-workflow-artifacts` when a repository wants to adopt this workflow but does not yet have the required scaffold.

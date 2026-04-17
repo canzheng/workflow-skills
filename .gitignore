@@ -1,3 +1,6 @@
+.agents/skills/
+.claude/skills/
+.claude/
 .codex/
 .local/
 .pytest_cache/

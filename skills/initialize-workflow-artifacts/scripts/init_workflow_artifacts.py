@@ -129,7 +129,7 @@ def workflow_reference_template() -> str:
 
 
 def run_openspec_init(root: Path) -> str:
-    command = ["openspec", "init", "--tools", "codex"]
+    command = ["openspec", "init", "--tools", "claude"]
     try:
         subprocess.run(command, cwd=root, check=True)
     except subprocess.CalledProcessError as exc:
@@ -138,7 +138,7 @@ def run_openspec_init(root: Path) -> str:
 
 
 def run_lessons_init(root: Path) -> str:
-    command = ["lessons", "init", "--tools", "codex"]
+    command = ["lessons", "init", "--tools", "claude"]
     try:
         subprocess.run(command, cwd=root, check=True)
     except subprocess.CalledProcessError as exc:

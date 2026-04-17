@@ -20,7 +20,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
   - then the first linked OpenSpec task in that feature with status `ready`
 - When naming a task explicitly, use the raw top-level OpenSpec task ID like `1`, not a synthetic label like `T1`.
 - "First" means top-to-bottom document order.
-- For the default path, use `python "${CODEX_HOME:-$HOME/.codex}/skills/start-task/scripts/resolve_start_task.py"`.
+- For the default path, use `python "${AGENTS_HOME:-$HOME/.agents}/skills/start-task/scripts/resolve_start_task.py"`.
 
 ## Workflow
 
@@ -45,7 +45,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
    - keep the implementation plan's validation section aligned with the selected task, the linked change intent, and the proof-obligation / validation-taxonomy language used by shaping and readiness guidance
 6. Perform a semantic consistency and coverage review across the selected change context before code execution starts.
    - read the task implementation plan after updating it
-   - spawn a `gpt-5.4-mini` reviewer subagent to review whether the task implementation plan and its validation section are semantically consistent with the selected task, the change proposal, the design, and the linked spec intent
+   - spawn a lightweight independent reviewer subagent to review whether the task implementation plan and its validation section are semantically consistent with the selected task, the change proposal, the design, and the linked spec intent
    - require that review to confirm the plan and its validation section fully cover the selected task's intended change and proof obligations before execution continues, using the same validation taxonomy that the workflow reference and feature template describe
    - if tests are being added or modified, ask the mandatory review question "changed tests narrowed contract?" and compare the new assertions to the task plan, not just the implementation
    - if the review finds semantic inconsistency, ambiguity, uncovered change intent, or missing validation coverage, return to step 5 to update the implementation plan and rerun this review until it passes
@@ -90,7 +90,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 - The task is not `ready`
 - Task scope is missing or invalid
 - The task implementation plan cannot be written or updated before execution begins
-- The `gpt-5.4-mini` semantic consistency and coverage review finds inconsistency, ambiguity, unresolved drift, or missing validation coverage between the task implementation plan and the linked proposal, design, specs, or selected task
+- The independent reviewer subagent's semantic consistency and coverage review finds inconsistency, ambiguity, unresolved drift, or missing validation coverage between the task implementation plan and the linked proposal, design, specs, or selected task
 - The primary checkout is dirty when the first feature worktree must be created
 - A later task for an existing `[IN_PROGRESS]` feature has no feature worktree and the user chooses to stop instead of creating one
 - The existing feature worktree is dirty when resuming a later task

@@ -13,11 +13,11 @@ MANAGED_WORKFLOW = REPO_ROOT / "AGENTS-global-workflow.md"
 FEATURE_TEMPLATE = REPO_ROOT / "docs" / "planning" / "template" / "feature-template.md"
 
 
-def _run_install(codex_home: Path) -> subprocess.CompletedProcess[str]:
+def _run_install(agent_home: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["bash", str(INSTALL_SCRIPT)],
         cwd=REPO_ROOT,
-        env={**os.environ, "CODEX_HOME": str(codex_home)},
+        env={**os.environ, "AGENTS_HOME": str(agent_home)},
         capture_output=True,
         text=True,
         check=False,
@@ -27,8 +27,8 @@ def _run_install(codex_home: Path) -> subprocess.CompletedProcess[str]:
 class InstallScriptTests(unittest.TestCase):
     def test_install_script_copies_workflow_skills_and_patches_agents(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            codex_home = Path(tmpdir) / "codex-home"
-            agents_path = codex_home / "AGENTS.md"
+            agent_home = Path(tmpdir) / "agent-home"
+            agents_path = agent_home / "AGENTS.md"
             agents_path.parent.mkdir(parents=True, exist_ok=True)
             agents_path.write_text(
                 "\n".join(
@@ -48,11 +48,11 @@ class InstallScriptTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = _run_install(codex_home)
+            result = _run_install(agent_home)
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-            skills_root = codex_home / "skills"
+            skills_root = agent_home / "skills"
             self.assertTrue((skills_root / "audit-workflow" / "SKILL.md").is_file())
             self.assertTrue((skills_root / "diagnose-workflow" / "SKILL.md").is_file())
             self.assertTrue((skills_root / "fastlane" / "SKILL.md").is_file())
@@ -60,7 +60,7 @@ class InstallScriptTests(unittest.TestCase):
             self.assertTrue((skills_root / "_workflow" / "workflow_state.py").is_file())
             self.assertFalse((skills_root / "_workflow" / "tests").exists())
             self.assertTrue((skills_root / "_workflow" / "templates" / "feature-template.md").is_file())
-            self.assertFalse((codex_home / "bin" / "run-python.sh").exists())
+            self.assertFalse((agent_home / "bin" / "run-python.sh").exists())
             self.assertFalse((skills_root / "run-python.sh").exists())
             self.assertFalse((skills_root / "bin" / "run-python.sh").exists())
 
@@ -78,8 +78,8 @@ class InstallScriptTests(unittest.TestCase):
 
     def test_install_script_initializes_existing_agents_without_markers(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            codex_home = Path(tmpdir) / "codex-home"
-            agents_path = codex_home / "AGENTS.md"
+            agent_home = Path(tmpdir) / "agent-home"
+            agents_path = agent_home / "AGENTS.md"
             agents_path.parent.mkdir(parents=True, exist_ok=True)
             agents_path.write_text(
                 "\n".join(
@@ -93,7 +93,7 @@ class InstallScriptTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = _run_install(codex_home)
+            result = _run_install(agent_home)
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
@@ -104,25 +104,25 @@ class InstallScriptTests(unittest.TestCase):
 
     def test_install_script_fails_when_agents_file_is_missing(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            codex_home = Path(tmpdir) / "codex-home"
+            agent_home = Path(tmpdir) / "agent-home"
 
-            result = _run_install(codex_home)
+            result = _run_install(agent_home)
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("Missing target AGENTS.md", result.stdout + result.stderr)
 
     def test_install_script_removes_stale_workflow_tests_from_target(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            codex_home = Path(tmpdir) / "codex-home"
-            agents_path = codex_home / "AGENTS.md"
+            agent_home = Path(tmpdir) / "agent-home"
+            agents_path = agent_home / "AGENTS.md"
             agents_path.parent.mkdir(parents=True, exist_ok=True)
             agents_path.write_text("# Global Instructions\n", encoding="utf-8")
 
-            stale_tests_dir = codex_home / "skills" / "_workflow" / "tests"
+            stale_tests_dir = agent_home / "skills" / "_workflow" / "tests"
             stale_tests_dir.mkdir(parents=True, exist_ok=True)
             (stale_tests_dir / "stale_test.py").write_text("print('stale')\n", encoding="utf-8")
 
-            result = _run_install(codex_home)
+            result = _run_install(agent_home)
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertFalse(stale_tests_dir.exists())

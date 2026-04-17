@@ -1,2 +1,2 @@
-"""Shared workflow helpers for Codex planning skills."""
+"""Shared workflow helpers for the agent planning skills."""
 

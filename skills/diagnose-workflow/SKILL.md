@@ -16,7 +16,7 @@ This skill complements `audit-workflow`:
 ## Run
 
 ```bash
-python "${CODEX_HOME:-$HOME/.codex}/skills/diagnose-workflow/scripts/diagnose_workflow.py"
+python "${AGENTS_HOME:-$HOME/.agents}/skills/diagnose-workflow/scripts/diagnose_workflow.py"
 ```
 
 ## What It Reports

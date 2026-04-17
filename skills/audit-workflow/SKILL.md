@@ -14,7 +14,7 @@ The audit checks the active version under `<repo_root>/docs/planning/current_ver
 ## Run
 
 ```bash
-python "${CODEX_HOME:-$HOME/.codex}/skills/audit-workflow/scripts/audit_workflow.py"
+python "${AGENTS_HOME:-$HOME/.agents}/skills/audit-workflow/scripts/audit_workflow.py"
 ```
 
 ## What It Checks

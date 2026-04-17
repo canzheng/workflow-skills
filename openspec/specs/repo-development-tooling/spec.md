@@ -7,7 +7,7 @@ TBD - created by archiving change v1-f013-harden-installer-and-dev-environment. 
 The repository installer SHALL treat a missing target `AGENTS.md` file differently from an existing file that has not yet been initialized with the managed workflow markers.
 
 #### Scenario: Installer fails when target AGENTS file is missing
-- **WHEN** `install.sh` runs and `${CODEX_HOME:-$HOME/.codex}/AGENTS.md` does not exist
+- **WHEN** `install.sh` runs and `${AGENTS_HOME:-$HOME/.agents}/AGENTS.md` does not exist
 - **THEN** installation fails
 - **AND** the failure message states that the target `AGENTS.md` file is missing
 

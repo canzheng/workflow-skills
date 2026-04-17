@@ -3,8 +3,8 @@ set -euo pipefail
 
 REPO_ROOT="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_SKILLS_DIR="${REPO_ROOT}/skills"
-TARGET_SKILLS_DIR="${CODEX_HOME:-${HOME}/.codex}/skills"
-TARGET_AGENTS_FILE="${CODEX_HOME:-${HOME}/.codex}/AGENTS.md"
+TARGET_SKILLS_DIR="${AGENTS_HOME:-${HOME}/.agents}/skills"
+TARGET_AGENTS_FILE="${AGENTS_HOME:-${HOME}/.agents}/AGENTS.md"
 MANAGED_WORKFLOW_FILE="${REPO_ROOT}/AGENTS-global-workflow.md"
 SOURCE_FEATURE_TEMPLATE_FILE="${REPO_ROOT}/docs/planning/template/feature-template.md"
 WORKFLOW_START_MARKER='<!-- Beginning of Workflow Section -->'

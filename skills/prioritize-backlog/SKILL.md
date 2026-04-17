@@ -9,7 +9,7 @@ description: Use when a repository with docs/planning needs BACKLOG, SHAPING, an
 
 This skill ranks all eligible items in the active version backlog, proposes an order for user review, and only after approval rewrites the top-to-bottom order inside `[BACKLOG]`, `[SHAPING]`, and `[READY]`.
 
-It is a workflow wrapper around `audit-workflow` plus the helper script at `python "${CODEX_HOME:-$HOME/.codex}/skills/prioritize-backlog/scripts/prioritize_backlog.py"`.
+It is a workflow wrapper around `audit-workflow` plus the helper script at `python "${AGENTS_HOME:-$HOME/.agents}/skills/prioritize-backlog/scripts/prioritize_backlog.py"`.
 
 ## Defaults
 
@@ -25,11 +25,11 @@ It is a workflow wrapper around `audit-workflow` plus the helper script at `pyth
    - read the active version `VERSION_SCOPE.md`
    - read the active `BACKLOG.md`
    - inspect the repo's obvious product context such as `README.md`, top-level docs, and main source directories
-   - use `gpt-5.4-mini` explorer subagents for exploration work when available
+   - use lightweight explorer subagents for exploration work when available
 3. Run:
 
 ```bash
-python "${CODEX_HOME:-$HOME/.codex}/skills/prioritize-backlog/scripts/prioritize_backlog.py" list
+python "${AGENTS_HOME:-$HOME/.agents}/skills/prioritize-backlog/scripts/prioritize_backlog.py" list
 ```
 
 4. Review the returned eligible items and linked OpenSpec context:
@@ -50,7 +50,7 @@ python "${CODEX_HOME:-$HOME/.codex}/skills/prioritize-backlog/scripts/prioritize
 8. After explicit approval, finalize one global ID order and run:
 
 ```bash
-python "${CODEX_HOME:-$HOME/.codex}/skills/prioritize-backlog/scripts/prioritize_backlog.py" apply \
+python "${AGENTS_HOME:-$HOME/.agents}/skills/prioritize-backlog/scripts/prioritize_backlog.py" apply \
   --ordered-id <id-1> \
   --ordered-id <id-2>
 ```

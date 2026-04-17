@@ -34,7 +34,7 @@ It is a workflow wrapper around `brainstorming` plus linked OpenSpec change crea
    - prefer linked change ids that reuse the feature-style prefix when practical, while keeping that naming convention non-gating
    - identify the corresponding existing documentation and spec surfaces likely affected by the feature, ensure the linked OpenSpec change captures the relevant paths, and note any documentation follow-up that shaping is not ready to reconcile yet
    - capture the proof obligations and validation surfaces that the shaped feature expects executable tasks to carry forward so later readiness review can confirm the contract is clear without forcing `start-task` to invent or narrow it
-   - create the feature file under `features/` by running `python "${CODEX_HOME:-$HOME/.codex}/skills/shape-backlog-item/scripts/render_feature_file.py"`
+   - create the feature file under `features/` by running `python "${AGENTS_HOME:-$HOME/.agents}/skills/shape-backlog-item/scripts/render_feature_file.py"`
    - pass the authoritative OpenSpec change and affected spec paths as explicit inputs to the renderer
    - do not duplicate proposal, design, spec, or task prose from OpenSpec inside the feature file
    - before the stage exits, call `record-lesson-usage` for the retrieved lesson IDs to reconcile whether they materially influenced the shaped output

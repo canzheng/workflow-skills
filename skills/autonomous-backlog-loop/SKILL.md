@@ -51,7 +51,7 @@ Whenever any spawned agent presents a design choice, append an entry that captur
 Run `audit-workflow`, then resolve the next action:
 
 ```bash
-python "${CODEX_HOME:-$HOME/.codex}/skills/autonomous-backlog-loop/scripts/resolve_autonomous_backlog_action.py"
+python "${AGENTS_HOME:-$HOME/.agents}/skills/autonomous-backlog-loop/scripts/resolve_autonomous_backlog_action.py"
 ```
 
 Optional resolver flags:

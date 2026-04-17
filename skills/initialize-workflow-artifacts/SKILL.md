@@ -10,12 +10,12 @@ description: Use when a repository wants to adopt the docs/planning workflow but
 Create the minimum valid `docs/planning/` plus `openspec/` scaffold for the workflow contract without overwriting existing user content.
 
 Use this before `audit-workflow` if the repo does not yet have `docs/planning/current_version`, `ROADMAP.md`, the active version directories, or the required OpenSpec scaffold.
-The initializer runs `openspec init --tools codex` and `lessons init --tools codex` from the target repo root, then layers the workflow-specific planning files on top.
+The initializer runs `openspec init --tools claude` and `lessons init --tools claude` from the target repo root, then layers the workflow-specific planning files on top.
 
 ## Run
 
 ```bash
-python "${CODEX_HOME:-$HOME/.codex}/skills/initialize-workflow-artifacts/scripts/init_workflow_artifacts.py" --version v1
+python "${AGENTS_HOME:-$HOME/.agents}/skills/initialize-workflow-artifacts/scripts/init_workflow_artifacts.py" --version v1
 ```
 
 ## What It Creates
@@ -27,7 +27,8 @@ python "${CODEX_HOME:-$HOME/.codex}/skills/initialize-workflow-artifacts/scripts
 - `docs/planning/versions/<version>/BACKLOG.md`
 - `docs/planning/versions/<version>/features/`
 - `docs/planning/current_version` symlink
-- `.codex/`
+- `.claude/`
+- `.agents/skills/` (lesson skills installed by `lessons init --tools claude`)
 - `docs/lessons/`
 - `openspec/specs/`
 - `openspec/changes/archive/`
