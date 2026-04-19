@@ -10,7 +10,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - OpenSpec Specs:
   - `openspec/specs/repo-development-tooling/spec.md`
   - `openspec/specs/feature-execution-tracking/spec.md`
-- Current Task: `4`
+- Current Task: `none`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
   - This field is the active execution marker for the implemented workflow; OpenSpec `tasks.md` remains the checked/unchecked task ledger.
@@ -139,6 +139,26 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `git diff --check` from the feature worktree
   - Result: `clean; no patch-format issues`
   - Evidence: `artifact_inspection`
+- `2026-04-19` Task `4`:
+  - Run: `bin/run-python.sh -m unittest discover -s tests -q` (combined remediation validation run)
+  - Result: `Ran 125 tests in 23.505s, OK`
+  - Evidence: `schema`
+- `2026-04-19` Task `4`:
+  - Run: `bin/run-python.sh -m pytest skills/_workflow/tests -q` (combined remediation validation run)
+  - Result: `66 passed in 1.96s`
+  - Evidence: `schema`
+- `2026-04-19` Task `4`:
+  - Run: `openspec validate v1-f019-remediate-implementation-review-findings`
+  - Result: `Change 'v1-f019-remediate-implementation-review-findings' is valid`
+  - Evidence: `artifact_inspection`
+- `2026-04-19` Task `4`:
+  - Run: `python "${AGENTS_HOME:-$HOME/.agents}/skills/audit-workflow/scripts/audit_workflow.py" --repo-root .` (pre-closure)
+  - Result: `OK: workflow audit passed for docs/planning/versions/v1`
+  - Evidence: `artifact_inspection`
+- `2026-04-19` Task `4`:
+  - Run: `time bin/run-python.sh -m unittest discover -s tests -q` (wall-clock runtime re-measurement for combined remediation)
+  - Result: `Ran 125 tests in 23.505s, OK — reproduces the post-task-3 runtime improvement; combined remediation runtime gate stable (baseline 105.740s → 23.505s, 77.7% reduction)`
+  - Evidence: `runtime_path`
 
 ## 2. Handoff Notes
 - `2026-04-19`:
@@ -249,3 +269,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `false`
   - Notes: `start-task preamble for v1-f019 task 4; implementation plan written at openspec/changes/v1-f019-remediate-implementation-review-findings/implementation-plans/4.md. Task 4 is a pure bookkeeping/validation gate over the combined tasks 1+2+3 remediation; no code changes.`
   - Proof Obligations: `audit-workflow green before and after closure bookkeeping; unittest and pytest suites pass with counts consistent with post-task-3 baseline; final evidence block recorded in the Validation Log; feature worktree clean for finish-feature handoff.`
+- `2026-04-19`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `no lessons retrieved; nothing to reconcile`
+  - Review Scope: `task_completion`
+  - Review Target: `4`
+  - Review Verdict: `approved`
+  - Blocking Findings: `none`
+  - Review Terminal: `true`
+  - Notes: `task 4 complete. Combined remediation validation slice re-run against the fully migrated worktree — 125 unittest + 66 pytest = 191 tests pass; unittest wall-clock 23.505s reproducing the post-task-3 runtime improvement (baseline 105.740s → 23.505s, 77.7% reduction). openspec validate reports the change valid. audit-workflow green. git diff --check clean. completion_handoff returned action=finish_feature, requires_human_decision=false — loop proceeds to finish-feature next.`
+  - Proof Obligations: `schema + runtime_path + artifact_inspection gates all met. Remediation-level evidence is captured at feature-file level so finish-feature can consume it directly for the archive + branch finalization path.`

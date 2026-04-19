@@ -27,10 +27,10 @@
 
 ## 4. Validation And Handoff
 
-- [ ] 4 Run the narrowest combined validation slice for the remediation scope and record evidence in the feature file
-  - [ ] 4.1 Re-run `audit-workflow` in the feature worktree after every task-closure bookkeeping edit and at feature completion
-  - [ ] 4.2 Run `bin/run-python.sh -m unittest discover -s tests` and `bin/run-python.sh -m pytest skills/_workflow/tests -q`; record both before/after results
-  - [ ] 4.3 Record the remediation evidence in the feature file Validation Log so `finish-feature` can close `v1-f019` cleanly
+- [x] 4 Run the narrowest combined validation slice for the remediation scope and record evidence in the feature file
+  - [x] 4.1 Re-run `audit-workflow` in the feature worktree after every task-closure bookkeeping edit and at feature completion
+  - [x] 4.2 Run `bin/run-python.sh -m unittest discover -s tests` and `bin/run-python.sh -m pytest skills/_workflow/tests -q`; record both before/after results
+  - [x] 4.3 Record the remediation evidence in the feature file Validation Log so `finish-feature` can close `v1-f019` cleanly
   - Depends On:
     - `1`
     - `2`
