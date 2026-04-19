@@ -165,3 +165,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `true`
   - Notes: `task 2 complete. parse_feature_id rewritten to drop the unreachable conditional branch and the double split. shape-backlog-item and ready-feature SKILL.md now use 'stage-scoped' for their Retrieved Lesson IDs line, matching WORKFLOW_REFERENCE.md. complete-task SKILL.md carries a new Output Contract block naming the completion_handoff payload fields. argparse --feature-id help text now states the ambiguity-driven contract for the three scripts that declare the flag (required for shape-backlog-item, optional with auto-resolution for autonomous-backlog-loop and finish-feature). test_workflow_contract_docs.py gains four new assertions (stage-scoped terminology, task-scoped terminology, Output Contract presence, shared preamble fragment pin) and retargets one existing assertion onto the new stage-scoped wording. design.md corrected to reclassify prioritize-backlog as 'absent' since it operates across all features. completion_handoff returned action=start_task, target_task_id=3, requires_human_decision=false — loop continues to task 3.`
   - Proof Obligations: `artifact_repair grep confirms no remaining 'task-scoped' in stage-level skills and no double-split expression in workflow_state.py. 125 unittest + 66 pytest = 191 tests pass (post-task-1 baseline 187 + 4 new task-2 contract-doc assertions). Runtime proof: argparse --help on the three --feature-id-carrying scripts produces the updated help text without errors. git diff --check clean; audit-workflow green.`
+- `2026-04-19`:
+  - Current Task: `3`
+  - Worktree State: `clean`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `retrieve-lessons tool not available in the live skills directory; inspected docs/lessons/lessons.md directly and confirmed L-001 (canonical metadata emitter+consumer+runtime test) and L-002 (fail-closed worktree negative-path) do not apply to task 3's test-harness refactor, shared fixture extraction, or subprocess-to-direct-call conversion`
+  - Review Scope: `task_execution`
+  - Review Target: `3`
+  - Review Verdict: `pending`
+  - Blocking Findings: `none`
+  - Review Terminal: `false`
+  - Notes: `start-task preamble for v1-f019 task 3; implementation plan written at openspec/changes/v1-f019-remediate-implementation-review-findings/implementation-plans/3.md. Baseline captured: full unittest suite 125 tests in 105.74s, integration subset (tests.test_workflow_openspec_integration) 42 tests in 69.94s (~66% of total). User override on 2026-04-19 after task-3 scope surfacing: audit all 42 integration methods and convert every test where conversion is safe, rather than stopping at the shaped ≥30% threshold.`
+  - Proof Obligations: `conversion is behavior-preserving; every existing assertion continues to hold; tests/conftest.py run_resolver helper reproduces subprocess.run semantics (.returncode/.stdout/.stderr); full unittest count ≥125; measurable runtime reduction; spec delta 'Integration-test runtime is justified' landed in repo-development-tooling stable spec`
