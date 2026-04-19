@@ -17,9 +17,9 @@ None yet.
 
 ## [IN_PROGRESS]
 
-### `v1-f019` [Remediate Implementation Review Findings](features/v1-f019-remediate-implementation-review-findings.md)
-
 ## [DONE]
+
+### `v1-f019` [Remediate Implementation Review Findings](features/v1-f019-remediate-implementation-review-findings.md)
 
 ### `v1-f018` [Reduce Status-Only Workflow Coordination Overhead](features/v1-f018-reduce-status-only-workflow-coordination-overhead.md)
 
