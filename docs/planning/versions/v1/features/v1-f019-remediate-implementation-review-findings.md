@@ -10,7 +10,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - OpenSpec Specs:
   - `openspec/specs/repo-development-tooling/spec.md`
   - `openspec/specs/feature-execution-tracking/spec.md`
-- Current Task: `none`
+- Current Task: `4`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
   - This field is the active execution marker for the implemented workflow; OpenSpec `tasks.md` remains the checked/unchecked task ledger.
@@ -237,3 +237,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `true`
   - Notes: `task 3 complete. tests/conftest.py landed as the shared factory module, exporting run_resolver (in-process main(argv) harness mirroring subprocess.run .returncode/.stdout/.stderr with optional cwd override), load_script_module (cached importlib loader), initialize (cached-scaffold-backed drop-in for init_workflow_artifacts.initialize) and initialize_repo_scaffold (session-level openspec/lessons scaffold cache). tests/test_workflow_openspec_integration.py converted 39 of 42 resolver calls to run_resolver while keeping a 3-test subprocess smoke set (start-task, complete-task, audit-workflow); module docstring documents the keep/convert criterion. tests/test_diagnose_workflow.py converted all 12 resolver calls to run_resolver and consumes the shared initialize factory. openspec/specs/repo-development-tooling/spec.md gains the Integration-test runtime justification requirement with its Subprocess-driven test scenario, matching the change delta. Runtime: full unittest suite 125 tests in 23.736s (baseline 105.740s — 77.5% reduction, well above the shaped ≥30% target); integration subset 42 tests in 5.525s (baseline 69.938s — 92.1% reduction). pytest 66 passed in 2.11s unchanged. The _git() helper and three smoke tests retain subprocess.run for end-to-end git-binary and installed-CLI fork-path coverage. skills/_workflow/tests/test_workflow_scripts.py left as-is since its pytest tree cannot import tests/conftest.py without sys.path gymnastics and its subprocess overhead is already small (2.11s total suite). completion_handoff returned action=start_task, target_task_id=4, requires_human_decision=false — loop continues to task 4.`
   - Proof Obligations: `schema gate met: 125 unittest + 66 pytest = 191 tests pass, no assertion removed or weakened. runtime_path gate met: before/after times recorded for both the integration subset and the full suite; 3 subprocess smoke tests continue to exercise the installed-CLI fork path. orchestration gate met: from conftest import initialize, run_resolver verified in both tests/test_workflow_openspec_integration.py and tests/test_diagnose_workflow.py. artifact_inspection gate met: stable spec carries the Integration-test runtime requirement; openspec validate and audit-workflow both pass; git diff --check clean.`
+- `2026-04-19`:
+  - Current Task: `4`
+  - Worktree State: `clean`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `no lessons retrieved; task 4 is a bookkeeping gate over already-completed remediation, neither L-001 nor L-002 applies`
+  - Review Scope: `task_execution`
+  - Review Target: `4`
+  - Review Verdict: `pending`
+  - Blocking Findings: `none`
+  - Review Terminal: `false`
+  - Notes: `start-task preamble for v1-f019 task 4; implementation plan written at openspec/changes/v1-f019-remediate-implementation-review-findings/implementation-plans/4.md. Task 4 is a pure bookkeeping/validation gate over the combined tasks 1+2+3 remediation; no code changes.`
+  - Proof Obligations: `audit-workflow green before and after closure bookkeeping; unittest and pytest suites pass with counts consistent with post-task-3 baseline; final evidence block recorded in the Validation Log; feature worktree clean for finish-feature handoff.`
