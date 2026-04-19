@@ -5,12 +5,12 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f019`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
 - OpenSpec Change: `v1-f019-remediate-implementation-review-findings`
 - OpenSpec Specs:
   - `openspec/specs/repo-development-tooling/spec.md`
   - `openspec/specs/feature-execution-tracking/spec.md`
-- Current Task: `none`
+- Current Task: `1`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
   - This field is the active execution marker for the implemented workflow; OpenSpec `tasks.md` remains the checked/unchecked task ledger.
@@ -75,7 +75,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Proof Obligations: `contract surface for tasks 1, 2, and 3 now explicit in design decisions and spec deltas; start-task can inherit the --feature-id contract, the preamble-repetition rule, and the code-quality scope boundary without inventing them`
 - `2026-04-19`:
   - Current Task: `1`
-  - Worktree State: `pending-creation`
+  - Worktree State: `clean`
   - Retrieved Lesson IDs: `L-002`
   - Lesson Usage: `pending; will record at complete-task whether L-002 (fail-closed worktree resolution needs an explicit missing-worktree negative-path test) materially influenced task 1 execution`
   - Review Scope: `task_execution`
