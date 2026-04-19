@@ -10,7 +10,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - OpenSpec Specs:
   - `openspec/specs/repo-development-tooling/spec.md`
   - `openspec/specs/feature-execution-tracking/spec.md`
-- Current Task: `none`
+- Current Task: `2`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
   - This field is the active execution marker for the implemented workflow; OpenSpec `tasks.md` remains the checked/unchecked task ledger.
@@ -117,3 +117,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `true`
   - Notes: `task 1 complete. cli_helpers.py landed and imported from all 9 entry scripts. _list_git_worktree_roots gone from start-task; converged on the public list_git_worktree_roots. FEATURE_ID_RE imported from workflow_state in audit-workflow; unused TASK_STATUS_RE local removed; BACKLOG_REF_RE retained. SKILLS_ROOT parents[2] idiom replaced with anchor-based walk-up bootstrap in every script and in skills/_workflow/tests/conftest.py; three other test files migrated to resolve_skills_root(). load_backlog canonical 3-tuple landed; autonomous-backlog-loop's FeatureRecord extension kept script-local; prioritize-backlog callers updated. init_workflow_artifacts uses a one-line wrapper over the shared repo_root with fallback_to_cwd=True. 121 unittest + 66 pytest = 187 tests pass (baseline 119+63=182 plus 2+3 new regressions). completion_handoff returned action=start_task, target_task_id=2, requires_human_decision=false — loop continues to task 2.`
   - Proof Obligations: `behavior-preservation gate met: no existing test weakened or retargeted; git diff --check clean; audit-workflow green. L-002 applied. artifact_repair, schema, negative_case, runtime_path, artifact_inspection evidence captured in the Validation Log.`
+- `2026-04-19`:
+  - Current Task: `2`
+  - Worktree State: `clean`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `retrieve-lessons returned none for task 2; L-001 (emitter+consumer+runtime test for new canonical metadata) and L-002 (fail-closed worktree negative-path) do not apply to task 2's parse_feature_id rewrite, SKILL.md terminology alignment, completion_handoff Output Contract documentation, or --feature-id CLI help clarifications`
+  - Review Scope: `task_execution`
+  - Review Target: `2`
+  - Review Verdict: `pending`
+  - Blocking Findings: `none`
+  - Review Terminal: `false`
+  - Notes: `start-task preamble for v1-f019 task 2; implementation plan written at openspec/changes/v1-f019-remediate-implementation-review-findings/implementation-plans/2.md`
+  - Proof Obligations: `task 2 is a mix of internal refactor (parse_feature_id dead branch), documentation alignment (SKILL.md stage-scoped wording, completion_handoff Output Contract), and argparse-help clarifications (--feature-id contract). All externally observable behavior is preserved except for the SKILL.md text changes and argparse help text updates. test_workflow_contract_docs.py gains assertions covering the new wording.`
