@@ -1,11 +1,11 @@
 ## 1. Shared CLI Helpers And Script Deduplication
 
-- [ ] 1 Land `skills/_workflow/cli_helpers.py` and migrate all nine skill entry scripts to it, removing the duplicate helpers and divergent worktree-root fallback
-  - [ ] 1.1 Create `skills/_workflow/cli_helpers.py` exporting `WorkflowError`, `repo_root()`, `read_backlog()`, and an anchor-based `resolve_skills_root()` that walks upward for the `_workflow/` sibling directory
-  - [ ] 1.2 Migrate all nine script entry files — `skills/audit-workflow/scripts/audit_workflow.py`, `skills/diagnose-workflow/scripts/diagnose_workflow.py`, `skills/shape-backlog-item/scripts/render_feature_file.py`, `skills/start-task/scripts/resolve_start_task.py`, `skills/complete-task/scripts/resolve_complete_task.py`, `skills/finish-feature/scripts/resolve_finish_feature.py`, `skills/prioritize-backlog/scripts/prioritize_backlog.py`, `skills/autonomous-backlog-loop/scripts/resolve_autonomous_backlog_action.py`, `skills/initialize-workflow-artifacts/scripts/init_workflow_artifacts.py` — to import the shared preamble and remove their local copies of `WorkflowError`, `repo_root`, and `read_backlog`
-  - [ ] 1.3 Delete the private `_list_git_worktree_roots` in `skills/start-task/scripts/resolve_start_task.py` and replace callers with the public helper exported by `skills/_workflow/workflow_state.py`; converge on a single failure contract
-  - [ ] 1.4 Drop the redundant `FEATURE_ID_RE` and `TASK_STATUS_RE` redefinitions in `skills/audit-workflow/scripts/audit_workflow.py` and import them from `_workflow.workflow_state`; leave `BACKLOG_REF_RE` in place since it is unique to `audit-workflow`
-  - [ ] 1.5 Replace the `SKILLS_ROOT = Path(__file__).resolve().parents[2]` idiom with the new anchor-based resolver in every migrated script
+- [x] 1 Land `skills/_workflow/cli_helpers.py` and migrate all nine skill entry scripts to it, removing the duplicate helpers and divergent worktree-root fallback
+  - [x] 1.1 Create `skills/_workflow/cli_helpers.py` exporting `WorkflowError`, `repo_root()`, `read_backlog()`, and an anchor-based `resolve_skills_root()` that walks upward for the `_workflow/` sibling directory
+  - [x] 1.2 Migrate all nine script entry files — `skills/audit-workflow/scripts/audit_workflow.py`, `skills/diagnose-workflow/scripts/diagnose_workflow.py`, `skills/shape-backlog-item/scripts/render_feature_file.py`, `skills/start-task/scripts/resolve_start_task.py`, `skills/complete-task/scripts/resolve_complete_task.py`, `skills/finish-feature/scripts/resolve_finish_feature.py`, `skills/prioritize-backlog/scripts/prioritize_backlog.py`, `skills/autonomous-backlog-loop/scripts/resolve_autonomous_backlog_action.py`, `skills/initialize-workflow-artifacts/scripts/init_workflow_artifacts.py` — to import the shared preamble and remove their local copies of `WorkflowError`, `repo_root`, and `read_backlog`
+  - [x] 1.3 Delete the private `_list_git_worktree_roots` in `skills/start-task/scripts/resolve_start_task.py` and replace callers with the public helper exported by `skills/_workflow/workflow_state.py`; converge on a single failure contract
+  - [x] 1.4 Drop the redundant `FEATURE_ID_RE` and `TASK_STATUS_RE` redefinitions in `skills/audit-workflow/scripts/audit_workflow.py` and import them from `_workflow.workflow_state`; leave `BACKLOG_REF_RE` in place since it is unique to `audit-workflow`
+  - [x] 1.5 Replace the `SKILLS_ROOT = Path(__file__).resolve().parents[2]` idiom with the new anchor-based resolver in every migrated script
 
 ## 2. Code Quality And Contract-Doc Alignment
 

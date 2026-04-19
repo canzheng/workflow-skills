@@ -10,7 +10,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - OpenSpec Specs:
   - `openspec/specs/repo-development-tooling/spec.md`
   - `openspec/specs/feature-execution-tracking/spec.md`
-- Current Task: `1`
+- Current Task: `none`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
   - This field is the active execution marker for the implemented workflow; OpenSpec `tasks.md` remains the checked/unchecked task ledger.
@@ -47,6 +47,26 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `python "${AGENTS_HOME:-$HOME/.agents}/skills/audit-workflow/scripts/audit_workflow.py" --repo-root /Users/canzheng/Work/sandbox/workflow-skills`
   - Result: `OK: workflow audit passed for docs/planning/versions/v1`
   - Evidence: `artifact_inspection`
+- `2026-04-19` Task `1`:
+  - Run: `rg -n '^class WorkflowError|^def repo_root|^def read_backlog|parents\[2\]|_list_git_worktree_roots|^FEATURE_ID_RE = re|^TASK_STATUS_RE = re' skills/`
+  - Result: `pass; only canonical definitions in _workflow/cli_helpers.py (class WorkflowError, def repo_root) and _workflow/workflow_state.py (FEATURE_ID_RE, TASK_STATUS_RE), one local read_backlog in autonomous-backlog-loop wrapping load_backlog with FeatureRecord extension (per design's "autonomous-backlog-loop's per-section feature-file loading stays in the script"), one init-specific repo_root wrapper in initialize-workflow-artifacts calling the shared helper with fallback_to_cwd=True (per design's init-specific fallback), one parents[2] in _workflow/feature_file.py resolving a tracked docs path (not the skills root; different concept), and no remaining _list_git_worktree_roots`
+  - Evidence: `artifact_repair`
+- `2026-04-19` Task `1`:
+  - Run: `bin/run-python.sh -m unittest discover -s tests`
+  - Result: `Ran 121 tests in 112.314s, OK — baseline 119 + 2 new unittest regression tests (tests/test_start_task_list_worktree_contract.py) for the _list_git_worktree_roots convergence`
+  - Evidence: `schema`
+- `2026-04-19` Task `1`:
+  - Run: `bin/run-python.sh -m pytest skills/_workflow/tests -q`
+  - Result: `66 passed in 2.53s — baseline 63 + 3 new pytest unit tests (skills/_workflow/tests/test_cli_helpers.py) covering resolve_skills_root walk-up from a relocated script path, an unchanged happy-path resolution, and the error path when no _workflow sibling is found`
+  - Evidence: `schema, negative_case`
+- `2026-04-19` Task `1`:
+  - Run: `git diff --check` from the feature worktree
+  - Result: `clean; no patch-format issues`
+  - Evidence: `artifact_inspection`
+- `2026-04-19` Task `1`:
+  - Run: `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py --repo-root .`; `bin/run-python.sh skills/diagnose-workflow/scripts/diagnose_workflow.py --repo-root .`; `bin/run-python.sh skills/prioritize-backlog/scripts/prioritize_backlog.py --repo-root . list`; `bin/run-python.sh skills/start-task/scripts/resolve_start_task.py --repo-root .`; `bin/run-python.sh skills/complete-task/scripts/resolve_complete_task.py --repo-root .`
+  - Result: `pass; all five migrated resolver scripts load their module dependencies through the new anchor-based bootstrap and the shared cli_helpers module, then produce the expected runtime behavior (audit OK, diagnose healthy status, prioritize list returns items, start-task correctly reports "repository already has a task with status in_progress" for v1-f019 task 1, complete-task correctly surfaces the next-gate error when applicable). This is the runtime proof that the migration did not break module resolution or entry-point semantics.`
+  - Evidence: `runtime_path`
 
 ## 2. Handoff Notes
 - `2026-04-19`:
@@ -85,3 +105,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `false`
   - Notes: `start-task preamble for v1-f019 task 1; implementation plan written at openspec/changes/v1-f019-remediate-implementation-review-findings/implementation-plans/1.md; lessons retrieved via retrieve-lessons; semantic consistency review pending before worktree creation`
   - Proof Obligations: `task 1 is behavior-preserving; verify via full test suite parity; add walk-up regression for resolve_skills_root and missing-worktree negative-path test for the migrated start-task resolver`
+- `2026-04-19`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Retrieved Lesson IDs: `L-002`
+  - Lesson Usage: `applied; L-002 drove the addition of tests/test_start_task_list_worktree_contract.py which prevents re-introducing the private _list_git_worktree_roots with its diverging failure contract. lessons.md updated (applied_count 0→1, last_applied_at 2026-04-19, optional_example extended to name the v1-f019 application)`
+  - Review Scope: `task_completion`
+  - Review Target: `1`
+  - Review Verdict: `approved`
+  - Blocking Findings: `none`
+  - Review Terminal: `true`
+  - Notes: `task 1 complete. cli_helpers.py landed and imported from all 9 entry scripts. _list_git_worktree_roots gone from start-task; converged on the public list_git_worktree_roots. FEATURE_ID_RE imported from workflow_state in audit-workflow; unused TASK_STATUS_RE local removed; BACKLOG_REF_RE retained. SKILLS_ROOT parents[2] idiom replaced with anchor-based walk-up bootstrap in every script and in skills/_workflow/tests/conftest.py; three other test files migrated to resolve_skills_root(). load_backlog canonical 3-tuple landed; autonomous-backlog-loop's FeatureRecord extension kept script-local; prioritize-backlog callers updated. init_workflow_artifacts uses a one-line wrapper over the shared repo_root with fallback_to_cwd=True. 121 unittest + 66 pytest = 187 tests pass (baseline 119+63=182 plus 2+3 new regressions). completion_handoff returned action=start_task, target_task_id=2, requires_human_decision=false — loop continues to task 2.`
+  - Proof Obligations: `behavior-preservation gate met: no existing test weakened or retargeted; git diff --check clean; audit-workflow green. L-002 applied. artifact_repair, schema, negative_case, runtime_path, artifact_inspection evidence captured in the Validation Log.`

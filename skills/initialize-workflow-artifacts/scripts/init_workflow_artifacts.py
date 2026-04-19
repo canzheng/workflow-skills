@@ -2,18 +2,27 @@
 from __future__ import annotations
 
 import argparse
-import os
 import subprocess
 import sys
 from pathlib import Path
 
-SKILLS_ROOT = Path(__file__).resolve().parents[2]
+for _candidate in Path(__file__).resolve().parents:
+    if (_candidate / "_workflow").is_dir():
+        if str(_candidate) not in sys.path:
+            sys.path.insert(0, str(_candidate))
+        break
+
 SKILL_DIR = Path(__file__).resolve().parents[1]
 WORKFLOW_REFERENCE_TEMPLATE_PATH = SKILL_DIR / "templates" / "WORKFLOW_REFERENCE.md"
-if str(SKILLS_ROOT) not in sys.path:
-    sys.path.insert(0, str(SKILLS_ROOT))
 
+from _workflow.cli_helpers import WorkflowError, repo_root as _repo_root
 from _workflow.feature_file import FEATURE_TEMPLATE
+
+
+def repo_root(explicit_root: str | None = None) -> Path:
+    """Init-specific wrapper: falls back to cwd when git resolution fails
+    because this skill may run against a directory that is not yet a git repo."""
+    return _repo_root(explicit_root, fallback_to_cwd=True)
 
 
 ROADMAP_TEMPLATE = """# Roadmap
@@ -73,36 +82,11 @@ None yet.
 """
 
 
-class WorkflowError(RuntimeError):
-    pass
-
-
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", help="Target repository root. Defaults to git root or the current directory.")
     parser.add_argument("--version", default="v1", help="Active version directory to initialize. Defaults to v1.")
     return parser.parse_args(argv)
-
-
-def repo_root(explicit_root: str | None = None) -> Path:
-    if explicit_root:
-        return Path(explicit_root).resolve()
-
-    env_root = os.environ.get("WORKFLOW_REPO_ROOT")
-    if env_root:
-        return Path(env_root).resolve()
-
-    resolved = subprocess.run(
-        ["git", "rev-parse", "--show-toplevel"],
-        cwd=Path.cwd(),
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if resolved.returncode == 0:
-        return Path(resolved.stdout.strip()).resolve()
-
-    return Path.cwd().resolve()
 
 
 def ensure_text_file(path: Path, contents: str) -> str:

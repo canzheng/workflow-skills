@@ -8,7 +8,9 @@ from pathlib import Path
 from _workflow.workflow_state import parse_backlog_document
 
 
-SKILLS_ROOT = Path(__file__).resolve().parents[2]
+from _workflow.cli_helpers import resolve_skills_root
+
+SKILLS_ROOT = resolve_skills_root(Path(__file__))
 PRIORITIZE_SCRIPT = SKILLS_ROOT / "prioritize-backlog" / "scripts" / "prioritize_backlog.py"
 
 

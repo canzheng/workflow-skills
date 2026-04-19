@@ -54,8 +54,8 @@
   catch_earlier_by: Review the shared helper itself and ask which exact test fails if the intended feature worktree is absent.
   confidence: high
   retrieved_count: 1
-  applied_count: 0.0
+  applied_count: 1.0
   last_retrieved_at: "2026-04-19"
-  last_applied_at: ""
-  optional_example: In reopened v1-f018, autonomous continuation looked hardened because existing-worktree and dirty-worktree tests passed, but the helper still needed a dedicated missing-worktree regression to remove the stale checkout fallback.
+  last_applied_at: "2026-04-19"
+  optional_example: In reopened v1-f018, autonomous continuation looked hardened because existing-worktree and dirty-worktree tests passed, but the helper still needed a dedicated missing-worktree regression to remove the stale checkout fallback. In v1-f019 task 1, L-002 drove the addition of tests/test_start_task_list_worktree_contract.py to guard the convergence of start-task onto the public list_git_worktree_roots against reintroducing a private copy with a diverging failure contract.
   updated_at: 2026-04-14

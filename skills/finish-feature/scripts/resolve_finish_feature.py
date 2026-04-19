@@ -3,46 +3,23 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import subprocess
 import sys
 from pathlib import Path
 
-SKILLS_ROOT = Path(__file__).resolve().parents[2]
-if str(SKILLS_ROOT) not in sys.path:
-    sys.path.insert(0, str(SKILLS_ROOT))
+for _candidate in Path(__file__).resolve().parents:
+    if (_candidate / "_workflow").is_dir():
+        if str(_candidate) not in sys.path:
+            sys.path.insert(0, str(_candidate))
+        break
 
+from _workflow.cli_helpers import WorkflowError, repo_root
 from _workflow.workflow_state import (
     parse_backlog_document,
     parse_current_task,
     parse_feature_openspec_change,
     parse_openspec_tasks_file,
 )
-
-
-class WorkflowError(RuntimeError):
-    pass
-
-
-def repo_root(explicit_root: str | None = None) -> Path:
-    if explicit_root:
-        return Path(explicit_root).resolve()
-
-    env_root = os.environ.get("WORKFLOW_REPO_ROOT")
-    if env_root:
-        return Path(env_root).resolve()
-
-    resolved = subprocess.run(
-        ["git", "rev-parse", "--show-toplevel"],
-        cwd=Path.cwd(),
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if resolved.returncode == 0:
-        return Path(resolved.stdout.strip()).resolve()
-
-    raise WorkflowError("could not determine repo root; run inside the target repo or pass --repo-root")
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:

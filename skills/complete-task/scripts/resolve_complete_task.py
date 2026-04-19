@@ -4,15 +4,16 @@ from __future__ import annotations
 import argparse
 from dataclasses import asdict
 import json
-import os
-import subprocess
 import sys
 from pathlib import Path
 
-SKILLS_ROOT = Path(__file__).resolve().parents[2]
-if str(SKILLS_ROOT) not in sys.path:
-    sys.path.insert(0, str(SKILLS_ROOT))
+for _candidate in Path(__file__).resolve().parents:
+    if (_candidate / "_workflow").is_dir():
+        if str(_candidate) not in sys.path:
+            sys.path.insert(0, str(_candidate))
+        break
 
+from _workflow.cli_helpers import WorkflowError, load_backlog, repo_root
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
     compute_completion_handoff,
@@ -22,7 +23,6 @@ from _workflow.workflow_state import (
     list_git_worktree_roots,
     linked_openspec_implementation_plan_path,
     list_openspec_change_context_files,
-    parse_backlog_document,
     parse_feature_openspec_change,
     parse_feature_openspec_status,
     parse_tasks,
@@ -32,59 +32,14 @@ from _workflow.workflow_state import (
 )
 
 
-class WorkflowError(RuntimeError):
-    pass
-
-
-def repo_root(explicit_root: str | None = None) -> Path:
-    if explicit_root:
-        return Path(explicit_root).resolve()
-
-    env_root = os.environ.get("WORKFLOW_REPO_ROOT")
-    if env_root:
-        return Path(env_root).resolve()
-
-    resolved = subprocess.run(
-        ["git", "rev-parse", "--show-toplevel"],
-        cwd=Path.cwd(),
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if resolved.returncode == 0:
-        return Path(resolved.stdout.strip()).resolve()
-
-    raise WorkflowError("could not determine repo root; run inside the target repo or pass --repo-root")
-
-
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", help="Override the repository root for fixture-backed task resolution.")
     return parser.parse_args(argv)
 
 
-def read_backlog(root: Path):
-    current_version = root / "docs" / "planning" / "current_version"
-    if not current_version.exists():
-        raise WorkflowError("docs/planning/current_version is missing")
-    if not current_version.is_symlink():
-        raise WorkflowError("docs/planning/current_version is not a symlink")
-
-    version_root = current_version.resolve()
-    backlog_path = version_root / "BACKLOG.md"
-    if not backlog_path.exists():
-        raise WorkflowError(f"{backlog_path.relative_to(root)} is missing")
-
-    parsed_backlog = parse_backlog_document(backlog_path.read_text(encoding="utf-8"))
-    if parsed_backlog.malformed_entries:
-        raise WorkflowError(
-            "; ".join(f"{backlog_path.relative_to(root)} {message}" for message in parsed_backlog.malformed_entries)
-        )
-    return backlog_path, parsed_backlog
-
-
 def resolve_active_task(root: Path, *, selected_feature_id: str | None = None) -> dict[str, object]:
-    backlog_path, parsed_backlog = read_backlog(root)
+    backlog_path, _backlog_text, parsed_backlog = load_backlog(root)
     active_payloads: list[dict[str, object]] = []
 
     for section_name in WORKFLOW_SECTIONS[1:]:

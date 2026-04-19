@@ -8,7 +8,9 @@ from pathlib import Path
 import pytest
 
 
-SKILLS_ROOT = Path(__file__).resolve().parents[2]
+from _workflow.cli_helpers import resolve_skills_root
+
+SKILLS_ROOT = resolve_skills_root(Path(__file__))
 AUDIT_SCRIPT = SKILLS_ROOT / "audit-workflow" / "scripts" / "audit_workflow.py"
 DIAGNOSE_SCRIPT = SKILLS_ROOT / "diagnose-workflow" / "scripts" / "diagnose_workflow.py"
 START_TASK_SCRIPT = SKILLS_ROOT / "start-task" / "scripts" / "resolve_start_task.py"
