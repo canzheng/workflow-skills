@@ -10,7 +10,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - OpenSpec Specs:
   - `openspec/specs/repo-development-tooling/spec.md`
   - `openspec/specs/feature-execution-tracking/spec.md`
-- Current Task: `3`
+- Current Task: `none`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
   - This field is the active execution marker for the implemented workflow; OpenSpec `tasks.md` remains the checked/unchecked task ledger.
@@ -91,6 +91,54 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Run: `bin/run-python.sh skills/autonomous-backlog-loop/scripts/resolve_autonomous_backlog_action.py --help`; `bin/run-python.sh skills/finish-feature/scripts/resolve_finish_feature.py --help`; `bin/run-python.sh skills/shape-backlog-item/scripts/render_feature_file.py --help`
   - Result: `pass; argparse produces the updated --feature-id help text without errors for all three scripts that declare the flag (required for shape-backlog-item, optional with auto-resolution for autonomous-backlog-loop and finish-feature). This is runtime proof that the canonical ambiguity-driven CLI contract applies cleanly and did not regress argparse parsing.`
   - Evidence: `runtime_path`
+- `2026-04-19` Task `3`:
+  - Run: `time bin/run-python.sh -m unittest tests.test_workflow_openspec_integration -q` (baseline, before task 3 edits)
+  - Result: `Ran 42 tests in 69.938s, OK`
+  - Evidence: `runtime_path`
+- `2026-04-19` Task `3`:
+  - Run: `time bin/run-python.sh -m unittest discover -s tests -q` (baseline, before task 3 edits)
+  - Result: `Ran 125 tests in 105.740s, OK`
+  - Evidence: `runtime_path`
+- `2026-04-19` Task `3`:
+  - Run: `time bin/run-python.sh -m unittest tests.test_workflow_openspec_integration -q` (after task 3 edits)
+  - Result: `Ran 42 tests in 5.525s, OK — ~92% reduction on the integration subset from shared scaffold cache + run_resolver in-process calls`
+  - Evidence: `runtime_path`
+- `2026-04-19` Task `3`:
+  - Run: `time bin/run-python.sh -m unittest discover -s tests -q` (after task 3 edits)
+  - Result: `Ran 125 tests in 23.736s, OK — ~77.5% reduction on the full unittest suite (baseline 105.74s → 23.74s); well above the shaped ≥30% target and matching the user's 'audit all, convert all safe cases' override`
+  - Evidence: `runtime_path`
+- `2026-04-19` Task `3`:
+  - Run: `bin/run-python.sh -m pytest skills/_workflow/tests -q`
+  - Result: `66 passed in 2.11s — unchanged from post-task-2 baseline; task 3 did not modify the pytest surface`
+  - Evidence: `schema`
+- `2026-04-19` Task `3`:
+  - Run: `bin/run-python.sh -m unittest tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_start_task_resolves_next_ready_task_from_linked_openspec_change tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_complete_task_resolves_active_task_with_linked_openspec_context tests.test_workflow_openspec_integration.WorkflowOpenSpecIntegrationTests.test_audit_workflow_fails_when_openspec_scaffold_is_missing`
+  - Result: `Ran 3 tests in 1.908s, OK — the three retained subprocess smoke tests still exercise the installed-CLI fork path for start-task, complete-task, and audit-workflow`
+  - Evidence: `runtime_path`
+- `2026-04-19` Task `3`:
+  - Run: `grep -cE 'run_resolver\(' tests/test_workflow_openspec_integration.py tests/test_diagnose_workflow.py` and `grep -cE 'subprocess\.run\(' tests/test_workflow_openspec_integration.py`
+  - Result: `39 direct-call conversions in test_workflow_openspec_integration.py; 12 direct-call conversions in test_diagnose_workflow.py; 3 subprocess.run calls retained in test_workflow_openspec_integration.py (the smoke set); 0 subprocess.run calls remain in test_diagnose_workflow.py; _git() helper retains subprocess.run for git binary invocations (line 197 of integration file)`
+  - Evidence: `artifact_inspection`
+- `2026-04-19` Task `3`:
+  - Run: `grep -nE 'from conftest' tests/test_workflow_openspec_integration.py tests/test_diagnose_workflow.py`
+  - Result: `both files import initialize and run_resolver from the shared tests/conftest.py factory module; orchestration proof that the shared helpers are consumed by both test roots`
+  - Evidence: `orchestration`
+- `2026-04-19` Task `3`:
+  - Run: `rg -n 'Integration-test runtime is justified' openspec/specs/repo-development-tooling/spec.md`
+  - Result: `match at line 35 — stable spec landed the integration-test runtime requirement with its Subprocess-driven test scenario, matching the delta under openspec/changes/v1-f019-remediate-implementation-review-findings/specs/repo-development-tooling/spec.md`
+  - Evidence: `artifact_inspection`
+- `2026-04-19` Task `3`:
+  - Run: `openspec validate v1-f019-remediate-implementation-review-findings`
+  - Result: `Change 'v1-f019-remediate-implementation-review-findings' is valid`
+  - Evidence: `artifact_inspection`
+- `2026-04-19` Task `3`:
+  - Run: `python "${AGENTS_HOME:-$HOME/.agents}/skills/audit-workflow/scripts/audit_workflow.py" --repo-root .`
+  - Result: `OK: workflow audit passed for docs/planning/versions/v1`
+  - Evidence: `artifact_inspection`
+- `2026-04-19` Task `3`:
+  - Run: `git diff --check` from the feature worktree
+  - Result: `clean; no patch-format issues`
+  - Evidence: `artifact_inspection`
 
 ## 2. Handoff Notes
 - `2026-04-19`:
@@ -177,3 +225,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `false`
   - Notes: `start-task preamble for v1-f019 task 3; implementation plan written at openspec/changes/v1-f019-remediate-implementation-review-findings/implementation-plans/3.md. Baseline captured: full unittest suite 125 tests in 105.74s, integration subset (tests.test_workflow_openspec_integration) 42 tests in 69.94s (~66% of total). User override on 2026-04-19 after task-3 scope surfacing: audit all 42 integration methods and convert every test where conversion is safe, rather than stopping at the shaped ≥30% threshold.`
   - Proof Obligations: `conversion is behavior-preserving; every existing assertion continues to hold; tests/conftest.py run_resolver helper reproduces subprocess.run semantics (.returncode/.stdout/.stderr); full unittest count ≥125; measurable runtime reduction; spec delta 'Integration-test runtime is justified' landed in repo-development-tooling stable spec`
+- `2026-04-19`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `no lessons retrieved; nothing to reconcile`
+  - Review Scope: `task_completion`
+  - Review Target: `3`
+  - Review Verdict: `approved`
+  - Blocking Findings: `none`
+  - Review Terminal: `true`
+  - Notes: `task 3 complete. tests/conftest.py landed as the shared factory module, exporting run_resolver (in-process main(argv) harness mirroring subprocess.run .returncode/.stdout/.stderr with optional cwd override), load_script_module (cached importlib loader), initialize (cached-scaffold-backed drop-in for init_workflow_artifacts.initialize) and initialize_repo_scaffold (session-level openspec/lessons scaffold cache). tests/test_workflow_openspec_integration.py converted 39 of 42 resolver calls to run_resolver while keeping a 3-test subprocess smoke set (start-task, complete-task, audit-workflow); module docstring documents the keep/convert criterion. tests/test_diagnose_workflow.py converted all 12 resolver calls to run_resolver and consumes the shared initialize factory. openspec/specs/repo-development-tooling/spec.md gains the Integration-test runtime justification requirement with its Subprocess-driven test scenario, matching the change delta. Runtime: full unittest suite 125 tests in 23.736s (baseline 105.740s — 77.5% reduction, well above the shaped ≥30% target); integration subset 42 tests in 5.525s (baseline 69.938s — 92.1% reduction). pytest 66 passed in 2.11s unchanged. The _git() helper and three smoke tests retain subprocess.run for end-to-end git-binary and installed-CLI fork-path coverage. skills/_workflow/tests/test_workflow_scripts.py left as-is since its pytest tree cannot import tests/conftest.py without sys.path gymnastics and its subprocess overhead is already small (2.11s total suite). completion_handoff returned action=start_task, target_task_id=4, requires_human_decision=false — loop continues to task 4.`
+  - Proof Obligations: `schema gate met: 125 unittest + 66 pytest = 191 tests pass, no assertion removed or weakened. runtime_path gate met: before/after times recorded for both the integration subset and the full suite; 3 subprocess smoke tests continue to exercise the installed-CLI fork path. orchestration gate met: from conftest import initialize, run_resolver verified in both tests/test_workflow_openspec_integration.py and tests/test_diagnose_workflow.py. artifact_inspection gate met: stable spec carries the Integration-test runtime requirement; openspec validate and audit-workflow both pass; git diff --check clean.`

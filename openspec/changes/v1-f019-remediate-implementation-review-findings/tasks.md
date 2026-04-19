@@ -18,12 +18,12 @@
 
 ## 3. Test Suite Ergonomics
 
-- [ ] 3 Cut integration-test runtime and remove repo-scaffold helper duplication
-  - [ ] 3.1 Introduce `tests/conftest.py` with shared repo-scaffold factories currently reimplemented in `tests/test_diagnose_workflow.py` and `skills/_workflow/tests/test_workflow_scripts.py`
-  - [ ] 3.2 Audit `tests/test_workflow_openspec_integration.py` and classify every test method as `keep-as-subprocess` or `convert-to-direct-call` using the criterion that only tests asserting on subprocess argv, exit codes, or stdout byte-formatting keep their subprocess harness
-  - [ ] 3.3 Convert the direct-call subset to use the resolver Python entry points directly and assert on return values; keep the subprocess smoke set short and explicit
-  - [ ] 3.4 Record the before/after full-suite runtime in this task's implementation plan; target a ≥30% reduction as the success metric, and stop there rather than chasing lower numbers
-  - [ ] 3.5 Update `openspec/specs/repo-development-tooling/spec.md` with the integration-test runtime-justification requirement documented in the spec delta under `openspec/changes/v1-f019-remediate-implementation-review-findings/specs/repo-development-tooling/spec.md`
+- [x] 3 Cut integration-test runtime and remove repo-scaffold helper duplication
+  - [x] 3.1 Introduce `tests/conftest.py` with shared repo-scaffold factories currently reimplemented in `tests/test_diagnose_workflow.py` and `skills/_workflow/tests/test_workflow_scripts.py`
+  - [x] 3.2 Audit `tests/test_workflow_openspec_integration.py` and classify every test method as `keep-as-subprocess` or `convert-to-direct-call` using the criterion that only tests asserting on subprocess argv, exit codes, or stdout byte-formatting keep their subprocess harness
+  - [x] 3.3 Convert the direct-call subset to use the resolver Python entry points directly and assert on return values; keep the subprocess smoke set short and explicit
+  - [x] 3.4 Record the before/after full-suite runtime in this task's implementation plan; target a ≥30% reduction as the success metric, and stop there rather than chasing lower numbers
+  - [x] 3.5 Update `openspec/specs/repo-development-tooling/spec.md` with the integration-test runtime-justification requirement documented in the spec delta under `openspec/changes/v1-f019-remediate-implementation-review-findings/specs/repo-development-tooling/spec.md`
 
 ## 4. Validation And Handoff
 

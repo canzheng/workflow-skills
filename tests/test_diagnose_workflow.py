@@ -1,23 +1,23 @@
 from __future__ import annotations
 
-import importlib.util
 import json
 import subprocess
+import sys
 import tempfile
 import textwrap
 import unittest
 from pathlib import Path
 
+_TESTS_DIR = Path(__file__).resolve().parent
+if str(_TESTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_TESTS_DIR))
+
+from conftest import initialize, run_resolver  # noqa: E402
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INIT_SCRIPT = REPO_ROOT / "skills" / "initialize-workflow-artifacts" / "scripts" / "init_workflow_artifacts.py"
 DIAGNOSE_SCRIPT = REPO_ROOT / "skills" / "diagnose-workflow" / "scripts" / "diagnose_workflow.py"
-
-_SPEC = importlib.util.spec_from_file_location("init_workflow_artifacts", INIT_SCRIPT)
-assert _SPEC is not None and _SPEC.loader is not None
-_MODULE = importlib.util.module_from_spec(_SPEC)
-_SPEC.loader.exec_module(_MODULE)
-initialize = _MODULE.initialize
 
 
 def _write_active_change_linkage_fixture(repo: Path, *, orphaned: bool) -> None:
@@ -103,12 +103,7 @@ class DiagnoseWorkflowTests(unittest.TestCase):
             repo = Path(tmpdir) / "repo"
             initialize(repo, "v1")
 
-            result = subprocess.run(
-                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(DIAGNOSE_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -124,12 +119,7 @@ class DiagnoseWorkflowTests(unittest.TestCase):
             initialize(repo, "v1")
             (repo / "docs" / "planning" / "current_version").unlink()
 
-            result = subprocess.run(
-                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(DIAGNOSE_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -153,12 +143,7 @@ class DiagnoseWorkflowTests(unittest.TestCase):
             (orphan_change / "design.md").write_text("design", encoding="utf-8")
             (orphan_change / "tasks.md").write_text("- [ ] 1 Orphan work\n", encoding="utf-8")
 
-            result = subprocess.run(
-                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(DIAGNOSE_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -237,12 +222,7 @@ class DiagnoseWorkflowTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(DIAGNOSE_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -295,12 +275,7 @@ class DiagnoseWorkflowTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(DIAGNOSE_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -382,12 +357,7 @@ class DiagnoseWorkflowTests(unittest.TestCase):
             (change_dir / "design.md").write_text("design", encoding="utf-8")
             (change_dir / "tasks.md").write_text("- [ ] 1 Fixture task\n", encoding="utf-8")
 
-            result = subprocess.run(
-                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(DIAGNOSE_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -470,12 +440,7 @@ class DiagnoseWorkflowTests(unittest.TestCase):
             (change_dir / "proposal.md").write_text("proposal", encoding="utf-8")
             (change_dir / "tasks.md").write_text("- [ ] 1 Fixture task\n", encoding="utf-8")
 
-            result = subprocess.run(
-                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(DIAGNOSE_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -557,12 +522,7 @@ class DiagnoseWorkflowTests(unittest.TestCase):
             change_dir.mkdir(parents=True, exist_ok=True)
             (change_dir / "proposal.md").write_text("proposal", encoding="utf-8")
 
-            result = subprocess.run(
-                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(DIAGNOSE_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -647,12 +607,7 @@ class DiagnoseWorkflowTests(unittest.TestCase):
             (change_dir / "design.md").write_text("design", encoding="utf-8")
             (change_dir / "tasks.md").write_text("- [ ] 1 Fixture task\n", encoding="utf-8")
 
-            result = subprocess.run(
-                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(DIAGNOSE_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -733,12 +688,7 @@ class DiagnoseWorkflowTests(unittest.TestCase):
                 (change_dir / "design.md").write_text("design", encoding="utf-8")
                 (change_dir / "tasks.md").write_text("- [ ] 1 Execute work\n", encoding="utf-8")
 
-            result = subprocess.run(
-                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(DIAGNOSE_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -753,12 +703,7 @@ class DiagnoseWorkflowTests(unittest.TestCase):
             initialize(repo, "v1")
             _write_active_change_linkage_fixture(repo, orphaned=True)
 
-            result = subprocess.run(
-                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(DIAGNOSE_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -773,12 +718,7 @@ class DiagnoseWorkflowTests(unittest.TestCase):
             initialize(repo, "v1")
             _write_active_change_linkage_fixture(repo, orphaned=False)
 
-            result = subprocess.run(
-                ["python3", str(DIAGNOSE_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(DIAGNOSE_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)

@@ -1,15 +1,45 @@
+"""Workflow + OpenSpec integration tests.
+
+Most tests in this module exercise resolver behavior through
+:func:`conftest.run_resolver`, which calls a skill entry script's ``main(argv)``
+in-process. That replicates the observable contract of
+``subprocess.run(["python3", <script>, *argv], capture_output=True, text=True,
+check=False)`` — the same ``.returncode`` / ``.stdout`` / ``.stderr`` surface
+tests already assert on — without paying the Python-fork cost per test.
+
+## Keep subprocess vs. convert to direct call
+
+A test keeps a genuine ``subprocess.run`` call only when its coverage
+materially differs from what :func:`conftest.run_resolver` provides: it
+exercises subprocess argv parsing, process exit semantics distinct from the
+function's return value, or stdout byte-formatting that in-process capture
+cannot faithfully reproduce. Three smoke tests cover the installed-CLI fork
+path end-to-end, one per major resolver family (start-task, complete-task,
+audit-workflow).
+
+All other resolver tests convert to :func:`conftest.run_resolver`. Calls to
+the ``git`` binary via the ``_git`` helper stay subprocess because ``git`` is
+an external tool, not a Python resolver.
+"""
+
 from __future__ import annotations
 
-import importlib.util
 import json
 import subprocess
+import sys
 import tempfile
 import textwrap
 import unittest
 from pathlib import Path
 
-from skills._workflow.feature_file import append_task_validation_entry
-from skills._workflow.workflow_state import find_openspec_task_structure_errors
+_TESTS_DIR = Path(__file__).resolve().parent
+if str(_TESTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_TESTS_DIR))
+
+from conftest import initialize, run_resolver  # noqa: E402
+
+from skills._workflow.feature_file import append_task_validation_entry  # noqa: E402
+from skills._workflow.workflow_state import find_openspec_task_structure_errors  # noqa: E402
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -21,12 +51,6 @@ AUTONOMOUS_RESOLVER_SCRIPT = (
 )
 COMPLETE_TASK_SCRIPT = REPO_ROOT / "skills" / "complete-task" / "scripts" / "resolve_complete_task.py"
 FINISH_FEATURE_SCRIPT = REPO_ROOT / "skills" / "finish-feature" / "scripts" / "resolve_finish_feature.py"
-
-_SPEC = importlib.util.spec_from_file_location("init_workflow_artifacts", INIT_SCRIPT)
-assert _SPEC is not None and _SPEC.loader is not None
-_MODULE = importlib.util.module_from_spec(_SPEC)
-_SPEC.loader.exec_module(_MODULE)
-initialize = _MODULE.initialize
 
 
 def _write_implementation_plan(change_dir: Path, task_id: str) -> None:
@@ -159,12 +183,7 @@ class TestStartTaskExecutionInstruction(unittest.TestCase):
             )
             _write_implementation_plan(change_dir, "1")
 
-            result = subprocess.run(
-                ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(START_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -1078,13 +1097,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 worktree_commit_result.stdout + worktree_commit_result.stderr,
             )
 
-            result = subprocess.run(
-                ["python3", str(START_TASK_SCRIPT)],
-                cwd=repo,
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(START_TASK_SCRIPT, [], cwd=repo)
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -1182,12 +1195,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             )
             _write_implementation_plan(change_dir, "1")
 
-            result = subprocess.run(
-                ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(START_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -1222,13 +1230,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                ["python3", str(START_TASK_SCRIPT)],
-                cwd=repo,
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(START_TASK_SCRIPT, [], cwd=repo)
 
             self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn("feature worktree has uncommitted handoff changes", result.stderr)
@@ -1387,13 +1389,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 worktree_commit_result.stdout + worktree_commit_result.stderr,
             )
 
-            result = subprocess.run(
-                ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--feature-id", "v1-f001"],
-                cwd=repo,
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUTONOMOUS_RESOLVER_SCRIPT, ["--feature-id", "v1-f001"], cwd=repo)
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -1421,13 +1417,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--feature-id", "v1-f001"],
-                cwd=repo,
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUTONOMOUS_RESOLVER_SCRIPT, ["--feature-id", "v1-f001"], cwd=repo)
 
             self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn("feature worktree has uncommitted handoff changes", result.stderr)
@@ -1524,13 +1514,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             commit_result = _git(repo, "commit", "-m", "initial workflow state")
             self.assertEqual(commit_result.returncode, 0, commit_result.stdout + commit_result.stderr)
 
-            result = subprocess.run(
-                ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--feature-id", "v1-f001"],
-                cwd=repo,
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUTONOMOUS_RESOLVER_SCRIPT, ["--feature-id", "v1-f001"], cwd=repo)
 
             self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn("no active feature worktree", result.stderr)
@@ -1619,12 +1603,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(START_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn(
@@ -1722,12 +1701,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(START_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("task implementation plan is invalid:", result.stderr)
@@ -1739,12 +1713,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             initialize(repo, "v1")
             _write_cross_feature_start_task_fixture(repo, archived_upstream=False)
 
-            result = subprocess.run(
-                ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(START_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -1775,12 +1744,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             initialize(repo, "v1")
             _write_cross_feature_start_task_fixture(repo, archived_upstream=True)
 
-            result = subprocess.run(
-                ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(START_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -2017,12 +1981,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             _write_implementation_plan(change_dir, "1")
             _write_task_validation_log(active_feature_file, task_id="1", evidence_categories="runtime_path")
 
-            result = subprocess.run(
-                ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(COMPLETE_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -2036,12 +1995,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             initialize(repo, "v1")
             _write_complete_task_legacy_exempt_fixture(repo)
 
-            result = subprocess.run(
-                ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(COMPLETE_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -2142,12 +2096,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(COMPLETE_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn(
@@ -2245,12 +2194,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(COMPLETE_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("task implementation plan is invalid:", result.stderr)
@@ -2337,12 +2281,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             _write_implementation_plan(change_dir, "1")
             _write_task_validation_log(feature_file, task_id="1", evidence_categories="schema")
 
-            result = subprocess.run(
-                ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(COMPLETE_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("task completion evidence does not satisfy declared proof obligations", result.stderr)
@@ -2353,12 +2292,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             initialize(repo, "v1")
             _write_complete_task_legacy_exempt_fixture(repo, missing_active_change=True)
 
-            result = subprocess.run(
-                ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(COMPLETE_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("v1-f002-active-feature.md is missing OpenSpec Change metadata", result.stderr)
@@ -2447,12 +2381,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             )
             _write_implementation_plan(change_dir, "2")
 
-            result = subprocess.run(
-                ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(COMPLETE_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("nested checklist", result.stderr)
@@ -2541,12 +2470,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             _write_implementation_plan(change_dir, "1")
             _write_task_validation_log(feature_file, task_id="1", evidence_categories="runtime_path")
 
-            result = subprocess.run(
-                ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(COMPLETE_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -2719,13 +2643,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 worktree_commit_result.stdout + worktree_commit_result.stderr,
             )
 
-            result = subprocess.run(
-                ["python3", str(COMPLETE_TASK_SCRIPT)],
-                cwd=repo,
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(COMPLETE_TASK_SCRIPT, [], cwd=repo)
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -2817,12 +2735,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             _write_implementation_plan(change_dir, "1")
             _write_task_validation_log(feature_file, task_id="1", evidence_categories="runtime_path")
 
-            result = subprocess.run(
-                ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(COMPLETE_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -2924,12 +2837,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             _write_implementation_plan(change_dir, "1")
             _write_task_validation_log(feature_file, task_id="1", evidence_categories="runtime_path")
 
-            result = subprocess.run(
-                ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(COMPLETE_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             payload = json.loads(result.stdout)
@@ -3028,12 +2936,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             _write_implementation_plan(change_dir, "2")
             _write_task_validation_log(feature_file, task_id="2", evidence_categories="runtime_path")
 
-            complete_result = subprocess.run(
-                ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            complete_result = run_resolver(COMPLETE_TASK_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(complete_result.returncode, 0, complete_result.stdout + complete_result.stderr)
             complete_payload = json.loads(complete_result.stdout)
@@ -3065,12 +2968,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            finish_result = subprocess.run(
-                ["python3", str(FINISH_FEATURE_SCRIPT), "--repo-root", str(repo), "--feature-id", "v1-f001"],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            finish_result = run_resolver(FINISH_FEATURE_SCRIPT, ["--repo-root", str(repo), "--feature-id", "v1-f001"])
 
             self.assertEqual(finish_result.returncode, 0, finish_result.stdout + finish_result.stderr)
             finish_payload = json.loads(finish_result.stdout)
@@ -3163,12 +3061,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            finish_result = subprocess.run(
-                ["python3", str(FINISH_FEATURE_SCRIPT), "--repo-root", str(repo), "--feature-id", "v1-f001"],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            finish_result = run_resolver(FINISH_FEATURE_SCRIPT, ["--repo-root", str(repo), "--feature-id", "v1-f001"])
 
             self.assertNotEqual(finish_result.returncode, 0)
             self.assertIn("Current Task must be `none`", finish_result.stderr)
@@ -3255,12 +3148,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUDIT_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
@@ -3326,12 +3214,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUDIT_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
@@ -3403,12 +3286,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             archive_dir.mkdir(parents=True, exist_ok=True)
             (archive_dir / "proposal.md").write_text("proposal", encoding="utf-8")
 
-            result = subprocess.run(
-                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUDIT_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
@@ -3481,12 +3359,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             (change_dir / "proposal.md").write_text("proposal", encoding="utf-8")
             (change_dir / "tasks.md").write_text("- [ ] 1 Draft work\n", encoding="utf-8")
 
-            result = subprocess.run(
-                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUDIT_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("is in [SHAPING] but linked OpenSpec change is missing design.md", result.stdout)
@@ -3560,12 +3433,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             (change_dir / "proposal.md").write_text("proposal", encoding="utf-8")
             (change_dir / "tasks.md").write_text("- [ ] 1 Draft work\n", encoding="utf-8")
 
-            result = subprocess.run(
-                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUDIT_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("is in [READY] but linked OpenSpec change is missing design.md", result.stdout)
@@ -3631,12 +3499,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUDIT_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("legacy-exempt", result.stdout)
@@ -3712,12 +3575,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             second_archive.mkdir(parents=True, exist_ok=True)
             (second_archive / "proposal.md").write_text("proposal", encoding="utf-8")
 
-            result = subprocess.run(
-                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUDIT_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn(
@@ -3768,12 +3626,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUDIT_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("docs/planning/versions/v1/BACKLOG.md has section order", result.stdout)
@@ -3857,12 +3710,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUDIT_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn(
@@ -3938,12 +3786,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             (change_dir / "design.md").write_text("design", encoding="utf-8")
             (change_dir / "tasks.md").write_text("- [ ] 1 Do it\n", encoding="utf-8")
 
-            result = subprocess.run(
-                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUDIT_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("legacy inline planning sections", result.stdout)
@@ -4028,12 +3871,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUDIT_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn(
@@ -4122,12 +3960,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUDIT_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn(
@@ -4142,12 +3975,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             initialize(repo, "v1")
             _write_active_change_linkage_fixture(repo, orphaned=True)
 
-            result = subprocess.run(
-                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUDIT_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("orphan active OpenSpec change orphan-change is not linked from any promoted feature", result.stdout)
@@ -4158,12 +3986,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             initialize(repo, "v1")
             _write_active_change_linkage_fixture(repo, orphaned=False)
 
-            result = subprocess.run(
-                ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            result = run_resolver(AUDIT_SCRIPT, ["--repo-root", str(repo)])
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn("OK: workflow audit passed", result.stdout)
