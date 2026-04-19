@@ -5,7 +5,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 ## 0. Meta
 - Feature ID: `v1-f019`
 - Version: `v1`
-- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#shaping`
+- Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#ready`
 - OpenSpec Change: `v1-f019-remediate-implementation-review-findings`
 - OpenSpec Specs:
   - `openspec/specs/repo-development-tooling/spec.md`
@@ -27,6 +27,26 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Inspection: `proposal.md`, `design.md`, `tasks.md`, linked delta specs under `openspec/changes/v1-f019-remediate-implementation-review-findings/specs/`, and the stable specs at `openspec/specs/repo-development-tooling/spec.md` and `openspec/specs/feature-execution-tracking/spec.md`
   - Result: `no additional pre-readiness documentation edits are required; the shaped change itself owns the intended workflow doc and stable-spec updates and those paths are explicit in the OpenSpec change`
   - Evidence: `artifact_inspection`
+- `2026-04-19` Readiness review iteration 1:
+  - Run: `independent lightweight reviewer subagent review of the shaped change against proposal.md, design.md, tasks.md, delta specs, and stable specs`
+  - Result: `changes_requested; four findings - task 2.4 deferred the --feature-id contract to execution, task 2.5 deferred the SKILL.md preamble decision to execution, code-quality findings were missing from delta specs creating scope ambiguity, and the spec delta did not cover the --feature-id normalization contract`
+  - Evidence: `contract_surface`
+- `2026-04-19` Readiness strengthening:
+  - Inspection: `added two canonical decision sections to design.md (ambiguity-driven --feature-id contract and explicit-repetition preamble decision), scoped code-quality fixes as internal refactors in a third decision section, rewrote tasks 2.4 and 2.5 to apply pre-made decisions, added an ambiguity-driven --feature-id CLI contract requirement with three scenarios to the repo-development-tooling delta spec`
+  - Result: `all four iteration-1 findings addressed without expanding scope beyond the 11 original review findings`
+  - Evidence: `contract_surface`
+- `2026-04-19` Readiness review iteration 2:
+  - Run: `independent lightweight reviewer subagent review of the strengthened shaped change`
+  - Result: `approved; all four iteration-1 findings resolved, no new findings surfaced, contract surface sufficient for start-task to draft task 1, 2, or 3 implementation plans without inventing acceptance criteria`
+  - Evidence: `contract_surface`
+- `2026-04-19` Task `1`:
+  - Run: `openspec validate v1-f019-remediate-implementation-review-findings`
+  - Result: `Change 'v1-f019-remediate-implementation-review-findings' is valid`
+  - Evidence: `artifact_inspection`
+- `2026-04-19` Task `1`:
+  - Run: `python "${AGENTS_HOME:-$HOME/.agents}/skills/audit-workflow/scripts/audit_workflow.py" --repo-root /Users/canzheng/Work/sandbox/workflow-skills`
+  - Result: `OK: workflow audit passed for docs/planning/versions/v1`
+  - Evidence: `artifact_inspection`
 
 ## 2. Handoff Notes
 - `2026-04-19`:
@@ -39,5 +59,17 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Verdict: `approved`
   - Blocking Findings: `none`
   - Review Terminal: `true`
-  - Notes: `shaping complete; linked OpenSpec change v1-f019-remediate-implementation-review-findings carries proposal.md, design.md, tasks.md, and delta specs for repo-development-tooling and feature-execution-tracking; awaiting ready-feature review before promotion to [READY]`
-  - Proof Obligations: `Task 1 preserves behavior while centralizing the CLI preamble; Task 2 fixes narrow code defects and aligns SKILL.md terminology with WORKFLOW_REFERENCE.md; Task 3 cuts integration-test runtime by ≥30% without regressing assertions; Task 4 records combined validation evidence before finish-feature`
+  - Notes: `shaping complete; linked OpenSpec change v1-f019-remediate-implementation-review-findings carries proposal.md, design.md, tasks.md, and delta specs for repo-development-tooling and feature-execution-tracking`
+  - Proof Obligations: `Task 1 preserves behavior while centralizing the CLI preamble; Task 2 fixes narrow code defects, aligns SKILL.md terminology with WORKFLOW_REFERENCE.md, and applies the canonical ambiguity-driven --feature-id contract; Task 3 cuts integration-test runtime by ≥30% without regressing assertions; Task 4 records combined validation evidence before finish-feature`
+- `2026-04-19`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `retrieve-lessons returned none for stage=ready; no lessons influenced the readiness judgment`
+  - Review Scope: `ready`
+  - Review Target: `v1-f019`
+  - Review Verdict: `approved`
+  - Blocking Findings: `none`
+  - Review Terminal: `true`
+  - Notes: `readiness approved on iteration 2 after strengthening the shaped change to resolve four contract-surface gaps flagged on iteration 1; feature promoted from [SHAPING] to [READY] with task 1 selected as the first ready task`
+  - Proof Obligations: `contract surface for tasks 1, 2, and 3 now explicit in design decisions and spec deltas; start-task can inherit the --feature-id contract, the preamble-repetition rule, and the code-quality scope boundary without inventing them`

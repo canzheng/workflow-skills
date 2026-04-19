@@ -52,6 +52,28 @@ The integration test file mixes genuine end-to-end scenarios (those that exercis
 
 All changes apply to the currently-shipped main-checkout implementation and the stable specs. Feature files under `docs/planning/versions/v1/features/` remain frozen evidence even if they contain outdated phrasing; that is the convention of this workflow.
 
+### Decision: Canonical `--feature-id` treatment is ambiguity-driven, not uniform
+
+Each skill entry script takes `--feature-id` only when the skill cannot unambiguously infer the target feature from workflow state. Specifically:
+
+- **Required**: `skills/shape-backlog-item/scripts/render_feature_file.py` — shaping creates the feature file, so the ID must be supplied by the caller.
+- **Optional with auto-resolution from workflow state**: `skills/finish-feature/scripts/resolve_finish_feature.py`, `skills/autonomous-backlog-loop/scripts/resolve_autonomous_backlog_action.py`, `skills/prioritize-backlog/scripts/prioritize_backlog.py` — these can resolve a target from `BACKLOG.md` state but accept an explicit override when the caller wants to target a specific feature.
+- **Absent**: `skills/start-task/scripts/resolve_start_task.py`, `skills/complete-task/scripts/resolve_complete_task.py`, `skills/audit-workflow/scripts/audit_workflow.py`, `skills/diagnose-workflow/scripts/diagnose_workflow.py`, `skills/initialize-workflow-artifacts/scripts/init_workflow_artifacts.py` — these either resolve the active feature deterministically from `Current Task` / `[IN_PROGRESS]` state (task-level skills) or operate across all features at once (repo-wide skills).
+
+The argparse `help=` text for every script SHALL state which of these three treatments applies. Task 2 enforces the contract; a new requirement under `openspec/changes/v1-f019-remediate-implementation-review-findings/specs/repo-development-tooling/spec.md` locks the rule into the stable spec so future scripts inherit it.
+
+### Decision: Keep SKILL.md preamble repetition explicit
+
+The `start-task`, `complete-task`, and `ready-feature` SKILL.md preambles will stay in place rather than being factored into a shared include. Three considerations drive this:
+
+- SKILL.md files are authored as self-contained operator contracts. An include mechanism would add indirection that operators and subagents have to resolve at read time, which contradicts the "operator reads one file and knows the contract" goal.
+- The repetition is ~4–5 lines per skill, small enough that drift is the only real cost.
+- Drift cost is already addressable with tests. Task 2.5 adds a `test_workflow_contract_docs.py` assertion that pins the shared preamble wording across the three files; any future edit that only touches one SKILL.md will fail the test and prompt a deliberate decision about whether all three should move together.
+
+### Decision: Code-quality defects are in-scope as internal refactors, not stable-contract changes
+
+Findings 6 (dead branch in `parse_feature_id`) and 7 (double-split inefficiency on the same line) are purely internal to `skills/_workflow/workflow_state.py`. They do not change any external contract, public function signature, or observable behavior. Task 2.1 fixes them as an internal refactor; no stable-spec delta is needed for these findings. The `repo-development-tooling` delta already covers the structural changes (shared preamble, anchor-based SKILLS_ROOT, integration-test runtime) that do affect the stable contract.
+
 ## Risks / Trade-offs
 
 - **Cross-script refactor risk.** Touching all nine scripts in one task has blast radius. Mitigated by: behavior-preserving migration, exhaustive test coverage of each script's existing contract, and a full-suite pass before handoff.

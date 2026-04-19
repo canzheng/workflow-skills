@@ -13,11 +13,9 @@ None yet.
 
 ## [SHAPING]
 
-### `v1-f019` [Remediate Implementation Review Findings](features/v1-f019-remediate-implementation-review-findings.md)
-
 ## [READY]
 
-None yet.
+### `v1-f019` [Remediate Implementation Review Findings](features/v1-f019-remediate-implementation-review-findings.md)
 
 ## [IN_PROGRESS]
 

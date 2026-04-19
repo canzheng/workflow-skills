@@ -13,8 +13,8 @@
   - [ ] 2.1 Rewrite `parse_feature_id` in `skills/_workflow/workflow_state.py:1225` to remove the unreachable conditional branch and the double `stem.split("-", 2)` call
   - [ ] 2.2 Update `skills/shape-backlog-item/SKILL.md:30` and `skills/ready-feature/SKILL.md:26` to say "stage-scoped canonical `Retrieved Lesson IDs: ...`" matching `docs/planning/WORKFLOW_REFERENCE.md:85`; update `tests/test_workflow_contract_docs.py` assertions to match
   - [ ] 2.3 Add a short `Output Contract` block to `skills/complete-task/SKILL.md` that lists the `completion_handoff` payload fields (`action`, `target_feature_id`, `target_task_id`, `reason`, `requires_human_decision`) and cross-references `docs/planning/WORKFLOW_REFERENCE.md:77-78`
-  - [ ] 2.4 Normalize `--feature-id` across the script CLIs: document the rule in each script's argparse help and record the chosen contract in this task's implementation plan before code edits begin
-  - [ ] 2.5 Decide on the `start-task`/`complete-task`/`ready-feature` SKILL.md preamble repetition: either extract a shared preamble referenced from each file, or record in this task's implementation plan that the repetition is intentional and document why
+  - [ ] 2.4 Apply the canonical `--feature-id` contract defined in `design.md` under "Decision: canonical `--feature-id` treatment is ambiguity-driven, not uniform" to the nine skill entry scripts and their argparse help text, and land the matching delta requirement in `openspec/changes/v1-f019-remediate-implementation-review-findings/specs/repo-development-tooling/spec.md`
+  - [ ] 2.5 Leave the `start-task`/`complete-task`/`ready-feature` SKILL.md preamble repetition in place per `design.md` under "Decision: keep SKILL.md preamble repetition explicit"; add a `test_workflow_contract_docs.py` assertion guarding the preamble wording so future drift is caught by tests rather than review
 
 ## 3. Test Suite Ergonomics
 
@@ -31,3 +31,7 @@
   - [ ] 4.1 Re-run `audit-workflow` in the feature worktree after every task-closure bookkeeping edit and at feature completion
   - [ ] 4.2 Run `bin/run-python.sh -m unittest discover -s tests` and `bin/run-python.sh -m pytest skills/_workflow/tests -q`; record both before/after results
   - [ ] 4.3 Record the remediation evidence in the feature file Validation Log so `finish-feature` can close `v1-f019` cleanly
+  - Depends On:
+    - `1`
+    - `2`
+    - `3`
