@@ -27,7 +27,7 @@ It is a workflow wrapper around `brainstorming` plus linked OpenSpec change crea
    - multiple features below the 5-feature split limit
    - or smaller backlog items first
    - do not continue until the wrapped `brainstorming` flow has completed its required review gates for the chosen shaping output
-   - once the shaping output is clear, call `retrieve-lessons` to retrieve relevant active lessons and record the returned lesson IDs in the feature file handoff notes under a task-scoped canonical `Retrieved Lesson IDs: ...` line for `shaping`; use `none` when no lessons are returned
+   - once the shaping output is clear, call `retrieve-lessons` to retrieve relevant active lessons and record the returned lesson IDs in the feature file handoff notes under a stage-scoped canonical `Retrieved Lesson IDs: ...` line for `shaping`; use `none` when no lessons are returned
 5. For each promoted feature:
    - assign the next feature ID
    - run `openspec-propose` to create or update exactly one linked OpenSpec change for the feature's shaping authority

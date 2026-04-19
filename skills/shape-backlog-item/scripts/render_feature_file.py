@@ -18,7 +18,14 @@ from _workflow.feature_file import render_feature_file
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", help="Override the repository root.")
-    parser.add_argument("--feature-id", required=True)
+    parser.add_argument(
+        "--feature-id",
+        required=True,
+        help=(
+            "Required: shaping creates the feature file, so the ID must be supplied by the caller "
+            "and cannot be inferred from workflow state."
+        ),
+    )
     parser.add_argument("--title", required=True)
     parser.add_argument("--version", required=True)
     parser.add_argument("--backlog-reference", required=True)

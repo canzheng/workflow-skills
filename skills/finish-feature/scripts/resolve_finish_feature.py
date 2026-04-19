@@ -25,7 +25,13 @@ from _workflow.workflow_state import (
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", help="Override the repository root for fixture-backed finish checks.")
-    parser.add_argument("--feature-id", help="Explicit feature ID to finish.")
+    parser.add_argument(
+        "--feature-id",
+        help=(
+            "Optional: overrides auto-resolution from BACKLOG.md state. When omitted, the script "
+            "resolves the target feature from the active [IN_PROGRESS] feature that is ready to finish."
+        ),
+    )
     return parser.parse_args(argv)
 
 

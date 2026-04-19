@@ -36,7 +36,14 @@ class FeatureRecord:
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", help="Override the repository root for fixture-backed workflow checks.")
-    parser.add_argument("--feature-id", help="Resolve the next ready task for only this feature.")
+    parser.add_argument(
+        "--feature-id",
+        help=(
+            "Optional: overrides auto-resolution from BACKLOG.md state. When omitted, the resolver "
+            "walks the WORKFLOW_SECTIONS precedence (IN_PROGRESS → READY → SHAPING → BACKLOG). When "
+            "supplied, only the named feature's next ready task is considered."
+        ),
+    )
     parser.add_argument(
         "--design-mode",
         action="store_true",

@@ -12,6 +12,18 @@ This skill verifies one active task, reconciles already-recorded evidence, and u
 It does not merge or clean up the feature branch/worktree. Branch finalization is separate and should use `finish-feature` once the feature is complete.
 It also does not start the next task; downstream task execution must go through a later explicit `start-task` invocation. The downstream continuation contract is the canonical `completion_handoff` payload, which wrappers may use when `requires_human_decision=false`.
 
+## Output Contract
+
+The resolver returns JSON that includes a canonical `completion_handoff` object. Consumers should read the structured payload rather than parsing prose handoff notes. The fields are:
+
+- `action`: one of `start_task`, `finish_feature`, or `stop`.
+- `target_feature_id`: the feature identifier the next step operates on (always present).
+- `target_task_id`: the top-level OpenSpec task ID when `action == start_task`; `null` otherwise.
+- `reason`: a short machine-readable label explaining why that action was selected.
+- `requires_human_decision`: `true` when the caller must stop and surface the choice to a human; `false` when an autonomous wrapper may auto-accept.
+
+The full semantics — when each action is emitted, how `Depends On` parsing shapes the selection, and how wrappers should consume the payload — live in `docs/planning/WORKFLOW_REFERENCE.md` under the Task Status Model bullets. Do not re-derive those rules from the fields alone.
+
 ## Defaults
 
 - If the user names a task, use it.

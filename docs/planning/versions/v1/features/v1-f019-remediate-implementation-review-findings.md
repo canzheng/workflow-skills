@@ -10,7 +10,7 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - OpenSpec Specs:
   - `openspec/specs/repo-development-tooling/spec.md`
   - `openspec/specs/feature-execution-tracking/spec.md`
-- Current Task: `2`
+- Current Task: `none`
   - Use `none` when no task is actively executing, including handoff gaps inside an `[IN_PROGRESS]` feature.
   - Otherwise use the raw top-level OpenSpec task ID, for example `1`.
   - This field is the active execution marker for the implemented workflow; OpenSpec `tasks.md` remains the checked/unchecked task ledger.
@@ -66,6 +66,30 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - `2026-04-19` Task `1`:
   - Run: `bin/run-python.sh skills/audit-workflow/scripts/audit_workflow.py --repo-root .`; `bin/run-python.sh skills/diagnose-workflow/scripts/diagnose_workflow.py --repo-root .`; `bin/run-python.sh skills/prioritize-backlog/scripts/prioritize_backlog.py --repo-root . list`; `bin/run-python.sh skills/start-task/scripts/resolve_start_task.py --repo-root .`; `bin/run-python.sh skills/complete-task/scripts/resolve_complete_task.py --repo-root .`
   - Result: `pass; all five migrated resolver scripts load their module dependencies through the new anchor-based bootstrap and the shared cli_helpers module, then produce the expected runtime behavior (audit OK, diagnose healthy status, prioritize list returns items, start-task correctly reports "repository already has a task with status in_progress" for v1-f019 task 1, complete-task correctly surfaces the next-gate error when applicable). This is the runtime proof that the migration did not break module resolution or entry-point semantics.`
+  - Evidence: `runtime_path`
+- `2026-04-19` Task `2`:
+  - Run: `rg -n 'task-scoped' skills/shape-backlog-item/SKILL.md skills/ready-feature/SKILL.md`; `rg -n 'completion_handoff|target_feature_id|requires_human_decision' skills/complete-task/SKILL.md`; `rg -n 'split\("-", 2\)\[0\]' skills/_workflow/workflow_state.py`
+  - Result: `pass; no "task-scoped" remaining in the stage-level SKILL.md files, completion_handoff fields present under the new Output Contract section in complete-task/SKILL.md, old double-split expression gone from workflow_state.py`
+  - Evidence: `artifact_repair`
+- `2026-04-19` Task `2`:
+  - Run: `bin/run-python.sh -m unittest discover -s tests`
+  - Result: `Ran 125 tests in 120.927s, OK — post-task-1 baseline 121 + 4 new contract-doc assertions (stage-scoped terminology for shape-backlog-item/ready-feature, task-scoped terminology for start-task/complete-task, Output Contract presence in complete-task, shared preamble fragment pin across start-task/ready-feature/shape-backlog-item/prioritize-backlog)`
+  - Evidence: `schema`
+- `2026-04-19` Task `2`:
+  - Run: `bin/run-python.sh -m pytest skills/_workflow/tests -q`
+  - Result: `66 passed in 2.43s — unchanged from post-task-1 baseline; task 2 did not touch the pytest surface`
+  - Evidence: `schema`
+- `2026-04-19` Task `2`:
+  - Run: `python "${AGENTS_HOME:-$HOME/.agents}/skills/audit-workflow/scripts/audit_workflow.py" --repo-root .`
+  - Result: `OK: workflow audit passed for docs/planning/versions/v1`
+  - Evidence: `artifact_inspection`
+- `2026-04-19` Task `2`:
+  - Run: `git diff --check` from the feature worktree
+  - Result: `clean; no patch-format issues`
+  - Evidence: `artifact_inspection`
+- `2026-04-19` Task `2`:
+  - Run: `bin/run-python.sh skills/autonomous-backlog-loop/scripts/resolve_autonomous_backlog_action.py --help`; `bin/run-python.sh skills/finish-feature/scripts/resolve_finish_feature.py --help`; `bin/run-python.sh skills/shape-backlog-item/scripts/render_feature_file.py --help`
+  - Result: `pass; argparse produces the updated --feature-id help text without errors for all three scripts that declare the flag (required for shape-backlog-item, optional with auto-resolution for autonomous-backlog-loop and finish-feature). This is runtime proof that the canonical ambiguity-driven CLI contract applies cleanly and did not regress argparse parsing.`
   - Evidence: `runtime_path`
 
 ## 2. Handoff Notes
@@ -129,3 +153,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `false`
   - Notes: `start-task preamble for v1-f019 task 2; implementation plan written at openspec/changes/v1-f019-remediate-implementation-review-findings/implementation-plans/2.md`
   - Proof Obligations: `task 2 is a mix of internal refactor (parse_feature_id dead branch), documentation alignment (SKILL.md stage-scoped wording, completion_handoff Output Contract), and argparse-help clarifications (--feature-id contract). All externally observable behavior is preserved except for the SKILL.md text changes and argparse help text updates. test_workflow_contract_docs.py gains assertions covering the new wording.`
+- `2026-04-19`:
+  - Current Task: `none`
+  - Worktree State: `clean`
+  - Retrieved Lesson IDs: `none`
+  - Lesson Usage: `no lessons retrieved; nothing to reconcile`
+  - Review Scope: `task_completion`
+  - Review Target: `2`
+  - Review Verdict: `approved`
+  - Blocking Findings: `none`
+  - Review Terminal: `true`
+  - Notes: `task 2 complete. parse_feature_id rewritten to drop the unreachable conditional branch and the double split. shape-backlog-item and ready-feature SKILL.md now use 'stage-scoped' for their Retrieved Lesson IDs line, matching WORKFLOW_REFERENCE.md. complete-task SKILL.md carries a new Output Contract block naming the completion_handoff payload fields. argparse --feature-id help text now states the ambiguity-driven contract for the three scripts that declare the flag (required for shape-backlog-item, optional with auto-resolution for autonomous-backlog-loop and finish-feature). test_workflow_contract_docs.py gains four new assertions (stage-scoped terminology, task-scoped terminology, Output Contract presence, shared preamble fragment pin) and retargets one existing assertion onto the new stage-scoped wording. design.md corrected to reclassify prioritize-backlog as 'absent' since it operates across all features. completion_handoff returned action=start_task, target_task_id=3, requires_human_decision=false — loop continues to task 3.`
+  - Proof Obligations: `artifact_repair grep confirms no remaining 'task-scoped' in stage-level skills and no double-split expression in workflow_state.py. 125 unittest + 66 pytest = 191 tests pass (post-task-1 baseline 187 + 4 new task-2 contract-doc assertions). Runtime proof: argparse --help on the three --feature-id-carrying scripts produces the updated help text without errors. git diff --check clean; audit-workflow green.`

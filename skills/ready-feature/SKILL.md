@@ -23,7 +23,7 @@ It is a workflow wrapper around linked OpenSpec shaping artifacts, with optional
 2. Resolve the target feature.
 3. Confirm the feature is in `[SHAPING]`.
 4. Review the feature file and linked OpenSpec change.
-   - before the independent readiness review, call `retrieve-lessons` to retrieve relevant active lessons and record the returned lesson IDs in the feature file handoff notes under a task-scoped canonical `Retrieved Lesson IDs: ...` line for `ready`; use `none` when no lessons are returned
+   - before the independent readiness review, call `retrieve-lessons` to retrieve relevant active lessons and record the returned lesson IDs in the feature file handoff notes under a stage-scoped canonical `Retrieved Lesson IDs: ...` line for `ready`; use `none` when no lessons are returned
 5. If the linked OpenSpec change is too weak to justify readiness, wrap `brainstorming` only long enough to strengthen the shaping output.
    - if `brainstorming` is used here, do not continue until its required review gates have passed
 6. Confirm the linked OpenSpec change has the required shaping artifacts:

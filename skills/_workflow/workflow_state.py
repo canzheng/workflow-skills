@@ -1219,10 +1219,10 @@ def parse_feature_id(feature_text: str, *, feature_file: Path | None = None) -> 
         return feature_id_match.group(1)
     if feature_file is None:
         return None
-    stem = feature_file.stem
-    if "-" not in stem:
-        return stem
-    return stem.split("-", 2)[0] + "-" + stem.split("-", 2)[1] if stem.count("-") >= 1 else stem
+    parts = feature_file.stem.split("-", 2)
+    if len(parts) >= 2:
+        return f"{parts[0]}-{parts[1]}"
+    return feature_file.stem
 
 
 def _feature_tasks_by_id(

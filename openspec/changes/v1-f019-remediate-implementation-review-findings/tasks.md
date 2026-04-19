@@ -9,12 +9,12 @@
 
 ## 2. Code Quality And Contract-Doc Alignment
 
-- [ ] 2 Fix the narrow code defects and bring operator-facing docs into agreement with the stable spec
-  - [ ] 2.1 Rewrite `parse_feature_id` in `skills/_workflow/workflow_state.py:1225` to remove the unreachable conditional branch and the double `stem.split("-", 2)` call
-  - [ ] 2.2 Update `skills/shape-backlog-item/SKILL.md:30` and `skills/ready-feature/SKILL.md:26` to say "stage-scoped canonical `Retrieved Lesson IDs: ...`" matching `docs/planning/WORKFLOW_REFERENCE.md:85`; update `tests/test_workflow_contract_docs.py` assertions to match
-  - [ ] 2.3 Add a short `Output Contract` block to `skills/complete-task/SKILL.md` that lists the `completion_handoff` payload fields (`action`, `target_feature_id`, `target_task_id`, `reason`, `requires_human_decision`) and cross-references `docs/planning/WORKFLOW_REFERENCE.md:77-78`
-  - [ ] 2.4 Apply the canonical `--feature-id` contract defined in `design.md` under "Decision: canonical `--feature-id` treatment is ambiguity-driven, not uniform" to the nine skill entry scripts and their argparse help text, and land the matching delta requirement in `openspec/changes/v1-f019-remediate-implementation-review-findings/specs/repo-development-tooling/spec.md`
-  - [ ] 2.5 Leave the `start-task`/`complete-task`/`ready-feature` SKILL.md preamble repetition in place per `design.md` under "Decision: keep SKILL.md preamble repetition explicit"; add a `test_workflow_contract_docs.py` assertion guarding the preamble wording so future drift is caught by tests rather than review
+- [x] 2 Fix the narrow code defects and bring operator-facing docs into agreement with the stable spec
+  - [x] 2.1 Rewrite `parse_feature_id` in `skills/_workflow/workflow_state.py:1225` to remove the unreachable conditional branch and the double `stem.split("-", 2)` call
+  - [x] 2.2 Update `skills/shape-backlog-item/SKILL.md:30` and `skills/ready-feature/SKILL.md:26` to say "stage-scoped canonical `Retrieved Lesson IDs: ...`" matching `docs/planning/WORKFLOW_REFERENCE.md:85`; update `tests/test_workflow_contract_docs.py` assertions to match
+  - [x] 2.3 Add a short `Output Contract` block to `skills/complete-task/SKILL.md` that lists the `completion_handoff` payload fields (`action`, `target_feature_id`, `target_task_id`, `reason`, `requires_human_decision`) and cross-references `docs/planning/WORKFLOW_REFERENCE.md:77-78`
+  - [x] 2.4 Apply the canonical `--feature-id` contract defined in `design.md` under "Decision: canonical `--feature-id` treatment is ambiguity-driven, not uniform" to the nine skill entry scripts and their argparse help text, and land the matching delta requirement in `openspec/changes/v1-f019-remediate-implementation-review-findings/specs/repo-development-tooling/spec.md`
+  - [x] 2.5 Leave the `start-task`/`complete-task`/`ready-feature` SKILL.md preamble repetition in place per `design.md` under "Decision: keep SKILL.md preamble repetition explicit"; add a `test_workflow_contract_docs.py` assertion guarding the preamble wording so future drift is caught by tests rather than review
 
 ## 3. Test Suite Ergonomics
 

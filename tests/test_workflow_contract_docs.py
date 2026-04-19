@@ -13,6 +13,8 @@ AUTONOMOUS_BACKLOG_LOOP_SKILL = REPO_ROOT / "skills" / "autonomous-backlog-loop"
 TASK_EXECUTION_HANDOFF_SPEC = REPO_ROOT / "openspec" / "specs" / "task-execution-handoff" / "spec.md"
 FEATURE_EXECUTION_TRACKING_SPEC = REPO_ROOT / "openspec" / "specs" / "feature-execution-tracking" / "spec.md"
 WORKFLOW_AUDIT_AND_REPAIR_SPEC = REPO_ROOT / "openspec" / "specs" / "workflow-audit-and-repair" / "spec.md"
+SHAPE_BACKLOG_ITEM_SKILL = REPO_ROOT / "skills" / "shape-backlog-item" / "SKILL.md"
+PRIORITIZE_BACKLOG_SKILL = REPO_ROOT / "skills" / "prioritize-backlog" / "SKILL.md"
 WORKFLOW_REFERENCE = REPO_ROOT / "docs" / "planning" / "WORKFLOW_REFERENCE.md"
 WORKFLOW_REFERENCE_TEMPLATE = (
     REPO_ROOT
@@ -164,12 +166,12 @@ class WorkflowContractDocsTests(unittest.TestCase):
         feature_template = FEATURE_TEMPLATE.read_text(encoding="utf-8")
 
         self.assertIn("call `retrieve-lessons`", shape_backlog_item_skill)
-        self.assertIn("task-scoped canonical `Retrieved Lesson IDs: ...` line for `shaping`", shape_backlog_item_skill)
+        self.assertIn("stage-scoped canonical `Retrieved Lesson IDs: ...` line for `shaping`", shape_backlog_item_skill)
         self.assertIn("call `record-lesson-usage`", shape_backlog_item_skill)
         self.assertIn("record any warranted high-signal notes in `docs/lessons/notes.md`", shape_backlog_item_skill)
         self.assertIn("before the independent readiness review", ready_feature_skill)
         self.assertIn("call `retrieve-lessons`", ready_feature_skill)
-        self.assertIn("task-scoped canonical `Retrieved Lesson IDs: ...` line for `ready`", ready_feature_skill)
+        self.assertIn("stage-scoped canonical `Retrieved Lesson IDs: ...` line for `ready`", ready_feature_skill)
         self.assertIn("call `record-lesson-usage`", ready_feature_skill)
         self.assertIn("record any warranted high-signal notes in `docs/lessons/notes.md`", ready_feature_skill)
         self.assertIn("Retrieved Lesson IDs", feature_template)
@@ -250,6 +252,63 @@ class WorkflowContractDocsTests(unittest.TestCase):
             "`cp docs/planning/WORKFLOW_REFERENCE.md "
             "skills/initialize-workflow-artifacts/templates/WORKFLOW_REFERENCE.md`.",
         )
+
+    def test_stage_level_skills_describe_retrieved_lesson_ids_as_stage_scoped(self) -> None:
+        shape_backlog_item_skill = SHAPE_BACKLOG_ITEM_SKILL.read_text(encoding="utf-8")
+        ready_feature_skill = READY_FEATURE_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn(
+            "stage-scoped canonical `Retrieved Lesson IDs: ...` line for `shaping`",
+            shape_backlog_item_skill,
+        )
+        self.assertIn(
+            "stage-scoped canonical `Retrieved Lesson IDs: ...` line for `ready`",
+            ready_feature_skill,
+        )
+        self.assertNotIn(
+            "task-scoped canonical `Retrieved Lesson IDs: ...` line for `shaping`",
+            shape_backlog_item_skill,
+        )
+        self.assertNotIn(
+            "task-scoped canonical `Retrieved Lesson IDs: ...` line for `ready`",
+            ready_feature_skill,
+        )
+
+    def test_task_level_skills_describe_retrieved_lesson_ids_as_task_scoped(self) -> None:
+        start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
+        complete_task_skill = COMPLETE_TASK_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn("task-scoped canonical `Retrieved Lesson IDs: ...` line", start_task_skill)
+        self.assertIn("task-scoped canonical `Retrieved Lesson IDs: ...` line", complete_task_skill)
+
+    def test_complete_task_skill_documents_completion_handoff_output_contract(self) -> None:
+        complete_task_skill = COMPLETE_TASK_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn("## Output Contract", complete_task_skill)
+        self.assertIn("`completion_handoff`", complete_task_skill)
+        for field in ("`action`", "`target_feature_id`", "`target_task_id`", "`reason`", "`requires_human_decision`"):
+            self.assertIn(field, complete_task_skill, f"Output Contract is missing field {field}")
+        for action in ("`start_task`", "`finish_feature`", "`stop`"):
+            self.assertIn(action, complete_task_skill, f"Output Contract is missing action {action}")
+
+    def test_workflow_wrapper_preamble_remains_in_owning_skills(self) -> None:
+        """Pin the `It is a workflow wrapper around` fragment across every SKILL.md
+        that currently uses it. v1-f019 accepted this repetition explicitly; any
+        future one-sided removal should fail here instead of silently drifting.
+        """
+        fragment = "It is a workflow wrapper around"
+        for path in (
+            START_TASK_SKILL,
+            READY_FEATURE_SKILL,
+            SHAPE_BACKLOG_ITEM_SKILL,
+            PRIORITIZE_BACKLOG_SKILL,
+        ):
+            self.assertIn(
+                fragment,
+                path.read_text(encoding="utf-8"),
+                f"{path.relative_to(REPO_ROOT)} lost the shared preamble '{fragment}'. "
+                "Either restore it here or remove it from every owning SKILL.md in the same change.",
+            )
 
     def test_workflow_audit_and_repair_spec_allows_selected_feature_scoping_with_diagnostics(self) -> None:
         task_execution_handoff_spec = TASK_EXECUTION_HANDOFF_SPEC.read_text(encoding="utf-8")
