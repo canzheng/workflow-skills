@@ -53,9 +53,9 @@
   do_differently_next_time: Pair any \"prefer existing worktree\" change with explicit tests for missing worktree, multiple worktrees, and dirty worktree outcomes.
   catch_earlier_by: Review the shared helper itself and ask which exact test fails if the intended feature worktree is absent.
   confidence: high
-  retrieved_count: 0
+  retrieved_count: 1
   applied_count: 0.0
-  last_retrieved_at: ""
+  last_retrieved_at: "2026-04-19"
   last_applied_at: ""
   optional_example: In reopened v1-f018, autonomous continuation looked hardened because existing-worktree and dirty-worktree tests passed, but the helper still needed a dedicated missing-worktree regression to remove the stale checkout fallback.
   updated_at: 2026-04-14

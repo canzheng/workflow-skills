@@ -73,3 +73,15 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
   - Review Terminal: `true`
   - Notes: `readiness approved on iteration 2 after strengthening the shaped change to resolve four contract-surface gaps flagged on iteration 1; feature promoted from [SHAPING] to [READY] with task 1 selected as the first ready task`
   - Proof Obligations: `contract surface for tasks 1, 2, and 3 now explicit in design decisions and spec deltas; start-task can inherit the --feature-id contract, the preamble-repetition rule, and the code-quality scope boundary without inventing them`
+- `2026-04-19`:
+  - Current Task: `1`
+  - Worktree State: `pending-creation`
+  - Retrieved Lesson IDs: `L-002`
+  - Lesson Usage: `pending; will record at complete-task whether L-002 (fail-closed worktree resolution needs an explicit missing-worktree negative-path test) materially influenced task 1 execution`
+  - Review Scope: `task_execution`
+  - Review Target: `1`
+  - Review Verdict: `pending`
+  - Blocking Findings: `none`
+  - Review Terminal: `false`
+  - Notes: `start-task preamble for v1-f019 task 1; implementation plan written at openspec/changes/v1-f019-remediate-implementation-review-findings/implementation-plans/1.md; lessons retrieved via retrieve-lessons; semantic consistency review pending before worktree creation`
+  - Proof Obligations: `task 1 is behavior-preserving; verify via full test suite parity; add walk-up regression for resolve_skills_root and missing-worktree negative-path test for the migrated start-task resolver`
