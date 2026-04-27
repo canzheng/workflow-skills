@@ -39,8 +39,8 @@ It is a workflow wrapper around `brainstorming` plus linked OpenSpec change crea
    - do not duplicate proposal, design, spec, or task prose from OpenSpec inside the feature file
    - before the stage exits, call `record-lesson-usage` for the retrieved lesson IDs to reconcile whether they materially influenced the shaped output
    - then record any warranted high-signal notes in `docs/lessons/notes.md`
-6. Update feature files first, then update `BACKLOG.md`.
-7. Place promoted features at the bottom of `[SHAPING]`, preserving the existing top-to-bottom order of earlier items.
+6. Update feature files first, then update `BACKLOG.md` by editing only the entry headings; do not carry the backlog item's body notes into the promoted entry.
+7. Place promoted features at the bottom of `[SHAPING]` as heading-only entries, preserving the existing top-to-bottom order of earlier items.
 8. Re-run `audit-workflow`.
 9. Commit the intentional planning-state changes when needed to leave the primary checkout clean before exiting.
 10. Confirm the primary checkout is clean before exit.

@@ -22,6 +22,7 @@ from _workflow.workflow_state import (
     find_openspec_task_structure_errors,
     find_legacy_inline_planning_sections,
     format_task_readiness_drift_messages,
+    list_git_worktree_roots,
     parse_backlog_document,
     validate_promoted_feature_openspec_specs,
     parse_feature_openspec_status,
@@ -35,18 +36,33 @@ BACKLOG_REF_RE = re.compile(r"^- Backlog Reference: `([^`]+)`$", re.MULTILINE)
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", help="Override the repository root for fixture-backed workflow checks.")
+    parser.add_argument(
+        "--gate",
+        choices=("start", "complete"),
+        help=(
+            "Gate-aware in_progress check. start: assert 0 in_progress tasks. "
+            "complete: assert exactly 1 in_progress task; print its feature_id and task_id on success."
+        ),
+    )
+    parser.add_argument(
+        "--include-worktrees",
+        action="store_true",
+        help=(
+            "Walk all git worktrees and aggregate the in_progress count across them. "
+            "Detects cross-worktree drift where two worktrees claim different in_progress tasks."
+        ),
+    )
     return parser.parse_args(argv)
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = parse_args(argv or sys.argv[1:])
-    try:
-        root = repo_root(args.repo_root)
-    except WorkflowError as exc:
-        print(f"ERROR: {exc}")
-        return 1
+def _audit_single_root(root: Path) -> tuple[list[str], list[tuple[str, str]]]:
+    """Audit one checkout. Returns (errors, in_progress_records).
 
+    in_progress_records is a list of (feature_id, task_id) tuples for tasks
+    whose status is `in_progress` in this checkout's planning state.
+    """
     errors: list[str] = []
+    in_progress_records: list[tuple[str, str]] = []
 
     current_version = root / "docs" / "planning" / "current_version"
     if not current_version.exists():
@@ -58,9 +74,7 @@ def main(argv: list[str] | None = None) -> int:
         current_path = current_version.resolve()
 
     if current_path is None:
-        for error in errors:
-            print(f"ERROR: {error}")
-        return 1
+        return errors, in_progress_records
 
     openspec_root = root / "openspec"
     if not openspec_root.exists():
@@ -74,9 +88,7 @@ def main(argv: list[str] | None = None) -> int:
     backlog = current_path / "BACKLOG.md"
     if not backlog.exists():
         errors.append(f"{backlog.relative_to(root)} is missing")
-        for error in errors:
-            print(f"ERROR: {error}")
-        return 1
+        return errors, in_progress_records
 
     backlog_text = backlog.read_text(encoding="utf-8")
     for section_error in find_backlog_section_order_errors(backlog_text):
@@ -86,7 +98,6 @@ def main(argv: list[str] | None = None) -> int:
     parsed_backlog = parse_backlog_document(backlog_text)
     for malformed_entry in parsed_backlog.malformed_entries:
         errors.append(f"{backlog.relative_to(root)} {malformed_entry}")
-    in_progress_tasks = 0
 
     for section_name in WORKFLOW_SECTIONS[1:]:
         for entry in parsed_backlog.feature_sections.get(section_name, []):
@@ -193,14 +204,14 @@ def main(argv: list[str] | None = None) -> int:
                         )
 
             try:
-                task_statuses = [
-                    task.status
-                    for task in parse_tasks(feature_text, feature_file=feature_path, repo_root=root)
-                ]
+                tasks = parse_tasks(feature_text, feature_file=feature_path, repo_root=root)
             except ValueError as exc:
                 errors.append(f"{feature_path.relative_to(root)} {exc}")
                 continue
-            in_progress_tasks += sum(1 for status in task_statuses if status == "in_progress")
+            task_statuses = [task.status for task in tasks]
+            for task in tasks:
+                if task.status == "in_progress":
+                    in_progress_records.append((feature_id, task.task_id))
 
             if section_name == "READY" and "ready" not in task_statuses:
                 errors.append(
@@ -214,20 +225,79 @@ def main(argv: list[str] | None = None) -> int:
             ):
                 errors.append(drift_message)
 
-    if in_progress_tasks > 1:
-        errors.append(f"repository has {in_progress_tasks} tasks with status `in_progress`, expected at most 1")
+    if len(in_progress_records) > 1:
+        errors.append(
+            f"repository has {len(in_progress_records)} tasks with status `in_progress`, expected at most 1"
+        )
 
     if current_path is not None and (openspec_root / "changes").is_dir():
         linkage = collect_openspec_change_linkage(root)
         for change_id in linkage.orphan_active_change_ids:
             errors.append(f"orphan active OpenSpec change {change_id} is not linked from any promoted feature")
 
+    return errors, in_progress_records
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv or sys.argv[1:])
+    try:
+        root = repo_root(args.repo_root)
+    except WorkflowError as exc:
+        print(f"ERROR: {exc}")
+        return 1
+
+    errors, in_progress_records = _audit_single_root(root)
+    aggregated_records: list[tuple[Path, str, str]] = [
+        (root, feature_id, task_id) for feature_id, task_id in in_progress_records
+    ]
+
+    if args.include_worktrees:
+        for worktree_root in list_git_worktree_roots(root):
+            if worktree_root == root.resolve():
+                continue
+            wt_errors, wt_records = _audit_single_root(worktree_root)
+            for wt_error in wt_errors:
+                errors.append(f"[worktree {worktree_root}] {wt_error}")
+            for feature_id, task_id in wt_records:
+                aggregated_records.append((worktree_root, feature_id, task_id))
+
+        distinct_pairs = {(feature_id, task_id) for _, feature_id, task_id in aggregated_records}
+        if len(distinct_pairs) > 1:
+            errors.append(
+                "cross-worktree drift: multiple distinct in_progress tasks across worktrees: "
+                + ", ".join(
+                    f"{feature_id}/{task_id} in {worktree_root}"
+                    for worktree_root, feature_id, task_id in aggregated_records
+                )
+            )
+
+    if args.gate == "start":
+        if aggregated_records:
+            scope = "across worktrees" if args.include_worktrees else "in this checkout"
+            errors.append(
+                f"--gate=start requires 0 in_progress tasks {scope}; found "
+                + ", ".join(f"{feature_id}/{task_id}" for _, feature_id, task_id in aggregated_records)
+            )
+    elif args.gate == "complete":
+        distinct_pairs = {(feature_id, task_id) for _, feature_id, task_id in aggregated_records}
+        if len(distinct_pairs) != 1:
+            scope = "across worktrees" if args.include_worktrees else "in this checkout"
+            errors.append(
+                f"--gate=complete requires exactly 1 in_progress task {scope}; found {len(distinct_pairs)}"
+            )
+
     if errors:
         for error in errors:
             print(f"ERROR: {error}")
         return 1
 
-    print(f"OK: workflow audit passed for {current_path.relative_to(root)}")
+    if args.gate == "complete" and aggregated_records:
+        feature_id, task_id = aggregated_records[0][1], aggregated_records[0][2]
+        print(f"OK: gate=complete feature_id={feature_id} task_id={task_id}")
+    else:
+        current_version = root / "docs" / "planning" / "current_version"
+        label = current_version.resolve().relative_to(root) if current_version.exists() else current_version
+        print(f"OK: workflow audit passed for {label}")
     return 0
 
 

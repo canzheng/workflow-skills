@@ -106,8 +106,8 @@ The main agent performs every step below. Do not wrap the outer selection loop o
    - run the resolver with `--feature-id <feature-id>` from that same repo root
    - if the resolver returns `feature_exhausted`, exit the feature loop and return to step 2
    - otherwise:
-     - invoke `start-task` for the named feature/task so execution stays on the selected feature and feature worktree. `start-task` will spawn its required independent reviewer sub-agent from the main agent; do not bypass or reimplement that review
-     - if the task finishes cleanly, invoke `complete-task`
+     - invoke `start-task` for the named feature/task so execution stays on the selected feature and feature worktree. Pass the resolver-provided `feature_id` and `task_id` to `start-task`'s resolver script via `--feature-id` and `--task-id` so it takes the explicit-ID fast path and skips redundant BACKLOG and worktree scanning. `start-task` will spawn its required independent reviewer sub-agent from the main agent; do not bypass or reimplement that review
+     - if the task finishes cleanly, invoke `complete-task`. Pass the same `feature_id` and `task_id` to `complete-task`'s resolver script via `--feature-id` and `--task-id` for the same fast path
      - complete `complete-task` before resolving or starting any downstream top-level task
      - after `complete-task`, confirm `git status --short` is clean from the selected feature worktree before continuing the feature loop
      - read the canonical `completion_handoff` payload returned by `complete-task`

@@ -21,6 +21,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 - When naming a task explicitly, use the raw top-level OpenSpec task ID like `1`, not a synthetic label like `T1`.
 - "First" means top-to-bottom document order.
 - For the default path, use `python "${AGENTS_HOME:-$HOME/.agents}/skills/start-task/scripts/resolve_start_task.py"`.
+- When the caller already knows the feature and task IDs (for example, from the autonomous-backlog-loop resolver, or when the user named a task explicitly), pass `--feature-id <feature-id> --task-id <task-id>` to take the explicit-ID fast path. The fast path skips BACKLOG-wide scanning and the cross-worktree fanout, and runs only the per-task validation. The two flags must be supplied together.
 
 ## Workflow
 

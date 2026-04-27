@@ -17,6 +17,12 @@ The audit checks the active version under `<repo_root>/docs/planning/current_ver
 python "${AGENTS_HOME:-$HOME/.agents}/skills/audit-workflow/scripts/audit_workflow.py"
 ```
 
+Optional flags:
+
+- `--gate=start` — assert there are 0 `in_progress` tasks. Use this from `start-task` (or any caller about to start a task) to fail fast if the repository already has an active task.
+- `--gate=complete` — assert there is exactly 1 `in_progress` task. On success, prints `OK: gate=complete feature_id=<…> task_id=<…>` so callers can read the active task IDs from stdout.
+- `--include-worktrees` — also walk every git worktree's planning state and aggregate the `in_progress` count. Detects cross-worktree drift where two worktrees claim different tasks as active. Combine with `--gate` to make the gate global rather than per-checkout.
+
 ## What It Checks
 
 - `current_version` exists and is a symlink

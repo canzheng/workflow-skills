@@ -67,7 +67,7 @@ For non-micro tasks:
 - Do not rewrite the whole file.
 - Do not duplicate content.
 - Preserve existing content unless explicitly required.
-- Update the feature file first, then update `BACKLOG.md` if the board section or linked summary also changed.
+- Update the feature file first, then update `BACKLOG.md` only if the board section changed. Promoted entries (`[SHAPING]`, `[READY]`, `[IN_PROGRESS]`, `[DONE]`, `[DEFER]`) are heading-only; do not write summaries, rationale, or notes under them. `[BACKLOG]` items may carry body notes until they are promoted.
 
 ## Workflow Worktree Policy
 - Always create feature worktrees outside the main repository directory.

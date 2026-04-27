@@ -14,6 +14,7 @@ SKILLS_ROOT = resolve_skills_root(Path(__file__))
 AUDIT_SCRIPT = SKILLS_ROOT / "audit-workflow" / "scripts" / "audit_workflow.py"
 DIAGNOSE_SCRIPT = SKILLS_ROOT / "diagnose-workflow" / "scripts" / "diagnose_workflow.py"
 START_TASK_SCRIPT = SKILLS_ROOT / "start-task" / "scripts" / "resolve_start_task.py"
+COMPLETE_TASK_SCRIPT = SKILLS_ROOT / "complete-task" / "scripts" / "resolve_complete_task.py"
 AUTONOMOUS_RESOLVER_SCRIPT = (
     SKILLS_ROOT / "autonomous-backlog-loop" / "scripts" / "resolve_autonomous_backlog_action.py"
 )
@@ -1263,3 +1264,310 @@ def test_resolve_autonomous_backlog_action_fails_when_ready_feature_links_missin
         "docs/planning/versions/v1/features/v1-f010-broken.md links missing active OpenSpec change directory "
         "openspec/changes/missing-change" in result.stderr
     )
+
+
+def _write_modern_gate_fixture(
+    tmp_path: Path,
+    *,
+    feature_section: str,
+    current_task: str,
+) -> Path:
+    """Audit-clean modern-format fixture: tasks live in OpenSpec tasks.md, not in the feature file."""
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    (repo / "openspec" / "specs").mkdir(parents=True, exist_ok=True)
+    (repo / "openspec" / "changes").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "planning" / "current_version").symlink_to(Path("versions/v1"))
+
+    backlog = textwrap.dedent(
+        f"""\
+        # V1 Backlog
+
+        ## [BACKLOG]
+
+        None yet.
+
+        ## [SHAPING]
+
+        None yet.
+
+        ## [READY]
+
+        {"### `v1-f999` [Example](features/v1-f999-example.md)" if feature_section == "READY" else "None yet."}
+
+        ## [IN_PROGRESS]
+
+        {"### `v1-f999` [Example](features/v1-f999-example.md)" if feature_section == "IN_PROGRESS" else "None yet."}
+
+        ## [DONE]
+
+        None yet.
+
+        ## [DEFER]
+
+        None yet.
+        """
+    )
+    (repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md").write_text(backlog, encoding="utf-8")
+
+    feature_text = textwrap.dedent(
+        f"""\
+        # Feature: Example
+
+        ## 0. Meta
+        - Feature ID: `v1-f999`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#{feature_section.lower()}`
+        - OpenSpec Change: `example-change`
+        - OpenSpec Specs:
+          - `openspec/specs/task-execution-handoff/spec.md`
+        - Current Task: `{current_task}`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - None yet.
+        """
+    )
+    (feature_dir / "v1-f999-example.md").write_text(feature_text, encoding="utf-8")
+
+    change_dir = repo / "openspec" / "changes" / "example-change"
+    change_dir.mkdir(parents=True, exist_ok=True)
+    (change_dir / "proposal.md").write_text("## Why\n\nFixture.\n", encoding="utf-8")
+    (change_dir / "design.md").write_text("## Context\n\nFixture.\n", encoding="utf-8")
+    (change_dir / "tasks.md").write_text(
+        textwrap.dedent(
+            """\
+            ## 1. First task
+
+            - [ ] 1 First task
+              - Depends On:
+                - none
+            - [ ] 2 Second task
+              - Depends On:
+                - `1`
+            """
+        ),
+        encoding="utf-8",
+    )
+    return repo
+
+
+def test_audit_workflow_gate_start_passes_when_no_in_progress(tmp_path: Path) -> None:
+    repo = _write_modern_gate_fixture(tmp_path, feature_section="READY", current_task="none")
+
+    result = subprocess.run(
+        ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo), "--gate=start"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "OK:" in result.stdout
+
+
+def test_audit_workflow_gate_start_fails_when_task_in_progress(tmp_path: Path) -> None:
+    repo = _write_modern_gate_fixture(tmp_path, feature_section="IN_PROGRESS", current_task="1")
+
+    result = subprocess.run(
+        ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo), "--gate=start"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "--gate=start requires 0 in_progress tasks" in result.stdout
+    assert "v1-f999/1" in result.stdout
+
+
+def test_audit_workflow_gate_complete_emits_active_task(tmp_path: Path) -> None:
+    repo = _write_modern_gate_fixture(tmp_path, feature_section="IN_PROGRESS", current_task="1")
+
+    result = subprocess.run(
+        ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo), "--gate=complete"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "gate=complete" in result.stdout
+    assert "feature_id=v1-f999" in result.stdout
+    assert "task_id=1" in result.stdout
+
+
+def test_audit_workflow_gate_complete_fails_without_active_task(tmp_path: Path) -> None:
+    repo = _write_modern_gate_fixture(tmp_path, feature_section="READY", current_task="none")
+
+    result = subprocess.run(
+        ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo), "--gate=complete"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "--gate=complete requires exactly 1 in_progress task" in result.stdout
+
+
+def test_resolve_start_task_explicit_id_returns_named_task(tmp_path: Path) -> None:
+    repo = _write_cross_feature_openspec_repo_fixture(tmp_path, archived_upstream=False)
+
+    result = subprocess.run(
+        [
+            "python3",
+            str(START_TASK_SCRIPT),
+            "--repo-root",
+            str(repo),
+            "--feature-id",
+            "v1-f002",
+            "--task-id",
+            "1",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["feature_id"] == "v1-f002"
+    assert payload["task_id"] == "1"
+    assert payload["feature_section"] == "READY"
+
+
+def test_resolve_start_task_explicit_id_rejects_partial_args(tmp_path: Path) -> None:
+    repo = _write_repo_fixture(tmp_path, feature_section="READY", task_statuses={"T01": "ready", "T02": "todo"})
+
+    result = subprocess.run(
+        ["python3", str(START_TASK_SCRIPT), "--repo-root", str(repo), "--feature-id", "v1-f999"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "must be supplied together" in result.stderr
+
+
+def test_resolve_start_task_explicit_id_rejects_unknown_feature(tmp_path: Path) -> None:
+    repo = _write_repo_fixture(tmp_path, feature_section="READY", task_statuses={"T01": "ready", "T02": "todo"})
+
+    result = subprocess.run(
+        [
+            "python3",
+            str(START_TASK_SCRIPT),
+            "--repo-root",
+            str(repo),
+            "--feature-id",
+            "v1-f404",
+            "--task-id",
+            "T01",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "feature v1-f404 not found in active backlog" in result.stderr
+
+
+def test_resolve_start_task_explicit_id_rejects_wrong_status(tmp_path: Path) -> None:
+    repo = _write_repo_fixture(tmp_path, feature_section="READY", task_statuses={"T01": "ready", "T02": "todo"})
+
+    result = subprocess.run(
+        [
+            "python3",
+            str(START_TASK_SCRIPT),
+            "--repo-root",
+            str(repo),
+            "--feature-id",
+            "v1-f999",
+            "--task-id",
+            "T02",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "expected `ready`" in result.stderr
+
+
+def test_resolve_complete_task_explicit_id_rejects_partial_args(tmp_path: Path) -> None:
+    repo = _write_repo_fixture(
+        tmp_path,
+        feature_section="IN_PROGRESS",
+        task_statuses={"T01": "in_progress", "T02": "todo"},
+    )
+
+    result = subprocess.run(
+        ["python3", str(COMPLETE_TASK_SCRIPT), "--repo-root", str(repo), "--task-id", "T01"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "must be supplied together" in result.stderr
+
+
+def test_resolve_complete_task_explicit_id_rejects_unknown_feature(tmp_path: Path) -> None:
+    repo = _write_repo_fixture(
+        tmp_path,
+        feature_section="IN_PROGRESS",
+        task_statuses={"T01": "in_progress", "T02": "todo"},
+    )
+
+    result = subprocess.run(
+        [
+            "python3",
+            str(COMPLETE_TASK_SCRIPT),
+            "--repo-root",
+            str(repo),
+            "--feature-id",
+            "v1-f404",
+            "--task-id",
+            "T01",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "feature v1-f404 not found in active backlog" in result.stderr
+
+
+def test_resolve_complete_task_explicit_id_rejects_wrong_status(tmp_path: Path) -> None:
+    repo = _write_repo_fixture(
+        tmp_path,
+        feature_section="IN_PROGRESS",
+        task_statuses={"T01": "in_progress", "T02": "todo"},
+    )
+
+    result = subprocess.run(
+        [
+            "python3",
+            str(COMPLETE_TASK_SCRIPT),
+            "--repo-root",
+            str(repo),
+            "--feature-id",
+            "v1-f999",
+            "--task-id",
+            "T02",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "expected `in_progress`" in result.stderr
+

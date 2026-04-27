@@ -35,7 +35,151 @@ from _workflow.workflow_state import (
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", help="Override the repository root for fixture-backed task resolution.")
-    return parser.parse_args(argv)
+    parser.add_argument(
+        "--feature-id",
+        help=(
+            "Optional fast path: skip BACKLOG-wide scanning and validate only the named feature/task. "
+            "Must be paired with --task-id."
+        ),
+    )
+    parser.add_argument(
+        "--task-id",
+        help=(
+            "Optional fast path: skip BACKLOG-wide scanning and validate only the named feature/task. "
+            "Must be paired with --feature-id."
+        ),
+    )
+    args = parser.parse_args(argv)
+    if (args.feature_id is None) != (args.task_id is None):
+        parser.error("--feature-id and --task-id must be supplied together")
+    return args
+
+
+def resolve_named_task(root: Path, feature_id: str, task_id: str) -> dict[str, object]:
+    """Fast path: validate and return a payload for the explicitly named (feature_id, task_id).
+
+    Skips the BACKLOG-wide multi-task scan and the cross-worktree fanout used by
+    `resolve_active_task_across_worktrees`. Performs the same per-task validation:
+    plan exists and is valid, evidence categories are recorded, no open nested
+    items, and asserts the task's status is `in_progress`.
+    """
+    backlog_path, _backlog_text, parsed_backlog = load_backlog(root)
+    matching_entry = None
+    matching_section: str | None = None
+    for section_name in WORKFLOW_SECTIONS[1:]:
+        for entry in parsed_backlog.feature_sections.get(section_name, []):
+            if entry.feature_id == feature_id:
+                matching_entry = entry
+                matching_section = section_name
+                break
+        if matching_entry is not None:
+            break
+
+    if matching_entry is None or matching_section is None:
+        raise WorkflowError(f"feature {feature_id} not found in active backlog")
+
+    feature_path = (backlog_path.parent / matching_entry.link).resolve()
+    if not feature_path.exists():
+        raise WorkflowError(
+            f"{backlog_path.relative_to(root)} section [{matching_section}] links missing feature file {matching_entry.link}"
+        )
+    feature_text = feature_path.read_text(encoding="utf-8")
+    if matching_section == "DONE" and parse_feature_openspec_status(feature_text) == "legacy-exempt":
+        raise WorkflowError(f"feature {feature_id} is legacy-exempt and cannot host an active task")
+
+    change_id = parse_feature_openspec_change(feature_text)
+    if change_id is None:
+        raise WorkflowError(f"{feature_path.relative_to(root)} is missing OpenSpec Change metadata")
+    change_path = root / "openspec" / "changes" / change_id
+    feature_label = str(feature_path.relative_to(root))
+
+    matching_task = None
+    for task in parse_tasks(feature_text, feature_file=feature_path, repo_root=root):
+        if task.task_id == task_id:
+            matching_task = task
+            break
+    if matching_task is None:
+        raise WorkflowError(f"task {task_id} not found in feature {feature_id}")
+    if matching_task.status != "in_progress":
+        raise WorkflowError(
+            f"task {task_id} in feature {feature_id} has status `{matching_task.status}`, expected `in_progress`"
+        )
+
+    open_nested_item_ids = list_open_openspec_nested_items(
+        feature_text,
+        matching_task.task_id,
+        feature_file=feature_path,
+        repo_root=root,
+    )
+    if open_nested_item_ids:
+        raise WorkflowError(
+            f"task {matching_task.task_id} has open nested checklist items: " + ", ".join(open_nested_item_ids)
+        )
+    implementation_plan_path = linked_openspec_implementation_plan_path(
+        feature_text,
+        matching_task.task_id,
+        feature_file=feature_path,
+        repo_root=root,
+    )
+    if implementation_plan_path is None or not implementation_plan_path.exists():
+        relative_plan_path = (
+            str(implementation_plan_path.relative_to(root))
+            if implementation_plan_path is not None
+            else f"openspec/changes/{change_id}/implementation-plans/{matching_task.task_id}.md"
+        )
+        raise WorkflowError(
+            "task implementation plan is missing: "
+            f"{relative_plan_path}. Write or update the implementation plan before completing the task."
+        )
+    try:
+        plan_summary = validate_implementation_plan_file(implementation_plan_path)
+    except ValueError as exc:
+        raise WorkflowError(f"task implementation plan is invalid: {exc}") from exc
+    evidence_summary = collect_task_validation_evidence(feature_text, matching_task.task_id)
+    if not evidence_summary.evidence_categories:
+        raise WorkflowError(
+            "task completion evidence is missing categorized proof: "
+            f"{feature_label} task {matching_task.task_id} must record categorized evidence in Validation Log"
+        )
+    required_evidence_categories = required_validation_evidence_categories_for_plan(plan_summary)
+    if not set(evidence_summary.evidence_categories).intersection(required_evidence_categories):
+        raise WorkflowError(
+            "task completion evidence does not satisfy declared proof obligations: "
+            f"{feature_label} task {matching_task.task_id} needs one of "
+            f"{', '.join(required_evidence_categories)}, got "
+            f"{', '.join(evidence_summary.evidence_categories)}"
+        )
+    context_files = list_openspec_change_context_files(
+        feature_text,
+        task_id=matching_task.task_id,
+        feature_file=feature_path,
+        repo_root=root,
+    )
+    return {
+        "feature_id": feature_id,
+        "feature_path": str(feature_path.relative_to(root)),
+        "feature_section": matching_section,
+        "completion_handoff": asdict(
+            compute_completion_handoff(
+                feature_text,
+                matching_task.task_id,
+                feature_file=feature_path,
+                repo_root=root,
+            )
+        ),
+        "openspec_change_id": change_id,
+        "openspec_change_path": str(change_path.relative_to(root)),
+        "implementation_plan_path": (
+            str(implementation_plan_path.relative_to(root))
+            if implementation_plan_path is not None
+            else None
+        ),
+        "openspec_context_files": [str(path.relative_to(root)) for path in context_files],
+        "execution_instruction": "Read the files listed as context before completing the task.",
+        "task_id": matching_task.task_id,
+        "task_title": matching_task.task_title,
+        "selected_repo_root": str(root.resolve()),
+    }
 
 
 def resolve_active_task(root: Path, *, selected_feature_id: str | None = None) -> dict[str, object]:
@@ -205,7 +349,11 @@ def resolve_active_task_across_worktrees(root: Path) -> dict[str, object]:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
     try:
-        payload = resolve_active_task_across_worktrees(repo_root(args.repo_root))
+        root = repo_root(args.repo_root)
+        if args.feature_id is not None and args.task_id is not None:
+            payload = resolve_named_task(root, args.feature_id, args.task_id)
+        else:
+            payload = resolve_active_task_across_worktrees(root)
     except WorkflowError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1

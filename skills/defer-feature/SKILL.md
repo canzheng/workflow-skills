@@ -21,8 +21,8 @@ This skill moves one feature to `[DEFER]` and records why the work is being post
 2. Resolve the target feature.
 3. Require an explicit deferral reason.
 4. If a task is active, stop and ask how that task should be closed before deferring.
-5. Record the reason in the backlog entry or feature file.
-6. Move the backlog entry to `[DEFER]`.
+5. Record the reason in the feature file.
+6. Move the backlog entry to `[DEFER]`. The entry remains heading-only; do not write the deferral reason under it.
 7. Re-run `audit-workflow`.
 
 ## Rules

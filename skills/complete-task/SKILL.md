@@ -28,6 +28,7 @@ The full semantics — when each action is emitted, how `Depends On` parsing sha
 
 - If the user names a task, use it.
 - Otherwise select the only task in the repository with status `in_progress`.
+- When the caller already knows the feature and task IDs (for example, from the autonomous-backlog-loop resolver, or because `start-task` returned them earlier in this session), pass `--feature-id <feature-id> --task-id <task-id>` to the resolver script to take the explicit-ID fast path. The fast path skips BACKLOG-wide scanning and the cross-worktree fanout, and runs only the per-task validation. The two flags must be supplied together.
 
 ## Workflow
 

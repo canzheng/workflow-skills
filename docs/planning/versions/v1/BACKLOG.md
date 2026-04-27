@@ -5,7 +5,8 @@ This file tracks feature-board status only.
 - `[BACKLOG]` entries must use ``### `v1-b001` [TAG] TITLE``.
 - `[SHAPING]`, `[READY]`, `[IN_PROGRESS]`, `[DONE]`, and `[DEFER]` entries must use ``### `v1-f001` [TAG] [Title](features/v1-f001-title.md)``.
 - `[TAG]` is optional in both formats.
-- Detailed evidence, raw diagnostics, and task-level progress belong in feature files or source notes, not here.
+- Promoted entries are heading-only. Do not write summaries, rationale, defer reasons, or evidence under them. Records go in the feature file; intent and design go in the linked OpenSpec change.
+- `[BACKLOG]` items may carry body notes under the heading until they are promoted to `[SHAPING]`.
 
 ## [BACKLOG]
 

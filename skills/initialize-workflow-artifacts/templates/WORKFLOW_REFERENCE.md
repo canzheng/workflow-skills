@@ -28,6 +28,8 @@ This document is the canonical reference for workflow definitions, status models
 - Prefer linked change IDs that reuse the feature-style prefix when practical, for example `v1-f008-...`; this naming convention is guidance only and must not be used as an audit or readiness gate.
 - `[BACKLOG]` entries must use lowercase backlog IDs like `v1-b001` and follow ``### `v1-b001` [TAG] TITLE``, where `[TAG]` is optional.
 - `[SHAPING]`, `[READY]`, `[IN_PROGRESS]`, `[DONE]`, and `[DEFER]` entries must follow ``### `v1-f001` [TAG] [Title](features/v1-f001-title.md)``, where `[TAG]` is optional.
+- Promoted entries are heading-only. Do not add body content, summaries, rationale, or defer reasons under the heading. Records belong in the feature file; intent and design belong in the linked OpenSpec change.
+- `[BACKLOG]` items may carry body notes (rationale, dependency hints, sketch ideas) under the heading until they are promoted to `[SHAPING]`, since no feature file or OpenSpec change exists yet.
 
 ## Directory and Path Conventions
 
@@ -65,7 +67,7 @@ This document is the canonical reference for workflow definitions, status models
 - Move a feature from `[SHAPING]` to `[READY]` when shaping is complete and tasks are ready to execute.
 - Move a feature from `[READY]` to `[IN_PROGRESS]` as soon as task execution starts.
 - A feature may move to `[DONE]` only when its required tasks are complete and its feature-level acceptance bar is satisfied.
-- A feature may move to `[DEFER]` from any section, but the reason should be captured in the backlog entry or linked feature file.
+- A feature may move to `[DEFER]` from any section, but the reason must be captured in the linked feature file.
 
 ## Task Status Model
 
