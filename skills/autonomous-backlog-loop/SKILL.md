@@ -118,7 +118,7 @@ The main agent performs every step below. Do not wrap the outer selection loop o
      - if `finish-feature` completes successfully, exit the feature loop and return to step 2
      - if `completion_handoff.action` is `start_task`, continue the feature loop on the same feature branch/worktree
      - if `completion_handoff.action` is `stop`, exit the feature loop and return control
-     - if the task ends `blocked` or `cancelled`, leave the feature branch/worktree in place, then exit the feature loop and return control
+     - if the task ends `blocked` or `cancelled`, leave the feature branch/worktree in place and the feature in `[IN_PROGRESS]`, then exit the feature loop and return to step 2 so the outer resolver can pick the next eligible feature
 8. When a wrapped skill or its reviewer sub-agent raises a design choice:
    - in `solo` mode, auto-accept the recommendation only if one was offered and it does not conflict with direct user instructions already given
    - in `interactive` mode, pause and surface the choice to the user with concise context, the recommendation if any, and the concrete options that need a decision
@@ -133,9 +133,10 @@ The main agent performs every step below. Do not wrap the outer selection loop o
 
 ## Rules
 
+- Do not pause, ask the user to confirm continuation, or hand back control between successful steps. Continue running until one of the Stop Conditions fires, you need to surface a design choice, or encountered a real blocker prevents progress.
 - The main agent drives every outer step directly. Do not wrap the outer loop or the feature loop in a sub-agent.
 - Never begin a new outer step before the current step's wrapped skill has returned.
-- Keep the active feature's task loop on a single feature branch/worktree and do not start another feature until the current one reaches `[DONE]`, `[DEFER]`, or an explicit stop.
+- Keep the active feature's task loop on a single feature branch/worktree, and never switch branches while a task is `in_progress`. Multiple features may live in `[IN_PROGRESS]` simultaneously; when the active feature has no executable task (its task ended `blocked` or `cancelled`, or the resolver returned `feature_exhausted`), return to the outer resolver to pick the next eligible feature. The global "at most one `in_progress` task" invariant still holds.
 - Reuse one feature branch/worktree across the sequential tasks of the same feature.
 - Respect review and verification gates inherited from wrapped skills instead of short-circuiting them in the loop controller. In particular, let `start-task` and `ready-feature` spawn their required reviewer sub-agents from the main agent.
 - Do not duplicate branch-finalization behavior owned by `finish-feature`.

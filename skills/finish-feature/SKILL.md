@@ -36,9 +36,9 @@ Earlier workflow stages record lesson usage and high-signal notes only. `finish-
    - confirm no active change directory still exists
    - confirm exactly one matching archive directory exists
    - move the feature from `[IN_PROGRESS]` to `[DONE]` only after acceptance is confirmed
-8. Record the archive result and feature-completion evidence in the feature file when that evidence is not already present.
+8. Record the archive result and feature-completion evidence in the feature file when that evidence is not already present. Archive paths are written in evidence and notes sections only. Do not modify the `OpenSpec Change` metadata field — it stays as the bare change id throughout the feature's lifecycle, including the `[DONE]` transition.
 8.5. Distill durable lessons before branch finalization.
-   - call `distill-lessons` after the linked OpenSpec change is validated and archived and before branch finalization begins
+   - spawn a subagent to run `distill-lessons` after the linked OpenSpec change is validated and archived and before branch finalization begins. The subagent reads notes and writes lessons; isolating it keeps the main agent's context lean for branch finalization. `distill-lessons` does not require its own subagents, so the 2-level limit is not a concern here
    - keep `refresh-lessons` user-triggered; do not auto-run it here
 9. Re-run `audit-workflow` if the feature file changed.
 10. Move the feature from `[IN_PROGRESS]` to `[DONE]` only after the linked change is validated and archived and feature-level acceptance is confirmed.
@@ -52,6 +52,7 @@ Earlier workflow stages record lesson usage and high-signal notes only. `finish-
 - Archive proof is filesystem state, not memory:
   - `openspec/changes/<change-id>/` must not exist
   - exactly one `openspec/changes/archive/*-<change-id>/` directory must exist
+- The `OpenSpec Change` metadata field is the bare change id (for example `v1-f062-cli-typer-split-and-security-id-rename`). Never rewrite it to include an `archive/...` prefix, a date, or any other archive-derived path when moving the feature to `[DONE]`. The audit and resolver scripts treat that field as the lookup key and derive archive state from filesystem globs; rewriting it produces self-contradictory audit errors.
 - If the feature is not in `[IN_PROGRESS]`, stop instead of trying to finish the branch early.
 - A feature is not startable here unless all top-level OpenSpec tasks are done and `Current Task` is `none`.
 - OpenSpec archive is additive. It does not replace task-level verification or feature-level acceptance.
