@@ -71,6 +71,12 @@ For eligible tasks:
 10. Run only the narrowest relevant validation, if any.
 11. Stop once the requested tiny fix is complete.
 
+## Backlog item completion
+
+When the request explicitly asks fastlane to complete a tracked `v\d+-b\d+` item from the active BACKLOG.md (`<repo_root>/docs/planning/current_version/BACKLOG.md`) and the edit accomplishes that scope, delete that `###` heading and any indented body bullets directly underneath (up to the next `###` heading or section break) in the same commit. The git log is the completion record; fastlane does not write a separate ledger entry.
+
+This is the only workflow-state edit fastlane may make. If the named id is not present in BACKLOG.md, do nothing — fastlane does not search for matches or load any other workflow artifact.
+
 ## Validation policy
 
 Validation should be minimal:
