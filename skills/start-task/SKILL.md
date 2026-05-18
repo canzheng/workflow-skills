@@ -25,6 +25,8 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 
 ## Workflow
 
+Create or re-enter the feature worktree early, before any heavy planning or review work, so the primary checkout is freed for concurrent `shape-backlog-item`, `ready-feature`, or other features' `start-task` work. Steps 1–4 are read-only against the primary checkout; steps 5–6 create the worktree; every step from 7 onward runs inside the feature worktree.
+
 1. Run `audit-workflow`.
 2. Confirm there is no repository task already marked `in_progress`.
 3. Resolve the target feature and task from the correct checkout.
@@ -36,7 +38,15 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
      2. stop
    - require the resolver payload to include the selected repo root, the linked OpenSpec change directory, the Markdown context file list under that change, and the task implementation-plan path
 4. Confirm the feature is `[IN_PROGRESS]` or `[READY]`, the linked top-level OpenSpec task resolves to workflow status `ready`, and the feature has no workflow-derived task-readiness drift against the shared dependency model.
-5. Read the linked change context before updating the task implementation plan.
+5. If this is the first executing task for the feature, confirm the primary checkout is clean so the worktree will be created from a clean commit. If the primary checkout is dirty, stop and resolve the changes explicitly instead of auto-committing them.
+6. Wrap `using-git-worktrees` to create or re-enter the feature worktree before any heavy planning or review work:
+   - use the repo's preferred worktree root
+   - if this is the first executing task for the feature, create one feature branch/worktree
+   - otherwise re-enter or reuse the existing feature branch/worktree for that feature only; never fall back to the primary checkout for a later task
+   - if no feature worktree exists for a later task, ask the user whether to create one now or stop; recommend creating the worktree
+   - if reusing an existing feature worktree, stop unless that worktree is already clean and ready for the next task
+   - all subsequent steps run inside this feature worktree so the primary checkout stays free for other features
+7. From inside the feature worktree, read the linked change context before updating the task implementation plan.
    - read `proposal.md`, `design.md`, linked specs, `tasks.md`, and any other Markdown files under the linked change directory before drafting or updating the task implementation plan
    - use that context to update the task implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution starts
    - before drafting or updating the task implementation plan, retrieve relevant active lessons for the task
@@ -44,19 +54,12 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
    - write `Retrieved Lesson IDs: none` when no lessons were returned; otherwise write the IDs as a comma-separated list in returned order, for example `Retrieved Lesson IDs: L-001, L-014`
    - do not rename, regroup, or renumber lesson IDs when recording the handoff; record the exact IDs returned by retrieval
    - keep the implementation plan's validation section aligned with the selected task, the linked change intent, and the proof-obligation / validation-taxonomy language used by shaping and readiness guidance
-6. Perform a semantic consistency and coverage review across the selected change context before code execution starts.
+8. Perform a semantic consistency and coverage review across the selected change context before code execution starts.
    - read the task implementation plan after updating it
    - spawn a lightweight independent reviewer subagent to review whether the task implementation plan and its validation section are semantically consistent with the selected task, the change proposal, the design, and the linked spec intent
    - require that review to confirm the plan and its validation section fully cover the selected task's intended change and proof obligations before execution continues, using the same validation taxonomy that the workflow reference and feature template describe
    - if tests are being added or modified, ask the mandatory review question "changed tests narrowed contract?" and compare the new assertions to the task plan, not just the implementation
-   - if the review finds semantic inconsistency, ambiguity, uncovered change intent, or missing validation coverage, return to step 5 to update the implementation plan and rerun this review until it passes
-7. If this is the first executing task for the feature, confirm the primary checkout is clean so the worktree will be created from a clean commit. If the primary checkout is dirty, stop and resolve the changes explicitly instead of auto-committing them.
-8. Wrap `using-git-worktrees`:
-   - use the repo's preferred worktree root
-   - if this is the first executing task for the feature, create one feature branch/worktree
-   - otherwise re-enter or reuse the existing feature branch/worktree for that feature only; never fall back to the primary checkout for a later task
-   - if no feature worktree exists for a later task, ask the user whether to create one now or stop; recommend creating the worktree
-   - if reusing an existing feature worktree, stop unless that worktree is already clean and ready for the next task
+   - if the review finds semantic inconsistency, ambiguity, uncovered change intent, or missing validation coverage, return to step 7 to update the implementation plan and rerun this review until it passes
 9. Update the feature file to record active execution:
    - set `Current Task` to the selected top-level task ID
    - keep OpenSpec `tasks.md` as the checked/unchecked task ledger rather than inventing a separate native `in_progress` syntax
