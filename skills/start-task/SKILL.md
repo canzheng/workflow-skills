@@ -27,6 +27,8 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 
 Create or re-enter the feature worktree early, before any heavy planning or review work, so the primary checkout is freed for concurrent `shape-backlog-item`, `ready-feature`, or other features' `start-task` work. Steps 1–4 are read-only against the primary checkout; steps 5–6 create the worktree; every step from 7 onward runs inside the feature worktree.
 
+**Hard ordering rule.** Do not retrieve lessons, read change context, or draft/update the task implementation plan in the primary checkout. These belong to step 7 inside the feature worktree. If the resolver reports `implementation_plan_status: missing`, that is expected — proceed to steps 5–6 to create the worktree, then draft the plan inside the worktree at step 7. Never write the plan, retrieve lessons, or do context-reading in the primary checkout and then roll back.
+
 1. Run `audit-workflow`.
 2. Confirm there is no repository task already marked `in_progress`.
 3. Resolve the target feature and task from the correct checkout.
@@ -36,7 +38,8 @@ Create or re-enter the feature worktree early, before any heavy planning or revi
    - if a later task belongs to an existing `[IN_PROGRESS]` feature but no feature worktree is found, stop and ask the user to choose between:
      1. create a new feature worktree and continue there (recommended)
      2. stop
-   - require the resolver payload to include the selected repo root, the linked OpenSpec change directory, the Markdown context file list under that change, and the task implementation-plan path
+   - require the resolver payload to include the selected repo root, the linked OpenSpec change directory, the Markdown context file list under that change, the task implementation-plan path, and the implementation-plan status (`present` or `missing`)
+   - if the resolver returns `implementation_plan_status: missing`, do NOT draft the plan here. Proceed to steps 5–6; the plan is drafted inside the worktree at step 7.
 4. Confirm the feature is `[IN_PROGRESS]` or `[READY]`, the linked top-level OpenSpec task resolves to workflow status `ready`, and the feature has no workflow-derived task-readiness drift against the shared dependency model.
 5. If this is the first executing task for the feature, confirm the primary checkout is clean so the worktree will be created from a clean commit. If the primary checkout is dirty, stop and resolve the changes explicitly instead of auto-committing them.
 6. Wrap `using-git-worktrees` to create or re-enter the feature worktree before any heavy planning or review work:
@@ -46,9 +49,9 @@ Create or re-enter the feature worktree early, before any heavy planning or revi
    - if no feature worktree exists for a later task, ask the user whether to create one now or stop; recommend creating the worktree
    - if reusing an existing feature worktree, stop unless that worktree is already clean and ready for the next task
    - all subsequent steps run inside this feature worktree so the primary checkout stays free for other features
-7. From inside the feature worktree, read the linked change context before updating the task implementation plan.
+7. From inside the feature worktree, read the linked change context before drafting or updating the task implementation plan. All substeps here must run inside the worktree; do not retrieve lessons, read context, or write the plan in the primary checkout.
    - read `proposal.md`, `design.md`, linked specs, `tasks.md`, and any other Markdown files under the linked change directory before drafting or updating the task implementation plan
-   - use that context to update the task implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution starts
+   - use that context to draft (when the resolver returned `implementation_plan_status: missing`) or update (when `present`) the task implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution starts
    - before drafting or updating the task implementation plan, retrieve relevant active lessons for the task
    - record the returned lesson IDs in the feature file handoff notes under a task-scoped canonical `Retrieved Lesson IDs: ...` line for the active task so complete-task can reconcile usage later
    - write `Retrieved Lesson IDs: none` when no lessons were returned; otherwise write the IDs as a comma-separated list in returned order, for example `Retrieved Lesson IDs: L-001, L-014`

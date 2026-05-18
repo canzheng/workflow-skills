@@ -36,16 +36,22 @@ class WorkflowContractDocsTests(unittest.TestCase):
     def test_start_task_skill_reads_change_context_before_updating_plan(self) -> None:
         start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
 
-        self.assertIn("Read the linked change context before updating the task implementation plan", start_task_skill)
+        self.assertIn(
+            "read the linked change context before drafting or updating the task implementation plan",
+            start_task_skill,
+        )
         self.assertIn("read `proposal.md`, `design.md`, linked specs, `tasks.md`", start_task_skill)
-        self.assertIn("use that context to update the task implementation plan", start_task_skill)
+        self.assertIn(
+            "the task implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md`",
+            start_task_skill,
+        )
 
     def test_start_task_skill_requires_gpt_5_4_mini_plan_review_loop(self) -> None:
         start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
 
         self.assertIn("spawn a lightweight independent reviewer subagent", start_task_skill)
         self.assertIn("fully cover the selected task's intended change and proof obligations", start_task_skill)
-        self.assertIn("return to step 5 to update the implementation plan and rerun this review until it passes", start_task_skill)
+        self.assertIn("return to step 7 to update the implementation plan and rerun this review until it passes", start_task_skill)
 
     def test_start_task_skill_requires_validation_section_completion_before_handoff(self) -> None:
         start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
@@ -100,9 +106,9 @@ class WorkflowContractDocsTests(unittest.TestCase):
     def test_autonomous_backlog_loop_routes_completion_through_finish_feature(self) -> None:
         autonomous_loop_skill = AUTONOMOUS_BACKLOG_LOOP_SKILL.read_text(encoding="utf-8")
 
-        self.assertIn("if the task finishes cleanly, call `complete-task`", autonomous_loop_skill)
+        self.assertIn("if the task finishes cleanly, invoke `complete-task`", autonomous_loop_skill)
         self.assertIn(
-            "if `completion_handoff.action` is `finish_feature`, call `finish-feature` before any downstream cleanup",
+            "if `completion_handoff.action` is `finish_feature`, invoke `finish-feature` before any downstream cleanup",
             autonomous_loop_skill,
         )
         self.assertIn(
@@ -122,7 +128,7 @@ class WorkflowContractDocsTests(unittest.TestCase):
             autonomous_loop_skill,
         )
         self.assertIn(
-            "if `completion_handoff.action` is `stop`, stop the feature loop and return control",
+            "if `completion_handoff.action` is `stop`, exit the feature loop and return control",
             autonomous_loop_skill,
         )
 

@@ -102,20 +102,21 @@ def _resolve_task_in_root(root: Path, *, selected_feature_id: str | None = None)
                     feature_file=feature_path,
                     repo_root=root,
                 )
-                if implementation_plan_path is None or not implementation_plan_path.exists():
+                if implementation_plan_path is None:
                     relative_plan_path = (
-                        str(implementation_plan_path.relative_to(root))
-                        if implementation_plan_path is not None
-                        else f"openspec/changes/{change_id}/implementation-plans/{task.task_id}.md"
+                        f"openspec/changes/{change_id}/implementation-plans/{task.task_id}.md"
                     )
-                    raise WorkflowError(
-                        "task implementation plan is missing: "
-                        f"{relative_plan_path}. Write or update the implementation plan before executing the task."
-                    )
-                try:
-                    validate_implementation_plan_file(implementation_plan_path)
-                except ValueError as exc:
-                    raise WorkflowError(f"task implementation plan is invalid: {exc}") from exc
+                    implementation_plan_status = "missing"
+                elif not implementation_plan_path.exists():
+                    relative_plan_path = str(implementation_plan_path.relative_to(root))
+                    implementation_plan_status = "missing"
+                else:
+                    relative_plan_path = str(implementation_plan_path.relative_to(root))
+                    try:
+                        validate_implementation_plan_file(implementation_plan_path)
+                    except ValueError as exc:
+                        raise WorkflowError(f"task implementation plan is invalid: {exc}") from exc
+                    implementation_plan_status = "present"
                 context_files = list_openspec_change_context_files(
                     feature_text,
                     task_id=task.task_id,
@@ -134,9 +135,8 @@ def _resolve_task_in_root(root: Path, *, selected_feature_id: str | None = None)
                     "selected_repo_root": str(root),
                     "openspec_change_id": change_id,
                     "openspec_change_path": str(active_change_dir.relative_to(root)),
-                    "implementation_plan_path": (
-                        str(implementation_plan_path.relative_to(root)) if implementation_plan_path is not None else None
-                    ),
+                    "implementation_plan_path": relative_plan_path,
+                    "implementation_plan_status": implementation_plan_status,
                     "openspec_context_files": [str(path.relative_to(root)) for path in context_files],
                     "ready_review_verdict": (
                         {
@@ -150,9 +150,11 @@ def _resolve_task_in_root(root: Path, *, selected_feature_id: str | None = None)
                         else None
                     ),
                     "execution_instruction": (
-                        "Read the files listed as context, then write or update the implementation plan at the "
-                        "provided path before executing the task. Record validation evidence during execution as "
-                        "planned proof steps complete."
+                        "Create or re-enter the feature worktree FIRST. Only after the worktree exists, "
+                        "from inside that worktree, read the listed context files, retrieve lessons, and "
+                        "draft (if status=missing) or update (if status=present) the implementation plan "
+                        "at the provided path. Do not retrieve lessons or write the plan in the primary "
+                        "checkout. Record validation evidence during execution as planned proof steps complete."
                     ),
                     "task_id": task.task_id,
                     "task_title": task.task_title,
@@ -231,20 +233,21 @@ def resolve_named_task(root: Path, feature_id: str, task_id: str) -> dict[str, o
         feature_file=feature_path,
         repo_root=root,
     )
-    if implementation_plan_path is None or not implementation_plan_path.exists():
+    if implementation_plan_path is None:
         relative_plan_path = (
-            str(implementation_plan_path.relative_to(root))
-            if implementation_plan_path is not None
-            else f"openspec/changes/{change_id}/implementation-plans/{matching_task.task_id}.md"
+            f"openspec/changes/{change_id}/implementation-plans/{matching_task.task_id}.md"
         )
-        raise WorkflowError(
-            "task implementation plan is missing: "
-            f"{relative_plan_path}. Write or update the implementation plan before executing the task."
-        )
-    try:
-        validate_implementation_plan_file(implementation_plan_path)
-    except ValueError as exc:
-        raise WorkflowError(f"task implementation plan is invalid: {exc}") from exc
+        implementation_plan_status = "missing"
+    elif not implementation_plan_path.exists():
+        relative_plan_path = str(implementation_plan_path.relative_to(root))
+        implementation_plan_status = "missing"
+    else:
+        relative_plan_path = str(implementation_plan_path.relative_to(root))
+        try:
+            validate_implementation_plan_file(implementation_plan_path)
+        except ValueError as exc:
+            raise WorkflowError(f"task implementation plan is invalid: {exc}") from exc
+        implementation_plan_status = "present"
     context_files = list_openspec_change_context_files(
         feature_text,
         task_id=matching_task.task_id,
@@ -263,9 +266,8 @@ def resolve_named_task(root: Path, feature_id: str, task_id: str) -> dict[str, o
         "selected_repo_root": str(root.resolve()),
         "openspec_change_id": change_id,
         "openspec_change_path": str(active_change_dir.relative_to(root)),
-        "implementation_plan_path": (
-            str(implementation_plan_path.relative_to(root)) if implementation_plan_path is not None else None
-        ),
+        "implementation_plan_path": relative_plan_path,
+        "implementation_plan_status": implementation_plan_status,
         "openspec_context_files": [str(path.relative_to(root)) for path in context_files],
         "ready_review_verdict": (
             {
@@ -279,9 +281,11 @@ def resolve_named_task(root: Path, feature_id: str, task_id: str) -> dict[str, o
             else None
         ),
         "execution_instruction": (
-            "Read the files listed as context, then write or update the implementation plan at the "
-            "provided path before executing the task. Record validation evidence during execution as "
-            "planned proof steps complete."
+            "Create or re-enter the feature worktree FIRST. Only after the worktree exists, "
+            "from inside that worktree, read the listed context files, retrieve lessons, and "
+            "draft (if status=missing) or update (if status=present) the implementation plan "
+            "at the provided path. Do not retrieve lessons or write the plan in the primary "
+            "checkout. Record validation evidence during execution as planned proof steps complete."
         ),
         "task_id": matching_task.task_id,
         "task_title": matching_task.task_title,

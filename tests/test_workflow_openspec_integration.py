@@ -903,7 +903,9 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                     "openspec/changes/integrate-openspec-shaping-readiness/implementation-plans/2.md",
                 ],
             )
-            self.assertIn("write or update the implementation plan", payload["execution_instruction"])
+            self.assertEqual(payload["implementation_plan_status"], "present")
+            self.assertIn("update", payload["execution_instruction"])
+            self.assertIn("worktree FIRST", payload["execution_instruction"])
 
     def test_start_task_prefers_existing_feature_worktree_for_later_tasks(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1519,7 +1521,7 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn("no active feature worktree", result.stderr)
 
-    def test_start_task_rejects_missing_implementation_plan(self) -> None:
+    def test_start_task_reports_missing_implementation_plan_for_drafting_in_worktree(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"
             initialize(repo, "v1")
@@ -1605,12 +1607,14 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
 
             result = run_resolver(START_TASK_SCRIPT, ["--repo-root", str(repo)])
 
-            self.assertNotEqual(result.returncode, 0)
-            self.assertIn(
-                "task implementation plan is missing: "
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["implementation_plan_status"], "missing")
+            self.assertEqual(
+                payload["implementation_plan_path"],
                 "openspec/changes/integrate-openspec-shaping-readiness/implementation-plans/2.md",
-                result.stderr,
             )
+            self.assertEqual(payload["task_id"], "2")
 
     def test_start_task_rejects_structurally_invalid_implementation_plan(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
