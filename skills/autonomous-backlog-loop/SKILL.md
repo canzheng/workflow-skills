@@ -146,6 +146,7 @@ The main agent performs every step below. Do not wrap the outer selection loop o
 
 - `audit-workflow` fails
 - the resolver reports an existing `in_progress` task
+- the resolver reports a feature with `Current Task` set but no active in-progress task backing it
 - the resolver reports `completion_limit_reached`
 - the resolver reports `no_eligible_work`
 - the resolver reports `feature_exhausted` in design mode because only non-design work remains

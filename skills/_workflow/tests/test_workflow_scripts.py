@@ -19,6 +19,8 @@ AUTONOMOUS_RESOLVER_SCRIPT = (
     SKILLS_ROOT / "autonomous-backlog-loop" / "scripts" / "resolve_autonomous_backlog_action.py"
 )
 AUTONOMOUS_BACKLOG_LOOP_SKILL = SKILLS_ROOT / "autonomous-backlog-loop" / "SKILL.md"
+DRY_RUN_PLAN_SCRIPT = SKILLS_ROOT / "start-task" / "scripts" / "dry_run_plan_validation.py"
+ARCHIVE_READINESS_SCRIPT = SKILLS_ROOT / "ready-feature" / "scripts" / "check_archive_readiness.py"
 
 
 def _write_implementation_plan(change_dir: Path, task_id: str) -> None:
@@ -487,6 +489,131 @@ def test_audit_workflow_reports_ready_drift_for_promotable_todo_tasks(tmp_path: 
 
     assert result.returncode == 1
     assert "could be `ready` but is still `todo`" in result.stdout
+
+
+def _write_current_task_reference_fixture(
+    tmp_path: Path,
+    *,
+    current_task: str,
+    task_done: bool = False,
+) -> Path:
+    repo = tmp_path / "repo"
+    feature_dir = repo / "docs" / "planning" / "versions" / "v1" / "features"
+    feature_dir.mkdir(parents=True)
+    (repo / "docs" / "planning").mkdir(parents=True, exist_ok=True)
+    (repo / "docs" / "planning" / "current_version").symlink_to(Path("versions/v1"))
+    (repo / "openspec" / "specs").mkdir(parents=True, exist_ok=True)
+    change_dir = repo / "openspec" / "changes" / "current-task-change"
+    change_dir.mkdir(parents=True, exist_ok=True)
+
+    backlog = textwrap.dedent(
+        """\
+        # V1 Backlog
+
+        ## [BACKLOG]
+
+        None yet.
+
+        ## [SHAPING]
+
+        None yet.
+
+        ## [READY]
+
+        None yet.
+
+        ## [IN_PROGRESS]
+
+        ### `v1-f001` [Example](features/v1-f001-example.md)
+
+        ## [DONE]
+
+        None yet.
+
+        ## [DEFER]
+
+        None yet.
+        """
+    )
+    (repo / "docs" / "planning" / "versions" / "v1" / "BACKLOG.md").write_text(backlog, encoding="utf-8")
+
+    feature_text = textwrap.dedent(
+        f"""\
+        # Feature: Example
+
+        ## 0. Meta
+        - Feature ID: `v1-f001`
+        - Version: `v1`
+        - Backlog Reference: `docs/planning/versions/v1/BACKLOG.md#in_progress`
+        - OpenSpec Change: `current-task-change`
+        - OpenSpec Specs:
+          - `openspec/specs/task-execution-handoff/spec.md`
+        - Current Task: `{current_task}`
+
+        ## 1. Validation Log
+        - None yet.
+
+        ## 2. Handoff Notes
+        - None yet.
+        """
+    )
+    (feature_dir / "v1-f001-example.md").write_text(feature_text, encoding="utf-8")
+
+    (change_dir / "proposal.md").write_text("## Why\n\nFixture.\n", encoding="utf-8")
+    (change_dir / "design.md").write_text("## Context\n\nFixture.\n", encoding="utf-8")
+    checkbox = "x" if task_done else " "
+    (change_dir / "tasks.md").write_text(
+        f"## 1. Work\n\n- [{checkbox}] 1 Execute the work\n",
+        encoding="utf-8",
+    )
+    return repo
+
+
+def test_audit_workflow_accepts_current_task_referencing_in_progress_task(tmp_path: Path) -> None:
+    repo = _write_current_task_reference_fixture(tmp_path, current_task="1", task_done=False)
+
+    result = subprocess.run(
+        ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_audit_workflow_rejects_current_task_pointing_at_done_task(tmp_path: Path) -> None:
+    repo = _write_current_task_reference_fixture(tmp_path, current_task="1", task_done=True)
+
+    result = subprocess.run(
+        ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert (
+        "Current Task `1` references a task with status `done`, expected `in_progress`"
+        in result.stdout
+    )
+
+
+def test_audit_workflow_rejects_current_task_pointing_at_unknown_task(tmp_path: Path) -> None:
+    repo = _write_current_task_reference_fixture(tmp_path, current_task="9", task_done=False)
+
+    result = subprocess.run(
+        ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert (
+        "Current Task `9` does not reference any top-level OpenSpec task"
+        in result.stdout
+    )
 
 
 def test_resolve_start_task_fails_when_feature_has_task_readiness_drift(tmp_path: Path) -> None:
@@ -1570,4 +1697,119 @@ def test_resolve_complete_task_explicit_id_rejects_wrong_status(tmp_path: Path) 
 
     assert result.returncode == 1
     assert "expected `in_progress`" in result.stderr
+
+
+def test_resolve_autonomous_backlog_action_rejects_dangling_current_task(tmp_path: Path) -> None:
+    repo = _write_current_task_reference_fixture(tmp_path, current_task="1", task_done=True)
+
+    result = subprocess.run(
+        ["python3", str(AUTONOMOUS_RESOLVER_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert (
+        "Current Task `1` references a task with status `done`, expected `in_progress`"
+        in result.stderr
+    )
+
+
+def test_dry_run_plan_validation_accepts_valid_plan(tmp_path: Path) -> None:
+    change_dir = tmp_path / "change"
+    change_dir.mkdir()
+    _write_implementation_plan(change_dir, "1")
+    plan_path = change_dir / "implementation-plans" / "1.md"
+
+    result = subprocess.run(
+        ["python3", str(DRY_RUN_PLAN_SCRIPT), str(plan_path)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    payload = json.loads(result.stdout)
+    assert "integration" in payload["required_validation_classes"]
+    assert payload["required_evidence_categories"]
+
+
+def test_dry_run_plan_validation_rejects_plan_missing_required_sections(tmp_path: Path) -> None:
+    plan_path = tmp_path / "1.md"
+    plan_path.write_text(
+        "# Task 1 Implementation Plan\n\n## Objective\n\nNo contract surface here.\n",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        ["python3", str(DRY_RUN_PLAN_SCRIPT), str(plan_path)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "implementation plan is invalid" in result.stderr
+    assert "Contract Surface" in result.stderr
+
+
+def _write_archive_readiness_repo(
+    tmp_path: Path, *, modified_header: str, with_rename_bridge: bool
+) -> Path:
+    repo = tmp_path / "repo"
+    capability = "task-execution-handoff"
+    main_spec = repo / "openspec" / "specs" / capability / "spec.md"
+    main_spec.parent.mkdir(parents=True, exist_ok=True)
+    main_spec.write_text(
+        "## Purpose\n\n### Requirement: Original requirement name\nThe system SHALL do X.\n",
+        encoding="utf-8",
+    )
+    delta_spec = repo / "openspec" / "changes" / "example-change" / "specs" / capability / "spec.md"
+    delta_spec.parent.mkdir(parents=True, exist_ok=True)
+    body = ""
+    if with_rename_bridge:
+        body += (
+            "## RENAMED Requirements\n\n"
+            "- FROM: `### Requirement: Original requirement name`\n"
+            f"- TO: `### Requirement: {modified_header}`\n\n"
+        )
+    body += (
+        "## MODIFIED Requirements\n\n"
+        f"### Requirement: {modified_header}\nThe system SHALL do X better.\n"
+    )
+    delta_spec.write_text(body, encoding="utf-8")
+    return repo
+
+
+def test_check_archive_readiness_accepts_rename_bridge(tmp_path: Path) -> None:
+    repo = _write_archive_readiness_repo(
+        tmp_path, modified_header="Renamed requirement name", with_rename_bridge=True
+    )
+
+    result = subprocess.run(
+        ["python3", str(ARCHIVE_READINESS_SCRIPT), "--repo-root", str(repo), "--change-id", "example-change"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_check_archive_readiness_rejects_modified_without_rename_bridge(tmp_path: Path) -> None:
+    repo = _write_archive_readiness_repo(
+        tmp_path, modified_header="Renamed requirement name", with_rename_bridge=False
+    )
+
+    result = subprocess.run(
+        ["python3", str(ARCHIVE_READINESS_SCRIPT), "--repo-root", str(repo), "--change-id", "example-change"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "header differs from the main spec" in result.stderr
+    assert "no `## RENAMED` bridge" in result.stderr
 

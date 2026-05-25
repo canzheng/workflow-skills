@@ -4,13 +4,16 @@ import textwrap
 from pathlib import Path
 
 from _workflow.workflow_state import (
+    TaskRecord,
     WorkflowStateError,
     collect_openspec_change_linkage,
     collect_task_validation_evidence,
     compute_task_readiness_drift,
+    current_task_reference_error,
     find_backlog_section_order_errors,
     find_openspec_task_structure_errors,
     latest_review_verdict,
+    openspec_archive_modified_without_rename_bridge,
     parse_handoff_review_verdicts,
     parse_feature_openspec_specs,
     required_validation_evidence_categories_for_plan,
@@ -1436,3 +1439,183 @@ def test_latest_review_verdict_returns_latest_matching_scope_and_target() -> Non
     assert verdict.verdict == "approved"
     assert verdict.blocking_findings == ()
     assert verdict.terminal is True
+
+
+def test_validate_implementation_plan_file_ignores_hash_comments_inside_fenced_blocks(tmp_path: Path) -> None:
+    plan_path = tmp_path / "1.md"
+    plan_path.write_text(
+        textwrap.dedent(
+            """\
+            # Task 1 Implementation Plan
+
+            ## Objective
+
+            Exercise fenced-block handling.
+
+            ## Contract Surface
+
+            - Change Type: `behavioral`
+            - Workflow Surface: `resolver path`
+
+            ## Proof Obligations
+
+            - The plan must declare proof obligations explicitly.
+
+            ## Validation Plan
+
+            ```bash
+            # this comment must not terminate the Validation Plan section
+            python -m pytest
+            ```
+
+            ### Required Validation Classes
+
+            - `integration`
+
+            ### Unit-Only Justification
+
+            None.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    summary = validate_implementation_plan_file(plan_path)
+
+    assert summary.required_validation_classes == ("integration",)
+
+
+def test_validate_implementation_plan_file_accepts_named_validation_class_with_description(tmp_path: Path) -> None:
+    plan_path = tmp_path / "1.md"
+    plan_path.write_text(
+        textwrap.dedent(
+            """\
+            # Task 1 Implementation Plan
+
+            ## Objective
+
+            Exercise named-bullet handling.
+
+            ## Contract Surface
+
+            - Change Type: `behavioral`
+            - Workflow Surface: `resolver path`
+
+            ## Proof Obligations
+
+            - The plan must declare proof obligations explicitly.
+
+            ## Validation Plan
+
+            ### Required Validation Classes
+
+            - `integration` — runs the resolver end to end
+
+            ### Unit-Only Justification
+
+            None.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    summary = validate_implementation_plan_file(plan_path)
+
+    assert summary.required_validation_classes == ("integration",)
+
+
+def _task_record(task_id: str, status: str) -> TaskRecord:
+    return TaskRecord(
+        task_id=task_id,
+        task_title=f"Task {task_id}",
+        status=status,
+        depends_on=(),
+        status_line_index=0,
+    )
+
+
+def test_current_task_reference_error_accepts_in_progress_reference() -> None:
+    tasks = [_task_record("1", "in_progress")]
+
+    assert current_task_reference_error("1", tasks) is None
+
+
+def test_current_task_reference_error_allows_no_current_task() -> None:
+    tasks = [_task_record("1", "done")]
+
+    assert current_task_reference_error(None, tasks) is None
+
+
+def test_current_task_reference_error_rejects_done_reference() -> None:
+    tasks = [_task_record("1", "done")]
+
+    assert (
+        current_task_reference_error("1", tasks)
+        == "Current Task `1` references a task with status `done`, expected `in_progress`"
+    )
+
+
+def test_current_task_reference_error_rejects_unknown_reference() -> None:
+    tasks = [_task_record("1", "in_progress")]
+
+    assert (
+        current_task_reference_error("9", tasks)
+        == "Current Task `9` does not reference any top-level OpenSpec task"
+    )
+
+
+def _write_archive_readiness_change(repo: Path, *, modified_header: str, with_rename_bridge: bool) -> Path:
+    capability = "task-execution-handoff"
+    main_spec = repo / "openspec" / "specs" / capability / "spec.md"
+    main_spec.parent.mkdir(parents=True, exist_ok=True)
+    main_spec.write_text(
+        "## Purpose\n\n### Requirement: Original requirement name\nThe system SHALL do X.\n",
+        encoding="utf-8",
+    )
+    change_dir = repo / "openspec" / "changes" / "example-change"
+    delta_spec = change_dir / "specs" / capability / "spec.md"
+    delta_spec.parent.mkdir(parents=True, exist_ok=True)
+    body = ""
+    if with_rename_bridge:
+        body += (
+            "## RENAMED Requirements\n\n"
+            "- FROM: `### Requirement: Original requirement name`\n"
+            f"- TO: `### Requirement: {modified_header}`\n\n"
+        )
+    body += (
+        "## MODIFIED Requirements\n\n"
+        f"### Requirement: {modified_header}\nThe system SHALL do X better.\n"
+    )
+    delta_spec.write_text(body, encoding="utf-8")
+    return change_dir
+
+
+def test_openspec_archive_modified_matching_main_spec_has_no_issue(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    change_dir = _write_archive_readiness_change(
+        repo, modified_header="Original requirement name", with_rename_bridge=False
+    )
+
+    assert openspec_archive_modified_without_rename_bridge(change_dir, repo) == []
+
+
+def test_openspec_archive_modified_renamed_header_requires_bridge(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    change_dir = _write_archive_readiness_change(
+        repo, modified_header="Renamed requirement name", with_rename_bridge=False
+    )
+
+    issues = openspec_archive_modified_without_rename_bridge(change_dir, repo)
+
+    assert len(issues) == 1
+    assert "`## MODIFIED` requirement `Renamed requirement name` header differs from the main spec" in issues[0]
+    assert "no `## RENAMED` bridge" in issues[0]
+
+
+def test_openspec_archive_modified_renamed_header_accepts_rename_bridge(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    change_dir = _write_archive_readiness_change(
+        repo, modified_header="Renamed requirement name", with_rename_bridge=True
+    )
+
+    assert openspec_archive_modified_without_rename_bridge(change_dir, repo) == []

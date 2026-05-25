@@ -57,6 +57,10 @@ Create or re-enter the feature worktree early, before any heavy planning or revi
    - write `Retrieved Lesson IDs: none` when no lessons were returned; otherwise write the IDs as a comma-separated list in returned order, for example `Retrieved Lesson IDs: L-001, L-014`
    - do not rename, regroup, or renumber lesson IDs when recording the handoff; record the exact IDs returned by retrieval
    - keep the implementation plan's validation section aligned with the selected task, the linked change intent, and the proof-obligation / validation-taxonomy language used by shaping and readiness guidance
+7.5. Run a deterministic dry-run of the `complete-task` implementation-plan validator over the authored plan, before spawning the round-1 reviewer:
+   - from inside the feature worktree, run `python "${AGENTS_HOME:-$HOME/.agents}/skills/start-task/scripts/dry_run_plan_validation.py" <implementation-plan-path>`
+   - this runs the same `validate_implementation_plan_file` and `required_validation_evidence_categories_for_plan` checks `complete-task` enforces at closure, so plan-contract violations surface now instead of at completion: missing `## Contract Surface` / `## Proof Obligations` / `## Validation Plan`, missing or non-bare-name `### Required Validation Classes` bullets, or a runtime-facing contract surface with neither a runtime-facing validation class nor an explicit unit-only justification
+   - if the dry-run fails, return to step 7, fix the implementation plan, and re-run the dry-run until it passes before invoking the reviewer
 8. Perform a semantic consistency and coverage review across the selected change context before code execution starts.
    - read the task implementation plan after updating it
    - spawn a lightweight independent reviewer subagent to review whether the task implementation plan and its validation section are semantically consistent with the selected task, the change proposal, the design, and the linked spec intent
@@ -97,6 +101,7 @@ Create or re-enter the feature worktree early, before any heavy planning or revi
 - The task is not `ready`
 - Task scope is missing or invalid
 - The task implementation plan cannot be written or updated before execution begins
+- The deterministic `complete-task` plan-validator dry-run cannot be made to pass before the reviewer is spawned
 - The independent reviewer subagent's semantic consistency and coverage review finds inconsistency, ambiguity, unresolved drift, or missing validation coverage between the task implementation plan and the linked proposal, design, specs, or selected task
 - The primary checkout is dirty when the first feature worktree must be created
 - A later task for an existing `[IN_PROGRESS]` feature has no feature worktree and the user chooses to stop instead of creating one

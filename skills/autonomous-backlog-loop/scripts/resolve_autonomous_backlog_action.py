@@ -16,7 +16,9 @@ for _candidate in Path(__file__).resolve().parents:
 from _workflow.cli_helpers import WorkflowError, load_backlog, repo_root
 from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
+    current_task_reference_error,
     ensure_clean_feature_worktree_for_handoff,
+    parse_current_task,
     parse_tasks,
     resolve_feature_repo_root,
     validate_active_feature_execution,
@@ -158,6 +160,17 @@ def resolve_action(
     active_tasks = sum(task.status == "in_progress" for feature in all_features for task in feature.tasks)
     if active_tasks:
         raise WorkflowError("repository already has a task with status `in_progress`")
+
+    # Refuse to advance task-close state that left `Current Task` set without an
+    # active in-progress task backing it (same invariant the audit gate enforces).
+    for feature in all_features:
+        try:
+            current_task = parse_current_task(feature.feature_text)
+        except ValueError as exc:
+            raise WorkflowError(f"{feature.feature_path.relative_to(root)} {exc}") from exc
+        reference_error = current_task_reference_error(current_task, feature.tasks)
+        if reference_error is not None:
+            raise WorkflowError(f"{feature.feature_path.relative_to(root)} {reference_error}")
 
     for section_name in ("IN_PROGRESS", "READY"):
         for feature in feature_sections[section_name]:

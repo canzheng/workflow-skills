@@ -18,6 +18,7 @@ from _workflow.workflow_state import (
     WORKFLOW_SECTIONS,
     collect_openspec_change_linkage,
     compute_task_readiness_drift,
+    current_task_reference_error,
     find_backlog_section_order_errors,
     find_openspec_task_structure_errors,
     find_legacy_inline_planning_sections,
@@ -25,6 +26,7 @@ from _workflow.workflow_state import (
     list_git_worktree_roots,
     parse_backlog_document,
     validate_promoted_feature_openspec_specs,
+    parse_current_task,
     parse_feature_openspec_status,
     parse_tasks,
     parse_feature_openspec_change,
@@ -212,6 +214,15 @@ def _audit_single_root(root: Path) -> tuple[list[str], list[tuple[str, str]]]:
             for task in tasks:
                 if task.status == "in_progress":
                     in_progress_records.append((feature_id, task.task_id))
+
+            try:
+                current_task = parse_current_task(feature_text)
+            except ValueError as exc:
+                errors.append(f"{feature_path.relative_to(root)} {exc}")
+                current_task = None
+            reference_error = current_task_reference_error(current_task, tasks)
+            if reference_error is not None:
+                errors.append(f"{feature_path.relative_to(root)} {reference_error}")
 
             if section_name == "READY" and "ready" not in task_statuses:
                 errors.append(

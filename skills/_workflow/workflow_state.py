@@ -37,6 +37,9 @@ LEGACY_INLINE_SECTION_NAMES = {
     "implementation plan",
     "tasks",
 }
+REQUIREMENT_HEADER_RE = re.compile(r"^###\s+Requirement:\s+(?P<name>.+?)\s*$")
+DELTA_OPERATION_RE = re.compile(r"^##\s+(?P<op>ADDED|MODIFIED|REMOVED|RENAMED)\s+Requirements\s*$")
+RENAMED_TO_RE = re.compile(r"^-\s+TO:\s+`###\s+Requirement:\s+(?P<name>.+?)`\s*$")
 
 
 class WorkflowStateError(RuntimeError):
@@ -488,6 +491,28 @@ def parse_current_task(feature_text: str) -> str | None:
     return current_task
 
 
+def current_task_reference_error(current_task: str | None, tasks: list[TaskRecord]) -> str | None:
+    """Return an error message when `Current Task` is set but no active in-progress task backs it.
+
+    `current_task` is the value already parsed by `parse_current_task` (`None` means
+    no active task is declared). Returns `None` when the invariant holds. Shared by
+    the audit gate and the autonomous-backlog-loop resolver so both refuse to advance
+    task-close state that left `Current Task` pointing at a task that is not
+    `in_progress`.
+    """
+    if current_task is None:
+        return None
+    referenced_task = next((task for task in tasks if task.task_id == current_task), None)
+    if referenced_task is None:
+        return f"Current Task `{current_task}` does not reference any top-level OpenSpec task"
+    if referenced_task.status != "in_progress":
+        return (
+            f"Current Task `{current_task}` references a task with status "
+            f"`{referenced_task.status}`, expected `in_progress`"
+        )
+    return None
+
+
 def parse_handoff_review_verdicts(feature_text: str) -> list[ReviewVerdict]:
     handoff_notes_header = "## 2. Handoff Notes\n"
     handoff_start = feature_text.find(handoff_notes_header)
@@ -719,15 +744,24 @@ def _collect_markdown_section(lines: list[str], *, title: str, level: int) -> li
     heading_re = re.compile(rf"^{'#' * level}(?:\s+\d+(?:\.\d+)*)?\.?\s+{re.escape(title)}\s*$")
     collected: list[str] = []
     collecting = False
+    in_fence = False
 
     for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("```") or stripped.startswith("~~~"):
+            in_fence = not in_fence
+            if collecting:
+                collected.append(line)
+            continue
+
         if not collecting:
-            if heading_re.match(line.strip()):
+            if not in_fence and heading_re.match(stripped):
                 collecting = True
             continue
 
-        stripped = line.strip()
-        if stripped.startswith("#"):
+        # A `#`-comment inside a fenced code block is content, not a heading, so it
+        # must not terminate the section.
+        if not in_fence and stripped.startswith("#"):
             marker = stripped.split(maxsplit=1)[0]
             if set(marker) == {"#"} and len(marker) <= level:
                 break
@@ -757,8 +791,14 @@ def _parse_bullet_values(lines: list[str]) -> list[str]:
         if not stripped.startswith("- "):
             continue
         value = stripped[2:].strip()
-        if value.startswith("`") and value.endswith("`") and len(value) >= 2:
-            value = value[1:-1]
+        # Accept both bare-name bullets (`- `integration``) and named bullets that
+        # carry a trailing description (`- `integration` — runs the resolver`) by
+        # extracting the first backtick-quoted token as the value.
+        if value.startswith("`"):
+            closing = value.find("`", 1)
+            if closing != -1:
+                values.append(value[1:closing])
+                continue
         values.append(value.rstrip("."))
     return values
 
@@ -926,6 +966,72 @@ def validate_implementation_plan_file(plan_path: Path) -> ImplementationPlanSumm
         required_validation_classes=required_validation_classes,
         unit_only_justification=unit_only_justification,
     )
+
+
+def _parse_main_spec_requirement_names(spec_path: Path) -> set[str]:
+    if not spec_path.exists():
+        return set()
+    names: set[str] = set()
+    for line in spec_path.read_text(encoding="utf-8").splitlines():
+        match = REQUIREMENT_HEADER_RE.match(line.strip())
+        if match:
+            names.add(match.group("name"))
+    return names
+
+
+def _parse_delta_spec_modified_and_renamed(spec_path: Path) -> tuple[list[str], set[str]]:
+    modified_requirements: list[str] = []
+    renamed_to_names: set[str] = set()
+    current_operation: str | None = None
+    for line in spec_path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        operation_match = DELTA_OPERATION_RE.match(stripped)
+        if operation_match:
+            current_operation = operation_match.group("op")
+            continue
+        if current_operation == "MODIFIED":
+            requirement_match = REQUIREMENT_HEADER_RE.match(stripped)
+            if requirement_match:
+                modified_requirements.append(requirement_match.group("name"))
+        elif current_operation == "RENAMED":
+            to_match = RENAMED_TO_RE.match(stripped)
+            if to_match:
+                renamed_to_names.add(to_match.group("name"))
+    return modified_requirements, renamed_to_names
+
+
+def openspec_archive_modified_without_rename_bridge(change_dir: Path, repo_root: Path) -> list[str]:
+    """Return archive-readiness issues for delta `## MODIFIED` requirements that
+    cannot be located in the main spec and lack a `## RENAMED` bridge.
+
+    OpenSpec archive applies a "## MODIFIED" block by matching its
+    "### Requirement: <name>" header against the same-named requirement in the main
+    spec. When a change renames a requirement, the new header only resolves if a
+    "## RENAMED Requirements" bridge with a matching "- TO:" line maps it from the
+    old main-spec header. A MODIFIED header that is neither present in the main spec
+    nor a RENAMED TO target would fail only at archive time, so this gate surfaces it
+    during readiness instead.
+    """
+    issues: list[str] = []
+    specs_root = change_dir / "specs"
+    if not specs_root.is_dir():
+        return issues
+    main_specs_root = repo_root / "openspec" / "specs"
+    for delta_spec_path in sorted(specs_root.glob("*/spec.md")):
+        capability = delta_spec_path.parent.name
+        modified_requirements, renamed_to_names = _parse_delta_spec_modified_and_renamed(delta_spec_path)
+        if not modified_requirements:
+            continue
+        main_requirement_names = _parse_main_spec_requirement_names(main_specs_root / capability / "spec.md")
+        for requirement_name in modified_requirements:
+            if requirement_name in main_requirement_names or requirement_name in renamed_to_names:
+                continue
+            issues.append(
+                f"openspec/changes/{change_dir.name}/specs/{capability}/spec.md "
+                f"`## MODIFIED` requirement `{requirement_name}` header differs from the main spec "
+                f"and has no `## RENAMED` bridge"
+            )
+    return issues
 
 
 def validate_active_feature_execution(
