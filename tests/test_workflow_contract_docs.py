@@ -59,6 +59,16 @@ class WorkflowContractDocsTests(unittest.TestCase):
         self.assertIn("every step in the implementation plan's validation section has been completed successfully", start_task_skill)
         self.assertIn("leaving only the fresh completion-time reconciliation gate owned by `complete-task`", start_task_skill)
 
+    def test_ready_and_start_gates_run_claim_evidence_lint(self) -> None:
+        ready_feature_skill = READY_FEATURE_SKILL.read_text(encoding="utf-8")
+        start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
+
+        lint_command = "skills/_workflow/scripts/lint_openspec_claim_evidence.py"
+        self.assertIn(lint_command, ready_feature_skill)
+        self.assertIn(lint_command, start_task_skill)
+        self.assertIn("file:line citation or numeric pin", ready_feature_skill)
+        self.assertIn("file:line citation or numeric pin", start_task_skill)
+
     def test_start_task_skill_forbids_task_agent_from_continuing_to_next_workflow_task(self) -> None:
         start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
 

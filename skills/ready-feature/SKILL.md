@@ -35,6 +35,10 @@ It is a workflow wrapper around linked OpenSpec shaping artifacts, with optional
    - run `python "${AGENTS_HOME:-$HOME/.agents}/skills/ready-feature/scripts/check_archive_readiness.py" --change-id <linked-change-id>`
    - it flags any delta `## MODIFIED` requirement whose `### Requirement:` header differs from the main spec without a `## RENAMED Requirements` bridge mapping the old main-spec header to the new one
    - if it reports issues, return to shaping and add the required `## RENAMED` bridge (or correct the MODIFIED header) before promotion, so the change does not fail only at archive time
+6.6. Run a deterministic pinned-claim evidence lint on the linked change:
+   - run `python "${AGENTS_HOME:-$HOME/.agents}/skills/_workflow/scripts/lint_openspec_claim_evidence.py" "openspec/changes/<linked-change-id>"`
+   - it flags any plan/design line containing a file:line citation or numeric pin without an adjacent grep/Read evidence block
+   - if it reports issues, return to shaping and add the adjacent evidence block or remove the unsupported pinned claim before promotion
 7. Review corresponding existing documentation for consistency with the shaped change, update any documentation that must change before the feature can honestly be considered ready, and otherwise make the no-update-needed conclusion explicit in the linked OpenSpec change.
 8. Confirm at least one linked top-level OpenSpec task resolves to workflow status `ready` under the workflow task dependency convention.
 9. Perform an independent readiness review before promotion:
@@ -71,6 +75,7 @@ It is a workflow wrapper around linked OpenSpec shaping artifacts, with optional
 - The feature file does not exist
 - The linked OpenSpec change is too incomplete to justify readiness safely
 - The linked OpenSpec change has a delta `## MODIFIED` requirement whose header differs from the main spec without a `## RENAMED` bridge
+- The linked OpenSpec change has a plan/design file:line citation or numeric pin without adjacent grep/Read evidence
 - No task can honestly be marked `ready`
 - The primary checkout cannot be left clean before exit
 - `audit-workflow` reports an invalid workflow state

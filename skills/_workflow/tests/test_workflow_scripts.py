@@ -21,6 +21,7 @@ AUTONOMOUS_RESOLVER_SCRIPT = (
 AUTONOMOUS_BACKLOG_LOOP_SKILL = SKILLS_ROOT / "autonomous-backlog-loop" / "SKILL.md"
 DRY_RUN_PLAN_SCRIPT = SKILLS_ROOT / "start-task" / "scripts" / "dry_run_plan_validation.py"
 ARCHIVE_READINESS_SCRIPT = SKILLS_ROOT / "ready-feature" / "scripts" / "check_archive_readiness.py"
+CLAIM_EVIDENCE_LINT_SCRIPT = SKILLS_ROOT / "_workflow" / "scripts" / "lint_openspec_claim_evidence.py"
 
 
 def _write_implementation_plan(change_dir: Path, task_id: str) -> None:
@@ -1813,3 +1814,29 @@ def test_check_archive_readiness_rejects_modified_without_rename_bridge(tmp_path
     assert "header differs from the main spec" in result.stderr
     assert "no `## RENAMED` bridge" in result.stderr
 
+
+def test_claim_evidence_lint_script_rejects_unsupported_pinned_claims(tmp_path: Path) -> None:
+    change_dir = tmp_path / "example-change"
+    change_dir.mkdir()
+    (change_dir / "proposal.md").write_text(
+        textwrap.dedent(
+            """\
+            ## Why
+
+            - `panel.py:147` is the only path that computes the value.
+            - The expected score is 0.065.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        ["python3", str(CLAIM_EVIDENCE_LINT_SCRIPT), str(change_dir)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "panel.py:147" in result.stderr
+    assert "numeric claim lacks adjacent grep/Read evidence block" in result.stderr

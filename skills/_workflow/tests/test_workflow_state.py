@@ -19,6 +19,7 @@ from _workflow.workflow_state import (
     required_validation_evidence_categories_for_plan,
     validate_promoted_feature_openspec_specs,
     list_open_openspec_nested_items,
+    lint_openspec_claim_evidence,
     parse_backlog_document,
     parse_current_task,
     parse_tasks,
@@ -307,6 +308,62 @@ def test_validate_implementation_plan_file_rejects_behavioral_plan_without_runti
         assert "runtime-facing validation class or an explicit unit-only justification" in str(exc)
     else:
         raise AssertionError("expected behavioral plan without runtime validation to be rejected")
+
+
+def test_lint_openspec_claim_evidence_rejects_unsupported_file_line_and_numeric_claims(
+    tmp_path: Path,
+) -> None:
+    change_dir = tmp_path / "example-change"
+    change_dir.mkdir()
+    (change_dir / "design.md").write_text(
+        textwrap.dedent(
+            """\
+            ## Decision
+
+            - `calibration_run.py:636` is the only embargo arithmetic path.
+            - The matched evaluation reproduces canonical 0.0782.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    issues = lint_openspec_claim_evidence(change_dir)
+
+    assert [(issue.relative_path, issue.line_number, issue.reason) for issue in issues] == [
+        ("design.md", 3, "file-line citation lacks adjacent grep/Read evidence block"),
+        ("design.md", 4, "numeric claim lacks adjacent grep/Read evidence block"),
+    ]
+
+
+def test_lint_openspec_claim_evidence_accepts_adjacent_grep_evidence_blocks(
+    tmp_path: Path,
+) -> None:
+    change_dir = tmp_path / "example-change"
+    change_dir.mkdir()
+    (change_dir / "design.md").write_text(
+        textwrap.dedent(
+            """\
+            ## Decision
+
+            Evidence:
+            ```text
+            rtk rg -n "embargo" calibration_run.py panel.py
+            calibration_run.py:636:existing embargo arithmetic
+            panel.py:147:duplicated embargo arithmetic
+            ```
+            - `calibration_run.py:636` and `panel.py:147` show the duplicated paths.
+
+            Evidence:
+            ```text
+            Read output: matched evaluation returned 0.0782.
+            ```
+            - The matched evaluation reproduces canonical 0.0782.
+            """
+        ),
+        encoding="utf-8",
+    )
+
+    assert lint_openspec_claim_evidence(change_dir) == []
 
 
 def test_validate_active_feature_execution_rejects_missing_openspec_change_metadata(tmp_path: Path) -> None:

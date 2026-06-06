@@ -53,3 +53,30 @@
   catch_earlier_by: Review the shared helper and ask what happens when no unique active worktree exists.
   distilled_into:
     - L-002
+
+- id: N-003
+  status: open
+  created_at: 2026-05-29
+  updated_at: 2026-05-29
+  feature_ref: ad-hoc-claim-evidence-lint
+  task_ref: ""
+  kind: signal
+  context: User supplied review synthesis that repeated assertions from memory caused planning and review rework, including incorrect numeric pins and incorrect claims about centralized code structure.
+  observation: The existing guidance requiring grep/Read evidence for correctness-critical pinned claims was prose-only; ready-feature and start-task had no deterministic gate that could reject unsupported file-line or numeric claims before review.
+  why_notable: This is a review-loop signal because the same human correction recurred across tasks, and relying on agent memory let unsupported claims reach plan/design artifacts where reviewers had to catch them manually.
+  current_hypothesis: A focused lint over OpenSpec proposal, design, and implementation-plan files should turn the soft norm into a cheap blocking check while avoiding task/spec numbering noise.
+  artifacts:
+    - skills/_workflow/workflow_state.py
+    - skills/_workflow/scripts/lint_openspec_claim_evidence.py
+    - skills/ready-feature/SKILL.md
+    - skills/start-task/SKILL.md
+    - skills/_workflow/tests/test_workflow_state.py
+    - skills/_workflow/tests/test_workflow_scripts.py
+  next_check: Watch the lint during the next ready-feature/start-task pass for noisy false positives around legitimate numeric planning language, then narrow or broaden the regex based on concrete cases.
+  outcome: Implemented a shared pinned-claim evidence lint and wired ready-feature/start-task guidance to run it before promotion or execution review.
+  what_worked: Testing the unsupported file-line and numeric cases first kept the implementation focused on the specific review failure.
+  what_did_not_work: ""
+  reusable_insight: Repeated memory-based claim corrections need executable gates, not only prose lessons.
+  do_differently_next_time: Add lint-level enforcement when a lesson describes a recurring review failure that can be detected mechanically.
+  catch_earlier_by: During shaping/readiness review, ask whether each file-line citation or numeric pin has adjacent grep/Read output before accepting the artifact.
+  distilled_into: []

@@ -146,6 +146,14 @@ class ImplementationPlanSummary:
 
 
 @dataclass(frozen=True)
+class ClaimEvidenceIssue:
+    relative_path: str
+    line_number: int
+    reason: str
+    line: str
+
+
+@dataclass(frozen=True)
 class ValidationEvidenceSummary:
     task_id: str
     evidence_lines: tuple[str, ...]
@@ -170,6 +178,25 @@ RUNTIME_FACING_SURFACE_KEYWORDS = (
     "prompt interface",
     "runtime",
     "artifact mutation",
+)
+FILE_LINE_CITATION_RE = re.compile(
+    r"(?<![:/\w.-])(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+\.[A-Za-z0-9]+:\d+(?:-\d+)?"
+)
+DECIMAL_OR_PERCENT_PIN_RE = re.compile(
+    r"(?:[~<>]=?\s*)?\b\d+\.\d+\b|\b\d+(?:\.\d+)?\s?%|\b\d{1,3}(?:,\d{3})+(?:\.\d+)?\b"
+)
+STRUCTURE_COUNT_PIN_RE = re.compile(
+    r"\b(?:single|one|two|three|four|five|six|seven|eight|nine|ten|\d+)"
+    r"\s+(?:centralized\s+)?(?:tiers?|paths?|levers?|copies|implementations?|locations?)\b",
+    re.IGNORECASE,
+)
+INLINE_CODE_SPAN_RE = re.compile(r"`[^`]*`")
+ISO_DATE_RE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
+EVIDENCE_ADJACENCY_RE = re.compile(r"^\s*(?:evidence|grep|rg|read|output)\s*:?\s*$", re.IGNORECASE)
+EVIDENCE_BLOCK_RE = re.compile(r"\b(evidence|grep|rg|read|output)\b", re.IGNORECASE)
+EVIDENCE_COMMAND_RE = re.compile(
+    r"^\s*(?:\$?\s*)?(?:rtk\s+)?(?:rg|grep|sed|nl|python|cat|read)\b",
+    re.IGNORECASE,
 )
 VALIDATION_EVIDENCE_CATEGORY_ALIASES = {
     "schema": "schema",
@@ -880,6 +907,127 @@ def collect_task_validation_evidence(feature_text: str, task_id: str) -> Validat
         evidence_lines=tuple(evidence_lines),
         evidence_categories=evidence_categories,
     )
+
+
+def _iter_claim_lint_markdown_files(change_dir: Path) -> list[Path]:
+    candidates: list[Path] = []
+    for name in ("proposal.md", "design.md"):
+        path = change_dir / name
+        if path.is_file():
+            candidates.append(path)
+
+    implementation_plans = change_dir / "implementation-plans"
+    if implementation_plans.is_dir():
+        candidates.extend(sorted(implementation_plans.rglob("*.md")))
+
+    seen: set[Path] = set()
+    unique_candidates: list[Path] = []
+    for path in candidates:
+        resolved = path.resolve()
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        unique_candidates.append(path)
+    return unique_candidates
+
+
+def _collect_fenced_markdown_blocks(lines: list[str]) -> list[tuple[int, int, bool]]:
+    blocks: list[tuple[int, int, bool]] = []
+    fence_start: int | None = None
+    fence_marker: str | None = None
+    for index, line in enumerate(lines, start=1):
+        stripped = line.lstrip()
+        if fence_start is None:
+            if stripped.startswith("```") or stripped.startswith("~~~"):
+                fence_start = index
+                fence_marker = stripped[:3]
+            continue
+        if fence_marker is not None and stripped.startswith(fence_marker):
+            block_lines = lines[fence_start - 1 : index]
+            context_before = lines[max(0, fence_start - 3) : fence_start - 1]
+            evidence_text = "\n".join([*context_before, *block_lines])
+            is_evidence = bool(
+                EVIDENCE_BLOCK_RE.search(evidence_text)
+                or any(EVIDENCE_COMMAND_RE.search(block_line) for block_line in block_lines)
+                or any(FILE_LINE_CITATION_RE.search(block_line) for block_line in block_lines)
+            )
+            blocks.append((fence_start, index, is_evidence))
+            fence_start = None
+            fence_marker = None
+    if fence_start is not None:
+        blocks.append((fence_start, len(lines), False))
+    return blocks
+
+
+def _line_is_inside_block(line_number: int, blocks: list[tuple[int, int, bool]]) -> bool:
+    return any(start <= line_number <= end for start, end, _is_evidence in blocks)
+
+
+def _only_evidence_adjacency_lines(lines: list[str]) -> bool:
+    meaningful = [line for line in lines if line.strip()]
+    if len(meaningful) > 1:
+        return False
+    return not meaningful or all(EVIDENCE_ADJACENCY_RE.match(line) for line in meaningful)
+
+
+def _has_adjacent_evidence_block(
+    line_number: int,
+    lines: list[str],
+    blocks: list[tuple[int, int, bool]],
+) -> bool:
+    for start, end, is_evidence in blocks:
+        if not is_evidence:
+            continue
+        if line_number < start and _only_evidence_adjacency_lines(lines[line_number : start - 1]):
+            return True
+        if line_number > end and _only_evidence_adjacency_lines(lines[end : line_number - 1]):
+            return True
+    return False
+
+
+def _line_has_numeric_pin(line: str) -> bool:
+    text = INLINE_CODE_SPAN_RE.sub("", line)
+    text = ISO_DATE_RE.sub("", text)
+    return bool(DECIMAL_OR_PERCENT_PIN_RE.search(text) or STRUCTURE_COUNT_PIN_RE.search(text))
+
+
+def _claim_evidence_issues_for_file(path: Path, *, relative_path: str) -> list[ClaimEvidenceIssue]:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    blocks = _collect_fenced_markdown_blocks(lines)
+    issues: list[ClaimEvidenceIssue] = []
+    for index, line in enumerate(lines, start=1):
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or _line_is_inside_block(index, blocks):
+            continue
+
+        has_evidence = _has_adjacent_evidence_block(index, lines, blocks)
+        if FILE_LINE_CITATION_RE.search(line) and not has_evidence:
+            issues.append(
+                ClaimEvidenceIssue(
+                    relative_path=relative_path,
+                    line_number=index,
+                    reason="file-line citation lacks adjacent grep/Read evidence block",
+                    line=stripped,
+                )
+            )
+        if _line_has_numeric_pin(line) and not has_evidence:
+            issues.append(
+                ClaimEvidenceIssue(
+                    relative_path=relative_path,
+                    line_number=index,
+                    reason="numeric claim lacks adjacent grep/Read evidence block",
+                    line=stripped,
+                )
+            )
+    return issues
+
+
+def lint_openspec_claim_evidence(change_dir: Path) -> list[ClaimEvidenceIssue]:
+    issues: list[ClaimEvidenceIssue] = []
+    for path in _iter_claim_lint_markdown_files(change_dir):
+        relative_path = path.relative_to(change_dir).as_posix()
+        issues.extend(_claim_evidence_issues_for_file(path, relative_path=relative_path))
+    return issues
 
 
 def required_validation_evidence_categories_for_plan(summary: ImplementationPlanSummary) -> tuple[str, ...]:
