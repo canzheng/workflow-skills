@@ -188,7 +188,7 @@ def initialize_repo_scaffold(repo: Path, version: str = "v1") -> Path:
     ``tests/test_diagnose_workflow.py`` so the scaffold step is written once.
     Results are identical to calling :func:`_real_initialize` directly, but a
     per-version cache copies a pre-built tree instead of re-forking
-    ``openspec init`` and ``lessons init`` for every test.
+    ``openspec init`` for every test.
     """
 
     template = _ensure_scaffold_cache(version)
@@ -205,7 +205,7 @@ def initialize(repo: Path, version: str = "v1") -> Path:
 
     Uses the cached scaffold copy for speed. Falls back to the real
     subprocess-backed initializer when the cache cannot be populated (for
-    example, when ``openspec`` or ``lessons`` is unavailable).
+    example, when ``openspec`` is unavailable).
     """
 
     try:

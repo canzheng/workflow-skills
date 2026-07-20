@@ -44,18 +44,13 @@ The full semantics — when each action is emitted, how `Depends On` parsing sha
    - if the task ran through `executing-plans`, wrap `requesting-code-review` whenever this task closes a review batch, materially completes a feature, or otherwise reaches a review checkpoint
 6. Confirm the active feature worktree contains only intended task changes and will be left clean after completion. Use repo-appropriate checks such as `git status --short` and `git diff --check`.
    - read the files listed as context before completing the task so validation and task closure are checked against the authoritative change artifacts
-6.5. Reconcile lesson usage before closing the task.
-   - read the task-scoped canonical `Retrieved Lesson IDs: ...` line recorded by `start-task` in the feature file handoff notes for the active task
-   - treat `Retrieved Lesson IDs: none` as meaning no usage reconciliation is needed
-   - otherwise parse the comma-separated lesson IDs in returned order, call `record-lesson-usage` for those exact IDs before the task is marked done, and point it at the task completion summary and evidence block in the feature file so it can judge usage from that evidence plus the related work done in the repo
-   - if the canonical line is missing while lessons were supposed to have been retrieved, stop and repair the feature-file handoff notes before closing the task
-   - record any warranted high-signal notes in `docs/lessons/notes.md` after usage reconciliation and before the task is closed
+6.5. Record the completion review verdict before closing the task.
    - if the task crossed a review gate, record the completion review verdict in the feature file handoff notes using canonical `Review Scope`, `Review Target`, `Review Verdict`, `Blocking Findings`, and `Review Terminal` lines so downstream workflow can consume it without prose inference
 7. Update the feature file:
    - reconcile the existing validation log against the same proof-obligation and validation-taxonomy language the task plan used
    - add any missing completion-time verification evidence that was produced only at this gate
    - clear `Current Task` to `none`; do not set it to a new task ID in this skill
-   - record any task-completion handoff notes, including the lesson usage outcome when lessons were retrieved
+   - record any task-completion handoff notes
 8. Update the linked OpenSpec change:
    - mark the completed task `done`
    - rely on the workflow `Depends On` convention parsed from the linked OpenSpec task file to expose downstream ready work

@@ -151,9 +151,9 @@ def _resolve_task_in_root(root: Path, *, selected_feature_id: str | None = None)
                     ),
                     "execution_instruction": (
                         "Create or re-enter the feature worktree FIRST. Only after the worktree exists, "
-                        "from inside that worktree, read the listed context files, retrieve lessons, and "
+                        "from inside that worktree, read the listed context files and "
                         "draft (if status=missing) or update (if status=present) the implementation plan "
-                        "at the provided path. Do not retrieve lessons or write the plan in the primary "
+                        "at the provided path. Do not write the plan in the primary "
                         "checkout. Record validation evidence during execution as planned proof steps complete."
                     ),
                     "task_id": task.task_id,
@@ -282,9 +282,9 @@ def resolve_named_task(root: Path, feature_id: str, task_id: str) -> dict[str, o
         ),
         "execution_instruction": (
             "Create or re-enter the feature worktree FIRST. Only after the worktree exists, "
-            "from inside that worktree, read the listed context files, retrieve lessons, and "
+            "from inside that worktree, read the listed context files and "
             "draft (if status=missing) or update (if status=present) the implementation plan "
-            "at the provided path. Do not retrieve lessons or write the plan in the primary "
+            "at the provided path. Do not write the plan in the primary "
             "checkout. Record validation evidence during execution as planned proof steps complete."
         ),
         "task_id": matching_task.task_id,

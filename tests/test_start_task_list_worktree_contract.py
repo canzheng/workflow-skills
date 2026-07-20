@@ -2,9 +2,9 @@
 v1-f019 task 1. Before the migration, `skills/start-task/scripts/resolve_start_task.py`
 carried a private `_list_git_worktree_roots` whose failure contract returned
 `[]` while the public `list_git_worktree_roots` in `skills/_workflow/workflow_state.py`
-returned `[root.resolve()]`. Retrieved lesson L-002 required a missing-worktree
-negative-path test to keep fallback behavior from silently returning during
-resolver runs. This test enforces that the private copy cannot come back.
+returned `[root.resolve()]`. A missing-worktree negative-path test is required
+to keep fallback behavior from silently returning during resolver runs. This
+test enforces that the private copy cannot come back.
 """
 from __future__ import annotations
 

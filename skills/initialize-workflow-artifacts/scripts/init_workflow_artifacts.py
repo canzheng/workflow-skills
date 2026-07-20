@@ -122,15 +122,6 @@ def run_openspec_init(root: Path) -> str:
     return f"RUN {' '.join(command)}"
 
 
-def run_lessons_init(root: Path) -> str:
-    command = ["lessons", "init", "--tools", "claude"]
-    try:
-        subprocess.run(command, cwd=root, check=True)
-    except subprocess.CalledProcessError as exc:
-        raise WorkflowError(f"lessons init failed with exit code {exc.returncode}") from exc
-    return f"RUN {' '.join(command)}"
-
-
 def initialize(root: Path, version: str) -> list[str]:
     root.mkdir(parents=True, exist_ok=True)
     planning_root = root / "docs" / "planning"
@@ -140,7 +131,6 @@ def initialize(root: Path, version: str) -> list[str]:
     results = []
 
     results.append(run_openspec_init(root))
-    results.append(run_lessons_init(root))
     feature_root.mkdir(parents=True, exist_ok=True)
     results.append(f"ENSURE {feature_root}")
     (openspec_root / "specs").mkdir(parents=True, exist_ok=True)

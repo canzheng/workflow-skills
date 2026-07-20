@@ -174,28 +174,6 @@ class WorkflowContractDocsTests(unittest.TestCase):
         self.assertIn("Blocking Findings", feature_template)
         self.assertIn("Review Terminal", feature_template)
 
-    def test_planning_stage_lesson_lifecycle_docs_expose_canonical_handoff_lines(self) -> None:
-        shape_backlog_item_skill = (REPO_ROOT / "skills" / "shape-backlog-item" / "SKILL.md").read_text(encoding="utf-8")
-        ready_feature_skill = (REPO_ROOT / "skills" / "ready-feature" / "SKILL.md").read_text(encoding="utf-8")
-        finish_feature_skill = FINISH_FEATURE_SKILL.read_text(encoding="utf-8")
-        workflow_reference = WORKFLOW_REFERENCE.read_text(encoding="utf-8")
-        feature_template = FEATURE_TEMPLATE.read_text(encoding="utf-8")
-
-        self.assertIn("call `retrieve-lessons`", shape_backlog_item_skill)
-        self.assertIn("stage-scoped canonical `Retrieved Lesson IDs: ...` line for `shaping`", shape_backlog_item_skill)
-        self.assertIn("call `record-lesson-usage`", shape_backlog_item_skill)
-        self.assertIn("record any warranted high-signal notes in `docs/lessons/notes.md`", shape_backlog_item_skill)
-        self.assertIn("before the independent readiness review", ready_feature_skill)
-        self.assertIn("call `retrieve-lessons`", ready_feature_skill)
-        self.assertIn("stage-scoped canonical `Retrieved Lesson IDs: ...` line for `ready`", ready_feature_skill)
-        self.assertIn("call `record-lesson-usage`", ready_feature_skill)
-        self.assertIn("record any warranted high-signal notes in `docs/lessons/notes.md`", ready_feature_skill)
-        self.assertIn("Retrieved Lesson IDs", feature_template)
-        self.assertIn("Lesson Usage", feature_template)
-        self.assertIn("Lesson lifecycle integrates with shaping, readiness, task execution, and feature completion", workflow_reference)
-        self.assertIn("Earlier workflow stages record lesson usage and high-signal notes only", finish_feature_skill)
-        self.assertIn("only workflow stage that runs `distill-lessons`", finish_feature_skill)
-
     def test_stable_handoff_spec_mentions_autonomous_finish_feature_gate(self) -> None:
         task_execution_handoff_spec = TASK_EXECUTION_HANDOFF_SPEC.read_text(encoding="utf-8")
 
@@ -268,34 +246,6 @@ class WorkflowContractDocsTests(unittest.TestCase):
             "`cp docs/planning/WORKFLOW_REFERENCE.md "
             "skills/initialize-workflow-artifacts/templates/WORKFLOW_REFERENCE.md`.",
         )
-
-    def test_stage_level_skills_describe_retrieved_lesson_ids_as_stage_scoped(self) -> None:
-        shape_backlog_item_skill = SHAPE_BACKLOG_ITEM_SKILL.read_text(encoding="utf-8")
-        ready_feature_skill = READY_FEATURE_SKILL.read_text(encoding="utf-8")
-
-        self.assertIn(
-            "stage-scoped canonical `Retrieved Lesson IDs: ...` line for `shaping`",
-            shape_backlog_item_skill,
-        )
-        self.assertIn(
-            "stage-scoped canonical `Retrieved Lesson IDs: ...` line for `ready`",
-            ready_feature_skill,
-        )
-        self.assertNotIn(
-            "task-scoped canonical `Retrieved Lesson IDs: ...` line for `shaping`",
-            shape_backlog_item_skill,
-        )
-        self.assertNotIn(
-            "task-scoped canonical `Retrieved Lesson IDs: ...` line for `ready`",
-            ready_feature_skill,
-        )
-
-    def test_task_level_skills_describe_retrieved_lesson_ids_as_task_scoped(self) -> None:
-        start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
-        complete_task_skill = COMPLETE_TASK_SKILL.read_text(encoding="utf-8")
-
-        self.assertIn("task-scoped canonical `Retrieved Lesson IDs: ...` line", start_task_skill)
-        self.assertIn("task-scoped canonical `Retrieved Lesson IDs: ...` line", complete_task_skill)
 
     def test_complete_task_skill_documents_completion_handoff_output_contract(self) -> None:
         complete_task_skill = COMPLETE_TASK_SKILL.read_text(encoding="utf-8")

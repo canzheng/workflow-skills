@@ -27,7 +27,7 @@ It is a workflow wrapper around `using-git-worktrees` for feature-scoped isolati
 
 Create or re-enter the feature worktree early, before any heavy planning or review work, so the primary checkout is freed for concurrent `shape-backlog-item`, `ready-feature`, or other features' `start-task` work. Steps 1–4 are read-only against the primary checkout; steps 5–6 create the worktree; every step from 7 onward runs inside the feature worktree.
 
-**Hard ordering rule.** Do not retrieve lessons, read change context, or draft/update the task implementation plan in the primary checkout. These belong to step 7 inside the feature worktree. If the resolver reports `implementation_plan_status: missing`, that is expected — proceed to steps 5–6 to create the worktree, then draft the plan inside the worktree at step 7. Never write the plan, retrieve lessons, or do context-reading in the primary checkout and then roll back.
+**Hard ordering rule.** Do not read change context or draft/update the task implementation plan in the primary checkout. These belong to step 7 inside the feature worktree. If the resolver reports `implementation_plan_status: missing`, that is expected — proceed to steps 5–6 to create the worktree, then draft the plan inside the worktree at step 7. Never write the plan or do context-reading in the primary checkout and then roll back.
 
 1. Run `audit-workflow`.
 2. Confirm there is no repository task already marked `in_progress`.
@@ -49,13 +49,9 @@ Create or re-enter the feature worktree early, before any heavy planning or revi
    - if no feature worktree exists for a later task, ask the user whether to create one now or stop; recommend creating the worktree
    - if reusing an existing feature worktree, stop unless that worktree is already clean and ready for the next task
    - all subsequent steps run inside this feature worktree so the primary checkout stays free for other features
-7. From inside the feature worktree, read the linked change context before drafting or updating the task implementation plan. All substeps here must run inside the worktree; do not retrieve lessons, read context, or write the plan in the primary checkout.
+7. From inside the feature worktree, read the linked change context before drafting or updating the task implementation plan. All substeps here must run inside the worktree; do not read context or write the plan in the primary checkout.
    - read `proposal.md`, `design.md`, linked specs, `tasks.md`, and any other Markdown files under the linked change directory before drafting or updating the task implementation plan
    - use that context to draft (when the resolver returned `implementation_plan_status: missing`) or update (when `present`) the task implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution starts
-   - before drafting or updating the task implementation plan, retrieve relevant active lessons for the task
-   - record the returned lesson IDs in the feature file handoff notes under a task-scoped canonical `Retrieved Lesson IDs: ...` line for the active task so complete-task can reconcile usage later
-   - write `Retrieved Lesson IDs: none` when no lessons were returned; otherwise write the IDs as a comma-separated list in returned order, for example `Retrieved Lesson IDs: L-001, L-014`
-   - do not rename, regroup, or renumber lesson IDs when recording the handoff; record the exact IDs returned by retrieval
    - keep the implementation plan's validation section aligned with the selected task, the linked change intent, and the proof-obligation / validation-taxonomy language used by shaping and readiness guidance
 7.4. Run a deterministic pinned-claim evidence lint over the linked change after the task implementation plan is drafted or updated:
    - from inside the feature worktree, run `python "${AGENTS_HOME:-$HOME/.agents}/skills/_workflow/scripts/lint_openspec_claim_evidence.py" "openspec/changes/<linked-change-id>"`

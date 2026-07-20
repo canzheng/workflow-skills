@@ -27,8 +27,6 @@ Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.
 - `<YYYY-MM-DD>`:
   - Current Task: `<task-id like 1 or none>`
   - Worktree State: `<clean/dirty>`
-  - Retrieved Lesson IDs: `<none or comma-separated lesson IDs>`
-  - Lesson Usage: `<concise status summary keyed to the retrieved IDs>`
   - Review Scope: `<ready | task_execution | task_completion | feature_finish>`
   - Review Target: `<feature-id | top-level-task-id>`
   - Review Verdict: `<approved | changes_requested | blocked>`

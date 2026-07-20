@@ -74,7 +74,7 @@ class InitializeWorkflowArtifactsTests(unittest.TestCase):
             self.assertTrue((repo / "openspec" / "changes" / "archive").is_dir())
             self.assertTrue((repo / ".claude").is_dir())
 
-    def test_initialize_runs_lessons_init_from_repo_root(self) -> None:
+    def test_initialize_runs_openspec_init_from_repo_root(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir) / "repo"
 
@@ -83,17 +83,12 @@ class InitializeWorkflowArtifactsTests(unittest.TestCase):
 
                 initialize(repo, "v1")
 
-            self.assertGreaterEqual(run_mock.call_count, 2)
+            self.assertGreaterEqual(run_mock.call_count, 1)
             self.assertEqual(
                 run_mock.call_args_list[0].args[0],
                 ["openspec", "init", "--tools", "claude"],
             )
             self.assertEqual(run_mock.call_args_list[0].kwargs["cwd"], repo)
-            self.assertEqual(
-                run_mock.call_args_list[1].args[0],
-                ["lessons", "init", "--tools", "claude"],
-            )
-            self.assertEqual(run_mock.call_args_list[1].kwargs["cwd"], repo)
 
     def test_initialize_creates_workflow_reference_doc(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
