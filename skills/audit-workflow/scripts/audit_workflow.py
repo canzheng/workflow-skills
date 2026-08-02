@@ -57,6 +57,112 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _grandfathered(feature_text: str, marker: str) -> bool:
+    """An explicit, reasoned opt-out for work that predates a rule.
+
+    Deliberately not a date cutoff: a marker has to be WRITTEN, with a reason, by someone who
+    looked. A silent retroactive pass would let the rule appear to hold over history it never
+    governed.
+    """
+    return re.search(rf"^\s*-?\s*{re.escape(marker)}:\s*`?grandfathered`?", feature_text, re.M) is not None
+
+
+_REVIEW_SCOPE = re.compile(r"^\s*-?\s*Review Scope:\s*`?(?P<scope>[a-z_]+)`?", re.M)
+_REVIEW_VERDICT = re.compile(r"^\s*-?\s*Review Verdict:\s*`?(?P<verdict>[a-z_]+)`?", re.M)
+
+
+def _remediation_gap(feature_text: str, feature_path: Path, root: Path, change_id: str | None) -> str | None:
+    """A `feature_finish` gate that returned `changes_requested` must be followed by a gated
+    remediation round before the next `feature_finish` verdict is recorded.
+
+    Rationale (WORKFLOW_REFERENCE, "REMEDIATION ROUND"): the previous contract told the author to
+    resolve findings "through normal task execution", which names a `done -> ready` transition the
+    Task Status Model does not define. Remediation therefore ran ungated, and on one feature roughly
+    half of ALL blocking findings were introduced by a previous gate's own remediation. This makes
+    the unreviewed round an audit failure rather than a discretionary omission.
+
+    Notes are newest-first, so the scan walks the file top-down and the FIRST entries are the most
+    recent ones.
+    """
+    scopes = [(m.start(), m.group("scope")) for m in _REVIEW_SCOPE.finditer(feature_text)]
+    if not scopes:
+        return None
+    verdicts = [(m.start(), m.group("verdict")) for m in _REVIEW_VERDICT.finditer(feature_text)]
+
+    def verdict_after(pos: int) -> str | None:
+        for vpos, verdict in verdicts:
+            if vpos > pos:
+                return verdict
+        return None
+
+    if _grandfathered(feature_text, "Remediation Audit"):
+        return None
+    finishes = [(pos, verdict_after(pos)) for pos, scope in scopes if scope == "feature_finish"]
+    if len(finishes) < 2:
+        return None
+    newest_pos, _ = finishes[0]
+    prior_pos, prior_verdict = finishes[1]
+    if prior_verdict != "changes_requested":
+        return None
+    # between the prior failing gate and the newer one (remember: newest-first, so the window is
+    # textually ABOVE the prior entry), a remediation_code verdict must appear
+    window = feature_text[newest_pos:prior_pos]
+    if "remediation_code" not in window:
+        return (
+            f"{feature_path.relative_to(root)} records a `feature_finish` verdict after a "
+            f"`changes_requested` one with no `Review Scope: remediation_code` verdict between "
+            f"them - the remediation round was not reviewed (WORKFLOW_REFERENCE: REMEDIATION ROUND)"
+        )
+    if change_id:
+        rem_dir = root / "openspec" / "changes" / change_id / "remediation"
+        if not rem_dir.exists() or not any(rem_dir.glob("gate-*.md")):
+            return (
+                f"{feature_path.relative_to(root)} remediation round has no catalogue at "
+                f"openspec/changes/{change_id}/remediation/gate-<n>.md"
+            )
+    return None
+
+
+def _tasks_without_plans(feature_text: str, feature_path: Path, root: Path, change_id: str | None,
+                         tasks) -> list[str]:
+    """Every done task must have an implementation plan.
+
+    All of `start-task`'s deterministic gates key on that file, so a task executed without one
+    silently receives none of them. On one feature, task 6 had no plan, never had one, and carried
+    the longest defect tail of any task.
+    """
+    if not change_id or _grandfathered(feature_text, "Plan Audit"):
+        return []
+    # A change that has been archived keeps its implementation-plans, at the archived path. Look in
+    # both, or every DONE feature reports a false violation.
+    plan_dirs = [root / "openspec" / "changes" / change_id / "implementation-plans"]
+    plan_dirs += [d / "implementation-plans"
+                  for d in sorted((root / "openspec" / "changes" / "archive").glob(f"*-{change_id}"))]
+    # A plan is due only once a task has actually been executed. A feature still in [SHAPING] or
+    # [READY] has no done or in_progress tasks and therefore owes no plans yet.
+    if not any(task.status in ("done", "in_progress") for task in tasks):
+        return []
+    if not any(d.exists() for d in plan_dirs):
+        # No plan directory anywhere: the feature predates the plan requirement. Report once, as a
+        # single finding, rather than one per task.
+        return [
+            f"{feature_path.relative_to(root)} has no implementation-plans directory for "
+            f"{change_id}; every executable task needs a plan (WORKFLOW_REFERENCE). If this "
+            f"feature predates the requirement, record `Plan Audit: grandfathered` with a reason "
+            f"in its handoff notes."
+        ]
+    out = []
+    for task in tasks:
+        if task.status != "done":
+            continue
+        if not any((d / f"{task.task_id}.md").exists() for d in plan_dirs):
+            out.append(
+                f"{feature_path.relative_to(root)} task {task.task_id} is done but has no "
+                f"implementation plan at implementation-plans/{task.task_id}.md for {change_id}"
+            )
+    return out
+
+
 def _audit_single_root(root: Path) -> tuple[list[str], list[tuple[str, str]]]:
     """Audit one checkout. Returns (errors, in_progress_records).
 
@@ -210,6 +316,18 @@ def _audit_single_root(root: Path) -> tuple[list[str], list[tuple[str, str]]]:
             except ValueError as exc:
                 errors.append(f"{feature_path.relative_to(root)} {exc}")
                 continue
+            # OPEN features only. A [DONE] feature's plans and reviews are settled and its change is
+            # archived; re-litigating them on every audit run reports history that cannot be changed
+            # and drowns the findings that can. The first version of these rules omitted this and
+            # threw 17 errors at 8 closed features, which forced grandfather markers that were
+            # working around this omission rather than around any real exemption.
+            if section_name in {"SHAPING", "READY", "IN_PROGRESS"}:
+                gap = _remediation_gap(feature_text, feature_path, root, change_id)
+                if gap:
+                    errors.append(gap)
+                errors.extend(
+                    _tasks_without_plans(feature_text, feature_path, root, change_id, tasks)
+                )
             task_statuses = [task.status for task in tasks]
             for task in tasks:
                 if task.status == "in_progress":

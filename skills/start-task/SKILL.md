@@ -51,8 +51,16 @@ Create or re-enter the feature worktree early, before any heavy planning or revi
    - all subsequent steps run inside this feature worktree so the primary checkout stays free for other features
 7. From inside the feature worktree, read the linked change context before drafting or updating the task implementation plan. All substeps here must run inside the worktree; do not read context or write the plan in the primary checkout.
    - read `proposal.md`, `design.md`, linked specs, `tasks.md`, and any other Markdown files under the linked change directory before drafting or updating the task implementation plan
-   - use that context to draft (when the resolver returned `implementation_plan_status: missing`) or update (when `present`) the task implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution starts
+7.1. PER-TASK CONTRACT READINESS — ask this BEFORE drafting the plan, because it is a question about the CONTRACT, not about the plan.
+   - spawn a lightweight independent reviewer over `proposal.md`, `design.md`, the linked specs, and this task's entry in `tasks.md`, asking one question: do the shaping artifacts define THIS task's contract surface clearly enough to draft against without inventing or narrowing the acceptance contract?
+   - require it to name any unresolved ambiguity, missing acceptance boundary, or surrogate-proof risk that would force this step to decide scope instead of inheriting it
+   - if it finds gaps, STOP and strengthen the linked OpenSpec artifacts before drafting the plan. A gap found here is cheap; the same gap found at `finish-feature` is not.
+   - record the verdict in the feature file handoff notes using canonical `Review Scope: task_readiness`, `Review Target: <feature-id>/<task-id>`, `Review Verdict`, `Blocking Findings`, and `Review Terminal` lines
+   - this replaces the feature-level readiness review that `ready-feature` used to run. That one reviewed the first task and promoted all of them: on `v1-f010` task `1` was reviewed, tasks `2`-`6` were not, and every contract-surface defect its nine feature gates found lived in tasks 2-6. Asking per task is also better than asking once, because shaping is often amended between tasks.
+7.2. Draft or update the task implementation plan, now that the contract has been confirmed draftable.
+   - draft (when the resolver returned `implementation_plan_status: missing`) or update (when `present`) the plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md` before code execution starts
    - keep the implementation plan's validation section aligned with the selected task, the linked change intent, and the proof-obligation / validation-taxonomy language used by shaping and readiness guidance
+   - EVERY executable task gets a plan. There is no path that skips it: all three deterministic gates below key on the plan file, so a task executed without one silently receives none of them. On `v1-f010` task 6 had no plan, never had one, and carried the longest defect tail of any task — blocking findings at four separate gates.
 7.4. Run a deterministic pinned-claim evidence lint over the linked change after the task implementation plan is drafted or updated:
    - from inside the feature worktree, run `python "${AGENTS_HOME:-$HOME/.agents}/skills/_workflow/scripts/lint_openspec_claim_evidence.py" "openspec/changes/<linked-change-id>"`
    - it flags any plan/design line containing a file:line citation or numeric pin without an adjacent grep/Read evidence block, including the task implementation plan
@@ -101,6 +109,7 @@ Create or re-enter the feature worktree early, before any heavy planning or revi
 - The task is not `ready`
 - Task scope is missing or invalid
 - The task implementation plan cannot be written or updated before execution begins
+- The per-task contract-readiness review (step 7.1) finds the shaping artifacts inadequate for this task
 - The linked change has a plan/design file:line citation or numeric pin without adjacent grep/Read evidence
 - The deterministic `complete-task` plan-validator dry-run cannot be made to pass before the reviewer is spawned
 - The independent reviewer subagent's semantic consistency and coverage review finds inconsistency, ambiguity, unresolved drift, or missing validation coverage between the task implementation plan and the linked proposal, design, specs, or selected task

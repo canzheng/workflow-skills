@@ -40,13 +40,11 @@ It is a workflow wrapper around linked OpenSpec shaping artifacts, with optional
    - if it reports issues, return to shaping and add the adjacent evidence block or remove the unsupported pinned claim before promotion
 7. Review corresponding existing documentation for consistency with the shaped change, update any documentation that must change before the feature can honestly be considered ready, and otherwise make the no-update-needed conclusion explicit in the linked OpenSpec change.
 8. Confirm at least one linked top-level OpenSpec task resolves to workflow status `ready` under the workflow task dependency convention.
-9. Perform an independent readiness review before promotion:
-   - spawn a lightweight independent reviewer subagent to review the selected `ready` task against `proposal.md`, `design.md`, linked specs, `tasks.md`, and corresponding existing docs
-   - require that review to answer whether the shaping artifacts define the contract surface clearly enough that `start-task` can draft the task implementation plan without inventing or narrowing the acceptance contract
-   - require that review to check for unresolved ambiguity, missing acceptance boundaries, or surrogate-proof risk that would force `start-task` to decide scope instead of inheriting it
-   - do not promote the feature to `[READY]` unless the independent review passes
-   - if the review finds gaps, return to shaping and strengthen the linked OpenSpec artifacts before retrying readiness
-   - record the readiness review verdict in the feature file handoff notes using canonical `Review Scope`, `Review Target`, `Review Verdict`, `Blocking Findings`, and `Review Terminal` lines so the result can be consumed without prose inference
+9. Do NOT perform a feature-level readiness review. Readiness is judged PER TASK, in `start-task`, immediately before that task runs.
+   - This step used to spawn a reviewer against the one selected `ready` task and then promote the whole feature. That is not a small version of the right check — it licenses every task on the evidence of one, and it reads as though the feature's contract has been reviewed when only a single task's has.
+   - Measured on `v1-f010`: the recorded readiness verdict covered task `1`; tasks `2`-`6` were never contract-reviewed; and **every contract-surface defect its nine feature gates found lived in tasks 2-6** — the units seam, the sigma-vs-E|move| basis, and an audit whose scope was wrong by 4x.
+   - Judging readiness per task is also strictly better than judging it once up front, because shaping is frequently amended between tasks, so a task-5 contract is best assessed when task 5 is about to run.
+   - The deterministic checks in steps 6.5 and 6.6 remain gating here: they are cheap, they are feature-wide, and they catch archive-time and evidence failures that no per-task review would look for.
 10. Update the feature file first, then move the backlog entry from `[SHAPING]` to the bottom of `[READY]`.
 11. Re-run `audit-workflow`.
 12. Commit the intentional planning-state changes when needed to leave the primary checkout clean before exiting.
@@ -62,9 +60,9 @@ It is a workflow wrapper around linked OpenSpec shaping artifacts, with optional
 - Preserve inherited validation and review gates. OpenSpec shaping does not relax audit, review, or verification requirements.
 - Do not promote a feature to `[READY]` while known documentation drift remains in corresponding existing docs that should already reflect the shaped change.
 - Do not promote the feature to `[READY]` unless at least one linked top-level OpenSpec task resolves to workflow status `ready`.
-- Do not treat dependency-derived `ready` status as sufficient on its own; the independent readiness review must conclude that shaping already defines enough contract surface for `start-task` to draft against it safely.
+- Do not treat dependency-derived `ready` status as a statement about contract quality. It is a dependency fact only; the contract question is asked per task in `start-task`.
 - Preserve the existing feature file and update only relevant sections.
-- Treat proof obligations and the validation taxonomy as part of the readiness contract, but gate them through the independent readiness review rather than through a shaping-owned execution artifact.
+- Treat proof obligations and the validation taxonomy as part of the readiness contract, but gate them per task in `start-task` rather than through a shaping-owned execution artifact or a feature-wide review.
 
 ## Stop Conditions
 

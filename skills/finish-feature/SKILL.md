@@ -27,7 +27,16 @@ It enforces a mandatory feature-level code review, then the acceptance-plus-Open
 3.5. Run a mandatory feature-level code review before any OpenSpec verification or archive work.
    - invoke `/code-review` at `medium` effort over the feature branch's cumulative diff against its base branch (the full feature changes, which `complete-task` has already committed). Do not pass `--comment`; this is a local pre-finalization gate, not a PR comment.
    - this review is additive: it does not replace the task-level reviews recorded during `complete-task`, and it must run even when every task already passed its own review.
-   - if the review returns blocking findings, stop: do not run `openspec-verify-change`, sync, or archive, and do not move the feature to `[DONE]`. Keep the feature `[IN_PROGRESS]`, resolve the findings through normal task execution, and re-run `finish-feature`.
+   - if the review returns blocking findings, stop: do not run `openspec-verify-change`, sync, or archive, and do not move the feature to `[DONE]`. Keep the feature `[IN_PROGRESS]` and run the REMEDIATION ROUND below. Do not re-invoke this gate until every step of it has completed.
+   - increment `Gate Iteration` in the feature file on every invocation of this step, so the loop can see its own length.
+3.5.1. REMEDIATION ROUND — a first-class gated unit, not free-form commits.
+   - A remediation round is NOT task execution and does NOT reopen a task. `Current Task` stays `none`. This is stated because the previous wording ("resolve the findings through normal task execution") named a `done -> ready` transition the Task Status Model does not define, so in practice remediation ran as raw commits with no gate of any kind. On `v1-f010` roughly half of the blocking findings across nine gates were introduced by a previous gate's own remediation.
+   - **(a) Catalogue.** Write `openspec/changes/<change-id>/remediation/gate-<n>.md` enumerating EVERY finding from that gate, blocking and non-blocking, each with: the finding, its attribution (original work, or introduced by an earlier round's fix), the intended fix, the proof obligation, and the validation class. Findings the round will not fix are listed with a reason. This file is the round's committed audit trail — without it, no later reviewer can tell whether a prescribed fix was ever implemented, and on `v1-f010` a fixture prescribed at gate 1 went unwritten for eight gates because nothing tracked it.
+   - **(b) Implement.**
+   - **(c) Verify deterministically** before any reviewer is invoked: the test suite; the mutation table run UNFILTERED and AFTER the final commit (`-k` cannot show a survivor outside its filter, and the harness builds a worktree at HEAD so uncommitted work is invisible — SKIPPED is not a pass); `yaml.safe_load` over every changed YAML artifact; `openspec validate --strict`; and a live run of each changed tool including one negative case.
+   - **(d) Code review the remediation diff ALONE** — not the cumulative branch diff. This is the step that catches injected defects, and it is cheap: a round is typically a few hundred lines, whereas the cumulative diff had reached 224 files and +57k lines at unchanged reviewer effort. Record the verdict with canonical `Review Scope: remediation_code`, `Review Target: <feature-id>/gate-<n>` lines.
+   - **(e) Only then re-invoke step 3.5.**
+   - if the remediation code review returns blocking findings, fix them and re-run (d). Do not carry them into the next feature gate.
    - record the feature-level review verdict in the feature file handoff notes using canonical `Review Scope`, `Review Target`, `Review Verdict`, `Blocking Findings`, and `Review Terminal` lines, with `Review Scope: feature_finish` and `Review Target` set to the feature ID, so downstream workflow can consume it without prose inference.
 4. Run `openspec-verify-change` with the name of the openspec change to verify the change against the specs
 5. Run the finish-feature resolver script to inspect active-vs-archived state for that change.
@@ -49,6 +58,7 @@ It enforces a mandatory feature-level code review, then the acceptance-plus-Open
 
 - Do not call `finishing-a-development-branch` before the linked OpenSpec change is archived.
 - A mandatory feature-level `/code-review` runs before OpenSpec verification and archive. Do not run OpenSpec verification, sync, or archive, and do not move the feature to `[DONE]`, while that review has unresolved blocking findings.
+- A remediation round is itself gated: its catalogue, its deterministic verification, and a code review of its own diff all complete before the feature gate is re-invoked. An unreviewed remediation round is a workflow violation, not a shortcut.
 - `finish-feature` owns the terminal feature transition and the handoff into generic branch finalization.
 - This skill must run `openspec-archive-change` when the linked change is still active.
 - Archive proof is filesystem state, not memory:

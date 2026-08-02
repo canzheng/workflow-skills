@@ -3151,6 +3151,10 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            plans_dir = change_dir / "implementation-plans"
+            plans_dir.mkdir(parents=True, exist_ok=True)
+            (plans_dir / "1.md").write_text("plan", encoding="utf-8")
+            (plans_dir / "2.md").write_text("plan", encoding="utf-8")
 
             result = run_resolver(AUDIT_SCRIPT, ["--repo-root", str(repo)])
 

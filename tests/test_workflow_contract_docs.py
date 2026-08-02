@@ -42,7 +42,7 @@ class WorkflowContractDocsTests(unittest.TestCase):
         )
         self.assertIn("read `proposal.md`, `design.md`, linked specs, `tasks.md`", start_task_skill)
         self.assertIn(
-            "the task implementation plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md`",
+            "the plan at `openspec/changes/<change-id>/implementation-plans/<task-id>.md`",
             start_task_skill,
         )
 
@@ -106,12 +106,23 @@ class WorkflowContractDocsTests(unittest.TestCase):
         self.assertIn("canonical `Review Scope`, `Review Target`, `Review Verdict`, `Blocking Findings`, and `Review Terminal` lines", complete_task_skill)
         self.assertIn("downstream workflow can consume it without prose inference", complete_task_skill)
 
-    def test_ready_feature_skill_requires_canonical_review_verdict_lines(self) -> None:
+    def test_ready_feature_skill_defers_readiness_review_to_start_task(self) -> None:
         ready_feature_skill = READY_FEATURE_SKILL.read_text(encoding="utf-8")
 
-        self.assertIn("record the readiness review verdict", ready_feature_skill)
-        self.assertIn("canonical `Review Scope`, `Review Target`, `Review Verdict`, `Blocking Findings`, and `Review Terminal` lines", ready_feature_skill)
-        self.assertIn("consumed without prose inference", ready_feature_skill)
+        self.assertIn(
+            "Do NOT perform a feature-level readiness review. Readiness is judged PER TASK, in `start-task`",
+            ready_feature_skill,
+        )
+        self.assertNotIn("independent readiness review must conclude", ready_feature_skill)
+
+    def test_start_task_skill_requires_canonical_task_readiness_review_lines(self) -> None:
+        start_task_skill = START_TASK_SKILL.read_text(encoding="utf-8")
+
+        self.assertIn("PER-TASK CONTRACT READINESS", start_task_skill)
+        self.assertIn(
+            "canonical `Review Scope: task_readiness`, `Review Target: <feature-id>/<task-id>`, `Review Verdict`, `Blocking Findings`, and `Review Terminal` lines",
+            start_task_skill,
+        )
 
     def test_autonomous_backlog_loop_routes_completion_through_finish_feature(self) -> None:
         autonomous_loop_skill = AUTONOMOUS_BACKLOG_LOOP_SKILL.read_text(encoding="utf-8")

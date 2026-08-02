@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import textwrap
 from pathlib import Path
@@ -395,6 +396,7 @@ def _write_cross_feature_openspec_repo_fixture(tmp_path: Path, *, archived_upstr
         (upstream_change_dir / "proposal.md").write_text("## Why\n\nUpstream\n", encoding="utf-8")
         (upstream_change_dir / "design.md").write_text("## Context\n\nUpstream\n", encoding="utf-8")
         (upstream_change_dir / "tasks.md").write_text(upstream_tasks_text, encoding="utf-8")
+        _write_implementation_plan(upstream_change_dir, "1")
 
     return repo
 
@@ -567,7 +569,119 @@ def _write_current_task_reference_fixture(
         f"## 1. Work\n\n- [{checkbox}] 1 Execute the work\n",
         encoding="utf-8",
     )
+    plans_dir = change_dir / "implementation-plans"
+    plans_dir.mkdir(parents=True, exist_ok=True)
+    (plans_dir / "1.md").write_text("## Plan\n\nFixture.\n", encoding="utf-8")
     return repo
+
+
+def _run_audit(repo: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        ["python3", str(AUDIT_SCRIPT), "--repo-root", str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def _plan_audit_fixture(tmp_path: Path) -> tuple[Path, Path, Path]:
+    """An `[IN_PROGRESS]` feature whose only task is done. Returns (repo, feature file, plans dir)."""
+    repo = _write_current_task_reference_fixture(tmp_path, current_task="none", task_done=True)
+    feature_file = (
+        repo / "docs" / "planning" / "versions" / "v1" / "features" / "v1-f001-example.md"
+    )
+    plans_dir = repo / "openspec" / "changes" / "current-task-change" / "implementation-plans"
+    return repo, feature_file, plans_dir
+
+
+def test_audit_workflow_rejects_done_task_without_implementation_plan(tmp_path: Path) -> None:
+    repo, _, plans_dir = _plan_audit_fixture(tmp_path)
+    (plans_dir / "1.md").unlink()
+
+    result = _run_audit(repo)
+
+    assert result.returncode == 1
+    assert "task 1 is done but has no implementation plan" in result.stdout
+
+
+def test_audit_workflow_reports_missing_plan_directory_once(tmp_path: Path) -> None:
+    repo, _, plans_dir = _plan_audit_fixture(tmp_path)
+    shutil.rmtree(plans_dir)
+
+    result = _run_audit(repo)
+
+    assert result.returncode == 1
+    assert "has no implementation-plans directory for current-task-change" in result.stdout
+    assert result.stdout.count("ERROR") == 1
+
+
+def test_audit_workflow_accepts_grandfathered_plan_audit(tmp_path: Path) -> None:
+    repo, feature_file, plans_dir = _plan_audit_fixture(tmp_path)
+    shutil.rmtree(plans_dir)
+    feature_file.write_text(
+        feature_file.read_text(encoding="utf-8")
+        + "- `2026-08-01`:\n  - Plan Audit: `grandfathered` (predates the plan requirement)\n",
+        encoding="utf-8",
+    )
+
+    result = _run_audit(repo)
+
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_audit_workflow_skips_plan_audit_for_features_with_no_executed_tasks(tmp_path: Path) -> None:
+    repo = _write_current_task_reference_fixture(tmp_path, current_task="none", task_done=False)
+    shutil.rmtree(repo / "openspec" / "changes" / "current-task-change" / "implementation-plans")
+
+    result = _run_audit(repo)
+
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def _append_gate_note(feature_file: Path, *, scope: str, verdict: str) -> None:
+    """Handoff notes are newest-first, so a newer gate is PREPENDED to the notes section."""
+    text = feature_file.read_text(encoding="utf-8")
+    note = f"- `2026-08-01`:\n  - Review Scope: `{scope}`\n  - Review Verdict: `{verdict}`\n"
+    marker = "## 2. Handoff Notes\n"
+    head, _, tail = text.partition(marker)
+    feature_file.write_text(head + marker + note + tail, encoding="utf-8")
+
+
+def test_audit_workflow_rejects_unreviewed_remediation_round(tmp_path: Path) -> None:
+    repo, feature_file, _ = _plan_audit_fixture(tmp_path)
+    _append_gate_note(feature_file, scope="feature_finish", verdict="changes_requested")
+    _append_gate_note(feature_file, scope="feature_finish", verdict="approved")
+
+    result = _run_audit(repo)
+
+    assert result.returncode == 1
+    assert "the remediation round was not reviewed" in result.stdout
+
+
+def test_audit_workflow_requires_remediation_catalogue(tmp_path: Path) -> None:
+    repo, feature_file, _ = _plan_audit_fixture(tmp_path)
+    _append_gate_note(feature_file, scope="feature_finish", verdict="changes_requested")
+    _append_gate_note(feature_file, scope="remediation_code", verdict="approved")
+    _append_gate_note(feature_file, scope="feature_finish", verdict="approved")
+
+    result = _run_audit(repo)
+
+    assert result.returncode == 1
+    assert "remediation round has no catalogue at" in result.stdout
+
+
+def test_audit_workflow_accepts_gated_remediation_round(tmp_path: Path) -> None:
+    repo, feature_file, _ = _plan_audit_fixture(tmp_path)
+    _append_gate_note(feature_file, scope="feature_finish", verdict="changes_requested")
+    _append_gate_note(feature_file, scope="remediation_code", verdict="approved")
+    _append_gate_note(feature_file, scope="feature_finish", verdict="approved")
+    remediation_dir = repo / "openspec" / "changes" / "current-task-change" / "remediation"
+    remediation_dir.mkdir(parents=True, exist_ok=True)
+    (remediation_dir / "gate-1.md").write_text("## Findings\n\nFixture.\n", encoding="utf-8")
+
+    result = _run_audit(repo)
+
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 def test_audit_workflow_accepts_current_task_referencing_in_progress_task(tmp_path: Path) -> None:
@@ -1480,6 +1594,9 @@ def _write_modern_gate_fixture(
         ),
         encoding="utf-8",
     )
+    plans_dir = change_dir / "implementation-plans"
+    plans_dir.mkdir(parents=True, exist_ok=True)
+    (plans_dir / "1.md").write_text("## Plan\n\nFixture.\n", encoding="utf-8")
     return repo
 
 
