@@ -309,6 +309,25 @@ check("OpenSpec Specs stops at a blank line before prose",
       ws.parse_feature_openspec_specs(_meta + "\nProse citing `also-not-a-spec.md`.\n") == _only)
 
 
+# --- a dotted task reference is not a numeric pin -------------------------------------------------
+# The claim-evidence lint's DECIMAL_OR_PERCENT_PIN_RE matches `\d+\.\d+`, so `task 3.2` read as a
+# measurement and demanded an evidence block for a number nobody measured. Measured cost on
+# technical-strategy v1-f005: it forced a rewrite of a sentence in a CLOSED task's implementation
+# plan, which broke that task's `plan-sha256` completion stamp and failed the audit.
+#
+# The third case is the one that discriminates. Stripping the reference must remove the REFERENCE
+# and nothing else: an implementation that dropped the whole line, or that stripped every decimal
+# once it saw the word "task", would pass the first two cases and fail this one.
+check("a bare decimal is still a pin",
+      ws._line_has_numeric_pin("The ratio improved to 3.2 in the second run."), "CONTROL")
+check("an explicit task reference is not a pin",
+      not ws._line_has_numeric_pin("Task 3.2 settled that verification runs in the ingest."))
+check("a real pin on the same line as a task reference still fires",
+      ws._line_has_numeric_pin("Task 3.2 took 3.7 seconds to run."))
+check("a bare dotted number stays a pin, because the tool would be guessing",
+      ws._line_has_numeric_pin("and 3.2 left implicit what the pin compares against"))
+
+
 # --- FINAL gate --------------------------------------------------------------------------------
 # The summary at line ~157 sits MID-FILE: every block below it (the worktree walk, the template
 # resolution checks) runs after that verdict, so before this gate existed their failures were

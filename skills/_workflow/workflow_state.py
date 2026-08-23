@@ -214,6 +214,15 @@ STRUCTURE_COUNT_PIN_RE = re.compile(
 )
 INLINE_CODE_SPAN_RE = re.compile(r"`[^`]*`")
 ISO_DATE_RE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
+# A dotted TASK REFERENCE is not a measurement, for the same reason an ISO date is not: nothing
+# about the export, the population, or the run produced it. `DECIMAL_OR_PERCENT_PIN_RE` cannot tell
+# `task 3.2` from a ratio of 3.2, so the reference is removed before the pin test runs -- exactly as
+# ISO_DATE_RE already removes dates. Only the EXPLICIT form is stripped: a bare `3.2` in prose stays
+# a pin, because at that point the tool would be guessing.
+TASK_REFERENCE_RE = re.compile(
+    r"\b(?:task|tasks|item|items|step|steps|subtask|subtasks)\s+\d+(?:\.\d+)+",
+    re.IGNORECASE,
+)
 EVIDENCE_ADJACENCY_RE = re.compile(r"^\s*(?:evidence|grep|rg|read|output)\s*:?\s*$", re.IGNORECASE)
 EVIDENCE_BLOCK_RE = re.compile(r"\b(evidence|grep|rg|read|output)\b", re.IGNORECASE)
 EVIDENCE_COMMAND_RE = re.compile(
@@ -1102,6 +1111,7 @@ def _has_adjacent_evidence_block(
 def _line_has_numeric_pin(line: str) -> bool:
     text = INLINE_CODE_SPAN_RE.sub("", line)
     text = ISO_DATE_RE.sub("", text)
+    text = TASK_REFERENCE_RE.sub("", text)
     return bool(DECIMAL_OR_PERCENT_PIN_RE.search(text) or STRUCTURE_COUNT_PIN_RE.search(text))
 
 
