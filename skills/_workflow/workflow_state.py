@@ -220,7 +220,7 @@ ISO_DATE_RE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
 # ISO_DATE_RE already removes dates. Only the EXPLICIT form is stripped: a bare `3.2` in prose stays
 # a pin, because at that point the tool would be guessing.
 TASK_REFERENCE_RE = re.compile(
-    r"\b(?:task|tasks|item|items|step|steps|subtask|subtasks)\s+\d+(?:\.\d+)+",
+    r"\b(?:task|tasks|item|items|subitem|subitems|step|steps|subtask|subtasks)\s+\d+(?:\.\d+)+",
     re.IGNORECASE,
 )
 EVIDENCE_ADJACENCY_RE = re.compile(r"^\s*(?:evidence|grep|rg|read|output)\s*:?\s*$", re.IGNORECASE)
