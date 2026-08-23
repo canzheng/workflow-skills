@@ -99,6 +99,12 @@ def _sweep_one(repo: Path, head: str, mutation: dict, control: str | None,
         # the likely file cannot reduce COVERAGE -- if it does not fail there, the full run follows
         # in the same command -- so this is a speed hint, not a filter, and a filtered sweep is the
         # thing this harness must never silently become.
+        #
+        # MEASURED TO BUY NOTHING ON A WELL-SPREAD SUITE, recorded rather than implied: a
+        # window-binding mutation expected to need a late-sorting `test_window.py` was in fact
+        # caught by an early `test_access.py`, so hinted and unhinted runs came to 1.02s and 1.08s.
+        # It stays as insurance for a mutation only ONE late test covers, which is the case the
+        # ordering argument is actually about.
         likely = mutation.get("likely") or []
         r = _run([*test_cmd, *likely, "."] if (fast and likely) else test_cmd, worktree)
         failed = [l for l in r.stdout.splitlines() if l.startswith("FAILED")]
