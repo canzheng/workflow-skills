@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Self-tests for the shared-library defects found by the correctness review.
 
-    python3 ~/.agents/skills/_workflow/test_workflow_state_fixes.py
+    bin/run-python.sh skills/_workflow/tests/test_workflow_state_fixes.py
 
-Dependency-free: ~/.agents is not a git repo and has no test runner. Each case names the defect it
-pins and the production change that would make it fail.
+Dependency-free, and a SCRIPT rather than a pytest module: its checks run at import and
+`sys.exit(1)` on failure, so `conftest.py` excludes it from collection. Each case names
+the defect it pins and the production change that would make it fail.
 """
 from __future__ import annotations
 
@@ -13,7 +14,11 @@ import pathlib
 import sys
 import tempfile
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+for _candidate in pathlib.Path(__file__).resolve().parents:
+    if (_candidate / "_workflow").is_dir():
+        if str(_candidate) not in sys.path:
+            sys.path.insert(0, str(_candidate))
+        break
 from _workflow import workflow_state as ws  # noqa: E402
 
 FAIL: list[str] = []

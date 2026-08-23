@@ -16,4 +16,6 @@ for _candidate in Path(__file__).resolve().parents:
 # collection error rather than a test failure. Run them directly:
 #   bin/run-python.sh skills/_workflow/tests/test_audit_checks.py
 #   bin/run-python.sh skills/_workflow/tests/mutate_audit_checks.py
-collect_ignore = ["test_audit_checks.py", "mutate_audit_checks.py"]
+#   bin/run-python.sh skills/_workflow/tests/test_workflow_state_fixes.py
+collect_ignore = ["test_audit_checks.py", "mutate_audit_checks.py",
+                  "test_workflow_state_fixes.py"]
