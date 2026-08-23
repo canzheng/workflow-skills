@@ -55,6 +55,40 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     return args
 
 
+def _count_in_progress_repo_wide(root: Path) -> list[tuple[str, str]]:
+    """Every (feature_id, task_id) at `in_progress` across the active backlog.
+
+    Used by the explicit-ID fast path so it enforces the same single-active-task invariant the
+    default path does. Failures to read a feature are ignored here: this is an invariant check, not
+    the place to report malformed files, and `audit-workflow` reports those.
+    """
+    out: list[tuple[str, str]] = []
+    try:
+        backlog_path, _text, parsed = load_backlog(root)
+    except Exception:                                    # noqa: BLE001
+        return out
+    for section_name in WORKFLOW_SECTIONS[1:]:
+        for entry in parsed.feature_sections.get(section_name, []):
+            feature_path = (backlog_path.parent / entry.link).resolve()
+            if not feature_path.is_file():
+                continue
+            try:
+                text = feature_path.read_text(encoding="utf-8")
+                try:
+                    _scanned = parse_tasks(text, feature_file=feature_path, repo_root=root)
+                except (ValueError, WorkflowError) as _exc:
+                    # A malformed `Current Task` or task ledger on an UNRELATED feature
+                    # must not abort the scan; it used to raise a bare ValueError and block
+                    # starting a task on a healthy feature. audit-workflow reports it.
+                    _scanned = []
+                for task in _scanned:
+                    if task.status == "in_progress":
+                        out.append((entry.feature_id, task.task_id))
+            except Exception:                            # noqa: BLE001
+                continue
+    return out
+
+
 def resolve_named_task(root: Path, feature_id: str, task_id: str) -> dict[str, object]:
     """Fast path: validate and return a payload for the explicitly named (feature_id, task_id).
 
@@ -94,12 +128,28 @@ def resolve_named_task(root: Path, feature_id: str, task_id: str) -> dict[str, o
     feature_label = str(feature_path.relative_to(root))
 
     matching_task = None
-    for task in parse_tasks(feature_text, feature_file=feature_path, repo_root=root):
+    # NOT guarded: this is the SELECTED feature, so a malformed task ledger here IS the answer.
+    # Reporting "task not found" instead would name the wrong problem. Only the repo-wide SCAN
+    # loops tolerate a malformed unrelated feature.
+    try:
+        _scanned = parse_tasks(feature_text, feature_file=feature_path, repo_root=root)
+    except ValueError as exc:
+        raise WorkflowError(f"{feature_path.relative_to(root)}: {exc}") from None
+    for task in _scanned:
         if task.task_id == task_id:
             matching_task = task
             break
     if matching_task is None:
         raise WorkflowError(f"task {task_id} not found in feature {feature_id}")
+    # The docstring claimed parity with the default path, but only the NAMED task's status was
+    # checked - so with two features both at `Current Task: 1` the default path and the audit both
+    # refused while this path returned exit 0. `start-task`'s fast path already counted repo-wide.
+    active = _count_in_progress_repo_wide(root)
+    if len(active) > 1:
+        raise WorkflowError(
+            "repository has multiple tasks with status `in_progress`: "
+            + ", ".join(f"{fid}/{tid}" for fid, tid in active)
+        )
     if matching_task.status != "in_progress":
         raise WorkflowError(
             f"task {task_id} in feature {feature_id} has status `{matching_task.status}`, expected `in_progress`"
@@ -211,7 +261,14 @@ def resolve_active_task(root: Path, *, selected_feature_id: str | None = None) -
                 repo_root=root,
             )
 
-            for task in parse_tasks(feature_text, feature_file=feature_path, repo_root=root):
+            try:
+                _scanned = parse_tasks(feature_text, feature_file=feature_path, repo_root=root)
+            except (ValueError, WorkflowError) as _exc:
+                # A malformed `Current Task` or task ledger on an UNRELATED feature
+                # must not abort the scan; it used to raise a bare ValueError and block
+                # starting a task on a healthy feature. audit-workflow reports it.
+                _scanned = []
+            for task in _scanned:
                 if task.status != "in_progress":
                     continue
                 open_nested_item_ids = list_open_openspec_nested_items(

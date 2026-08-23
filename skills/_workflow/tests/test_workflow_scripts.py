@@ -327,7 +327,8 @@ def _write_cross_feature_openspec_repo_fixture(tmp_path: Path, *, archived_upstr
         - None yet.
 
         ## 2. Handoff Notes
-        - None yet.
+        - `2026-08-22`:
+          - Completion Audit: `grandfathered` (fixture predates the completion-ledger requirement; this fixture exercises a different rule)
         """
     )
     (feature_dir / "v1-f001-upstream.md").write_text(upstream_feature_text, encoding="utf-8")
@@ -557,7 +558,8 @@ def _write_current_task_reference_fixture(
         - None yet.
 
         ## 2. Handoff Notes
-        - None yet.
+        - `2026-08-22`:
+          - Completion Audit: `grandfathered` (fixture predates the completion-ledger requirement; this fixture exercises a different rule)
         """
     )
     (feature_dir / "v1-f001-example.md").write_text(feature_text, encoding="utf-8")
@@ -655,7 +657,7 @@ def test_audit_workflow_rejects_unreviewed_remediation_round(tmp_path: Path) -> 
     result = _run_audit(repo)
 
     assert result.returncode == 1
-    assert "the remediation round was not reviewed" in result.stdout
+    assert "adjacent `feature_finish` gate pair(s) where one is `changes_requested`" in result.stdout
 
 
 def test_audit_workflow_requires_remediation_catalogue(tmp_path: Path) -> None:

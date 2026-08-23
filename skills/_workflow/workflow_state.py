@@ -18,6 +18,19 @@ TASK_HEADER_RE = re.compile(r"^### (?P<id>T\d+): (?P<title>.+)$")
 TASK_STATUS_RE = re.compile(r"^- Status: `(?P<status>[^`]+)`$")
 FIELD_HEADER_RE = re.compile(r"^- (?P<field>[^:]+):(?P<rest>.*)$")
 TASK_REF_RE = re.compile(r"`([^`]+)`")
+# A field's continuation ends at the next BLOCK, not at the next field header. `Depends On` and
+# `OpenSpec Specs` are written as a header plus indented bullets, so both collect backticked refs
+# from the lines that follow. With no stop condition that collection ran until the next field
+# header, which meant a nested checklist item's filenames and the following section heading's prose
+# were both read as refs. Nothing errors: the result is a plausible list of dependencies nobody
+# declared, and the referenced IDs are never checked to exist. Plain bullets must still continue a
+# field -- that is the documented multi-line form -- so only headings, checklist items, and blank
+# lines terminate.
+FIELD_CONTINUATION_STOP_RE = re.compile(r"^(?:#{1,6}\s|-\s*\[[ xX]\]|$)")
+
+
+def _terminates_field_continuation(stripped_line: str) -> bool:
+    return bool(FIELD_CONTINUATION_STOP_RE.match(stripped_line))
 FEATURE_ID_RE = re.compile(r"^- Feature ID: `([^`]+)`$", re.MULTILINE)
 OPEN_SPEC_CHANGE_RE = re.compile(r"^- OpenSpec Change: `([^`]+)`$", re.MULTILINE)
 OPEN_SPEC_STATUS_RE = re.compile(r"^- OpenSpec Status: `([^`]+)`$", re.MULTILINE)
@@ -25,8 +38,12 @@ CURRENT_TASK_RE = re.compile(r"^- Current Task: `([^`]+)`$", re.MULTILINE)
 BRANCH_FEATURE_ID_RE = re.compile(r"^(v\d+-f\d+)(?:$|[-/])")
 TOP_LEVEL_TASK_ID_RE = re.compile(r"^\d+$")
 OPEN_SPEC_TASK_RE = re.compile(r"^- \[(?P<done>[ xX])\]\s+(?P<id>\d+)\s+(?P<title>.+)$")
+# `\s+` REQUIRED indentation, so `- [ ] 1.3 x` at column 0 matched neither this nor
+# OPEN_SPEC_TASK_RE (which needs a bare integer id) - the item vanished, and complete-task's
+# open-nested-item gate was bypassed by deleting two spaces. Indentation is now optional; the dotted
+# id is what makes an item nested.
 OPEN_SPEC_NESTED_TASK_RE = re.compile(
-    r"^\s+- \[(?P<done>[ xX])\]\s+(?P<id>\d+\.\d+(?:\.\d+)*)\s+(?P<title>.+)$"
+    r"^\s*- \[(?P<done>[ xX])\]\s+(?P<id>\d+\.\d+(?:\.\d+)*)\s+(?P<title>.+)$"
 )
 HEADING_RE = re.compile(r"^##(?:\s+\d+(?:\.\d+)*)?\.?\s+(?P<name>.+?)\s*$", re.MULTILINE)
 LEGACY_INLINE_SECTION_NAMES = {
@@ -93,6 +110,11 @@ class ReviewVerdict:
     verdict: str
     blocking_findings: tuple[str, ...]
     terminal: bool
+    # The entry's own `- `YYYY-MM-DD`:` header. Present so "latest" can mean the newest DATE rather
+    # than a position in the file: handoff ordering is not an invariant anywhere (v1-f005 is neither
+    # newest- nor oldest-first), and `latest_review_verdict` used `reversed()`, which under the
+    # newest-first convention actually returned the OLDEST matching verdict.
+    entry_date: str | None = None
 
 
 @dataclass(frozen=True)
@@ -281,7 +303,23 @@ def parse_backlog_document(text: str) -> ParsedBacklogDocument:
     )
 
 
-def list_git_worktree_roots(root: Path) -> list[Path]:
+def list_git_worktrees(root: Path) -> tuple[list[Path], list[Path]]:
+    """(branch-attached worktree roots, DETACHED worktree roots), the caller's own root first.
+
+    Detached worktrees are separated because they are not workflow-managed checkouts. `start-task`
+    creates a feature worktree with `-b <branch>`, so every feature checkout has a named branch. A
+    detached one is a throwaway - a mutation-harness or fixture tree - and it can live anywhere on
+    disk, including a /tmp scratchpad.
+
+    Measured: three detached fixture worktrees under another session's scratchpad were walked as if
+    they were feature checkouts, and their fixture planning state produced errors attributed BY NAME
+    to a real feature file ("v1-f012-options-surface.md nested checklist item `1.1` is missing
+    parent..."). The findings looked real and the paths were the only clue.
+
+    They are RETURNED rather than dropped so the caller can disclose them. Anyone genuinely working
+    in a detached worktree can audit from inside it, where it is the caller's own root and always
+    included.
+    """
     resolved = subprocess.run(
         ["git", "worktree", "list", "--porcelain"],
         cwd=root,
@@ -290,16 +328,34 @@ def list_git_worktree_roots(root: Path) -> list[Path]:
         check=False,
     )
     if resolved.returncode != 0:
-        return [root.resolve()]
+        return [root.resolve()], []
 
-    worktree_roots = [root.resolve()]
+    attached = [root.resolve()]
+    detached: list[Path] = []
+    current: Path | None = None
+    is_detached = False
+
+    def flush() -> None:
+        nonlocal current, is_detached
+        if current is not None:
+            bucket = detached if is_detached else attached
+            if current not in attached and current not in detached:
+                bucket.append(current)
+        current, is_detached = None, False
+
     for line in resolved.stdout.splitlines():
-        if not line.startswith("worktree "):
-            continue
-        candidate_root = Path(line.removeprefix("worktree ")).resolve()
-        if candidate_root not in worktree_roots:
-            worktree_roots.append(candidate_root)
-    return worktree_roots
+        if line.startswith("worktree "):
+            flush()
+            current = Path(line.removeprefix("worktree ")).resolve()
+        elif line.strip() == "detached":
+            is_detached = True
+    flush()
+    return attached, detached
+
+
+def list_git_worktree_roots(root: Path) -> list[Path]:
+    """Branch-attached worktree roots only. See `list_git_worktrees` for why detached ones are out."""
+    return list_git_worktrees(root)[0]
 
 
 def is_primary_checkout(root: Path) -> bool:
@@ -370,7 +426,7 @@ def _locate_feature_in_repo(root: Path, feature_id: str) -> FeatureLocation | No
     if not backlog_path.exists():
         return None
 
-    parsed_backlog = parse_backlog_document(backlog_path.read_text(encoding="utf-8"))
+    parsed_backlog = parse_backlog_document(read_text_or_error(backlog_path))
     for section_name in WORKFLOW_SECTIONS[1:]:
         for entry in parsed_backlog.feature_sections.get(section_name, []):
             if entry.feature_id == feature_id:
@@ -434,13 +490,13 @@ def collect_openspec_change_linkage(repo_root: Path) -> OpenSpecChangeLinkage:
         raise WorkflowStateError(f"{backlog_path.relative_to(repo_root)} is missing")
 
     linked_change_ids: set[str] = set()
-    parsed_backlog = parse_backlog_document(backlog_path.read_text(encoding="utf-8"))
+    parsed_backlog = parse_backlog_document(read_text_or_error(backlog_path))
     for section_name in WORKFLOW_SECTIONS[1:]:
         for entry in parsed_backlog.feature_sections.get(section_name, []):
             feature_path = (backlog_path.parent / entry.link).resolve()
             if not feature_path.exists():
                 continue
-            change_id = parse_feature_openspec_change(feature_path.read_text(encoding="utf-8"))
+            change_id = parse_feature_openspec_change(read_text_or_error(feature_path))
             if change_id is not None:
                 linked_change_ids.add(change_id)
 
@@ -491,6 +547,9 @@ def parse_feature_openspec_specs(feature_text: str) -> list[str]:
             continue
 
         if current_field == "OpenSpec Specs":
+            if _terminates_field_continuation(line.strip()):
+                current_field = None
+                continue
             specs.extend(TASK_REF_RE.findall(line))
 
     return specs
@@ -539,6 +598,30 @@ def current_task_reference_error(current_task: str | None, tasks: list[TaskRecor
         )
     return None
 
+# Features currently being parsed, so a cross-feature `Depends On` cycle raises a named error
+# instead of RecursionError. `parse_tasks` allocates a FRESH dependency cache per call, so A -> B -> A
+# never observed that it was re-entering A.
+_PARSING_FEATURES: set[Path] = set()
+
+
+def read_text_or_error(path: Path) -> str:
+    """Read UTF-8 text, converting the three measured crash modes into `WorkflowStateError`.
+
+    There are eleven `read_text` sites in this module. A non-UTF-8 feature file, a path that is a
+    directory, or an unreadable file aborted the entire audit from whichever site reached it first -
+    so one malformed file hid every other finding, and the traceback named a helper rather than the
+    file at fault.
+    """
+    try:
+        return path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:
+        raise WorkflowStateError(f"{path} is not valid UTF-8 ({exc.reason})") from None
+    except IsADirectoryError:
+        raise WorkflowStateError(f"{path} is a directory, not a file") from None
+    except OSError as exc:
+        raise WorkflowStateError(f"{path} could not be read: {exc.strerror}") from None
+
+
 
 def parse_handoff_review_verdicts(feature_text: str) -> list[ReviewVerdict]:
     handoff_notes_header = "## 2. Handoff Notes\n"
@@ -553,14 +636,19 @@ def parse_handoff_review_verdicts(feature_text: str) -> list[ReviewVerdict]:
     current_verdict: str | None = None
     current_blocking_findings: tuple[str, ...] = ()
     current_terminal: bool | None = None
+    current_date: str | None = None
 
     def flush() -> None:
         nonlocal current_scope, current_target, current_verdict, current_blocking_findings, current_terminal
+        # `Review Terminal` used to be REQUIRED here, so a newer `blocked` verdict missing only that
+        # line was silently discarded and `latest_review_verdict` returned the older `approved`.
+        # Absence of a terminal CLAIM is not a terminal claim, so it reads as False.
+        if current_terminal is None and current_verdict is not None:
+            current_terminal = False
         if (
             current_scope is None
             or current_target is None
             or current_verdict is None
-            or current_terminal is None
         ):
             current_scope = None
             current_target = None
@@ -575,6 +663,7 @@ def parse_handoff_review_verdicts(feature_text: str) -> list[ReviewVerdict]:
                 verdict=current_verdict,
                 blocking_findings=current_blocking_findings,
                 terminal=current_terminal,
+                entry_date=current_date,
             )
         )
         current_scope = None
@@ -587,6 +676,7 @@ def parse_handoff_review_verdicts(feature_text: str) -> list[ReviewVerdict]:
         line = raw_line.strip()
         if line.startswith("- `") and line.endswith("`:"):
             flush()
+            current_date = line.removeprefix("- `").removesuffix("`:").strip()
             continue
         if line.startswith("- Review Scope: `") and line.endswith("`"):
             current_scope = line.removeprefix("- Review Scope: `").removesuffix("`")
@@ -615,13 +705,25 @@ def parse_handoff_review_verdicts(feature_text: str) -> list[ReviewVerdict]:
 
 
 def latest_review_verdict(feature_text: str, *, scope: str, target: str | None = None) -> ReviewVerdict | None:
-    for verdict in reversed(parse_handoff_review_verdicts(feature_text)):
-        if verdict.scope != scope:
-            continue
-        if target is not None and verdict.target != target:
-            continue
-        return verdict
-    return None
+    """The newest matching verdict BY DATE, falling back to document order only for undated entries.
+
+    This used `reversed()`, which assumes oldest-first. Handoff notes are newest-first by convention
+    (and `v1-f005` is neither), so it returned the OLDEST matching verdict - and callers put that in
+    the `ready_review_verdict` payload as the current one.
+    """
+    matches = [
+        (index, verdict)
+        for index, verdict in enumerate(parse_handoff_review_verdicts(feature_text))
+        if verdict.scope == scope and (target is None or verdict.target == target)
+    ]
+    if not matches:
+        return None
+    # Newest date wins; among equal or absent dates the EARLIER document position wins, which is the
+    # newest entry under the newest-first convention the real files follow.
+    dated = [(i, v) for i, v in matches if v.entry_date]
+    if dated:
+        return max(dated, key=lambda pair: (pair[1].entry_date, -pair[0]))[1]
+    return matches[0][1]
 
 
 def find_legacy_inline_planning_sections(feature_text: str) -> list[str]:
@@ -692,6 +794,9 @@ def _parse_feature_file_tasks(feature_text: str) -> list[TaskRecord]:
             continue
 
         if current_field == "Depends On":
+            if _terminates_field_continuation(line.strip()):
+                current_field = None
+                continue
             current_depends_on.extend(TASK_REF_RE.findall(line))
 
     flush_task()
@@ -864,12 +969,21 @@ def _collect_validation_log_task_block(feature_text: str, task_id: str) -> list[
 
 
 def _normalize_validation_evidence_category(text: str) -> str | None:
-    normalized = re.sub(r"[_\-]+", " ", text.lower()).strip()
+    """Match a single evidence TOKEN exactly, never an alias found somewhere inside prose.
+
+    This searched for any alias anywhere in the text and returned the first hit, so
+    `no schema proof applicable` counted AS schema proof - a negation satisfying the claim it denies -
+    and `manual inspection of the schema section` was read as schema because iteration order decided.
+    The template's contract is "comma-separated validation categories", so the token is compared whole.
+    """
+    normalized = re.sub(r"[_\-]+", " ", text.lower()).strip().strip("`.,;")
     normalized = re.sub(r"\s+", " ", normalized)
+    if not normalized:
+        return None
     for alias, category in VALIDATION_EVIDENCE_CATEGORY_ALIASES.items():
         alias_normalized = re.sub(r"[_\-]+", " ", alias.lower()).strip()
         alias_normalized = re.sub(r"\s+", " ", alias_normalized)
-        if alias_normalized and re.search(rf"(?<!\w){re.escape(alias_normalized)}(?!\w)", normalized):
+        if alias_normalized and normalized == alias_normalized:
             return category
     return None
 
@@ -992,7 +1106,7 @@ def _line_has_numeric_pin(line: str) -> bool:
 
 
 def _claim_evidence_issues_for_file(path: Path, *, relative_path: str) -> list[ClaimEvidenceIssue]:
-    lines = path.read_text(encoding="utf-8").splitlines()
+    lines = read_text_or_error(path).splitlines()
     blocks = _collect_fenced_markdown_blocks(lines)
     issues: list[ClaimEvidenceIssue] = []
     for index, line in enumerate(lines, start=1):
@@ -1058,7 +1172,7 @@ def required_validation_evidence_categories_for_plan(summary: ImplementationPlan
 
 
 def validate_implementation_plan_file(plan_path: Path) -> ImplementationPlanSummary:
-    lines = plan_path.read_text(encoding="utf-8").splitlines()
+    lines = read_text_or_error(plan_path).splitlines()
     plan_label = str(plan_path)
 
     contract_surface = _meaningful_markdown_lines(
@@ -1120,7 +1234,7 @@ def _parse_main_spec_requirement_names(spec_path: Path) -> set[str]:
     if not spec_path.exists():
         return set()
     names: set[str] = set()
-    for line in spec_path.read_text(encoding="utf-8").splitlines():
+    for line in read_text_or_error(spec_path).splitlines():
         match = REQUIREMENT_HEADER_RE.match(line.strip())
         if match:
             names.add(match.group("name"))
@@ -1131,7 +1245,7 @@ def _parse_delta_spec_modified_and_renamed(spec_path: Path) -> tuple[list[str], 
     modified_requirements: list[str] = []
     renamed_to_names: set[str] = set()
     current_operation: str | None = None
-    for line in spec_path.read_text(encoding="utf-8").splitlines():
+    for line in read_text_or_error(spec_path).splitlines():
         stripped = line.strip()
         operation_match = DELTA_OPERATION_RE.match(stripped)
         if operation_match:
@@ -1307,6 +1421,9 @@ def _parse_openspec_tasks_text(tasks_text: str) -> list[RawOpenSpecTaskRecord]:
             continue
 
         if current_field == "Depends On":
+            if _terminates_field_continuation(stripped):
+                current_field = None
+                continue
             current_depends_on.extend(TASK_REF_RE.findall(stripped))
 
     flush_task()
@@ -1314,7 +1431,7 @@ def _parse_openspec_tasks_text(tasks_text: str) -> list[RawOpenSpecTaskRecord]:
 
 
 def parse_openspec_tasks_file(tasks_file: Path, *, current_task: str | None = None) -> list[TaskRecord]:
-    raw_tasks = _parse_openspec_tasks_text(tasks_file.read_text(encoding="utf-8"))
+    raw_tasks = _parse_openspec_tasks_text(read_text_or_error(tasks_file))
     return _derive_openspec_task_statuses(raw_tasks, current_task=current_task)
 
 
@@ -1435,6 +1552,28 @@ def parse_tasks(
     feature_file: Path | None = None,
     repo_root: Path | None = None,
 ) -> list[TaskRecord]:
+    # A cross-feature `Depends On` cycle used to blow the stack: the caches below are allocated per
+    # call, so A -> B -> A re-entered A with no memory of being inside it.
+    if feature_file is not None:
+        key = feature_file.resolve()
+        if key in _PARSING_FEATURES:
+            raise WorkflowStateError(
+                f"dependency cycle: {key.name} is reached again while its own tasks are being "
+                f"resolved; a cross-feature `Depends On` chain loops back to it")
+        _PARSING_FEATURES.add(key)
+        try:
+            return _parse_tasks_inner(feature_text, feature_file=feature_file, repo_root=repo_root)
+        finally:
+            _PARSING_FEATURES.discard(key)
+    return _parse_tasks_inner(feature_text, feature_file=feature_file, repo_root=repo_root)
+
+
+def _parse_tasks_inner(
+    feature_text: str,
+    *,
+    feature_file: Path | None = None,
+    repo_root: Path | None = None,
+) -> list[TaskRecord]:
     feature_tasks = _parse_feature_file_tasks(feature_text)
     if feature_tasks:
         return feature_tasks
@@ -1446,7 +1585,7 @@ def parse_tasks(
 
     current_task = parse_current_task(feature_text)
     return _derive_openspec_task_statuses(
-        _parse_openspec_tasks_text(tasks_file.read_text(encoding="utf-8")),
+        _parse_openspec_tasks_text(read_text_or_error(tasks_file)),
         current_task=current_task,
         local_feature_id=parse_feature_id(feature_text, feature_file=feature_file),
         repo_root=resolved_repo_root,
@@ -1463,7 +1602,7 @@ def list_open_openspec_nested_items(
     tasks_file = _linked_openspec_tasks_file(feature_text, feature_file=feature_file, repo_root=repo_root)
     if tasks_file is None:
         return []
-    nested_items_by_task = _parse_openspec_open_nested_items(tasks_file.read_text(encoding="utf-8"))
+    nested_items_by_task = _parse_openspec_open_nested_items(read_text_or_error(tasks_file))
     return nested_items_by_task.get(task_id, [])
 
 
@@ -1547,7 +1686,7 @@ def _resolve_dependency(
     dependency_tasks_by_id = task_cache.get(dependency_feature_file)
     if dependency_tasks_by_id is None:
         dependency_tasks_by_id = _feature_tasks_by_id(
-            dependency_feature_file.read_text(encoding="utf-8"),
+            read_text_or_error(dependency_feature_file),
             feature_file=dependency_feature_file,
             repo_root=repo_root,
         )

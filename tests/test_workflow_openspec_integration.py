@@ -3129,6 +3129,8 @@ class WorkflowOpenSpecIntegrationTests(unittest.TestCase):
 
                     ## 2. Handoff Notes
                     - `2026-03-26`: Ready for `finish-feature`.
+                    - `2026-08-22`:
+                      - Completion Audit: `grandfathered` (fixture predates the completion-ledger requirement)
                     """
                 ),
                 encoding="utf-8",

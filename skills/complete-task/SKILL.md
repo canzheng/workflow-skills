@@ -53,6 +53,13 @@ The full semantics — when each action is emitted, how `Depends On` parsing sha
    - record any task-completion handoff notes
 8. Update the linked OpenSpec change:
    - mark the completed task `done`
+   - write the completion-ledger line by RUNNING
+     `python "${AGENTS_HOME:-$HOME/.agents}/skills/complete-task/scripts/write_completion_ledger.py" --feature-id <feature-id> --task-id <task-id>`.
+     Do NOT hand-write it. The line carries a `plan-sha256` and a `head` commit that `audit-workflow`
+     re-verifies, so a typed line fails; the script also refuses if the task is not yet `done` or if
+     a line already exists. This step is UNCONDITIONAL — unlike the step-6.5 review verdict it runs
+     whether or not a review gate was crossed, because it is the only record that distinguishes a
+     gated close from a hand-checked box.
    - rely on the workflow `Depends On` convention parsed from the linked OpenSpec task file to expose downstream ready work
 9. Commit the intended task changes, including the task-state updates that live on the feature branch, whenever needed to leave the feature worktree clean for handoff reporting.
 10. Confirm the feature worktree is clean and ready for later reuse by an explicit `start-task` invocation.
@@ -80,4 +87,5 @@ The full semantics — when each action is emitted, how `Depends On` parsing sha
 - The feature worktree cannot be left clean for the next handoff
 - The target task is not `in_progress`
 - The flow attempts to start another task during this `complete-task` invocation
+- The completion-ledger line cannot be written to the feature file
 - `audit-workflow` reports an invalid workflow state

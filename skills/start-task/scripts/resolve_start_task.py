@@ -210,7 +210,14 @@ def resolve_named_task(root: Path, feature_id: str, task_id: str) -> dict[str, o
         raise WorkflowError(str(exc)) from exc
 
     matching_task = None
-    for task in parse_tasks(feature_text, feature_file=feature_path, repo_root=root):
+    try:
+        _scanned = parse_tasks(feature_text, feature_file=feature_path, repo_root=root)
+    except (ValueError, WorkflowError) as _exc:
+        # A malformed `Current Task` or task ledger on an UNRELATED feature
+        # must not abort the scan; it used to raise a bare ValueError and block
+        # starting a task on a healthy feature. audit-workflow reports it.
+        _scanned = []
+    for task in _scanned:
         if task.task_id == task_id:
             matching_task = task
             break
