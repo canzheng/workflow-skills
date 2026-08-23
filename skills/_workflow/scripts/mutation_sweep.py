@@ -115,11 +115,21 @@ def main() -> int:
                     help="a test id that must PASS under every mutation, proving it is reached")
     ap.add_argument("--jobs", type=int, default=1)
     ap.add_argument("--test-cmd", default="uv run pytest -q")
+    ap.add_argument("--fast", action="store_true",
+                    help="stop each run at the first failure (-x). A sweep runs the suite ONCE PER "
+                         "MUTATION, so its cost is mutations x suite-time x reruns; -x collapses "
+                         "the caught cases, which are most of them. Measured on one caught "
+                         "mutation here: 23.95s -> 0.81s. There is no penalty on a survivor, "
+                         "because nothing fails and -x runs everything anyway. WHAT IT COSTS is "
+                         "the list of WHICH tests caught the mutation -- and 'caught by exactly "
+                         "one test' is itself evidence, the thing that justifies writing two "
+                         "similar tests instead of one. Use it while iterating; run the gate "
+                         "sweep without it, where that list is the record.")
     args = ap.parse_args()
 
     repo = args.repo.resolve()
     mutations = json.loads(args.spec.read_text())
-    test_cmd = args.test_cmd.split()
+    test_cmd = args.test_cmd.split() + (["-x"] if args.fast else [])
 
     dirty = _run(["git", "status", "--porcelain"], repo).stdout.strip()
     if dirty:
