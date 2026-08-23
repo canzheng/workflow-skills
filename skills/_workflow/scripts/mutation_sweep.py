@@ -73,7 +73,7 @@ def _apply(worktree: Path, mutation: dict) -> str | None:
 
 
 def _sweep_one(repo: Path, head: str, mutation: dict, control: str | None,
-               test_cmd: list[str]) -> dict:
+               test_cmd: list[str], fast: bool) -> dict:
     tmp = Path(tempfile.mkdtemp(prefix="mutsweep-"))
     worktree = tmp / "wt"
     try:
@@ -93,7 +93,14 @@ def _sweep_one(repo: Path, head: str, mutation: dict, control: str | None,
                         "detail": f"control test {control} fails under the mutation, so the "
                                   f"defect is not cleanly reached: {_summary(probe.stdout)}"}
 
-        r = _run(test_cmd, worktree)
+        # RUN THE LIKELY CATCHER FIRST, under -x. Ordering is the whole cost model once -x is on:
+        # pytest walks files alphabetically, so a mutation caught by an early-sorting test stops in
+        # about a second while one caught by a late-sorting test runs nearly the whole suite. Naming
+        # the likely file cannot reduce COVERAGE -- if it does not fail there, the full run follows
+        # in the same command -- so this is a speed hint, not a filter, and a filtered sweep is the
+        # thing this harness must never silently become.
+        likely = mutation.get("likely") or []
+        r = _run([*test_cmd, *likely, "."] if (fast and likely) else test_cmd, worktree)
         failed = [l for l in r.stdout.splitlines() if l.startswith("FAILED")]
         return {
             "label": mutation["label"],
@@ -159,13 +166,13 @@ def main() -> int:
     results = []
     if args.jobs > 1:
         with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as pool:
-            futures = [pool.submit(_sweep_one, repo, head, m, args.control, test_cmd)
+            futures = [pool.submit(_sweep_one, repo, head, m, args.control, test_cmd, args.fast)
                        for m in mutations]
             for f in concurrent.futures.as_completed(futures):
                 results.append(f.result())
     else:
         for m in mutations:
-            results.append(_sweep_one(repo, head, m, args.control, test_cmd))
+            results.append(_sweep_one(repo, head, m, args.control, test_cmd, args.fast))
 
     order = {"SURVIVED": 0, "NOT RUN": 1, "CAUGHT": 2}
     caught = sum(1 for r in results if r["verdict"] == "CAUGHT")
