@@ -27,7 +27,7 @@ It enforces a mandatory feature-level code review, then the acceptance-plus-Open
 3.5. Run a mandatory feature-level code review before any OpenSpec verification or archive work.
    - invoke `/code-review` at `medium` effort over the feature branch's cumulative diff against its base branch (the full feature changes, which `complete-task` has already committed). Do not pass `--comment`; this is a local pre-finalization gate, not a PR comment.
    - this review is additive: it does not replace the task-level reviews recorded during `complete-task`, and it must run even when every task already passed its own review.
-   - if the review returns blocking findings, stop: do not run `openspec-verify-change`, sync, or archive, and do not move the feature to `[DONE]`. Keep the feature `[IN_PROGRESS]` and run the REMEDIATION ROUND below. Do not re-invoke this gate until every step of it has completed.
+   - if the review returns blocking findings, stop: do not run `openspec-verify-change` or archive, and do not move the feature to `[DONE]`. Keep the feature `[IN_PROGRESS]` and run the REMEDIATION ROUND below. Do not re-invoke this gate until every step of it has completed.
    - increment `Gate Iteration` in the feature file on every invocation of this step, so the loop can see its own length.
 3.5.1. REMEDIATION ROUND — a first-class gated unit, not free-form commits.
    - A remediation round is NOT task execution and does NOT reopen a task. `Current Task` stays `none`. This is stated because the previous wording ("resolve the findings through normal task execution") named a `done -> ready` transition the Task Status Model does not define, so in practice remediation ran as raw commits with no gate of any kind. On `v1-f010` roughly half of the blocking findings across nine gates were introduced by a previous gate's own remediation.
@@ -46,8 +46,7 @@ It enforces a mandatory feature-level code review, then the acceptance-plus-Open
 4. Run `openspec-verify-change` with the name of the openspec change to verify the change against the specs
 5. Run the finish-feature resolver script to inspect active-vs-archived state for that change.
 6. If the linked change is still active:
-   - run `openspec-sync-specs` with the name of the openspec change, this will sync the delta specs to openspec main specs.
-   - run `openspec-archive-change` for that exact change
+   - run `openspec-archive-change` for that exact change. This updates the main specs from the delta specs itself (`openspec archive`: "Archive a completed change and update main specs"), so there is no separate sync step to run first.
    - rerun the resolver script and confirm the active change directory is gone and exactly one archive directory now exists
    - move the feature from `[IN_PROGRESS]` to `[DONE]` only after acceptance plus archive succeed
 7. If the linked change is already archived:
@@ -62,7 +61,7 @@ It enforces a mandatory feature-level code review, then the acceptance-plus-Open
 ## Rules
 
 - Do not call `finishing-a-development-branch` before the linked OpenSpec change is archived.
-- A mandatory feature-level `/code-review` runs before OpenSpec verification and archive. Do not run OpenSpec verification, sync, or archive, and do not move the feature to `[DONE]`, while that review has unresolved blocking findings.
+- A mandatory feature-level `/code-review` runs before OpenSpec verification and archive. Do not run OpenSpec verification or archive, and do not move the feature to `[DONE]`, while that review has unresolved blocking findings.
 - A remediation round is itself gated: its catalogue, its deterministic verification, and — when the round touched code — a code review of its own diff all complete before the feature gate is re-invoked. Skipping the catalogue or the mutation sweep is a workflow violation, not a shortcut.
 - A PROSE-ONLY remediation round skips the diff review and records a `remediation_code` entry with NO `Review Verdict` line. This is not a weakened gate: the round still catalogues, still runs the full suite and the unfiltered mutation sweep, and still faces the next feature gate over the cumulative diff. See step 3.5.1(d) for the measurement behind it.
 - `finish-feature` owns the terminal feature transition and the handoff into generic branch finalization.
