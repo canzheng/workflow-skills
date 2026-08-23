@@ -31,7 +31,15 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 from pathlib import Path
+
+# `git worktree add` and `remove` take git's index lock, so concurrent calls on one repo race: a
+# losing call can leave an EMPTY worktree, and the mutation against it then reports "file does not
+# exist in the worktree". Measured on an 11-mutation run at --jobs 4 -- one NOT RUN, no false catch,
+# because the existence check caught it. Serialising only the git calls keeps the pytest runs, which
+# are the expensive part, fully parallel.
+_GIT_WORKTREE_LOCK = threading.Lock()
 
 
 def _run(cmd, cwd, timeout=1800):
@@ -69,7 +77,11 @@ def _sweep_one(repo: Path, head: str, mutation: dict, control: str | None,
     tmp = Path(tempfile.mkdtemp(prefix="mutsweep-"))
     worktree = tmp / "wt"
     try:
-        _run(["git", "worktree", "add", "--detach", str(worktree), head], repo)
+        with _GIT_WORKTREE_LOCK:
+            added = _run(["git", "worktree", "add", "--detach", str(worktree), head], repo)
+        if added.returncode != 0:
+            return {"label": mutation["label"], "verdict": "NOT RUN",
+                    "detail": f"git worktree add failed: {added.stderr.strip().splitlines()[-1] if added.stderr.strip() else added.returncode}"}
         problem = _apply(worktree, mutation)
         if problem:
             return {"label": mutation["label"], "verdict": "NOT RUN", "detail": problem}
@@ -90,7 +102,8 @@ def _sweep_one(repo: Path, head: str, mutation: dict, control: str | None,
             "failed": failed[:5],
         }
     finally:
-        _run(["git", "worktree", "remove", "--force", str(worktree)], repo)
+        with _GIT_WORKTREE_LOCK:
+            _run(["git", "worktree", "remove", "--force", str(worktree)], repo)
         shutil.rmtree(tmp, ignore_errors=True)
 
 
@@ -114,6 +127,22 @@ def main() -> int:
               "detached worktree, so uncommitted work would be invisible and the result would "
               "describe code you are not running.\n" + dirty, file=sys.stderr)
         return 2
+    # A KILLED PREDECESSOR LEAVES ITS WORKTREES REGISTERED. `finally` does not survive SIGKILL, so
+    # a sweep that is stopped mid-run leaves `/tmp/mutsweep-*` directories and the registrations
+    # pointing at them. They are harmless -- detached, outside the source tree, which is the point
+    # of putting them there -- but they accumulate in `git worktree list`. Observed after a real
+    # kill: four left behind, while the source tree itself was untouched and the suite green.
+    stale = 0
+    for line in _run(["git", "worktree", "list", "--porcelain"], repo).stdout.splitlines():
+        if line.startswith("worktree ") and "/mutsweep-" in line:
+            path = line.split(" ", 1)[1]
+            _run(["git", "worktree", "remove", "--force", path], repo)
+            shutil.rmtree(Path(path).parent, ignore_errors=True)
+            stale += 1
+    _run(["git", "worktree", "prune"], repo)
+    if stale:
+        print(f"cleaned up {stale} worktree(s) left by an earlier interrupted sweep")
+
     head = _run(["git", "rev-parse", "HEAD"], repo).stdout.strip()
     print(f"sweeping {len(mutations)} mutation(s) against {head[:12]} in detached worktrees")
 
