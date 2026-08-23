@@ -4,7 +4,7 @@
 Dependency-free on purpose: `~/.agents` is not a git repo, has no test runner, and these checks gate
 every workflow operation in every consuming repository. Run directly:
 
-    python3 ~/.agents/skills/audit-workflow/scripts/test_audit_checks.py
+    bin/run-python.sh skills/_workflow/tests/test_audit_checks.py
 
 Each test names the production change that would make it fail. A check that gates everything and is
 itself unverified is the shape this whole round exists to remove.
@@ -16,7 +16,18 @@ import sys
 from collections import namedtuple
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+# This file lives in `skills/_workflow/tests/` (repo-only, never installed), while its subject
+# lives in the audit-workflow skill. Resolve that skill through the same helper the sibling tests
+# use, so the path holds wherever the repo is cloned.
+for _candidate in Path(__file__).resolve().parents:
+    if (_candidate / "_workflow").is_dir():
+        if str(_candidate) not in sys.path:
+            sys.path.insert(0, str(_candidate))
+        break
+from _workflow.cli_helpers import resolve_skills_root  # noqa: E402
+
+AUDIT_SCRIPT_DIR = resolve_skills_root(Path(__file__)) / "audit-workflow" / "scripts"
+sys.path.insert(0, str(AUDIT_SCRIPT_DIR))
 import audit_workflow as aw  # noqa: E402
 
 T = namedtuple("T", "task_id status")
@@ -277,7 +288,7 @@ def plans(text, tasks, change_id="c1", tmp=None):
     return aw._tasks_without_plans(text, FP, ROOT, change_id, tasks)
 
 
-def test_plans_with_fixture(tmpdir, done_ids, present_ids, text=""):
+def _plans_with_fixture(tmpdir, done_ids, present_ids, text=""):
     """Build a real plan directory so the check's filesystem probe is exercised, not stubbed."""
     d = tmpdir / "openspec" / "changes" / "c1" / "implementation-plans"
     d.mkdir(parents=True, exist_ok=True)
@@ -292,22 +303,22 @@ _tmp = pathlib.Path(tempfile.mkdtemp())
 (_tmp / "docs").mkdir(parents=True, exist_ok=True)
 
 check("a done task with no plan file is reported",
-      len(test_plans_with_fixture(_tmp / "a", ["1"], [])) == 1)
+      len(_plans_with_fixture(_tmp / "a", ["1"], [])) == 1)
 
 check("a done task WITH its plan file is clean",
-      test_plans_with_fixture(_tmp / "b", ["1"], ["1"]) == [])
+      _plans_with_fixture(_tmp / "b", ["1"], ["1"]) == [])
 
 check("only the task missing its plan is named",
-      "task 2" in test_plans_with_fixture(_tmp / "c", ["1", "2"], ["1"])[0])
+      "task 2" in _plans_with_fixture(_tmp / "c", ["1", "2"], ["1"])[0])
 
 check("a plan for a DIFFERENT task does not satisfy this one",
-      len(test_plans_with_fixture(_tmp / "d", ["1"], ["7"])) == 1)
+      len(_plans_with_fixture(_tmp / "d", ["1"], ["7"])) == 1)
 
 check("task 1 is not satisfied by 11.md",
-      len(test_plans_with_fixture(_tmp / "e", ["1"], ["11"])) == 1)
+      len(_plans_with_fixture(_tmp / "e", ["1"], ["11"])) == 1)
 
 check("the plan grandfather marker suppresses it",
-      test_plans_with_fixture(_tmp / "f", ["1"], [], text="- Plan Audit: `grandfathered` - predates the rule\n") == [])
+      _plans_with_fixture(_tmp / "f", ["1"], [], text="- Plan Audit: `grandfathered` - predates the rule\n") == [])
 
 # A DONE feature's change is archived to changes/archive/<date>-<change-id>/, so the check looks in
 # both places. No fixture used the archived path, so dropping that fallback survived - and it would

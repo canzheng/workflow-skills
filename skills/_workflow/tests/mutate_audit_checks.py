@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Mutation harness for the audit's own checks. Run after touching any check or its tests.
 
-    python3 ~/.agents/skills/audit-workflow/scripts/mutate_audit_checks.py
+    bin/run-python.sh skills/_workflow/tests/mutate_audit_checks.py
 
 Why this exists: `audit_workflow.py` gates every workflow operation in every consuming repo, and its
 self-tests are the only thing verifying it. Five of those tests were DECORATIVE when first written
@@ -21,7 +21,16 @@ import pathlib
 import subprocess
 import sys
 
-SCRIPT = pathlib.Path(__file__).with_name("audit_workflow.py")
+# This harness lives in `skills/_workflow/tests/` (repo-only, never installed); its subject lives
+# in the audit-workflow skill. `TEST` stays a sibling.
+for _candidate in pathlib.Path(__file__).resolve().parents:
+    if (_candidate / "_workflow").is_dir():
+        if str(_candidate) not in sys.path:
+            sys.path.insert(0, str(_candidate))
+        break
+from _workflow.cli_helpers import resolve_skills_root  # noqa: E402
+
+SCRIPT = resolve_skills_root(pathlib.Path(__file__)) / "audit-workflow" / "scripts" / "audit_workflow.py"
 TEST = str(pathlib.Path(__file__).with_name("test_audit_checks.py"))
 
 # (label, old_snippet, new_snippet) — each reintroduces ONE defect the suite claims to pin.
