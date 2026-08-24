@@ -12,6 +12,7 @@ Use narrow verification first.
 - `bin/run-python.sh skills/_workflow/tests/test_audit_checks.py` runs the audit-check self-tests. This file and `mutate_audit_checks.py` are self-running scripts, not pytest modules, so `conftest.py` excludes them from collection; run them directly.
 - `bin/run-python.sh skills/_workflow/tests/mutate_audit_checks.py` mutation-tests the audit's own checks and must report zero SURVIVED and zero SKIPPED.
 - `bin/run-python.sh skills/_workflow/tests/test_workflow_state_fixes.py` runs the shared-library self-tests; it is a self-running script too.
+- `bash skills/_workflow/tests/remediation_round/run.sh` and `bash skills/_workflow/tests/snapshot_state/run.sh` are negative-control corpora for `lint_remediation_round.py` and `snapshot_round_state.py`. Run the matching one after editing either script; each must exit 0.
 - `conda env create -f environment.yml` creates the managed environment named in `environment.yml`.
 - `conda env update -f environment.yml --prune` updates the managed environment from the tracked environment definition.
 - `bash install.sh` syncs the workflow skills from this repo into `${AGENTS_HOME:-$HOME/.agents}/skills`, patches the managed workflow section in `${AGENTS_HOME:-$HOME/.agents}/AGENTS.md`, and does not install repo-only tests.

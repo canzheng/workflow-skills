@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -102,6 +103,25 @@ def check(repo: Path, feature_id: str) -> list[str]:
         rows = len(re.findall(r"^\|\s*(?:test|out_of_band)\s*\|", manifest.read_text(), re.M))
         if scenarios != rows:
             problems.append(f"{scenarios} scenarios in the delta spec but {rows} manifest rows")
+
+        # COUNTING ROWS DOES NOT RESOLVE A CLOSER. A manifest can name a test that no longer exists
+        # and still have the right number of rows -- measured on `v1-f007` gate 1, where a
+        # remediation round deleted a test named as a closer and this script reported OK while the
+        # repo's own closure checker reported the dangling name. Delegate to that checker when the
+        # repo ships one, rather than reimplementing closure resolution here: the manifest format
+        # and the definition of "resolves" belong to the repo, not to this script.
+        closure = repo / "scripts" / "check_scenario_closure.py"
+        if closure.exists():
+            r = subprocess.run(
+                # The BARE change id, never `change.name`: once archived the directory is
+                # `<date>-<change-id>`, and the repo's checker takes the id. Passing the directory
+                # name resolved fine for every active change and broke at the archive boundary.
+                [sys.executable, str(closure), change_id],
+                cwd=repo, capture_output=True, text=True,
+            )
+            if r.returncode != 0:
+                detail = (r.stderr or r.stdout).strip().splitlines()
+                problems.extend(line.removeprefix("ERROR: ") for line in detail if line.strip())
 
     return problems
 
