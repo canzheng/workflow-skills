@@ -79,3 +79,12 @@ loss reconciliation, repeated identities, permission loss and human edits. Remot
 fixtures are explicitly fixtures; real connected-tool reads/403 write remain separate.
 Docs: handoff/evidence/capability failure guide. Ubuntu/fresh Cloud acceptance pending;
 this host is Debian 13, not Ubuntu. Next: F10 executable checks/trusted CI metadata.
+
+F09 committed at `a3c5dc2`. F10: public check validates schemas/source-consumer
+integrity/current links/anchors/PR sections and read-only Issue inconsistency
+snapshots. Trusted-base metadata uses head Git blobs as data with read-only
+permissions; body/head event coverage and injected shell/executable strings tested.
+31 tests and source public check pass. Actual Actions and merge enforcement pending;
+no repository settings changed. All-spec check remains intentionally sensitive to
+legacy current contracts until F13 removal (never claimed passed). Docs: checks/
+runbook/architecture/index. Next: F11 real bundle consumer/scenario proof.

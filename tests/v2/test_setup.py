@@ -38,7 +38,7 @@ def commit(root):
 def fixture_source(root):
     init(root)
     assets = {}
-    for file in ('core.py', 'setup.py', 'workflow.py'):
+    for file in ('core.py', 'setup.py', 'workflow.py', 'checks.py', 'records.py'):
         name = 'tools/workflow/' + file
         (root / name).parent.mkdir(parents=True, exist_ok=True)
         (root / name).write_bytes((TOOLS / file).read_bytes())

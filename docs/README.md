@@ -17,3 +17,4 @@ historical v1 evidence, not instructions or a writable delivery queue.
 - [Specifications](workflow/openspec.md): pinned validation, single-plan and archive ownership.
 - [Skill usage](workflow/usage.md) and [evaluation evidence](validation/skill-evaluations.md).
 - [Handoff and evidence](workflow/handoff.md): exact targets and same-content continuation.
+- [Current architecture](architecture.md) and [checks/enforcement](workflow/checks.md).

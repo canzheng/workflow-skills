@@ -6,7 +6,6 @@
     "tools/workflow/setup.py": "tools/workflow/setup.py",
     "tools/workflow/workflow.py": "tools/workflow/workflow.py",
     "tools/workflow/checks.py": "tools/workflow/checks.py",
-    "tools/workflow/migration.py": "tools/workflow/migration.py",
     "tools/workflow/records.py": "tools/workflow/records.py",
     ".agents/skills/workflow-design-to-backlog/SKILL.md": ".agents/skills/workflow-design-to-backlog/SKILL.md",
     ".agents/skills/workflow-deliver-issue/SKILL.md": ".agents/skills/workflow-deliver-issue/SKILL.md",

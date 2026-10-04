@@ -98,6 +98,7 @@ def main(argv=None):
     k = sub.add_parser('check')
     k.add_argument('--repo', required=True)
     k.add_argument('--pr-json')
+    k.add_argument('--metadata-only', action='store_true')
     k.add_argument('--specs', action='store_true')
     k.add_argument('--issues-json')
     k.add_argument('--json', action='store_true')
