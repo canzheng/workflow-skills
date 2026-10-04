@@ -265,3 +265,15 @@ remain pending authorization; enforcement read access is still limited. F14 rema
 incomplete and the rewrite change active; F01–F13 implemented/locally verified is
 not a merge or delivery claim. See [consumer evidence](f14-consumer-pilot.md) for actual
 Issue/PR/Actions mapping and the distinction between older adoption and S34 proof.
+
+Latest implementation evidence supersedes earlier refinement counts: source
+`11fa051a7c4af359bd4728e1edf69cd8c7a61259` passes68 tests/no skips and strict specs
+on Cloud/fresh Ubuntu, with actual source push/PR success. Independent PR findings
+were validated and remediated with failing-before coverage for effective ignores,
+runtime mapping omissions, extra ignored evidence identity and unsafe migration
+archive paths. Consumer `5efc5f5ffdcab46a440b2cb2237924ee476a5bd9` pins that source;
+actual fresh-clone same-pin bootstrap/hash/no-op/clean-tree checks and push/PR/metadata
+pass. Final semantic review results must be read before claiming review completion.
+The unified environment command was actually exercised from a new repo without tools
+and rerun unchanged. Current script/pins and exact next Cloud prompt are in the handoff.
+Documentation revisions update evidence/commands only; executable pin remains explicit.

@@ -2,47 +2,72 @@
 
 Use existing repository canzheng/workflow-skills-test, branch
 `pilot/shared-skill-bootstrap`, exact tested consumer SHA
-`539580779e52eef5b976a0460d7d18e16833c2b0` (PR8, Issue7).
+`5efc5f5ffdcab46a440b2cb2237924ee476a5bd9` (PR8, Issue7).
 The tracked manifest pins workflow source
-`47320c363e538d2c8423e11e5ca9121c2d0303da`. Main has the older tracked-skill model;
+`11fa051a7c4af359bd4728e1edf69cd8c7a61259`. Main has the older tracked-skill model;
 no merge is authorized. Select this branch for preparation and the fresh task.
 Do not discard user changes or silently substitute main.
 
-## Published environment preparation
+## Published environment setup command
 
-Put this idempotent script in the actual Cloud setup/preparation hook; use the same
-script in the maintenance hook if the host offers one. Ensure checkout precedes it
-and agent skill discovery follows it. Publish/apply the environment configuration
-and use a new task outside the onboarding conversation. The host's actual ordering
-is a gate to test, not a fact established by this document.
+Use this single idempotent script in Cloud setup/preparation and, if available, the
+maintenance hook. It works for a new Git checkout without tools/workflow: absence
+of the dependency manifest triggers a pinned source fetch and initial adoption.
+An adopted repository uses its own tracked pin and bootstrap without re-running
+adoption or fetching the seed version. Change both explicit path and owner/name
+for another repository; never infer a different target from the current directory.
 
 ```sh
 set -eu
 cd /workspace/workflow-skills-test
 python3 -c 'import sys; assert sys.version_info >= (3, 10), "Python >=3.10 is required"; print(sys.version.split()[0])'
 git --version
+if [ ! -f .workflow/install-manifest.json ]; then
+    WF2_SOURCE_SHA=11fa051a7c4af359bd4728e1edf69cd8c7a61259
+    WF2_SOURCE_DIR=$(mktemp -d)
+    trap 'rm -rf -- "$WF2_SOURCE_DIR"' EXIT
+    git -C "$WF2_SOURCE_DIR" init --quiet
+    git -C "$WF2_SOURCE_DIR" fetch --no-tags --depth=1 https://github.com/canzheng/workflow-skills.git "$WF2_SOURCE_SHA"
+    git -C "$WF2_SOURCE_DIR" checkout --detach --quiet "$WF2_SOURCE_SHA"
+    python3 "$WF2_SOURCE_DIR/tools/workflow/workflow.py" setup --source "$WF2_SOURCE_DIR" --revision "$WF2_SOURCE_SHA" --target "$PWD" --repository canzheng/workflow-skills-test --json
+    python3 "$WF2_SOURCE_DIR/tools/workflow/workflow.py" setup --source "$WF2_SOURCE_DIR" --revision "$WF2_SOURCE_SHA" --target "$PWD" --repository canzheng/workflow-skills-test --apply --json
+fi
+python3 -c 'import json, pathlib, sys; m=json.loads(pathlib.Path(".workflow/install-manifest.json").read_text(encoding="utf-8")); sys.exit(0 if m.get("schema_version")==2 else "Existing adoption needs reviewed dependency migration; do not overwrite it during environment setup")'
 python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
 python3 tools/workflow/workflow.py check --repo . --run-local --json
 python3 tools/workflow/workflow.py doctor --repo . --json
 git status --short --untracked-files=all
 ```
 
-Require exit0 and ok:true for bootstrap/check/doctor; preserve and report unexpected
-working-tree changes. The bootstrap adds no ignore rules during preparation: adoption
-already tracked the scoped ignore block and manifest. It materializes only the three
-ignored namespaces and no project-owned files. Repeat returns changes:[]; no source
-SHA is duplicated in environment settings. Do not run one-time setup at every launch.
-No Node/Conda/OpenSpec/global skill install is needed for this workflow-only branch.
-Git HTTPS access to the exact pinned source is required for an empty clone. GitHub
-API operations separately need api.github.com network/auth permission; apply the
-existing network draft if those operations remain proxy-blocked. Never print tokens.
+First adoption creates trackable tools/workflow, AGENTS, project workflow config/pin,
+GitHub workflows/templates/docs and exactly three owned ignore entries. Review and
+commit these generated adoption files so Git becomes the durable workflow authority;
+shared dependencies are already ignored and project-specific skills remain trackable.
+The script never changes the Git index, commits, publishes or silently migrates old
+tracked skills. Existing tracked shared files need explicit reviewed migration in
+operations. In an already adopted consumer, no project files are rewritten and
+bootstrap repeats with changes:[]; the initial seed SHA does not override its pin.
+The pilot branch has already committed adoption, so it takes that repeatable path.
+
+Publish/apply the environment configuration and use a new task outside onboarding.
+Ensure checkout precedes the hook and agent discovery follows it. Hook ordering,
+setup-file persistence and fresh host discovery are acceptance to test, not facts
+established by running the script in an already active chat. Run maintenance after
+checkout/pin changes when that host requires it. Record actual preparation logs.
+
+Require exit0 and ok:true for setup/bootstrap/check/doctor. For a fresh repository,
+uncommitted adoption files are expected until reviewed and committed; preserve/report
+other changes. An adopted pilot should remain Git-clean. No Node/Conda/OpenSpec/global
+skill installation is needed. Git HTTPS read access to the exact source is required
+for an empty dependency checkout. GitHub API access is separate: apply the existing
+api.github.com network draft if API operations remain proxy-blocked. Never print tokens.
 
 ## Fresh task prompt
 
 ```text
 Use the existing isolated checkout /workspace/workflow-skills-test. Do not create
 another worktree. Verify pilot/shared-skill-bootstrap at
-539580779e52eef5b976a0460d7d18e16833c2b0; preserve local changes and report mismatches.
+5efc5f5ffdcab46a440b2cb2237924ee476a5bd9; preserve local changes and report mismatches.
 Read AGENTS.md, docs/workflow/contract.md, docs/workflow/README.md and docs/design.md.
 Continue F14 validation for Issue7/Ready PR8, not application implementation.
 

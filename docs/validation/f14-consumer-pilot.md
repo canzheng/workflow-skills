@@ -283,3 +283,44 @@ The exact published environment script and fresh-task prompt are in
 on a fresh Cloud task and Ubuntu agent discovery remain unperformed. Actual merge →
 valid Issue completion and enforcement configuration mutations remain pending separate
 authorization; runtime bootstrap and workflow checks do not substitute for them.
+
+### Reviewed corrections and current pinned consumer
+
+Subsequent independent consumer review found broad excludes hiding project skills
+and negations exposing shared skills during setup. Both were reproduced against the
+exact old consumer clone, then fixed at source133dcff with effective Git policy preview
+before writes plus bootstrap/check/doctor validation. Consumer3b64cf re-review reports
+no major issues (comment5981763538); addressed threads resolved.
+
+Source ReadyPR16 review independently found incomplete installed runtime validation
+and extra ignored assets reported clean. Failing-before public regressions confirmed
+both; sourcecb2cde7 requires all seven runtime modules and marks unmanaged dependency
+content dirty. Further source review found source-check completeness drift and an
+external OpenSpec archive accepted through a symlink. Failing-before tests confirmed
+both; source11fa051 shares runtime requirements and validates archive root/matches.
+No original acceptance/assertions were weakened. Targeted final reviews were requested;
+read actual results before claiming final semantic acceptance.
+
+Current consumer branch `pilot/shared-skill-bootstrap`, SHA
+`5efc5f5ffdcab46a440b2cb2237924ee476a5bd9`, pins source
+`11fa051a7c4af359bd4728e1edf69cd8c7a61259`. Source68 tests/no skips, public check and
+strict OpenSpec checks pass on Cloud Debian and fresh same-SHA Ubuntu24.04.5;
+source push[37214817774](https://github.com/canzheng/workflow-skills/actions/runs/37214817774)
+and PR[37214821507](https://github.com/canzheng/workflow-skills/actions/runs/37214821507)
+pass. Consumer exact-head fresh Cloud-runtime/Ubuntu clones fetch that pin, materialize
+four exact hashes, repeat changes:[], pass check/doctor and remain Git-clean with
+project skill tracked. Actual consumer push
+[37214896516](https://github.com/canzheng/workflow-skills-test/actions/runs/37214896516),
+PR[37214899407](https://github.com/canzheng/workflow-skills-test/actions/runs/37214899407),
+metadata[37214897768](https://github.com/canzheng/workflow-skills-test/actions/runs/37214897768)
+pass. No merge/completed closure/admin mutation occurred.
+
+The user clarified that environment setup must handle a brand-new repo without tools.
+The [unified published setup script](cloud-bootstrap-handoff.md) now fetches an exact
+seed/adopts only when no tracked manifest exists; otherwise it bootstraps the existing
+pin. The exact script passed on a new Git checkout without tools, then repeated with
+no fetch/file changes; tools and pin are trackable, shared skills ignored. Generated
+adoption files must be reviewed/committed. This proves the script's behavior, not the
+host's preparation persistence/ordering or initial agent discovery. Those remain the
+fresh published Cloud gate. Ubuntu agent discovery is also unperformed; merge→Issue
+completion and enforcement mutations remain separately pending authorization.

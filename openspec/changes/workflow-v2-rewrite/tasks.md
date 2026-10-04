@@ -208,3 +208,15 @@ passes11 Cloud/Ubuntu/Python3.14 tests, final Codex review no major issues; addr
 threads resolved. Exact fresh published Cloud script/prompt is documented in
  docs/validation/cloud-bootstrap-handoff.md. F14 stays unchecked until actual fresh
 host discovery/use and other required gates; merge/admin mutations need separate authority.
+
+Current consumer/source checkpoint: pilot/shared-skill-bootstrap at
+5efc5f5ffdcab46a440b2cb2237924ee476a5bd9 pins source11fa051a7c4af359bd4728e1edf69cd8c7a61259.
+Source68 tests/no skips and strict checks passed on Cloud/fresh Ubuntu; actual source
+and consumer CI passed. Source/consumer PR review findings were reproduced and fixed
+with meaningful negatives; latest requested semantic results are not assumed passed.
+Unified environment script now handles absent tools/pin by exact seed fetch/adoption,
+then repeats via tracked-pin bootstrap with no fetch/file changes. Exact tested script
+and fresh task prompt are in docs/validation/cloud-bootstrap-handoff.md. F14 remains
+unchecked: actual fresh published Cloud pre-agent discovery/use, Ubuntu agent discovery,
+remaining required scenarios/final semantic acceptance and actual enforcement evidence
+remain distinct gates. Merge→valid completion/admin mutation need separate authorization.
