@@ -34,8 +34,12 @@ The user-authorized one-shot initial-backlog refinement and S33 now pass all
 54 tests without skips, public check and strict current/delta spec validation on
 the managed Debian checkout and a fresh same-SHA Ubuntu24.04 clone.
 [Source Actions37206519129](https://github.com/canzheng/workflow-skills/actions/runs/37206519129)
-succeeded. Documentation-only consumer evidence updates follow this revision; their
-exact final-SHA verification is recorded in Issue #15/PR #16 after publication.
+succeeded. The complete source/evidence head
+`ed6c6e099e921b62a26f904c738da581f456aabc` also passed all54 tests without skips,
+public checks and strict current/delta specs on this managed checkout and a fresh
+Ubuntu clone; [Actions37209497302](https://github.com/canzheng/workflow-skills/actions/runs/37209497302)
+succeeded. Subsequent evidence-only updates retain explicit tested SHAs and actual
+final-head checks in Issue15/PR16.
 The [real consumer pilot](f14-consumer-pilot.md) separately records source bundle pin,
 consumer branches/SHAs, actual Issues, Ready PR, successful generic/trusted-base CI,
 intentional metadata failure/restoration, Codex findings/fixes and Ubuntu tests.
@@ -49,7 +53,7 @@ the image. Initial mounted-clone ownership and cross-device hardlink failures we
 resolved by remote/copying clones, without changing global Git configuration.
 This proves Ubuntu portability, not a particular user's private Ubuntu host.
 
-The 51-test suite invokes the production pinned setup, installed checker, actual
+The current 54-test suite invokes the production pinned setup, installed checker, actual
 consumer CLIs, failure injections and real pinned OpenSpec validate/archive.
 Without Node, optional fixture checks are disclosed as skipped; that is not full
 rewrite acceptance. Here no tests skipped. The offline required runner rejects an

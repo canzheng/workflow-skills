@@ -141,7 +141,7 @@ openspec/specs/
 openspec/changes/
 ```
 
-The `.agents/skills/` directories are the only authored copies of the three v2 skills in the source repository. Reusable risk references live with the risk skill. Utilities live under `tools/workflow/`. Consumer setup copies this bounded bundle at a pinned source commit and records provenance; it must not create another editable skills source tree inside the source repository. The installation manifest is generated for installed consumer bundles, not required for authoring in the source repository, and never includes its own content hash. Doctor must distinguish a source checkout from an installed consumer explicitly rather than treating an absent source-repository install manifest as corruption.
+The `.agents/skills/` directories are the only authored, tracked copies of the three shared v2 skills in the source repository. Reusable risk references live with the risk skill. In consumers, project policy/configuration, utilities, CI/templates, docs/specs and project-specific skills remain tracked. The three shared skill directories are dependencies materialized repo-locally and individually gitignored. The tracked `.workflow/install-manifest.json` pins their full source commit, credential-free source URL and asset hashes; it is provenance, never task state, and never includes its own content hash. Cloud and Ubuntu consume that same pin, without fetching main/latest or installing globally. Doctor distinguishes authoring from installed consumers; source authoring needs no install manifest.
 
 ### 4.3 Repository-scoped setup
 
@@ -157,6 +157,8 @@ Required behavior:
 - On update, replace an owned file only if its previous hash still matches. Report local modifications as conflicts; preserve them. Do not silently overwrite or assume the source repository's `HEAD` identifies uncommitted bundle bytes.
 - Repeating setup with unchanged inputs is a no-op. Uninstall removes only unmodified managed files and its instruction block, retaining user documents and modifications.
 - Consumer configuration is user-owned after creation. New defaults do not overwrite it.
+- Adoption adds an owned `.gitignore` block for only the three canonical shared skill directories and records a schema-2 dependency pin. Existing tracked shared files require explicit reviewed untracking; setup never changes the Git index.
+- Repeatable `bootstrap` reads that pin and installs/verifies only the ignored shared skills. It preserves project-owned files and the index, supports no-op reruns, and rejects modified dependencies, unsafe paths or mismatched pins before writes. Environment preparation runs it before agent skill discovery; filesystem presence alone is not host discovery evidence.
 
 Repo-local skills are the default on Cloud and Ubuntu. Diagnose discoverable legacy/global duplicates; do not assume one same-named skill overrides another. Do not delete or edit global skills automatically. A user deliberately retaining v1 for other projects may keep them, provided explicit repository guidance prevents v1 execution here. Identical v2 names in more than one active discovery location are a setup conflict to resolve.
 
@@ -186,6 +188,7 @@ Public utility surface for the first release:
 | Command family | Minimum contract |
 | --- | --- |
 | `setup` | Dry-run/apply install, update, and uninstall using explicit paths and provenance |
+| `bootstrap` | Dry-run/apply repo-local shared-skill materialization from the tracked exact dependency pin; no project-file or index rewrites |
 | `doctor` | Read-only report of config, tool versions, instructions, duplicate skills, and available integration capabilities |
 | `check` | Check owned bundle consistency, schemas, local documentation links, selected spec validation, and declared PR contract structure |
 | `migrate inspect` | Read-only inventory and proposed v1 dispositions; no automatic state migration |

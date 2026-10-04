@@ -3,6 +3,7 @@
   "bundle_version": "2.0.0",
   "assets": {
     "tools/workflow/core.py": "tools/workflow/core.py",
+    "tools/workflow/bootstrap.py": "tools/workflow/bootstrap.py",
     "tools/workflow/setup.py": "tools/workflow/setup.py",
     "tools/workflow/workflow.py": "tools/workflow/workflow.py",
     "tools/workflow/checks.py": "tools/workflow/checks.py",

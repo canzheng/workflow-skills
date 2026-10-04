@@ -170,7 +170,7 @@ Milestone A: usable core with local/fixture proof. Milestone B: complete deliver
 
 **Deliverables**
 
-- Public `setup` dry-run/apply/update/uninstall behavior and read-only `doctor`.
+- Public `setup` dry-run/apply/update/uninstall behavior, repeatable pinned dependency `bootstrap`, and read-only `doctor`.
 - Versioned install provenance with managed-file hashes and source commit identity.
 - Consumer assets for a delimited AGENTS entrypoint, config, contract, templates, utilities, and the three canonical skill directories.
 - Tests using minimal valid fixture bundles before all production skills exist; assembly of the real bundle once F05/F06/F08 are available.
@@ -184,6 +184,9 @@ Milestone A: usable core with local/fixture proof. Milestone B: complete deliver
 5. Uninstall removes only unmodified managed assets and the managed instruction block, retaining user-owned documents/configuration as documented.
 6. Doctor reports malformed config, active legacy routing, supported tool availability, and discoverable duplicate skills. It never deletes global skills or claims to inspect inaccessible host locations.
 7. Incomplete production bundle assembly is a reported failure, not a falsely successful install of missing skills.
+8. Adoption tracks project-owned files and the exact dependency pin, ignores only the three shared skill directories, and never alters the Git index. Project-specific skills remain trackable; old tracked shared files require reviewed untracking.
+9. Bootstrap materializes/verifies the tracked full-SHA dependency without rewriting project policy/config/docs or using latest/global installation. Repetition is a no-op; missing/modified/extra/symlinked assets, denied fetch and pin mismatches have meaningful negative coverage (S34).
+10. Cloud/Ubuntu preparation and consumer CI run bootstrap before discovery/verification. Actual host discovery and same-pin environments are established separately in F14.
 
 **Verification:** public CLI tests in temporary Git repositories, including dirty/modified files, symlinks, spaces in paths, partial failure, and provenance mismatch. At F14 verify actual skill discovery, beyond filesystem presence.
 

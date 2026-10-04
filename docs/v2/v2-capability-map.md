@@ -44,11 +44,11 @@ All capabilities C01–C16 are in the first release. A capability can be impleme
 **Outcome:** A consumer repository adopts or updates v2 without global installation or destructive overwrites.
 
 - Inputs: explicit target repository, pinned source revision, current managed-file hashes, and apply intent.
-- Owner: `setup` utility and installation manifest.
+- Owner: `setup` adoption, `bootstrap` materialization and tracked installation/dependency manifest.
 - Outputs: dry-run diff; applied version and managed-file provenance; conflicts or rollback report.
 - Required behavior: preflight before writes, recover from partial failure, preserve modified/user-owned files, reject unsafe targets, support no-op rerun and bounded uninstall.
 - Proof: exercise the public setup command in temporary repositories, including failures after staging and during apply.
-- Implements: **WF2-F03**. Design: sections 4.2–4.4. Scenarios: **S01, S03, S04, S05**.
+- Implements: **WF2-F03**. Design: sections 4.2–4.4. Scenarios: **S01, S03, S04, S05, S34**.
 
 ### C04 GitHub delivery identity and lifecycle
 
@@ -232,6 +232,7 @@ Use these IDs in tests, evaluation records, and PR evidence. A scenario ID is a 
 | S31 | CI exists but merge rules are not configured: report available checks, not active enforcement | Repository settings inspection | F10/F14 |
 | S32 | Migration with done/active/deferred/malformed records and partial remote success: safe inventory and bounded resume | Migration integration | F12 |
 | S33 | Fresh project with MVP/later scope, dependencies and one unknown: one design-to-backlog run produces a coherent outcome Issue batch, one approval yields correct Ready/backlog/blocked separation, design links survive reruns, no coding-task explosion or implementation starts | Skill evaluation + authorized consumer GitHub pilot | F05/F11/F14 |
+| S34 | Fresh consumer clone lacks shared skills; bootstrap materializes the tracked exact pin into only three ignored namespaces, preserves tracked project skills/policy/index, reruns as a no-op, and fails safely on denied fetch, changed bytes or wrong pin; Cloud/Ubuntu consume the same pin before discovery | Public CLI clone/fault tests + real CI/environment pilot | F02/F03/F10/F11/F14 |
 
 ## 4. Platform responsibilities we reuse
 

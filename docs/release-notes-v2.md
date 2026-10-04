@@ -37,3 +37,11 @@ OpenSpec 1.14.0 with Node >=20.19.0. Tested versions and commands are in
 separate capabilities. Deterministic checks cannot certify semantic documentation,
 Issue closure or merge protection; adoption of trusted-base checks and protection
 configuration need their own observed evidence and authorization.
+
+The candidate consumer setup now separates one-time adoption/update from repeatable
+`bootstrap`. Project-owned files and a full-SHA dependency manifest remain tracked;
+only the three shared skill directories are materialized locally and ignored.
+Project-specific skills stay trackable. Bootstrap is idempotent, verifies the tracked
+pin and preserves project files/index. Existing tracked shared skills require reviewed
+untracking. Consumer CI bootstraps before checking. Fresh Cloud discovery and the
+new-model real pilot remain acceptance gates; this is not a published release.

@@ -18,7 +18,12 @@ class ConsumerCITests(unittest.TestCase):
         self.assertNotIn('tools/workflow/verify.py', text)
         self.assertIn('contents: read', text)
         self.assertNotIn('pull_request_target', text)
-        script = re.search(r'^      - run: (.+)$', text, re.M).group(1)
+        scripts = re.findall(r'^\s+run: (.+)$|^      - run: (.+)$', text, re.M)
+        steps = [left or right for left, right in scripts]
+        self.assertEqual(len(steps), 2)
+        self.assertIn('bootstrap --repo . --apply', steps[0])
+        script = steps[1]
+        self.assertEqual(subprocess.run(steps[0], shell=True, cwd=self.target, capture_output=True).returncode, 0)
         cp = self.target / '.workflow/config.json'
         config = json.loads(cp.read_text())
         config['verification']['local'] = [['python3', '-c', "from pathlib import Path; Path('application-ran').write_text('yes')"]]
@@ -62,4 +67,3 @@ class ConsumerCITests(unittest.TestCase):
         result = run('setup', '--target', self.target, '--uninstall', '--apply', expect=1)
         self.assertIn('.github/workflows/workflow-v2-verify.yml', result['residuals'])
         self.assertEqual(p.read_text(), 'modified managed workflow')
-

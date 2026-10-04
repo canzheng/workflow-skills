@@ -10,6 +10,11 @@ The Python standard-library utility entrypoint is tools/workflow/workflow.py.
 core.py validates configuration/paths/provenance and computes actual content identity.
 setup.py preflights pinned source assets/target ownership, stages backups and restores
 on apply failure; installation provenance is generated only for consumers.
+bootstrap.py reuses that transaction to materialize only ignored shared skills from
+the tracked schema-2 manifest's source URL/full SHA/hashes. It never rewrites project
+files or the index. Adoption owns a scoped .gitignore block; project skills remain
+tracked. Source-authored shared skills remain tracked here. No extra distribution
+database or mutable environment version selector is introduced.
 records.py renders approved source bodies and provides pure snapshot checks/edits
 for native operations, with no GitHub client or durable remote state.
 checks.py validates mechanical bundle/schema/link/PR obligations; metadata is data,

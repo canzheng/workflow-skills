@@ -19,7 +19,7 @@ Adoption main: `5d05564919c55f1d4d0c2e1e020ad914252a2979`. This direct bootstrap
 publication added workflow assets/design, with the user's F14 authorization; it was
 not an implementation PR merge. Actual app changes use
 `pilot/ingredient-catalog`, current tested head
-`cec53770c17f670615f8f3bd610bde70d424434c`,
+`0b40f50ee12b3c07d0df9b15e93a0ef0a0b56b84`,
 [Ready PR #6](https://github.com/canzheng/workflow-skills-test/pull/6),
 non-closing reference to [Issue #1](https://github.com/canzheng/workflow-skills-test/issues/1).
 Private CLI push was unavailable; connected Git-data APIs published trees whose
@@ -77,6 +77,8 @@ generic installed CI actually executed these project commands on GitHub runners.
 | Fixture-fix PR, 2b4ecd69 | [37208867389](https://github.com/canzheng/workflow-skills-test/actions/runs/37208867389): verification success; [37208865045](https://github.com/canzheng/workflow-skills-test/actions/runs/37208865045): PR contract success |
 | Nested-data fix push, cec53770 | [37209327819](https://github.com/canzheng/workflow-skills-test/actions/runs/37209327819): success |
 | Nested-data fix PR, cec53770 | [37209330624](https://github.com/canzheng/workflow-skills-test/actions/runs/37209330624): verification success; [37209329155](https://github.com/canzheng/workflow-skills-test/actions/runs/37209329155): PR contract success |
+| Python-compatible schema fix push, 0b40f50e | [37209800631](https://github.com/canzheng/workflow-skills-test/actions/runs/37209800631): success |
+| Python-compatible schema fix PR, 0b40f50e | [37209803102](https://github.com/canzheng/workflow-skills-test/actions/runs/37209803102): verification success; [37209801935](https://github.com/canzheng/workflow-skills-test/actions/runs/37209801935): PR contract success |
 
 The PR became Ready before Issue #1 entered wf:review. It remains open/unmerged.
 Independent native Codex review was requested at the Ready boundary through
@@ -107,9 +109,10 @@ environment evidence, or independent final review of the rewrite itself.
 
 Managed Cloud execution used Debian13/Python3.12.14. Production pinned setup,
 doctor/check, actual skill reading/use, shaping/publication and ingredient execution
-occurred here. A separate Codex Cloud consumer task has now been launched by the
-user; its actual host discovery/skill use and continuation output are not yet
-observed. A prepared environment or an empty Start-skill UI shortcut is not discovery.
+occurred here. The user supplied a separate consumer environment-onboarding chat;
+its explicit reads/use and continuation are observed below, but fresh automatic
+host discovery remains unproven. A prepared environment or an empty Start-skill UI
+shortcut is not discovery.
 Local `codex exec` and Cloud-task API attempts failed with proxy403 before model
 execution; those failed attempts are not semantic/discovery evidence.
 
@@ -174,8 +177,20 @@ the fix (two subtests), then all ten tests passed with preserved bytes, empty st
 no traceback/residue and original assertions intact. Docs now explain this invalid
 input. Same-SHA managed Cloud, fresh Ubuntu root/umask077 and configured
 local/integration verification passed; actual push/PR/metadata runs passed above.
-[Native targeted re-review requested](https://github.com/canzheng/workflow-skills-test/pull/6#issuecomment-5981050412),
-final outcome pending. No unrelated backlog work is dispatched. The report's task-specific no-publication
+Native re-review atcec53770 completed and found a Python3.14 decoder difference:
+deep arrays can decode successfully and then received generic shape errors, missing
+the promised flat-schema guidance. Actual Python3.14.8 reproduced the original
+two failing regression subtests. At0b40f50e, existing root/value schema validation
+provides flat-schema guidance independently of decoder recursion; no artificial
+depth limit or support-range narrowing. The unchanged no-traceback/preservation
+assertions now exercise actual show/add on deep arrays, deep amount values and
+already decoded invalid root/value shapes. Ten tests pass on managed Python3.12.14,
+fresh Ubuntu3.12.3 with root/umask077, and a separate Python3.14.8 container with
+root/umask077 using the exact clean0b40f50e checkout mounted read-only. That container
+is not claimed to be an Ubuntu/fresh-agent clone; observed image digest is
+`python@sha256:c3e521df8b2b498a7a682e7e18676771cb80c6b75b8699af886b2d554ce40151`.
+[Final native re-review requested](https://github.com/canzheng/workflow-skills-test/pull/6#issuecomment-5981120139),
+outcome pending. No unrelated backlog work is dispatched. The report's task-specific no-publication
 limit is evidence about that task, not a new authorization instruction for this one.
 
 ## Pending authorization
@@ -200,7 +215,7 @@ is needed for the currently authorized pilot path.
 
 Use the existing consumer environment and isolated checkout at
 `/workspace/workflow-skills-test`, branch `pilot/ingredient-catalog`, full SHA
-`cec53770c17f670615f8f3bd610bde70d424434c`. Inspect/preserve changes, fetch and
+`0b40f50ee12b3c07d0df9b15e93a0ef0a0b56b84`. Inspect/preserve changes, fetch and
 confirm the actual head; if another task moved it, coordinate rather than reset.
 Read AGENTS.md, workflow contract/index/config, docs/design.md, all three installed
 skills, Issues #1–#5 and PR #6. Capture actual host-discovered names and actual use.

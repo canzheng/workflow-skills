@@ -39,3 +39,19 @@ Tested Node 24.19.0, npm 11.9.0, OpenSpec 1.14.0. See
 `OPENSPEC_TELEMETRY=0 DO_NOT_TRACK=1 node_modules/.bin/openspec validate workflow-v2-rewrite --strict --no-interactive`.
 No global OpenSpec configuration is changed. Actual environment results and versions
 are in [acceptance evidence](validation/v2-acceptance.md).
+
+## Consumer preparation versus source authoring
+
+This source repository authors and tracks the shared skills. Consumers track project
+policy/config/utilities/CI/docs and a dependency pin, and materialize only three ignored
+shared-skill namespaces. Their repeatable environment command is:
+
+```sh
+python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
+```
+
+Run it after checkout and before agent discovery in the actual host preparation hook,
+then the consumer's declared check/doctor commands. Repeat for branch/pin changes;
+never embed a second source SHA in environment configuration. See [operations](operations.md)
+for initial adoption, explicit untracking of old shared skills and conflict recovery.
+Source contributors do not run consumer bootstrap here: there is no consumer pin.

@@ -173,10 +173,26 @@ resolved. An earlier user-supplied Cloud report's separate deeply nested JSON
 traceback was reproduced on2b4ecd69, then remediated at consumer
 `cec53770c17f670615f8f3bd610bde70d424434c` after reading the supplied task and
 confirming it idle. Ten actual tests pass on Cloud/fresh Ubuntu root/umask077 and
-real push/PR/metadata Actions; targeted re-review pending. The linked task's observed
+real push/PR/metadata Actions. Re-review found/reproduced Python3.14's successful
+deep-array decoding; at consumer `0b40f50ee12b3c07d0df9b15e93a0ef0a0b56b84`,
+root/value schema errors state the flat contract independently of recursion. Ten
+tests retain assertions and cover decoder-accepted shapes; passed on Cloud3.12,
+fresh Ubuntu3.12 root/umask077 and actual Python3.14.8 root/umask077. Actual push/PR/
+metadata passed; final targeted re-review pending. The linked task's observed
 9cf27f80 continuation preserves local-only work, but is still onboarding context.
-Fresh consumer
-Cloud task launched by the user; actual discovery/continuation evidence not received.
+It is not fresh automatic discovery evidence; a separate fresh consumer task
+remains required after supported environment/network draft publication by the user.
 See docs/validation/f14-consumer-pilot.md for exact branches, runs and continuation.
 F14 remains unchecked: preserve required fresh-host/scenario/final-review gates;
 real merge/completed closure and administrative mutations are separately unauthorized.
+
+### Narrow consumer dependency refinement
+
+User-approved ownership clarification: keep project policy/config/utilities/CI/docs
+and project-specific skills tracked; pin shared skills in the tracked installation
+manifest and materialize only the three ignored namespaces. Setup adoption owns the
+scoped ignore block; repeatable bootstrap preserves project files/index. Focused
+clone, idempotence, preservation, hash/fetch/unsafe-path and rollback tests are added.
+Full-head verification and real revised-model CI/Ubuntu/fresh Cloud discovery evidence
+must be recorded before claiming those gates. F14 remains incomplete; merge/Issue
+completion/admin mutation remain outside current authorization.
