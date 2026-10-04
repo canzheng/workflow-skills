@@ -30,7 +30,7 @@ class RetirementTests(unittest.TestCase):
     def test_clean_clone_has_no_retired_tree_and_keeps_active_rewrite(self):
         with tempfile.TemporaryDirectory() as td:
             clone = pathlib.Path(td) / 'clone'
-            subprocess.run(['git', 'clone', '-q', '--local', str(ROOT), str(clone)], check=True)
+            subprocess.run(['git', 'clone', '-q', '--no-hardlinks', str(ROOT), str(clone)], check=True)
             for name in ('skills', 'docs/planning', 'docs/lessons', 'docs/superpowers',
                          'docs/history', 'AGENTS-global-workflow.md', 'install.sh', 'environment.yml', 'bin'):
                 self.assertFalse((clone / name).exists(), name)

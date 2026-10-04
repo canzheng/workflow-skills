@@ -55,7 +55,7 @@ class MigrationTests(unittest.TestCase):
         self.assertEqual(r['active_count'], 0)
         self.assertEqual(r['historical_done_count'], 0)
         baseline = pathlib.Path(self.temp.name) / 'baseline'
-        subprocess.run(['git', 'clone', '-q', '--local', str(ROOT), str(baseline)], check=True)
+        subprocess.run(['git', 'clone', '-q', '--no-hardlinks', str(ROOT), str(baseline)], check=True)
         subprocess.run(['git', '-C', str(baseline), 'checkout', '-q', '--detach', 'd2aaf1904b2ccbe7fbab9733627e9c82fcf12f53'], check=True)
         result = run('migrate', 'inspect', '--repo', baseline)
         self.assertEqual(result['active_count'], 0)
