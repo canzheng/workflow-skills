@@ -1,0 +1,40 @@
+import os
+import pathlib
+import subprocess
+import tempfile
+import unittest
+
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+CLI = ROOT / 'node_modules/.bin/openspec'
+
+
+@unittest.skipUnless(CLI.exists(), 'Optional OpenSpec runtime absent; spec integration pending until npm ci')
+class OpenSpecTests(unittest.TestCase):
+    def test_actual_validate_and_archive_completed_disposable_change(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = pathlib.Path(td)
+            change = root / 'openspec/changes/receipt-protocol'
+            (change / 'specs/receipt').mkdir(parents=True)
+            (root / 'openspec/specs').mkdir(parents=True)
+            (change / 'proposal.md').write_text('# Receipt protocol\n\n## Why\nA receipt consumes quantity totals.\n\n## What Changes\nAdd receipt protocol.\n\n## Impact\nProducer and consumer.\n')
+            (change / 'tasks.md').write_text('- [ ] 1. Implement producer and consumer.\n')
+            (change / 'specs/receipt/spec.md').write_text('## Purpose\nReceipt producer and consumer preserve integer-cent quantity totals across the module boundary.\n\n## ADDED Requirements\n\n### Requirement: Quantity receipt\nThe receipt SHALL consume actual quantity totals.\n\n#### Scenario: Quantity two\n- **WHEN** price 199 has quantity 2\n- **THEN** receipt shows 398 cents\n')
+            r = subprocess.run([str(CLI), 'validate', 'receipt-protocol', '--strict', '--no-interactive'], cwd=root, env={**os.environ, 'OPENSPEC_TELEMETRY': '0', 'DO_NOT_TRACK': '1'}, capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            # Partial delivery cannot authorize final archive: no stable spec is promoted.
+            self.assertFalse((root / 'openspec/specs/receipt/spec.md').exists())
+            self.assertIn('[ ]', (change / 'tasks.md').read_text())
+            # Closing owner confirms implemented acceptance before native archive.
+            (change / 'tasks.md').write_text('- [x] 1. Implement producer and consumer.\n')
+            r = subprocess.run([str(CLI), 'archive', 'receipt-protocol', '--yes'], cwd=root, env={**os.environ, 'OPENSPEC_TELEMETRY': '0', 'DO_NOT_TRACK': '1'}, capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            stable = root / 'openspec/specs/receipt/spec.md'
+            self.assertIn('Quantity receipt', stable.read_text())
+            self.assertFalse(change.exists())
+            r = subprocess.run([str(CLI), 'validate', '--specs', '--strict', '--no-interactive'], cwd=root, env={**os.environ, 'OPENSPEC_TELEMETRY': '0', 'DO_NOT_TRACK': '1'}, capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+    def test_rewrite_is_valid_and_active_with_environment_gate(self):
+        r = subprocess.run([str(CLI), 'validate', 'workflow-v2-rewrite', '--strict', '--no-interactive'], cwd=ROOT, env={**os.environ, 'OPENSPEC_TELEMETRY': '0', 'DO_NOT_TRACK': '1'}, capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertTrue((ROOT / 'openspec/changes/workflow-v2-rewrite/tasks.md').exists())

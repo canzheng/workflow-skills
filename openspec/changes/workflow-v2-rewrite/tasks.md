@@ -54,3 +54,13 @@ restoration. 16 tests pass; primary-author semantic exercise in skill-evaluation
 Evidence belongs to current dirty content until this feature commit; no merge,
 remote write, independent review or fresh Cloud discovery claimed. Next: F07 pinned
 OpenSpec validation/archive fixtures and current implemented contracts.
+
+F06 committed at `25b570c`. F07: OpenSpec 1.14.0 pinned/installed, supported commands
+inspected, actual disposable validation/archive executed and current implemented
+adoption/delivery specs added. 18 tests pass plus strict v2 spec validations.
+Initial archive fixture failed because CLI-generated Purpose was placeholder/too
+short; corrected the actual delta Purpose rather than weakening strict validation.
+Partial fixture keeps unchecked work active; CLI structural validation cannot itself
+prove acceptance. Current six legacy specs remain until F13 reconciliation, so no
+all-spec v2 consistency claim yet. Docs: OpenSpec procedure/development/index;
+rewrite delta retains pending F14 gates. Next: F08 risk methods and negative controls.
