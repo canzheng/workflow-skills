@@ -6,6 +6,22 @@ The required runner uses Python's standard library. The optional pytest runner
 and its dependencies are pinned in requirements.txt; never substitute an
 unrelated interpreter if the selected environment is missing.
 
+Source development verification requires the full Git history, including recorded
+baseline `d2aaf1904b2ccbe7fbab9733627e9c82fcf12f53`. Migration/retirement tests inspect
+that tree and clone the source history; a shallow checkout can otherwise fail two
+required tests. Before running the suite, fetch history when the source is shallow:
+
+```sh
+if [ "$(git rev-parse --is-shallow-repository)" = true ]; then
+    git fetch --unshallow origin
+fi
+git cat-file -e 'd2aaf1904b2ccbe7fbab9733627e9c82fcf12f53^{commit}'
+```
+
+History preparation needs remote read access. Once present, the standard-library
+suite runs offline. Consumer installation/bootstrap uses its exact pinned source
+fetch and does not run this source retirement suite. Source CI checks out full history.
+
 ```sh
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt

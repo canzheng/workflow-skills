@@ -90,6 +90,19 @@ class SetupTests(unittest.TestCase):
         self.args = ['setup', '--source', self.source, '--revision', self.sha,
                      '--target', self.target, '--repository', 'fixture/consumer']
 
+    def test_annotated_tag_object_is_not_accepted_as_a_commit_pin(self):
+        subprocess.run(['git', '-C', str(self.source), '-c', 'tag.gpgSign=false', 'tag', '-a', 'wf2-fixture', '-m', 'Immutable tag object'], check=True)
+        tag = subprocess.check_output(['git', '-C', str(self.source), 'rev-parse', 'wf2-fixture'], text=True).strip()
+        self.assertNotEqual(tag, self.sha)
+        before = subprocess.check_output(['git', '-C', str(self.target), 'ls-files', '--stage'])
+        report = run('setup', '--source', self.source, '--revision', tag, '--target', self.target, '--repository', 'fixture/consumer', '--apply', expect=2)
+        self.assertFalse(report['ok'])
+        self.assertFalse((self.target / '.workflow/install-manifest.json').exists())
+        self.assertEqual((self.target / 'AGENTS.md').read_text(), 'User rule: preserve data.\n')
+        self.assertEqual(subprocess.check_output(['git', '-C', str(self.target), 'ls-files', '--stage']), before)
+        run(*self.args, '--apply')
+        self.assertEqual(json.loads((self.target / '.workflow/install-manifest.json').read_text())['source_revision'], self.sha)
+
     def test_omitted_public_runtime_module_fails_before_install(self):
         bundle = self.source / '.workflow/bundle.json'
         original = json.loads(bundle.read_text())
