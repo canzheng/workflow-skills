@@ -134,3 +134,8 @@ Installed verification/diagnostics and dependency bootstrap also require the com
 runtime/CI/skill destination set in provenance. Deleting a file and its manifest entry
 cannot turn an incomplete adoption into a pass. Partial uninstall residual provenance
 remains available for recovery; it does not certify a complete usable installation.
+
+Completeness includes required docs, Issue/PR templates and risk references as well
+as runtime/CI/skill entrypoints. A new Git repository may bootstrap before its first
+commit; doctor then reports revision:null and dirty:true, not a fabricated SHA. Commit
+reviewed adoption files before claiming exact-commit/environment delivery evidence.

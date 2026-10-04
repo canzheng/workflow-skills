@@ -31,3 +31,8 @@ Use actual authorized reads/writes to establish them; never copy secrets into th
 checkout. Native operation fault fixtures cover unknown creation, repeated source
 IDs, permission loss and concurrent human edits. These are fixture proof, not live
 remote success. An unknown write is reconciled by re-reading before retry.
+
+For an initialized repository before its first commit, diagnostics report revision:null,
+branch and actual content digest with dirty:true. No commit is invented. Commit the
+reviewed adoption files and rerun before recording exact-commit verification; malformed
+Git references remain errors rather than an unborn-branch fallback.

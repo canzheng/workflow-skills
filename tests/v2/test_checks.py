@@ -59,7 +59,10 @@ class CheckTests(unittest.TestCase):
     def test_installed_manifest_cannot_hide_deleted_runtime_or_ci_asset(self):
         pin = self.target / '.workflow/install-manifest.json'
         original = pin.read_bytes()
-        for name in ('tools/workflow/migration.py', '.github/workflows/workflow-v2-verify.yml', '.github/workflows/workflow-v2-pr-metadata.yml'):
+        for name in ('tools/workflow/migration.py', '.github/workflows/workflow-v2-verify.yml', '.github/workflows/workflow-v2-pr-metadata.yml',
+                     '.github/ISSUE_TEMPLATE/feature.yml', '.github/ISSUE_TEMPLATE/bug.yml', '.github/pull_request_template.md',
+                     'docs/workflow/contract.md', 'docs/workflow/README.md', 'docs/workflow/development.md', 'docs/workflow/operations.md',
+                     '.agents/skills/workflow-risk-review/references/methods.md'):
             with self.subTest(asset=name):
                 asset = self.target / name
                 contents = asset.read_bytes()

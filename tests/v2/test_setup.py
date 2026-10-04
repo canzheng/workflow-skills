@@ -55,6 +55,16 @@ def fixture_source(root):
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text('# Fixture\n')
         assets[path] = path
+    for source, dest in [('templates/consumer/development.md', 'docs/workflow/development.md'),
+                         ('templates/consumer/operations.md', 'docs/workflow/operations.md'),
+                         ('.github/ISSUE_TEMPLATE/feature.yml', '.github/ISSUE_TEMPLATE/feature.yml'),
+                         ('.github/ISSUE_TEMPLATE/bug.yml', '.github/ISSUE_TEMPLATE/bug.yml'),
+                         ('.github/pull_request_template.md', '.github/pull_request_template.md'),
+                         ('.agents/skills/workflow-risk-review/references/methods.md', '.agents/skills/workflow-risk-review/references/methods.md')]:
+        p = root / dest
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_bytes((ROOT / source).read_bytes())
+        assets[dest] = dest
     for source, dest in [('templates/consumer/verify.yml', '.github/workflows/workflow-v2-verify.yml'),
                          ('.github/workflows/pr-metadata.yml', '.github/workflows/workflow-v2-pr-metadata.yml')]:
         p = root / dest
@@ -93,6 +103,21 @@ class SetupTests(unittest.TestCase):
                 self.assertIn('Incomplete production bundle', json.dumps(result))
                 self.assertFalse((self.target / '.workflow').exists())
                 self.assertEqual((self.target / 'AGENTS.md').read_text(), 'User rule: preserve data.\n')
+
+    def test_required_docs_templates_and_reference_cannot_be_omitted(self):
+        bundle = self.source / '.workflow/bundle.json'
+        original = json.loads(bundle.read_text())
+        required = ['docs/workflow/' + name for name in ('contract.md', 'README.md', 'development.md', 'operations.md')]
+        required += ['.github/ISSUE_TEMPLATE/feature.yml', '.github/ISSUE_TEMPLATE/bug.yml', '.github/pull_request_template.md', '.agents/skills/workflow-risk-review/references/methods.md']
+        for name in required:
+            with self.subTest(asset=name):
+                spec = json.loads(json.dumps(original))
+                del spec['assets'][name]
+                bundle.write_text(json.dumps(spec))
+                sha = commit(self.source)
+                result = run('setup', '--source', self.source, '--revision', sha, '--target', self.target, '--repository', 'fixture/consumer', '--apply', expect=1)
+                self.assertIn('Incomplete production bundle', json.dumps(result))
+                self.assertFalse((self.target / '.workflow').exists())
 
     def test_fresh_dry_run_apply_noop_doctor_and_uninstall(self):
         original = (self.target / 'AGENTS.md').read_bytes()

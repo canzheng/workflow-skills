@@ -27,6 +27,21 @@ class DependencyBootstrapTests(unittest.TestCase):
         commit(self.target)
         return project_skill
 
+    def test_unborn_adoption_reports_no_commit_then_committed_identity(self):
+        fresh = self.base / 'unborn repository'
+        test_setup.init(fresh)
+        run('setup', '--source', self.source, '--revision', self.sha, '--target', fresh, '--repository', 'fixture/consumer', '--apply')
+        report = run('doctor', '--repo', fresh)
+        self.assertIsNone(report['content']['revision'])
+        self.assertTrue(report['content']['dirty'])
+        self.assertTrue(report['content']['branch'])
+        digest = report['content']['content_digest']
+        sha = commit(fresh)
+        report = run('doctor', '--repo', fresh)
+        self.assertEqual(report['content']['revision'], sha)
+        self.assertFalse(report['content']['dirty'])
+        self.assertEqual(report['content']['content_digest'], digest)
+
     def erase_dependency(self):
         for skill in SKILLS:
             shutil.rmtree(self.target / '.agents/skills' / skill)

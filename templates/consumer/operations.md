@@ -77,3 +77,7 @@ also mark dependency identity dirty, even when ordinary Git status is clean.
 
 Dropping an installed runtime/CI/skill file and its manifest entry still fails complete
 adoption checks. Partial uninstall residual provenance is recovery evidence, not a pass.
+
+Required docs, Issue/PR templates and risk references also participate in completeness.
+Before a first Git commit, doctor reports revision:null/dirty:true with actual content
+digest; commit reviewed adoption files and rerun to establish exact-commit evidence.
