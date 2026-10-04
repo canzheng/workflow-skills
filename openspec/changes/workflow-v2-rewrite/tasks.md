@@ -221,15 +221,18 @@ unchecked: actual fresh published Cloud pre-agent discovery/use, Ubuntu agent di
 remaining required scenarios/final semantic acceptance and actual enforcement evidence
 remain distinct gates. Merge→valid completion/admin mutation need separate authorization.
 
-Current implementation source7e71186ec8146b682f4c4cf40c8da5ecb6d3f608 passes70 tests/no
-skips/strict specs on Cloud and fresh Ubuntu; source Actions pass. Current consumer
-pilot/shared-skill-bootstrap at79efd96276e25e2c1a706a3c7972dbebf32d2a0a pins7e71186.
-Its actual project-owned .workflow/cloud-setup.sh matches the pastable env command:
-new repo absent tools/pin fetches/adopts exact seed once, then unchanged repeat has
-no fetch/file/index changes. Real fresh Cloud-runtime/Ubuntu clones run that script,
-match shared hashes/project tracking and stay clean; actual push/PR/metadata pass.
-Installed-completeness and ledger symlink findings were reproduced and fixed. CLI
-bootstrap remains pin-only; consumer review's assumption that it was the standalone
-unadopted-repo entrypoint was not accepted, and README/script make routing concrete.
-Latest semantic outcomes must still be read. Fresh published Cloud host discovery/use
-and Ubuntu agent-host discovery remain unperformed; no merge/completion/admin authority.
+Current checkpoint: source implementation608b4e6ee16017bca3e63e98b2e1e91235b1a004
+passes75 tests/no skips and strict checks on Cloud/fresh Ubuntu; source Actions pass.
+Consumer pilot/shared-skill-bootstrap at102706c76b2ade368397f866057314f083c67bea pins
+that source. Source-owned environment-setup.sh is excluded from the consumer bundle;
+source README documents Cloud install-script/local fetch-and-run, and consumer script
+copy is removed. Actual fresh Cloud-runtime/Ubuntu clones run that command twice,
+match four hashes, preserve project bytes/index/project skill and stay clean. Actual
+consumer push/PR/metadata CI succeeds. All20 mandatory destinations and unborn-root
+behavior have meaningful negative/positive proof. Current native semantic results
+remain to read after re-review. Publish/apply docs/validation/cloud-bootstrap-handoff.md
+command and launch a fresh task on that exact consumer branch outside onboarding.
+Record initial host discovery before agent bootstrap, then safe shaping rerun/use.
+F14 remains unchecked: fresh native Cloud/Ubuntu discovery, remaining scenario/review
+acceptance and enforcement evidence are distinct; merge→valid completed closure and
+administrative mutations need separate authorization. No simulated merge/closure.

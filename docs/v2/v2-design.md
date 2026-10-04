@@ -159,6 +159,7 @@ Required behavior:
 - Consumer configuration is user-owned after creation. New defaults do not overwrite it.
 - Adoption adds an owned `.gitignore` block for only the three canonical shared skill directories and records a schema-2 dependency pin. Existing tracked shared files require explicit reviewed untracking; setup never changes the Git index.
 - Repeatable `bootstrap` reads that pin and installs/verifies only the ignored shared skills. It preserves project-owned files and the index, supports no-op reruns, and rejects modified dependencies, unsafe paths or mismatched pins before writes. Environment preparation runs it before agent skill discovery; filesystem presence alone is not host discovery evidence.
+- Cloud/local environment setup fetches an explicit source commit and runs the source-owned entrypoint; it is not copied into the consumer. It adopts a new Git root once and otherwise preserves the existing tracked dependency pin. The source README owns Cloud install-script and local setup instructions.
 
 Repo-local skills are the default on Cloud and Ubuntu. Diagnose discoverable legacy/global duplicates; do not assume one same-named skill overrides another. Do not delete or edit global skills automatically. A user deliberately retaining v1 for other projects may keep them, provided explicit repository guidance prevents v1 execution here. Identical v2 names in more than one active discovery location are a setup conflict to resolve.
 

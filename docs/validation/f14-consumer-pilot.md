@@ -1,5 +1,51 @@
 # F14 real consumer pilot
 
+## Current source-owned setup checkpoint
+
+This checkpoint supersedes the earlier consumer-owned script instructions below.
+At user request, the source-owned `tools/workflow/environment-setup.sh` is excluded
+from the consumer bundle. Workflow-skills README documents one pinned fetch-and-run
+command for the Cloud environment **install script** field and local/Ubuntu Bash.
+Consumer README links to the source; `.workflow/cloud-setup.sh` has been removed.
+The outer command fetches its exact entrypoint each run; repeatable materialization
+itself uses the tracked consumer pin and needs no fetch when skills already match.
+No consumer policy/pin/index is rewritten by repeat setup. First adoption creates
+trackable policy and exactly three scoped ignore entries; project skills stay trackable.
+
+Tested implementation source `608b4e6ee16017bca3e63e98b2e1e91235b1a004` passes75 tests
+without skips and strict OpenSpec checks on Debian Cloud and fresh Ubuntu24.04.5
+(Python3.12.14/3.12.3, Git2.52/2.43). A shallow source-suite attempt failed two historical
+baseline checks; fetching full history restored required evidence without weakening
+those checks. Source push/PR Actions37217423703/37217427057 succeeded.
+Consumer `pilot/shared-skill-bootstrap` at `102706c76b2ade368397f866057314f083c67bea`
+pins that exact source; fresh Cloud-runtime/Ubuntu clones executed the actual README
+fetch-and-run command twice, matched all four shared hashes, preserved tracked bytes
+and index, kept pantry-project tracked and stayed Git-clean. Actual consumer push/PR/
+metadata Actions37217514512/37217517130/37217516077 succeeded. Issue7 and ReadyPR8
+remain open; PR6/Issue1 application evidence stays atf95f0cae3b87bc8031b00a4150cf9670251ae978.
+
+Mandatory completeness now includes all20 destinations, including docs/templates/risk
+reference; public negative tests proved omissions fail before install and cannot be
+hidden by editing provenance. An actual fresh Git root with no first commit ran the
+README command successfully, then repeated with identical bytes/index. Doctor reports
+revision:null/dirty:true before commit and the actual clean commit afterward. The prior
+fixture inventory assertion was updated to verify all four pinned shared files/bytes;
+no acceptance/assertions were weakened to accommodate broken output.
+
+Native independent current-head semantic review results must be read, not inferred
+from CI. Fresh published Cloud pre-agent discovery/use and Ubuntu agent-host discovery
+are still unperformed. The onboarding chat is not fresh-task evidence. Required-check
+administration reads are access-limited; workflow YAML and successful Actions do not
+prove enforced checks. No merge/Issue completion, protections/rulesets writes, release
+or remote branch deletion occurred. Those mutations remain pending separate authority.
+Use [the current Cloud handoff](cloud-bootstrap-handoff.md): publish/apply its install
+script, select the exact consumer branch, launch a genuinely fresh task and record the
+initial discovery catalog before agent-side bootstrap. F14 remains integration pending;
+F01–F13 are implemented/locally verified and ready for review, not merged or delivered.
+
+## Earlier implementation evidence
+
+
 Recorded 2026-10-04. This is immutable acceptance evidence, not a second backlog.
 Live scope/phases belong to GitHub. The user authorized this disposable consumer
 pilot through review and environment verification, excluding merge/completed closure

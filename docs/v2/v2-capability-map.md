@@ -232,7 +232,7 @@ Use these IDs in tests, evaluation records, and PR evidence. A scenario ID is a 
 | S31 | CI exists but merge rules are not configured: report available checks, not active enforcement | Repository settings inspection | F10/F14 |
 | S32 | Migration with done/active/deferred/malformed records and partial remote success: safe inventory and bounded resume | Migration integration | F12 |
 | S33 | Fresh project with MVP/later scope, dependencies and one unknown: one design-to-backlog run produces a coherent outcome Issue batch, one approval yields correct Ready/backlog/blocked separation, design links survive reruns, no coding-task explosion or implementation starts | Skill evaluation + authorized consumer GitHub pilot | F05/F11/F14 |
-| S34 | Fresh consumer clone lacks shared skills; bootstrap materializes the tracked exact pin into only three ignored namespaces, preserves tracked project skills/policy/index, reruns as a no-op, and fails safely on denied fetch, changed bytes or wrong pin; Cloud/Ubuntu consume the same pin before discovery | Public CLI clone/fault tests + real CI/environment pilot | F02/F03/F10/F11/F14 |
+| S34 | Fresh consumer clone lacks shared skills; bootstrap materializes the tracked exact pin into only three ignored namespaces, preserves tracked project skills/policy/index, reruns as a no-op, and fails safely on denied fetch, changed bytes or wrong pin; source-owned fetch/run also adopts a fresh root without tools or first commit, and Cloud/Ubuntu consume the same pin before discovery | Public CLI clone/fault tests + real CI/environment pilot | F02/F03/F10/F11/F14 |
 
 ## 4. Platform responsibilities we reuse
 
