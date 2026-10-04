@@ -25,7 +25,7 @@ All capabilities C01–C16 are in the first release. A capability can be impleme
 - Owner: root `AGENTS.md`, the delivery contract, and read-only doctor.
 - Outputs: the applicable workflow and context paths, or a clear conflicting/missing configuration finding.
 - Required behavior: preserve unrelated instructions; resolve active v1/v2 contradictions deliberately; keep historical records from activating v1; do not modify user-global configuration implicitly.
-- Proof: retained `docs/planning/` does not trigger old wrappers; malformed markers and duplicate names are surfaced.
+- Proof: during migration, retained `docs/planning/` does not trigger old wrappers; in the final `workflow-skills` head, v1-only planning artifacts are absent. Malformed markers and duplicate names are surfaced.
 - Implements: **WF2-F01, WF2-F03, WF2-F13**. Design: sections 3, 4, 12. Scenarios: **S01, S03, S04, S25**.
 
 ### C02 Portable development and Cloud readiness
@@ -177,9 +177,9 @@ All capabilities C01–C16 are in the first release. A capability can be impleme
 
 - Inputs: existing skills/scripts/tests/specs and L-001/L-002.
 - Owner: risk references, scenario corpus, migration inventory, and v2 packaging.
-- Outputs: concise retained lessons, rewritten meaningful tests, retired active commands/contracts, and historical links.
-- Required behavior: no Superpowers runtime dependency; no `_workflow` resolver in the v2 bundle; no tests requiring old ceremony in the default v2 suite.
-- Proof: tests still expose missing consumer/target failures while a fresh v2 user cannot accidentally invoke an installed old wrapper through current instructions.
+- Outputs: concise retained lessons, rewritten meaningful tests, retired commands/contracts, a clean v2 working tree, and a baseline Git-history reference.
+- Required behavior: no Superpowers runtime dependency; no `_workflow` resolver, v1 wrapper, local v1 board, or v1-only archive in the final source tree; no tests requiring old ceremony in the v2 suite.
+- Proof: tests still expose missing consumer/target failures while a fresh clone contains only v2-active files plus current v2 history/spec artifacts and cannot invoke an old wrapper.
 - Implements: **WF2-F08, WF2-F11, WF2-F13**. Design: sections 1.3, 6.3, 12. Scenarios: **S20, S25, S26**.
 
 ### C16 Bounded continuation and rewrite bootstrap
@@ -223,7 +223,7 @@ Use these IDs in tests, evaluation records, and PR evidence. A scenario ID is a 
 | S22 | PR open, docs incomplete, skipped checks, or stale evidence: cannot close as delivered | Skill/closure evaluation | F06/F10 |
 | S23 | Duplicate/ambiguous ownership or human edit: stop conflicting mutation, preserve human work | Operation fixture | F09/F12 |
 | S24 | Multi-PR OpenSpec change: partial PR does not archive or close parent; final PR completes obligations | Integration fixture | F07 |
-| S25 | Cutover and rollback: old IDs/evidence preserved, one writable authority, old runtime absent from v2 | Migration integration | F12/F13 |
+| S25 | Cutover and rollback: old IDs/evidence remain reachable by mapping/Git history, one writable authority exists, and v1-only files are absent from the final `workflow-skills` working tree | Migration integration | F12/F13 |
 | S26 | Resume with missing or ambiguous branch/worktree: no current-directory fallback | CLI/skill negative test | F09 |
 | S27 | PR metadata changes/head changes: appropriate check reruns; injected shell content remains data | CI event fixture | F10 |
 | S28 | Tested dirty tree or later material change: evidence identifies exact content and affected checks are rerun | Evidence evaluation | F09/F10 |
@@ -261,8 +261,8 @@ These dependencies must be exercised, not reimplemented. No capability above imp
 | `autonomous-backlog-loop` | Retire from first release | Explicit bounded batch execution through host instructions |
 | `skills/_workflow/workflow_state.py` and task resolvers | Retire | No replacement state engine |
 | `_workflow` evidence/contract/mutation checks | Inspect individually | Reuse only outcome-based validation with a current consumer |
-| v1 board, feature files, per-task plans | Historical only after cutover | Git history or labeled archive; one-time migration for active work |
-| Stable specs and archived OpenSpec changes | Review and retain/replace by meaning | Current specs must cease describing retired behavior as current |
+| v1 board, feature files, per-task plans | Remove from final source tree after cutover | Git history plus old-ID mapping; one-time migration for active consumer work |
+| Stable specs and archived OpenSpec changes | Review by meaning | Rewrite continuing contracts for v2; remove current and archived artifacts that only document the retired engine |
 | Lessons L-001/L-002 | Preserve substance | Risk references and S20/S26, without retrieval counters |
 | Superpowers | Remove required dependency | Useful practices expressed in the contract or focused risk references |
 | `environment.yml`, `bin/run-python.sh` | Replace required launch path | Portable setup; optional local convenience only if still useful |
