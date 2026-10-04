@@ -110,6 +110,7 @@ The following names are files under tests/v2. Skill evidence refers to
 | S30 | denied targets/permissions, staging/apply/interrupted migration negatives | Fresh-host targeted analysis pending |
 | S31 | rulesets GET returned []; branch-protection GET403 | Required contexts/merge blocking unobserved |
 | S32 | known v1 active/Done/deferred/malformed and partial remote success fixtures | Actual source0active means no live import |
+| S33 | realistic new-project design, five actual candidate bodies, one approval/Ready separation, preserved detail/unknown/later scope; test_initial_backlog pinned fresh install, dependency/link and rerun negatives | Fresh-host shaping and actual consumer batch publication remain separate pilot obligations |
 
 ## GitHub, enforcement and review
 
@@ -196,3 +197,15 @@ Docker socket and CA secret, then start that image with session CA mounted read-
 Inside it clone the rewrite branch from GitHub, detach the explicitly recorded SHA,
 create .venv, install requirements twice, run npm ci, verify.py, strict specs and Git
 clean/diff checks. Do not reuse a mounted source checkout as fresh-host proof.
+
+## User-authorized initial-backlog refinement
+
+Follow-up scope explicitly approved by the user: make existing-design → initial/MVP
+backlog the one-shot default, with internal optional decomposition, faithful detailed
+design translation, delivery-level Issue granularity, one batch approval, separate
+execution authority, stable reruns and lightweight direct prerequisite metadata.
+S33 was added to the approved capability/feature/design contract and current delivery
+spec, with realistic input/output and primary-author evaluation. This extends F05/F11
+and the real F14 consumer pilot without a new state engine or mandatory artifact.
+Earlier implementation-SHA results above remain historical evidence; the final revised
+SHA/reruns and consumer pilot outcome are recorded in Issue15/PR16 after publication.

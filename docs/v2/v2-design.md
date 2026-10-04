@@ -252,6 +252,8 @@ Responsibilities:
 5. Assess OpenSpec need and documentation impact. Separate first-release scope from later candidates.
 6. Mark only authorized, adequately shaped work Ready. A request to propose a backlog does not authorize executing it.
 
+Default new-project UX: "Create the initial backlog from this design" or "Create the MVP backlog from the current design" consumes one or more existing design documents in one run. Derive capability/dependency structure internally; persistence is optional. Translate detailed acceptance/scope/dependencies faithfully, and shape high-level intent proportionally. Produce the smallest release-sized delivery-outcome batch, not coding-task Issues. Later scope can stay unmaterialized. One batch approval enables sufficiently specified dependency-ready work, while unresolved/unsatisfied work stays backlog/blocked; it does not start implementation without a separate execution request. Stable logical source identities, design-section links and the contract's direct Issue-dependency convention support safe evolution and later host dispatch without another editable backlog.
+
 Outputs: persistent design updates; bounded Issue candidates or authorized GitHub Issues; dependency links; explicit unresolved decisions. Stop only the affected item for missing critical scope decisions. Continue independent authorized shaping.
 
 ### 6.2 `workflow-deliver-issue`

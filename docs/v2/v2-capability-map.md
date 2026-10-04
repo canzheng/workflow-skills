@@ -70,7 +70,7 @@ All capabilities C01–C16 are in the first release. A capability can be impleme
 - Outputs: durable design decisions, bounded outcomes, acceptance criteria, dependencies, risks, and linked candidate Issues.
 - Required behavior: distinguish current and target behavior; expose unresolved decisions; separate candidates from approved Ready work; reuse existing source IDs when rerun.
 - Proof: decompose a design containing a known core, an unresolved decision, and an attractive but excluded enhancement.
-- Implements: **WF2-F05**. Design: sections 5.3, 6.1. Scenarios: **S08, S09**.
+- Implements: **WF2-F05**. Design: sections 5.3, 6.1. Scenarios: **S08, S09, S33**.
 
 ### C06 Issue-level implementation and review preparation
 
@@ -231,6 +231,7 @@ Use these IDs in tests, evaluation records, and PR evidence. A scenario ID is a 
 | S30 | Permissions/migration/filesystem risk: denied, interrupted, missing-resource paths covered as relevant | Risk evaluation | F08 |
 | S31 | CI exists but merge rules are not configured: report available checks, not active enforcement | Repository settings inspection | F10/F14 |
 | S32 | Migration with done/active/deferred/malformed records and partial remote success: safe inventory and bounded resume | Migration integration | F12 |
+| S33 | Fresh project with MVP/later scope, dependencies and one unknown: one design-to-backlog run produces a coherent outcome Issue batch, one approval yields correct Ready/backlog/blocked separation, design links survive reruns, no coding-task explosion or implementation starts | Skill evaluation + authorized consumer GitHub pilot | F05/F11/F14 |
 
 ## 4. Platform responsibilities we reuse
 

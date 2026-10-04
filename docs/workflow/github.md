@@ -38,3 +38,15 @@ This reproducible temporary output is not a backlog or sync source. Published Is
 links belong in a link-only index. Live status never goes back into approved catalogs.
 No Project fields or closure bot is required. Audit can flag suspicious completed
 claims but cannot enforce manual closure or prove that an evidence statement is true.
+
+## Design batch traceability
+Use stable logical design/outcome source IDs across reruns, not title/content hashes.
+Generated Issue bodies carry workflow-requires as a JSON array of direct confirmed
+Issue URLs (or []), alongside readable dependency reasons. See
+[contract](contract.md#backlog-batches-and-dependencies). Temporary candidates may
+use logical IDs until creation is confirmed; resolve URLs before making work Ready.
+A missing link, cycle, unresolved decision or contradictory human acceptance blocks
+only affected readiness. Available prerequisites require actual content/evidence.
+One approved batch can have independent Ready groups and dependent backlog/blocked
+work. Candidate publication/approval does not dispatch implementation. PR references
+provide design→Issue→PR navigation without a second editable backlog or sync engine.

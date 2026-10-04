@@ -20,6 +20,6 @@ body:
     id: context
     attributes:
       label: Design, dependencies and proof
-      description: Link relevant design/specs, prerequisites, risks, environment and documentation impact; omit irrelevant concerns.
+      description: Link relevant design sections/specs, direct required Issue URLs and reasons, risks, environment and documentation impact. For generated batches include the workflow-requires JSON-array marker (empty for independent work); omit irrelevant concerns.
     validations:
       required: true

@@ -219,7 +219,7 @@ Milestone A: usable core with local/fixture proof. Milestone B: complete deliver
 
 **Outcome:** An agent can turn a high-level design into a persistent, scoped, implementable backlog.
 
-**References:** design sections 3, 5.3, 6.1; C05; S08/S09. **Dependencies:** F04. **Risk:** hidden scope expansion or loss of design intent.
+**References:** design sections 3, 5.3, 6.1; C05; S08/S09/S33. **Dependencies:** F04. **Risk:** hidden scope expansion or loss of design intent.
 
 **Deliverables**
 
@@ -235,8 +235,11 @@ Milestone A: usable core with local/fixture proof. Milestone B: complete deliver
 4. A genuinely unresolved decision becomes a discovery item or blocks only affected readiness. Excluded enhancements remain excluded.
 5. Candidate creation does not imply permission to execute. A user-approved batch can proceed without repeated product approval requests for the same scope.
 6. Rerunning on an existing design updates/reuses candidates by identity and preserves human changes.
+7. The default initial/MVP backlog is a single coherent batch from supplied existing design documents, with no mandatory persisted decomposition or repeated per-Issue invocation. Detailed intent is translated faithfully; high-level intent is shaped proportionally.
+8. One batch approval enables specified dependency-ready Issues, keeps later/unresolved/unsatisfied work backlog/blocked appropriately, and never starts implementation unless execution is separately requested.
+9. Delivery-level outcomes, stable logical identities, direct confirmed dependency links and design-section references provide lightweight design→Issue→PR traceability without coding-task Issue explosion or another editable backlog.
 
-**Verification:** run the skill against a sample design containing a usable first release, optional enhancements, one dependency, and one unknown. Inspect actual output artifacts. Static SKILL.md validation alone is insufficient.
+**Verification:** run the skill against a sample design containing a usable first release, optional enhancements, one dependency, and one unknown. Inspect actual output artifacts. Static SKILL.md validation alone is insufficient. S33 uses a fresh realistic project design with explicit MVP/later scope/dependencies/one unknown, one batch approval and no implementation dispatch; distinguish fixture proof from actual consumer GitHub/Cloud execution.
 
 **Documentation with this feature:** usage example from high-level design to Issues and the skill's precise scope. **Not included:** a prioritization algorithm or mandatory complete-system design before any implementation.
 

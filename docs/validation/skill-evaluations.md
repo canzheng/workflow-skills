@@ -90,3 +90,35 @@ EUR 1.99; restoring multiplication gives independently expected EUR 3.98. Only a
 that proof passes does the fixture mark implementation complete, archive and validate
 current specs. This extends structural CLI proof with implemented behavior; CLI
 validation remains insufficient by itself for semantic acceptance.
+
+## S33 one-shot new-project MVP backlog
+
+User-authorized ergonomics refinement, evaluated by the primary author in this turn.
+Read the rewritten design skill, current contract/config and realistic Pantry Planner
+input in tests/v2/scenarios/initial-backlog/design.md. Current application implementation
+and application specs are absent; setup preserves the durable design. The design already
+specifies catalog acceptance/dependencies, which are translated without brainstorming.
+
+Actual output: output.json contains five outcome/decision candidate bodies: ingredient
+catalog, recipe catalog, dietary decision, meal plan, shopping-list export. Explicit
+catalog success/denied cases and grams are preserved. Each body links its relevant design
+section, declares exclusions and stable logical identity, and states direct prerequisites.
+Both catalogs are independent. Meal planning depends on both and the dietary choice;
+shopping export depends on the actual plan. The unknown policy is surfaced with the
+exact owner question instead of invented allergy behavior. Cloud/accounts/analytics/UI
+stay unmaterialized. No class/migration/test/CI engineering-task Issues are generated.
+
+One batch approval enables the two sufficiently specified catalog outcomes; unresolved
+dietary input and dependent work remain backlog/blocked. Before approval every candidate
+is backlog. Neither initial publication nor approval starts implementation. No application
+code, implementation branch, PR, capability-map document or second editable backlog was
+created for the fixture. These five bodies are immutable evaluation artifacts, not live
+project records. The actual pinned bundle installation and design-link consumer are
+verified by test_initial_backlog; its numbered GitHub snapshots are explicit fixtures.
+
+Safe evolution proof reuses a renamed closed logical identity without reopening, preserves
+human acceptance prose through the actual managed-update helper, rejects a stale/conflicting
+human update and duplicate identity, and distinguishes genuinely new scope. Broken design
+anchors fail actual link checking. Primary-author semantic assessment is not automatic
+fresh-host triggering or live consumer GitHub publication; those F14 pilot obligations
+remain distinct. No per-capability/per-Issue invocation or repeated batch approval required.

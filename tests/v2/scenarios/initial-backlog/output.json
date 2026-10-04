@@ -1,0 +1,55 @@
+{
+  "scenario": "S33",
+  "kind": "immutable-primary-author-candidate-output",
+  "items": [
+    {
+      "source_id": "pantry-planner:ingredients",
+      "title": "Record and retrieve pantry ingredients",
+      "body": "<!-- workflow-source: pantry-planner:ingredients -->\n<!-- workflow-shaping:start -->\n## Outcome and scope\nA household can retain a valid ingredient catalog without data loss.\nIn scope: MVP record and retrieve pantry ingredients. Excluded: Cloud sync/accounts/analytics/mobile UI; internal coding-task Issues.\n## Acceptance\nOats500g/lentils300g round-trip; empty catalog valid; reject duplicate IDs, negative/noninteger grams and malformed input without changing existing data.\n## Design and specifications\n[Agreed design](docs/design.md#ingredient-catalog). Fresh repository: no application specs/code.\n## Dependencies\n<!-- workflow-requires: [] -->\nIndependent: no required Issue prerequisites.\n## Risk, environment and documentation\nOffline CLI on supported Python/Ubuntu. Integer units, denied inputs and preservation\nrequire meaningful tests. Maintain public data/CLI schema, defaults/errors, examples\nand actual limitations against final implementation; plan consumers need real proof.\n## Authorization\nCandidate publication/readiness approval only. No implementation dispatch authorized.\n<!-- workflow-shaping:end -->",
+      "requires": [],
+      "decision_blocked": false
+    },
+    {
+      "source_id": "pantry-planner:recipes",
+      "title": "Import and retrieve offline recipes",
+      "body": "<!-- workflow-source: pantry-planner:recipes -->\n<!-- workflow-shaping:start -->\n## Outcome and scope\nA household can import recipe amounts independently of pantry contents.\nIn scope: MVP import and retrieve offline recipes. Excluded: Cloud sync/accounts/analytics/mobile UI; internal coding-task Issues.\n## Acceptance\nSoup lentils200g/carrot100g for2servings round-trips; missing pantry ingredients allowed; reject duplicate IDs, invalid servings, empty/invalid amounts without data loss.\n## Design and specifications\n[Agreed design](docs/design.md#recipe-catalog). Fresh repository: no application specs/code.\n## Dependencies\n<!-- workflow-requires: [] -->\nIndependent: no required Issue prerequisites.\n## Risk, environment and documentation\nOffline CLI on supported Python/Ubuntu. Integer units, denied inputs and preservation\nrequire meaningful tests. Maintain public data/CLI schema, defaults/errors, examples\nand actual limitations against final implementation; plan consumers need real proof.\n## Authorization\nCandidate publication/readiness approval only. No implementation dispatch authorized.\n<!-- workflow-shaping:end -->",
+      "requires": [],
+      "decision_blocked": false
+    },
+    {
+      "source_id": "pantry-planner:dietary-policy",
+      "title": "Resolve the MVP dietary policy",
+      "body": "<!-- workflow-source: pantry-planner:dietary-policy -->\n<!-- workflow-shaping:start -->\n## Outcome and scope\nResolve the owner decision so meal-plan acceptance is implementable.\nIn scope: MVP resolve the mvp dietary policy. Excluded: Cloud sync/accounts/analytics/mobile UI; internal coding-task Issues.\n## Acceptance\nObtain explicit allergen exclusion versus explicit user-choice decision; record it in the design and revise affected acceptance. No invented policy or allergy-safety claim.\n## Design and specifications\n[Agreed design](docs/design.md#dietary-policy-decision). Fresh repository: no application specs/code.\n## Dependencies\n<!-- workflow-requires: [] -->\nIndependent: no required Issue prerequisites.\nBlocked input / next action: Owner must choose allergen exclusion or explicit user selection; request that exact choice. Investigation/output cannot be completed without it.\n## Risk, environment and documentation\nOffline CLI on supported Python/Ubuntu. Integer units, denied inputs and preservation\nrequire meaningful tests. Maintain public data/CLI schema, defaults/errors, examples\nand actual limitations against final implementation; plan consumers need real proof.\n## Authorization\nCandidate publication/readiness approval only. No implementation dispatch authorized.\n<!-- workflow-shaping:end -->",
+      "requires": [],
+      "decision_blocked": true
+    },
+    {
+      "source_id": "pantry-planner:meal-plan",
+      "title": "Produce a deterministic meal plan",
+      "body": "<!-- workflow-source: pantry-planner:meal-plan -->\n<!-- workflow-shaping:start -->\n## Outcome and scope\nA household can see required and missing grams from actual catalogs.\nIn scope: MVP produce a deterministic meal plan. Excluded: Cloud sync/accounts/analytics/mobile UI; internal coding-task Issues.\n## Acceptance\nSoup example consumes catalogs, requires lentils200g/carrot100g and misses carrot100g; reject unknown recipe/invalid servings. Dietary-policy acceptance remains unresolved until the owner decides.\n## Design and specifications\n[Agreed design](docs/design.md#meal-planning). Fresh repository: no application specs/code.\n## Dependencies\n<!-- workflow-requires: [\"pantry-planner:ingredients\", \"pantry-planner:recipes\", \"pantry-planner:dietary-policy\"] -->\nDirect prerequisites: pantry-planner:ingredients, pantry-planner:recipes, pantry-planner:dietary-policy. Resolve to confirmed Issue URLs before readiness.\nBlocked input / next action: Dietary acceptance missing; resolve linked decision and verify catalog prerequisites, then complete readiness.\n## Risk, environment and documentation\nOffline CLI on supported Python/Ubuntu. Integer units, denied inputs and preservation\nrequire meaningful tests. Maintain public data/CLI schema, defaults/errors, examples\nand actual limitations against final implementation; plan consumers need real proof.\n## Authorization\nCandidate publication/readiness approval only. No implementation dispatch authorized.\n<!-- workflow-shaping:end -->",
+      "requires": [
+        "pantry-planner:ingredients",
+        "pantry-planner:recipes",
+        "pantry-planner:dietary-policy"
+      ],
+      "decision_blocked": true
+    },
+    {
+      "source_id": "pantry-planner:shopping-list",
+      "title": "Export the missing-ingredient shopping list",
+      "body": "<!-- workflow-source: pantry-planner:shopping-list -->\n<!-- workflow-shaping:start -->\n## Outcome and scope\nA household can use the actual plan to shop for missing ingredients.\nIn scope: MVP export the missing-ingredient shopping list. Excluded: Cloud sync/accounts/analytics/mobile UI; internal coding-task Issues.\n## Acceptance\nSoup plan exports sorted CSV carrot,100; integer grams, no zero rows; reject malformed plan and preserve existing output on failure.\n## Design and specifications\n[Agreed design](docs/design.md#shopping-list-export). Fresh repository: no application specs/code.\n## Dependencies\n<!-- workflow-requires: [\"pantry-planner:meal-plan\"] -->\nDirect prerequisites: pantry-planner:meal-plan. Resolve to confirmed Issue URLs before readiness.\n## Risk, environment and documentation\nOffline CLI on supported Python/Ubuntu. Integer units, denied inputs and preservation\nrequire meaningful tests. Maintain public data/CLI schema, defaults/errors, examples\nand actual limitations against final implementation; plan consumers need real proof.\n## Authorization\nCandidate publication/readiness approval only. No implementation dispatch authorized.\n<!-- workflow-shaping:end -->",
+      "requires": [
+        "pantry-planner:meal-plan"
+      ],
+      "decision_blocked": false
+    }
+  ],
+  "unmaterialized": [
+    "cloud-sync",
+    "accounts",
+    "shared-access",
+    "nutrition-analytics",
+    "mobile-ui"
+  ],
+  "implementation_authorized": false
+}

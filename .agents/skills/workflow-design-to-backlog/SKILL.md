@@ -1,36 +1,78 @@
 ---
 name: workflow-design-to-backlog
-description: Shape a high-level design or refine candidate GitHub Issues into bounded outcomes with acceptance and dependencies. Do not use for an already-ready small implementation request.
+description: Create the initial or MVP GitHub backlog in one batch from one or more high-level or detailed design documents, or safely refine existing candidate Issues as the design evolves. Use for "Create the initial backlog from this design"; not for an already-ready small implementation request.
 ---
 
 Read [the delivery contract](../../../docs/workflow/contract.md). It owns workflow
-rules; this skill supplies shaping decisions, not execution authorization.
+rules; this skill translates intent into delivery outcomes, not execution authority.
 
-Resolve user objective, repository instructions, current implementation/specs,
-approved versus proposed design, first-release boundary and authorization extent.
-Inspect actual code before claiming a capability exists. Save agreed intent in
-an existing project design document; essential decisions cannot remain chat-only.
+## Default: design to initial backlog in one run
+Read all supplied design documents, repository instructions/.workflow/config.json,
+current implementation/specs if any, and the explicit first-release/MVP boundary.
+An empty implementation is valid. The existing design is the durable intent source;
+reuse it, preserve section anchors and record only consequential agreed decisions.
+For a detailed design, translate its already explicit outcomes/acceptance/dependencies;
+do not brainstorm them again. Shape a high-level design only enough to derive usable
+acceptance/dependencies. Surface product choices instead of inventing them.
 
-Identify observable independently verifiable outcomes, preferably usable vertical
-slices. Explain real enabling dependencies. Draft candidate Issues with outcome,
-in/out scope, concrete success/failure acceptance, design/spec links, dependencies,
-risks, required environments and expected documentation impact. Link to durable
-design rather than copying it. Do not create Issues for internal coding steps.
+Derive a capability/dependency decomposition internally across the selected release.
+Do not require a separate capability map, plan or persisted intermediate artifact.
+Produce the smallest coherent batch of independently useful/verifiable outcomes,
+preferably vertical slices. Enabling work needs a real dependency/outcome. Never
+create engineering-task Issues such as "create class", "add migration" or "write tests".
+A large design does not imply a large first backlog: materialize the authorized MVP
+slice; leave later candidates in the design unless deliberately requested as backlog.
+No repeated invocation per capability/Issue or repeated approval per batch item.
 
-An unknown product decision becomes discovery or blocks only affected readiness.
-Keep attractive excluded enhancements excluded. Candidate creation does not
-approve execution. Ready requires authorized scope, usable acceptance and resolved
-dependencies; a previously approved batch does not need repeated approval.
-Select OpenSpec only for substantial contracts/risk/ambiguity; use one plan home.
+Each Issue body includes outcome, in/out scope, concrete success/failure acceptance,
+relevant design sections/current specs, explicit dependency links, risk/environment,
+documentation impact and a stable logical source identity. Link design sections instead
+of copying long prose. Use the dependency convention in
+[the contract](../../../docs/workflow/contract.md#backlog-batches-and-dependencies).
+Keep direct prerequisites explicit, including [] for independently dispatchable work;
+link decisions too. Separate items with no mutual prerequisite can proceed in parallel
+once otherwise Ready, subject to scope/ownership. Cycles, missing references or
+contradictory design/human acceptance block affected readiness and need reconciliation.
 
-When authorized to publish, resolve exact repository and source identity. Search
-open AND closed Issues, paginate as needed: zero permits creation, one reuses,
-multiple require reconciliation. Preserve human prose and unrelated labels;
-re-read before a bounded managed-section update, and stop conflicting mutation.
-After timeout re-read before retry. Native host tools or authenticated gh do the
-operations. No write access: provide exact candidate bodies and continue shaping;
-do not claim remote creation or build an outbox/synchronizer.
+An unresolved decision becomes a bounded discovery/blocking Issue; record the exact
+question, affected outcomes and next action. Unknowns block only dependent items,
+not the whole backlog. Keep excluded enhancements excluded. Select OpenSpec only
+for substantial contracts/risk/ambiguity; use one plan home if needed.
 
-Return persistent design paths, bounded candidate/confirmed Issue references,
-dependencies, excluded scope and exact unresolved decisions. Do not implement an
-unapproved candidate or autonomously reprioritize the product.
+## Approval, publication and readiness are separate
+"Create the initial backlog" authorizes candidate publication when access exists,
+not implementation or implicit product approval. Present the coherent batch once
+for approval when it was not already approved. Before approval candidates remain
+wf:backlog. After a single batch approval, sufficiently specified, approved-release
+Issues with available prerequisites become wf:ready; unresolved/unsatisfied items
+remain wf:backlog + wf:blocked with their reason/next action. Intentionally deferred
+later items remain wf:backlog (wf:deferred only for an explicit deferral).
+An actionable discovery Issue can become Ready when its investigation is authorized;
+never mark the dependent product commitment Ready without its resolved decision.
+
+Batch approval permits readiness, not execution. Do not claim/start an Issue, create
+an implementation branch/PR, or edit application code unless the user separately
+asked to execute that scope. An already authorized batch needs no repeat approval.
+
+## Safe batch creation and reruns
+Resolve exact repository and stable identities across the whole batch. Prefer existing
+design/Issue IDs; never derive identity from changing titles, section numbers or a
+content hash. Search open AND closed Issues, paginate: zero permits creation, one
+reuses even when closed (inspect disposition; do not silently reopen), multiple block
+that mutation. Evolved designs add only genuinely new outcomes. A contradiction is
+reported for resolution, not overwritten or used to recreate an Issue.
+
+When publication is authorized, create/reuse the batch using native host tools/gh,
+then fill dependency links with confirmed Issue URLs/IDs. Until links are resolved,
+keep affected Issues backlog/blocked; never fabricate numbers. Preserve human prose,
+acceptance edits and unrelated labels. Re-read before bounded managed-section updates;
+reconcile changed snapshots, and stop only conflicting mutation. After timeout or
+partial publication, reconcile confirmed identities before retrying. No write access:
+return exact candidate bodies/references and unresolved publication without an outbox,
+state store or claim of remote creation.
+
+Return one batch summary: confirmed/candidate references, Ready versus backlog/blocked
+reasons, dependency/parallel groups, exclusions, exact decisions and any publication
+failures. Traceability is design section → Issue → eventual PR through normal references;
+a link-only design index is optional, never a second editable backlog/status mirror.
+Stop after backlog preparation unless execution was explicitly requested.

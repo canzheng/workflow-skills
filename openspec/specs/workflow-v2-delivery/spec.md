@@ -52,3 +52,23 @@ when publication is unavailable; approved cumulative rewrite bootstrap is an exc
 - **WHEN** authorized implementation finishes but PR publication is unavailable
 - **THEN** a committed reviewable branch and precise evidence can use the review fallback
 - **AND** required integration, review and merge remain pending
+
+### Requirement: One-shot initial design backlog
+Design shaping SHALL treat one or more supplied existing design documents as the
+durable intent source and produce the smallest coherent initial or MVP delivery-outcome
+Issue batch in one run. Intermediate decomposition SHALL NOT require persistence.
+Detailed scope/acceptance/dependencies SHALL be translated faithfully; high-level
+intent SHALL receive proportional shaping with product choices surfaced explicitly.
+
+#### Scenario: Fresh project batch and approval
+- **WHEN** a fresh repository design includes MVP scope, later capabilities, direct dependencies and an unresolved decision
+- **THEN** one shaping run prepares outcome Issues with design-section references and explicit prerequisites
+- **AND** one batch approval enables specified dependency-ready work while affected unknown/dependent work stays backlog or blocked
+- **AND** later scope stays unmaterialized or deliberately backlog, without coding-task Issues
+- **AND** application implementation does not start unless separately requested
+
+#### Scenario: Evolved design and human acceptance
+- **WHEN** backlog generation is rerun after design changes
+- **THEN** stable logical identities reuse open or closed matches without silent reopening
+- **AND** human edits and contradictory acceptance are preserved for reconciliation
+- **AND** genuinely new scope gets new candidates without a second editable backlog
