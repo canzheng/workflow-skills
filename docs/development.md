@@ -1,6 +1,6 @@
 # Development
 
-Runtime: Python >=3.10 and Git. Tested here: Python 3.12.14. No Conda,
+Runtime: Python >=3.10 and Git. Tested: Python 3.12.14 on Debian 13 and Python 3.12.3 on Ubuntu 24.04. No Conda,
 Node, global AGENTS/skills or GitHub token is needed for offline verification.
 The required runner uses Python's standard library. The optional pytest runner
 and its dependencies are pinned in requirements.txt; never substitute an
@@ -29,11 +29,13 @@ network proxy returned HTTP 403; no legacy cache or secret lifetime is assumed.
 Host GitHub tools and gh authentication are separate capabilities. An unavailable
 write must not stop local work or be described as a successful publication.
 
-Node/OpenSpec are optional until spec validation is selected at F07.
+Node/OpenSpec are optional for offline runtime checks; the full rewrite acceptance
+also requires the pinned specification checks below.
 
 ## Optional OpenSpec verification
 Install pinned local tooling with `npm ci --ignore-scripts` (Node >=20.19.0).
 Tested Node 24.19.0, npm 11.9.0, OpenSpec 1.14.0. See
 [specification procedure](workflow/openspec.md). Disable telemetry only for commands:
 `OPENSPEC_TELEMETRY=0 DO_NOT_TRACK=1 node_modules/.bin/openspec validate workflow-v2-rewrite --strict --no-interactive`.
-No global OpenSpec configuration is changed.
+No global OpenSpec configuration is changed. Actual environment results and versions
+are in [acceptance evidence](validation/v2-acceptance.md).

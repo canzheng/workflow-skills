@@ -20,10 +20,12 @@ verify.py is source development tooling, not part of the consumer runtime.
 setup consumes every entry and verifies actual bytes against the full source SHA.
 Consumer config remains user-owned. templates/consumer contains rendered consumer
 guidance rather than a duplicate skill source. GitHub forms/PR templates ship;
-source CI/development dependencies are repository-specific, not installed into apps.
+consumer verification and trusted-base PR metadata workflows ship as owned assets.
+The generic verification job invokes configured local argv commands plus mechanical
+checks; source development CI/dependencies are not copied into applications.
 
 OpenSpec 1.14.0 is an optional pinned local development dependency. Current v2 specs
-cover implemented adoption/delivery; the active rewrite delta retains required F14
+cover implemented adoption, delivery, migration and quality; the active rewrite delta retains required F14
 environment acceptance. Legacy wrappers/state engine/global installer and six obsolete stable contracts
 are removed. Original v1 records/archives remain reachable through the recorded baseline in Git,
 not a duplicate in-tree legacy directory. migration.py performs read-only known-format v1 inventory; it preserves original
@@ -32,4 +34,5 @@ acceptance/evidence/blockers and proposes explicit dispositions without mutation
 Tests execute public CLIs and installed fixture consumers, injected apply failures,
 metadata/head-data handling, content invalidation and numerical/consumer negative
 controls. Skill exercises are primary-author artifact/evidence records, not proof
-of fresh Cloud discovery, independent review or Ubuntu portability.
+of fresh Cloud discovery or independent review. Actual Ubuntu portability evidence
+is recorded separately in docs/validation/v2-acceptance.md.

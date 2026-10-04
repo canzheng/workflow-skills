@@ -1,8 +1,8 @@
 # Rewrite implementation and acceptance
 
-- [ ] 1. Establish repository-scoped foundation (WF2-F01–F06).
-- [ ] 2. Implement specifications, risk proof, handoffs, checks and scenarios (WF2-F07–F11).
-- [ ] 3. Inventory migration and retire active v1 assets (WF2-F12–F13).
+- [x] 1. Establish repository-scoped foundation (WF2-F01–F06).
+- [x] 2. Implement specifications, risk proof, handoffs, checks and scenarios (WF2-F07–F11).
+- [x] 3. Inventory migration and retire active v1 assets (WF2-F12–F13).
 - [ ] 4. Complete required Cloud/Ubuntu/GitHub/enforcement acceptance and archive (WF2-F14).
 
 ## Bootstrap checkpoint evidence
@@ -131,3 +131,15 @@ manifest. Prior "labeled history retained" records describe intermediate revisio
 not final source behavior. Fresh clone checks and baseline inventory regression
 will be rerun at the cleanup commit. Next: F14 same-revision Ubuntu/Actions and
 fresh Cloud discovery/required enforcement handoff.
+
+F13 cleanup verified at `0363702b5b6f79a619eb70e5c53215eb2ca559eb`: 49 tests
+and strict specs passed on this managed checkout, a fresh Ubuntu 24.04 remote clone,
+and Actions. Cross-filesystem clone failures were repaired with copying clones.
+Final consumer/archive proof and shaping artifacts verified at
+`bbbf1e5e5df860dbb3eca2ebfad1377f39159348`: 49 tests, public check and strict
+specs passed on both environments; Actions run 37204546568 succeeded.
+F01–F13 implementation is ready for review, with host/integration limits retained.
+F14 remains partial: fresh Cloud discovery/resume, independent review and observed
+merge enforcement are pending; trusted-base metadata requires base adoption.
+See docs/validation/v2-acceptance.md and native Issue #15 for exact continuation.
+Do not archive or close the parent while required acceptance remains pending.

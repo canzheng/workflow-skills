@@ -10,8 +10,9 @@ A trusted checker reads head files through Git blobs, fetching the exact SHA if
 needed; it never checks out/executes head content in the metadata job.
 `--metadata-only` requires a PR snapshot and limits work to that contract.
 `--specs` explicitly requires pinned OpenSpec 1.14.0 and validates actual specs;
-missing tool is a failure, not a skipped pass. Historical docs/archives are outside
-current local-link checking; they are labeled evidence, not executable guidance.
+missing tool is a failure, not a skipped pass. Historical references are outside
+current local-link checking; v1-only archives are available in Git rather than
+the final source tree.
 
 `--issues-json SNAPSHOT` is an on-demand read-only inconsistency audit of native
 Issue snapshots: repository + issues array with number/state/state_reason/labels.
@@ -19,7 +20,14 @@ A trusted adapter may supply delivery_evidence as an indexed reference; its trut
 still requires review. Stale closed labels, missing evidence and multiple open
 phases produce findings. This cannot prevent manual Issue closure.
 
-CI head/push events run v2 tests and checks with read-only permissions. Body edits
+Source CI head/push events run v2 tests and checks with read-only permissions.
+Consumer setup installs a separate generic workflow that executes mechanical checks
+and verification.local argv commands with --run-local; it copies neither source tests
+nor Node/OpenSpec installation. Application preparation belongs in reviewed commands
+or deliberate workflow customization, with conflicts preserved on managed updates.
+Integration commands remain explicit environment-specific work. The default local
+command checks only the bundle and cannot certify application behavior. Setup never
+configures Actions permissions/rulesets/protection or marks missing enforcement passed. Body edits
 and head updates rerun trusted-base pull_request_target metadata checks. No PR body
 is interpolated into shell. Metadata can execute neither commands nor untrusted
 head code. Changes to trusted checker/workflows themselves need ordinary review.

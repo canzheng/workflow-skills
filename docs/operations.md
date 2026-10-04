@@ -50,3 +50,13 @@ environment. Plain check is mechanical and does not run application tests. Outpu
 reports each exit without dumping potentially sensitive command output; rerun the
 specific declared command to investigate. Missing runtime never falls back. Empty
 integration arrays are not an environmental pass. Metadata-only forbids these flags.
+
+## Consumer CI adoption
+Setup includes owned workflow-v2-verify.yml and workflow-v2-pr-metadata.yml. The first
+runs mechanical checks and declared local verification; the second uses trusted
+base code for PR contract data. It does not copy source-only Python/Node/OpenSpec
+tests, install application dependencies implicitly, execute integration commands in
+the wrong environment, or configure repository settings. See installed development
+instructions and [enforcement runbook](workflow/checks.md). Configure actual application
+commands/prerequisites and observe Actions after authorized publication/base adoption.
+Existing/modified workflow files obey the same collision/update/uninstall policy.

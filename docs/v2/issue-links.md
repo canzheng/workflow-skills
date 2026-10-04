@@ -5,7 +5,7 @@ This is a link-only source identity index. GitHub owns live state.
 
 | Source ID | Issue |
 | --- | --- |
-+| WF2-F01 | [#2](https://github.com/canzheng/workflow-skills/issues/2) |
+| WF2-F01 | [#2](https://github.com/canzheng/workflow-skills/issues/2) |
 | WF2-F02 | [#3](https://github.com/canzheng/workflow-skills/issues/3) |
 | WF2-F03 | [#4](https://github.com/canzheng/workflow-skills/issues/4) |
 | WF2-F04 | [#5](https://github.com/canzheng/workflow-skills/issues/5) |

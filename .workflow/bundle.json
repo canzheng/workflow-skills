@@ -18,6 +18,8 @@
     "templates/consumer/development.md": "docs/workflow/development.md",
     "templates/consumer/operations.md": "docs/workflow/operations.md",
     ".agents/skills/workflow-risk-review/references/methods.md": ".agents/skills/workflow-risk-review/references/methods.md",
-    "tools/workflow/migration.py": "tools/workflow/migration.py"
+    "tools/workflow/migration.py": "tools/workflow/migration.py",
+    "templates/consumer/verify.yml": ".github/workflows/workflow-v2-verify.yml",
+    ".github/workflows/pr-metadata.yml": ".github/workflows/workflow-v2-pr-metadata.yml"
   }
 }

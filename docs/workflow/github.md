@@ -8,6 +8,14 @@ Cancelled closes as not planned; completed closes only after the delivery contra
 Closure removes workflow labels when permitted, preserving unrelated labels.
 Reopen restores a justified open phase and invalidates assumed completion.
 
+Normally wf:review means the canonical linked PR is Ready for Review, following
+implementation/self-verification; a draft PR remains wf:in-progress. Independent
+semantic/code review and subsequent fixes use that PR. Conversion back to draft
+restores in-progress. Update labels with native tools and re-read actual PR state;
+labels do not assert review passed. A reviewable branch is a fallback when publication
+is unavailable. The cumulative WF2 bootstrap is an explicitly documented exception.
+PR-to-Issue phase automation is deferred; no extra issue-stage reviewer is required.
+
 Parent acceptance remains open across partial PRs/children. Use Refs #N for partial
 work; final closing keywords require aggregate acceptance at merge to the intended
 branch. A phase label/comment is not an atomic execution lock. Record branch/session

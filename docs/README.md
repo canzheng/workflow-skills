@@ -18,3 +18,9 @@ reachable through the recorded baseline in Git, not copied into the source head.
 - [Skill usage](workflow/usage.md) and [evaluation evidence](validation/skill-evaluations.md).
 - [Handoff and evidence](workflow/handoff.md): exact targets and same-content continuation.
 - [Current architecture](architecture.md) and [checks/enforcement](workflow/checks.md).
+
+- [Acceptance evidence and continuation](validation/v2-acceptance.md): tested revisions,
+  feature/scenario results and remaining host/administrative gates.
+- [v2 release/migration notes](release-notes-v2.md): candidate behavior and adoption.
+- [Validated external review findings](validation/reviewer-findings.md): evidence and
+  targeted consumer-CI/PR-boundary adjustments.

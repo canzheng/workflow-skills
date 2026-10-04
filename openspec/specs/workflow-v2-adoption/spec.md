@@ -34,3 +34,21 @@ source authoring from installed consumers and authentication from unprobed write
 #### Scenario: Duplicate active skill name
 - **WHEN** a canonical v2 skill is discoverable in two inspected locations
 - **THEN** doctor reports a conflict without deleting global skills
+
+### Requirement: Consumer CI adoption
+The pinned consumer bundle SHALL include read-only generic verification and
+trusted-base PR metadata workflows. Verification SHALL consume reviewed local argv
+commands and mechanical checks without assuming source development dependencies or
+executing environment-specific integration commands. Setup SHALL NOT configure
+repository protections or overwrite unmanaged or modified workflows.
+
+#### Scenario: Consumer commands and ownership
+- **WHEN** a consumer installs the pinned bundle with declared application verification
+- **THEN** the installed verification workflow runs those commands and mechanical checks
+- **AND** missing prerequisites or a failed command fail verification
+- **AND** existing workflow collisions fail preflight without unrelated writes
+
+#### Scenario: Adoption is not enforcement
+- **WHEN** setup installs workflow files
+- **THEN** trusted-base metadata still requires base adoption
+- **AND** required check enforcement remains pending until separately configured and observed

@@ -8,6 +8,8 @@ import subprocess
 START = '<!-- workflow-v2:start -->'
 END = '<!-- workflow-v2:end -->'
 SKILLS = ('workflow-design-to-backlog', 'workflow-deliver-issue', 'workflow-risk-review')
+CI_ASSETS = ('.github/workflows/workflow-v2-verify.yml',
+             '.github/workflows/workflow-v2-pr-metadata.yml')
 PHASES = {'wf:backlog', 'wf:ready', 'wf:in-progress', 'wf:review'}
 MODIFIERS = {'wf:blocked', 'wf:deferred'}
 
@@ -117,7 +119,9 @@ def owned(name):
             name in ('docs/workflow/contract.md', 'docs/workflow/README.md',
                      'docs/workflow/development.md', 'docs/workflow/operations.md',
                      '.github/ISSUE_TEMPLATE/feature.yml', '.github/ISSUE_TEMPLATE/bug.yml',
-                     '.github/pull_request_template.md'))
+                     '.github/pull_request_template.md',
+                     '.github/workflows/workflow-v2-verify.yml',
+                     '.github/workflows/workflow-v2-pr-metadata.yml'))
 
 
 def manifest(root):

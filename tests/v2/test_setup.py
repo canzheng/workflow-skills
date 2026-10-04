@@ -55,6 +55,12 @@ def fixture_source(root):
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text('# Fixture\n')
         assets[path] = path
+    for source, dest in [('templates/consumer/verify.yml', '.github/workflows/workflow-v2-verify.yml'),
+                         ('.github/workflows/pr-metadata.yml', '.github/workflows/workflow-v2-pr-metadata.yml')]:
+        p = root / dest
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_bytes((ROOT / source).read_bytes())
+        assets[dest] = dest
     (root / '.workflow').mkdir()
     (root / '.workflow/bundle.json').write_text(json.dumps(dict(schema_version=1, bundle_version='2.0.0', assets=assets)))
     return commit(root)

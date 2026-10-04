@@ -33,6 +33,19 @@ its plan in docs/plans. A long-running non-OpenSpec effort may use one optional 
 Partial PRs cannot archive pending scope; final archive and current specs accompany
 the delivering code. The rewrite remains active until required F14 acceptance passes.
 
+## PR review boundary
+Normal published work proceeds from wf:in-progress through implementation,
+self-verification and documentation reassessment to a canonical PR Ready for Review,
+then wf:review. Draft PRs provide continuous deterministic checks while the Issue
+remains in progress. Formal independent semantic/code review uses the Ready PR;
+ordinary work has no mandatory independent pre-PR reviewer stage. Targeted risk
+methods remain available during implementation. Returning to draft restores
+wf:in-progress. Pending review/environment requirements remain explicit.
+When PR publication is unavailable, a committed reviewable branch and exact evidence
+may use the branch-only review fallback. The cumulative WF2 rewrite is a bounded
+bootstrap exception, not the default consumer lifecycle. Labels are updated with
+native authorized tools; no phase automation or closure bot is required.
+
 ## Evidence and completion
 Report implemented, locally verified, integration pending, ready for review,
 merged and delivered distinctly. Record full revision, environment, command,

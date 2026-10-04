@@ -33,8 +33,10 @@ This command reads the known `docs/planning/versions/*/BACKLOG.md` sections and
 linked feature metadata/OpenSpec records. It returns original record content,
 old ID, paths, phase and proposed disposition. Missing/ambiguous/duplicated IDs,
 changes, inconsistent Done/task metadata and unsafe paths produce findings; resolve
-manually rather than guessing. Unknown formats require manual mapping. This source
-has zero active and 19 historical Done; do not create fake migration Issues.
+manually rather than guessing. Unknown formats require manual mapping. The starting source
+had zero active and 19 historical Done. The final source has no v1 records; inspect
+the recorded baseline to reproduce the historical inventory. Do not create fake
+migration Issues.
 
 For each active item, explicitly choose one disposition with the authorized owner:
 finish v1, migrate once, defer, or cancel. A proposed inspector choice is not approval.
@@ -74,7 +76,7 @@ outside this workflow. No user-global installation/configuration is changed here
 | v1 OpenSpec integration | test_openspec actual pinned validation/archive and partial-owner obligation; no blanket apply prohibition |
 | v1 audit/remediation mutation corpora | Retired old linter/state APIs; current wrong-formula/consumer/assertion/target negative controls remain |
 | Conda launcher and environment tests | Portable verify/clean-venv/missing-suite proof; Conda is not required |
-| six old current OpenSpec specs | Replaced by implemented adoption/delivery/migration contracts and later checks/risk spec; original meanings retained in Git/archived changes |
+| six old current OpenSpec specs | Replaced by implemented adoption/delivery/migration contracts and later checks/risk spec; original meanings retained in baseline Git history |
 | docs/superpowers | Removed from final source; original remains in Git |
 | docs/planning / docs/lessons / v1 archived changes | Removed from final source; original acceptance/evidence remains inspectable at baseline; zero active work |
 

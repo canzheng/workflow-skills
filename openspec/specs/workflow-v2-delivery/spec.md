@@ -35,3 +35,20 @@ required verification/docs/archive/review and intended merge/release obligations
 #### Scenario: Local pass and open PR
 - **WHEN** local tests pass but required Ubuntu verification or merge is absent
 - **THEN** progress reports locally verified and integration pending, not delivered
+
+### Requirement: Canonical PR review boundary
+When PR publication is available, delivery SHALL keep the Issue in progress while
+the canonical PR is draft and transition to review after that PR is Ready for Review.
+Formal independent semantic review SHALL use the PR boundary rather than a mandatory
+independent pre-PR Issue-stage pipeline. Branch-only review SHALL remain available
+when publication is unavailable; approved cumulative rewrite bootstrap is an exception.
+
+#### Scenario: Ready and draft transitions
+- **WHEN** self-verification and documentation reassessment prepare a published result
+- **THEN** the canonical PR becomes Ready for Review before the linked Issue enters review
+- **AND** returning that PR to draft restores in progress without asserting completion
+
+#### Scenario: Publication unavailable
+- **WHEN** authorized implementation finishes but PR publication is unavailable
+- **THEN** a committed reviewable branch and precise evidence can use the review fallback
+- **AND** required integration, review and merge remain pending

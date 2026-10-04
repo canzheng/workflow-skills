@@ -72,7 +72,7 @@ def doctor(root, skill_roots=()):
     if shutil.which('gh'):
         r = subprocess.run(['gh', 'auth', 'status'], capture_output=True, timeout=10, check=False)
         auth = 'authenticated' if r.returncode == 0 else 'unavailable'
-    capabilities = dict(gh_authentication=auth, github_read='unprobed', github_write='unprobed', branch_publication='unprobed', actions_administration='unprobed', host_skill_discovery='unprobed')
+    capabilities = dict(gh_authentication=auth, github_read='unprobed', github_write='unprobed', branch_publication='unprobed', actions_administration='unprobed', merge_enforcement='unprobed', github_ci_execution='unprobed', host_skill_discovery='unprobed')
     return findings, dict(mode='installed-consumer' if m else 'source-checkout' if source else 'unknown', tools=tools, capabilities=capabilities, context=c)
 
 

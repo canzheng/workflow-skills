@@ -40,6 +40,15 @@ versus current wording. An internal repair may state no impact only when explana
 remain accurate. A random Markdown edit does not prove semantic consistency.
 Prepare PR sections Assignment, Changes, Evidence, Documentation and Remaining,
 including acceptance mapping, meaningful design deviations and exact next action.
+When publication is available, open/update a draft PR for continuous deterministic
+checks. After implementation, self-verification and final docs assessment, resolve
+known blockers to review and mark the canonical PR Ready for Review, then update the
+linked Issue to wf:review while preserving unrelated labels. Record the PR link.
+Keep a draft PR's Issue wf:in-progress; conversion back to draft restores that phase.
+Formal independent semantic/code review belongs on the Ready PR, with fixes and
+required reruns there. Targeted risk methods during implementation are not another
+mandatory independent pre-PR reviewer pipeline. Pending required environment evidence
+remains explicit and can block delivery without blocking a useful review.
 A significant multi-PR change has a closing owner; partial PRs neither archive
 pending scope nor close the parent. Final archive/current specs accompany delivery.
 
@@ -47,7 +56,8 @@ Remote writes use native tools/gh within authorization. Search open/closed sourc
 identities before creation, reconcile timeouts before retry, preserve human prose
 and unrelated labels with read/compare/update. No write access: continue authorized
 implementation and leave committed reviewable branch plus exact candidate body and
-handoff; never invent Issue numbers, publication or remote phase changes.
+handoff; branch-only wf:review is a fallback when PR publication is unavailable.
+Never invent Issue numbers, publication or remote phase changes.
 Handoff: repository, assignment, branch/full SHA, dirty state, plan/spec/docs paths,
 passed/failed/pending checks, prerequisites/blockers and exact next action.
 
