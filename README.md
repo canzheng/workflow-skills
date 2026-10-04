@@ -69,6 +69,18 @@ See [operations](docs/operations.md) for offline preview/update/uninstall and
 [migration/rollback](docs/migration-v1-v2.md). Source authoring uses .workflow/bundle.json;
 consumer provenance contains the durable dependency pin, not task state.
 
+If the host uses a **Start skill** for environment initialization, have that host
+entrypoint run the same pinned fetch-and-run command after resolving the intended
+consumer checkout and before workflow verification. It must materialize the shared
+dependency before running check/doctor; an older check-only startup instruction is
+insufficient for ignored skills. Keep the deterministic setup implementation in
+workflow-skills, rather than duplicating installation logic in a prompt. Capture
+the command output/exit status and actual checkout/source pin. Do not assume that
+a published setup-command field executed automatically or before skill discovery.
+Startup performed by an already active agent proves initialization and explicit
+skill use, while pre-agent automatic discovery still requires host evidence. See
+[the Start-skill handoff](docs/validation/cloud-bootstrap-handoff.md#start-skill-entrypoint).
+
 ## Acceptance boundary
 
 Code/local checks and primary-author skill exercises do not establish fresh Cloud

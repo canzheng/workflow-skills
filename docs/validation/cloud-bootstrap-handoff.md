@@ -78,6 +78,53 @@ it did not execute the normal README fetch binding. Test the exact pinned comman
 in the intended preparation phase before requesting a token. Actual default-binding
 fetch and host ordering need their own evidence.
 
+## Start-skill entrypoint
+
+The user reports that this host offers a Start skill for environment initialization
+and that the pinned command was placed in its published setup-command field. The
+field's execution/timing and this Start skill's current definition are not directly
+observable from the rewrite task. The earlier pasted Start-skill instruction ran
+check/doctor without bootstrap; that instruction cannot materialize ignored skills.
+
+Use the host's Start skill to invoke the **same source-owned pinned fetch-and-run
+command above**, rather than creating another installer or another shared workflow
+skill. This is startup routing, not a v1 task wrapper. Preserve unrelated host rules,
+the existing isolated checkout, project files and the index. In the pilot, verify
+the full expected consumer SHA and manifest pin first. Report a mismatch before
+initialization; do not silently reset, migrate old main or substitute its source pin.
+
+Suggested instruction for the Start skill:
+
+```text
+Use the existing /workspace/workflow-skills-test checkout. Preserve host instructions
+and user changes; do not create another worktree or install global skills.
+Before initialization, record the actual consumer branch/SHA and tracked manifest
+pin, plus any skill catalog already exposed. This pilot expects
+pilot/shared-skill-bootstrap at f31debf9810c8b989c924bc534add4848fffd6f3, with source
+ef24d36f47dbbcdbb204375b53db055122c28269. Report mismatches before proceeding.
+
+Run the complete pinned fetch-and-run shell block supplied in the environment setup
+instructions, using the existing platform Git authentication unchanged. Capture
+ordinary command output and exit status, without shell tracing or credential dumps.
+The fetched workflow-skills entrypoint must materialize the tracked dependency pin
+before check --run-local and doctor. Require exit0 and ok:true. Repeat bootstrap and
+require changes:[] with no tracked/index changes. Keep project-specific skills tracked.
+
+After initialization, read the current repo instructions and use the three shared
+skills where relevant. Record whether discovery was automatic, refreshed by a
+supported host operation, or explicit file reading. Initialization executed after
+the agent began cannot establish pre-agent discovery. Do not claim F14 complete
+from bootstrap/check/doctor alone. No merge, completed Issue closure, protections,
+release, branch deletion or global configuration changes.
+```
+
+The instruction refers to the complete shell block above, which must also be
+available to the Start skill; a new consumer need not contain any tools beforehand.
+Capture the actual run before deciding the published script failed. If Start runs
+only after initial agent discovery, this path can establish startup/materialization
+and explicit use, but does not silently change S34/F14's fresh-discovery contract.
+Establish the host's supported discovery ordering or report that gate unverified.
+
 ## Fresh task prompt
 
 ```text
