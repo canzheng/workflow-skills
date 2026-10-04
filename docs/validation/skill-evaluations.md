@@ -77,3 +77,16 @@ Pilot overhead observed: no user confirmations for fixture structure, no mandato
 per-task plans/feature ledgers, and no forced review rounds. Shipping required one
 accurate documentation update; quantity repair required a reasoned no-impact record.
 No measured speedup or universal model-reliability claim is made.
+
+Final shaping artifact completion: inspected shaping/current.py (single price only)
+and produced shaping/candidates.md with full acceptance/dependencies/risk/environment/
+documentation bodies, linked design and stable identities. Candidate status is
+explicitly unapproved execution. This expands the initial observed table into actual
+reviewable Issue-body artifacts without making a workflow backlog.
+
+Final significant-change proof now runs actual cart producer/receipt consumer inside
+the disposable OpenSpec project before archive: deliberately ignoring quantity gives
+EUR 1.99; restoring multiplication gives independently expected EUR 3.98. Only after
+that proof passes does the fixture mark implementation complete, archive and validate
+current specs. This extends structural CLI proof with implemented behavior; CLI
+validation remains insufficient by itself for semantic acceptance.
