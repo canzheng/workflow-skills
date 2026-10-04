@@ -1,6 +1,8 @@
 """Exercise the source-owned entrypoint against real consumer Git checkouts."""
 import json
+import os
 import pathlib
+import shutil
 import subprocess
 import unittest
 
@@ -73,7 +75,6 @@ class EnvironmentSetupTests(unittest.TestCase):
         self.execute(script, self.target)
         test_setup.commit(self.target)
         # Missing skills make it observable whether routing is checked before bootstrap.
-        import shutil
         for name in SKILLS:
             shutil.rmtree(self.target / '.agents/skills' / name)
         before = {n: (self.target / n).read_bytes() for n in git(self.target, 'ls-files', '-z').decode().split('\0') if n}
@@ -84,6 +85,26 @@ class EnvironmentSetupTests(unittest.TestCase):
         self.assertFalse((self.target / '.agents/skills/workflow-risk-review').exists())
         self.assertEqual(before, {n: (self.target / n).read_bytes() for n in before})
         self.assertEqual(index, git(self.target, 'ls-files', '--stage'))
+
+    def test_adopted_missing_config_fails_before_materialization(self):
+        script = self.entrypoint()
+        self.execute(script, self.target)
+        test_setup.commit(self.target)
+        (self.target / '.workflow/config.json').unlink()
+        for name in SKILLS:
+            shutil.rmtree(self.target / '.agents/skills' / name)
+        # Real exact-pin fetch through a process-local URL mapping, no global config.
+        env = dict(os.environ, GIT_CONFIG_COUNT='1',
+                   GIT_CONFIG_KEY_0='url.' + self.source.as_uri() + '.insteadOf',
+                   GIT_CONFIG_VALUE_0='https://github.com/canzheng/workflow-skills.git')
+        before = git(self.target, 'status', '--porcelain')
+        index = git(self.target, 'ls-files', '--stage')
+        r = subprocess.run(['bash', str(script), str(self.target), 'fixture/consumer'], capture_output=True, text=True, env=env)
+        self.assertNotEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertFalse((self.target / '.agents/skills/workflow-risk-review').exists(), r.stdout + r.stderr)
+        self.assertIn('config.json', r.stdout + r.stderr)
+        self.assertEqual(git(self.target, 'status', '--porcelain'), before)
+        self.assertEqual(git(self.target, 'ls-files', '--stage'), index)
 
     def test_wrong_target_and_old_adoption_fail_without_writes(self):
         script = self.entrypoint()

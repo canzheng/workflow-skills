@@ -94,6 +94,20 @@ class CheckTests(unittest.TestCase):
                 asset.write_bytes(contents)
                 pin.write_bytes(original)
 
+    def test_installed_manifest_rejects_invalid_versions_before_bootstrap(self):
+        p = self.target / '.workflow/install-manifest.json'
+        original = json.loads(p.read_text())
+        before = subprocess.check_output(['git', '-C', str(self.target), 'ls-files', '--stage'])
+        for version in ('not-a-version', '1.0.0', '2.0', '2.0.0-extra'):
+            with self.subTest(version=version):
+                p.write_text(json.dumps(dict(original, bundle_version=version)))
+                contents = p.read_bytes()
+                for command in ('check', 'doctor'):
+                    run(command, '--repo', self.target, expect=2)
+                run('bootstrap', '--repo', self.target, '--apply', expect=2)
+                self.assertEqual(p.read_bytes(), contents)
+                self.assertEqual(subprocess.check_output(['git', '-C', str(self.target), 'ls-files', '--stage']), before)
+
     def test_missing_sections_broken_files_and_anchors_fail(self):
         p = self.snapshot(BODY.replace('## Documentation', '## Unrelated'))
         r = run('check', '--repo', self.target, '--pr-json', p, expect=1)

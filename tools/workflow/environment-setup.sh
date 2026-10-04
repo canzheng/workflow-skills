@@ -21,8 +21,9 @@ if not re.fullmatch(r'[\w.-]+/[\w.-]+', sys.argv[3]):
     sys.exit('Repository identity must be owner/repository')
 try:
     root = repository(sys.argv[2])
-    if safe(root, '.workflow/config.json').exists() and config(root)['repository'] != sys.argv[3]:
-        sys.exit('Repository identity mismatch; refusing setup/bootstrap for a different project')
+    if safe(root, '.workflow/install-manifest.json').exists() or safe(root, '.workflow/config.json').exists():
+        if config(root)['repository'] != sys.argv[3]:
+            sys.exit('Repository identity mismatch; refusing setup/bootstrap for a different project')
 except Invalid as exc:
     sys.exit(str(exc))
 PY

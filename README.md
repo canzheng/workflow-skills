@@ -82,3 +82,6 @@ Original runtime/tests/specs and evidence remain reachable at the
 
 Environment setup validates the explicit owner/repository against any existing
 project config before adoption or bootstrap, rejecting mismatches without writes.
+
+An adopted repository missing its project configuration fails before dependency writes.
+Source and installed provenance share the same v2 bundle-version validation.
