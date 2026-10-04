@@ -2,9 +2,9 @@
 
 Use existing repository canzheng/workflow-skills-test, branch
 `pilot/shared-skill-bootstrap`, exact tested consumer SHA
-`102706c76b2ade368397f866057314f083c67bea` (PR8, Issue7).
+`ed5a678bbd7cda27cc3381cf80290acb8ebc2da8` (PR8, Issue7).
 The tracked manifest pins workflow source
-`608b4e6ee16017bca3e63e98b2e1e91235b1a004`. Main has the older tracked-skill model;
+`2e5106a007bb4da37b25a81e2bce1828a37d51eb`. Main has the older tracked-skill model;
 no merge is authorized. Select this branch for preparation and the fresh task.
 Do not discard user changes or silently substitute main.
 
@@ -21,7 +21,7 @@ revision. Always fetch an explicit full SHA; never main/latest. The source
 
 ```sh
 set -eu
-WF2_SOURCE_SHA=608b4e6ee16017bca3e63e98b2e1e91235b1a004
+WF2_SOURCE_SHA=2e5106a007bb4da37b25a81e2bce1828a37d51eb
 WF2_CONSUMER_ROOT=/workspace/workflow-skills-test
 WF2_CONSUMER_REPOSITORY=canzheng/workflow-skills-test
 WF2_SOURCE_DIR=$(mktemp -d)
@@ -60,7 +60,7 @@ api.github.com network draft if API operations remain proxy-blocked. Never print
 ```text
 Use the existing isolated checkout /workspace/workflow-skills-test. Do not create
 another worktree. Verify pilot/shared-skill-bootstrap at
-102706c76b2ade368397f866057314f083c67bea; preserve local changes and report mismatches.
+ed5a678bbd7cda27cc3381cf80290acb8ebc2da8; preserve local changes and report mismatches.
 Read AGENTS.md, docs/workflow/contract.md, docs/workflow/README.md and docs/design.md.
 Continue F14 validation for Issue7/Ready PR8, not application implementation.
 

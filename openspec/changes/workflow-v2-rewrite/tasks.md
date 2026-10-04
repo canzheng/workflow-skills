@@ -221,9 +221,9 @@ unchecked: actual fresh published Cloud pre-agent discovery/use, Ubuntu agent di
 remaining required scenarios/final semantic acceptance and actual enforcement evidence
 remain distinct gates. Merge→valid completion/admin mutation need separate authorization.
 
-Current checkpoint: source implementation608b4e6ee16017bca3e63e98b2e1e91235b1a004
-passes75 tests/no skips and strict checks on Cloud/fresh Ubuntu; source Actions pass.
-Consumer pilot/shared-skill-bootstrap at102706c76b2ade368397f866057314f083c67bea pins
+Current checkpoint: source implementation2e5106a007bb4da37b25a81e2bce1828a37d51eb
+passes77 tests/no skips and strict checks on Cloud/fresh Ubuntu; source Actions pass.
+Consumer pilot/shared-skill-bootstrap ated5a678bbd7cda27cc3381cf80290acb8ebc2da8 pins
 that source. Source-owned environment-setup.sh is excluded from the consumer bundle;
 source README documents Cloud install-script/local fetch-and-run, and consumer script
 copy is removed. Actual fresh Cloud-runtime/Ubuntu clones run that command twice,

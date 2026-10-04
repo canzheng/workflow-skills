@@ -12,16 +12,16 @@ itself uses the tracked consumer pin and needs no fetch when skills already matc
 No consumer policy/pin/index is rewritten by repeat setup. First adoption creates
 trackable policy and exactly three scoped ignore entries; project skills stay trackable.
 
-Tested implementation source `608b4e6ee16017bca3e63e98b2e1e91235b1a004` passes75 tests
+Tested implementation source `2e5106a007bb4da37b25a81e2bce1828a37d51eb` passes77 tests
 without skips and strict OpenSpec checks on Debian Cloud and fresh Ubuntu24.04.5
 (Python3.12.14/3.12.3, Git2.52/2.43). A shallow source-suite attempt failed two historical
 baseline checks; fetching full history restored required evidence without weakening
-those checks. Source push/PR Actions37217423703/37217427057 succeeded.
-Consumer `pilot/shared-skill-bootstrap` at `102706c76b2ade368397f866057314f083c67bea`
+those checks. Source push/PR Actions37218367939/37218371437 succeeded.
+Consumer `pilot/shared-skill-bootstrap` at `ed5a678bbd7cda27cc3381cf80290acb8ebc2da8`
 pins that exact source; fresh Cloud-runtime/Ubuntu clones executed the actual README
 fetch-and-run command twice, matched all four shared hashes, preserved tracked bytes
 and index, kept pantry-project tracked and stayed Git-clean. Actual consumer push/PR/
-metadata Actions37217514512/37217517130/37217516077 succeeded. Issue7 and ReadyPR8
+metadata Actions37218631482/37218633718/37218632531 succeeded at that exact head. Issue7 and ReadyPR8
 remain open; PR6/Issue1 application evidence stays atf95f0cae3b87bc8031b00a4150cf9670251ae978.
 
 Mandatory completeness now includes all20 destinations, including docs/templates/risk
@@ -32,7 +32,12 @@ revision:null/dirty:true before commit and the actual clean commit afterward. Th
 fixture inventory assertion was updated to verify all four pinned shared files/bytes;
 no acceptance/assertions were weakened to accommodate broken output.
 
-Native independent current-head semantic review results must be read, not inferred
+Source864eb08 review additionally found repeated setup ignoring repository identity
+and source check accepting malformed version strings. Both were reproduced with
+failing-before public tests, repaired at2e5106a and verified with actual wrong-identity
+Cloud/Ubuntu no-write negatives and77 tests. Consumer102706c review completed with no
+major issues; current-head re-reviews still need actual results. Native independent
+current-head semantic review results must be read, not inferred
 from CI. Fresh published Cloud pre-agent discovery/use and Ubuntu agent-host discovery
 are still unperformed. The onboarding chat is not fresh-task evidence. Required-check
 administration reads are access-limited; workflow YAML and successful Actions do not
