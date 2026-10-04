@@ -194,6 +194,20 @@ class DependencyBootstrapTests(unittest.TestCase):
         run(*self.args, '--apply', expect=1)
         self.assertEqual(self.tracked_bytes(), before)
 
+    def test_extra_ignored_dependency_marks_handoff_identity_dirty(self):
+        self.adopt()
+        before = content_identity(self.target)
+        p = self.target / '.agents/skills/workflow-risk-review/unmanaged.md'
+        p.write_text('Extra ignored dependency asset\n')
+        self.assertEqual(git(self.target, 'status', '--porcelain'), b'')
+        after = content_identity(self.target)
+        self.assertNotEqual(before['content_digest'], after['content_digest'])
+        self.assertTrue(after['dirty'])
+        self.assertTrue(after['dependency_modified'])
+        report = run('doctor', '--repo', self.target, expect=1)
+        self.assertTrue(report['content']['dependency_modified'])
+        self.assertTrue(report['content']['dirty'])
+
     def test_setup_preflights_negated_shared_and_nested_project_ignores(self):
         self.adopt()
         ignore = self.target / '.gitignore'

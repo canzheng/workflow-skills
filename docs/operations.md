@@ -124,3 +124,8 @@ bootstrap/check/doctor, including nested/global/info excludes. A broad rule hidi
 project skills or a negation exposing a shared dependency is a conflict even when
 the managed block hash matches. Review and narrow the offending rule explicitly;
 setup never silently rewrites unrelated ignore policy.
+
+The pinned bundle must include every installed CLI runtime module, not just skill
+entrypoints and CI files. Missing runtime assets fail adoption preflight. Unmanaged
+files inside ignored shared namespaces are dependency modifications: diagnostics
+report dirty dependency content even when Git status is clean.

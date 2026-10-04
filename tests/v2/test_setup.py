@@ -38,7 +38,7 @@ def commit(root):
 def fixture_source(root):
     init(root)
     assets = {}
-    for file in ('core.py', 'setup.py', 'bootstrap.py', 'workflow.py', 'checks.py', 'records.py'):
+    for file in ('core.py', 'setup.py', 'bootstrap.py', 'workflow.py', 'checks.py', 'records.py', 'migration.py'):
         name = 'tools/workflow/' + file
         (root / name).parent.mkdir(parents=True, exist_ok=True)
         (root / name).write_bytes((TOOLS / file).read_bytes())
@@ -79,6 +79,20 @@ class SetupTests(unittest.TestCase):
         commit(self.target)
         self.args = ['setup', '--source', self.source, '--revision', self.sha,
                      '--target', self.target, '--repository', 'fixture/consumer']
+
+    def test_omitted_public_runtime_module_fails_before_install(self):
+        bundle = self.source / '.workflow/bundle.json'
+        original = json.loads(bundle.read_text())
+        for module in ('workflow.py', 'core.py', 'setup.py', 'bootstrap.py', 'checks.py', 'records.py', 'migration.py'):
+            with self.subTest(module=module):
+                spec = json.loads(json.dumps(original))
+                del spec['assets']['tools/workflow/' + module]
+                bundle.write_text(json.dumps(spec))
+                sha = commit(self.source)
+                result = run('setup', '--source', self.source, '--revision', sha, '--target', self.target, '--repository', 'fixture/consumer', '--apply', expect=1)
+                self.assertIn('Incomplete production bundle', json.dumps(result))
+                self.assertFalse((self.target / '.workflow').exists())
+                self.assertEqual((self.target / 'AGENTS.md').read_text(), 'User rule: preserve data.\n')
 
     def test_fresh_dry_run_apply_noop_doctor_and_uninstall(self):
         original = (self.target / 'AGENTS.md').read_bytes()
