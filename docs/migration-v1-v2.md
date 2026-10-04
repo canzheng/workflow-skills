@@ -106,3 +106,7 @@ locations and remove/disable conflicting routing only with the user's authorizat
 Doctor reports discoverable legacy/duplicate names but does not edit globals.
 Keeping v1 for another repository requires explicit repository guidance preventing
 its use here. This rewrite does not uninstall the user's global configuration.
+
+Inspection validates OpenSpec archive roots and matching archive directories with
+repository-relative symlink-safe checks. A symlinked archive cannot supply external
+change evidence; report an unsafe/ambiguous change finding and resolve it deliberately.

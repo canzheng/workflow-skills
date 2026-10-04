@@ -67,6 +67,24 @@ class MigrationTests(unittest.TestCase):
         self.assertEqual(r['active_count'], 2)
         self.assertTrue(any(x['code'] == 'migration.feature' for x in r['findings']))
 
+    def test_symlinked_archive_root_or_match_is_not_external_change_evidence(self):
+        body = self.feature('v1-f001', 'READY')
+        (self.folder / 'BACKLOG.md').write_text(body)
+        (self.root / 'openspec/changes/v1-f001-example').rmdir()
+        external = pathlib.Path(self.temp.name) / 'outside'
+        (external / '2026-v1-f001-example').mkdir(parents=True)
+        archive = self.root / 'openspec/changes/archive'
+        archive.symlink_to(external, target_is_directory=True)
+        result = run('migrate', 'inspect', '--repo', self.root, expect=1)
+        self.assertIsNone(result['records'][0]['change_path'])
+        self.assertTrue(any(x['code'] == 'migration.change' for x in result['findings']))
+        archive.unlink()
+        archive.mkdir()
+        (archive / '2026-v1-f001-example').symlink_to(external / '2026-v1-f001-example', target_is_directory=True)
+        result = run('migrate', 'inspect', '--repo', self.root, expect=1)
+        self.assertIsNone(result['records'][0]['change_path'])
+        self.assertTrue(any(x['code'] == 'migration.change' for x in result['findings']))
+
     def test_interrupted_cutover_reconciles_old_identity_and_preserves_human_edits(self):
         from core import Conflict
         from records import source_match, managed_update

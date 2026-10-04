@@ -43,6 +43,19 @@ class CheckTests(unittest.TestCase):
         r = subprocess.run(['python3', str(installed), 'check', '--repo', str(self.target)], capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
 
+    def test_source_check_rejects_omitted_installed_runtime_mapping(self):
+        (self.source / '.workflow/config.json').write_bytes((self.target / '.workflow/config.json').read_bytes())
+        run('check', '--repo', self.source)
+        p = self.source / '.workflow/bundle.json'
+        original = json.loads(p.read_text())
+        for module in ('workflow.py', 'core.py', 'setup.py', 'bootstrap.py', 'checks.py', 'records.py', 'migration.py'):
+            with self.subTest(module=module):
+                spec = json.loads(json.dumps(original))
+                del spec['assets']['tools/workflow/' + module]
+                p.write_text(json.dumps(spec))
+                result = run('check', '--repo', self.source, expect=1)
+                self.assertTrue(any(x['code'] == 'bundle.incomplete' for x in result['findings']))
+
     def test_missing_sections_broken_files_and_anchors_fail(self):
         p = self.snapshot(BODY.replace('## Documentation', '## Unrelated'))
         r = run('check', '--repo', self.target, '--pr-json', p, expect=1)
