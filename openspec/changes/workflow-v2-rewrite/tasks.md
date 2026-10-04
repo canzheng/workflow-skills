@@ -13,3 +13,11 @@ Inventory inspected: 19 historical Done, zero active entries; unrelated style/te
 commit constraints preserved. CLI GitHub authentication unavailable; connected-tool
 search succeeded with no WF2 matches. Publication will be reconciled at F04.
 Next: F02 portable environment, then F03 safe setup/doctor.
+
+F01 tested at `6e6fffc`: instruction-chain comparison and baseline preservation;
+focused routing regressions now pass in F02. F02 tested content: portable runner,
+pinned optional pytest dependencies, config command and development guide;
+`/tmp/wf2-clean-venv/bin/python tools/workflow/verify.py`: 3 tests passed;
+missing-suite negative control fails for the intended reason. Clean venv install
+and rerun succeeded (pytest 8.4.2). Docs: development/index/config. Actual fresh
+Cloud discovery remains pending. Next: F03 public setup/doctor negative paths.

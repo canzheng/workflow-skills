@@ -9,12 +9,7 @@
     "local": [
       [
         "python3",
-        "-m",
-        "unittest",
-        "discover",
-        "-s",
-        "tests/v2",
-        "-v"
+        "tools/workflow/verify.py"
       ]
     ],
     "integration": []
