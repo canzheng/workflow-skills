@@ -28,3 +28,4 @@ reachable through the recorded baseline in Git, not copied into the source head.
   Actions negatives, review fixes, Ubuntu proof and remaining authorization gates.
 
 - [Fresh consumer Cloud bootstrap handoff](validation/cloud-bootstrap-handoff.md): published environment script, exact consumer/source pins and fresh-task prompt.
+- [Published Cloud run evidence](validation/f14-published-cloud-run.md): revision mismatch, successful recovery, discovery limits and next preparation diagnosis.

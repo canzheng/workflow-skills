@@ -221,18 +221,18 @@ unchecked: actual fresh published Cloud pre-agent discovery/use, Ubuntu agent di
 remaining required scenarios/final semantic acceptance and actual enforcement evidence
 remain distinct gates. Merge→valid completion/admin mutation need separate authorization.
 
-Current checkpoint: source implementation10ff9cc807a54aa0834d24de82e0b685048379de
-passes79 tests/no skips and strict checks on Cloud/fresh Ubuntu; source Actions pass.
-Consumer pilot/shared-skill-bootstrap ate22ab9a1e55c7457060fecfaef040283077c24ee pins
-that source. Source-owned environment-setup.sh is excluded from the consumer bundle;
-source README documents Cloud install-script/local fetch-and-run, and consumer script
-copy is removed. Actual fresh Cloud-runtime/Ubuntu clones run that command twice,
-match four hashes, preserve project bytes/index/project skill and stay clean. Actual
-consumer push/PR/metadata CI succeeds. All20 mandatory destinations and unborn-root
-behavior have meaningful negative/positive proof. Current native semantic results
-remain to read after re-review. Publish/apply docs/validation/cloud-bootstrap-handoff.md
-command and launch a fresh task on that exact consumer branch outside onboarding.
-Record initial host discovery before agent bootstrap, then safe shaping rerun/use.
-F14 remains unchecked: fresh native Cloud/Ubuntu discovery, remaining scenario/review
-acceptance and enforcement evidence are distinct; merge→valid completed closure and
-administrative mutations need separate authorization. No simulated merge/closure.
+Current checkpoint: executable source ef24d36f47dbbcdbb204375b53db055122c28269
+passes 80 tests/no skips and strict specs on Cloud/fresh Ubuntu; source Actions pass.
+Frozen consumer pilot/shared-skill-bootstrap at
+f31debf9810c8b989c924bc534add4848fffd6f3 pins that source. Source-owned environment
+entrypoint/README command, repeatability, four hashes, all20 completeness, unborn-root
+and canonical commit-object pin behavior have meaningful runtime/negative proof.
+Consumer actual push/PR/metadata checks and current-head Codex review pass; six
+threads resolved. See docs/validation/f14-published-cloud-run.md: the fresh published
+Cloud task started on old main with no local skill catalog exposure. Recovery,
+manual skill use, safe shaping rerun and targeted negatives passed, but cannot
+certify pre-agent discovery. Obtain actual published install/maintenance logs and
+selected-checkout ordering before another task; use the frozen pins in the handoff.
+Fresh Cloud/Ubuntu agent-host discovery, final source review and enforcement remain
+separate gates. F14 stays unchecked and change active. Real merge→valid completed
+Issue observation and administrative mutations require separate authorization.

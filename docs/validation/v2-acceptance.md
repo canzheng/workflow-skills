@@ -2,57 +2,59 @@
 
 ## Current source-owned setup checkpoint
 
-This checkpoint supersedes the earlier consumer-owned script instructions below.
-At user request, the source-owned `tools/workflow/environment-setup.sh` is excluded
-from the consumer bundle. Workflow-skills README documents one pinned fetch-and-run
-command for the Cloud environment **install script** field and local/Ubuntu Bash.
-Consumer README links to the source; `.workflow/cloud-setup.sh` has been removed.
-The outer command fetches its exact entrypoint each run; repeatable materialization
-itself uses the tracked consumer pin and needs no fetch when skills already match.
-No consumer policy/pin/index is rewritten by repeat setup. First adoption creates
-trackable policy and exactly three scoped ignore entries; project skills stay trackable.
+The source-owned `tools/workflow/environment-setup.sh` is excluded from the consumer
+bundle. The source README documents the pinned fetch-and-run command for the Cloud
+**install script** field and local/Ubuntu Bash. Consumer policy/configuration,
+helpers, CI/templates and the dependency pin are tracked; only the three shared
+skill namespaces are ignored. First adoption creates project-owned files; repeat
+materialization preserves project bytes and the index and obeys the tracked pin.
+The outer command fetches its exact entrypoint; matching skills need no bootstrap fetch.
 
-Tested implementation source `10ff9cc807a54aa0834d24de82e0b685048379de` passes79 tests
-without skips and strict OpenSpec checks on Debian Cloud and fresh Ubuntu24.04.5
-(Python3.12.14/3.12.3, Git2.52/2.43). A shallow source-suite attempt failed two historical
-baseline checks; fetching full history restored required evidence without weakening
-those checks. Source push/PR Actions37219390322/37219395628 succeeded.
-Consumer `pilot/shared-skill-bootstrap` at `e22ab9a1e55c7457060fecfaef040283077c24ee`
-pins that exact source; fresh Cloud-runtime/Ubuntu clones executed the actual README
-fetch-and-run command twice, matched all four shared hashes, preserved tracked bytes
-and index, kept pantry-project tracked and stayed Git-clean. Actual consumer push/PR/
-metadata Actions37219574528/37219577664/37219576095 succeeded at that exact head. Issue7 and ReadyPR8
-remain open; PR6/Issue1 application evidence stays atf95f0cae3b87bc8031b00a4150cf9670251ae978.
+Tested executable source `ef24d36f47dbbcdbb204375b53db055122c28269` passes 80 tests
+without skips and strict OpenSpec validation on Debian Cloud and fresh Ubuntu 24.04.5
+(Python 3.12.14/3.12.3, Git 2.52/2.43). Source push/PR Actions
+37220660666/37220665034 succeeded. Actual source-suite history prerequisites were
+executed on Ubuntu: a shallow clone fetched full history before baseline assertions.
+A meaningful annotated-tag negative failed before repair; setup now requires a
+canonical commit-object SHA, rejecting tag-object pins before writes. Completeness
+covers all 20 assets, and source/installed versions and adopted config are validated
+before dependency writes. Previous review fixes remain covered by the 80-test suite.
 
-Mandatory completeness now includes all20 destinations, including docs/templates/risk
-reference; public negative tests proved omissions fail before install and cannot be
-hidden by editing provenance. An actual fresh Git root with no first commit ran the
-README command successfully, then repeated with identical bytes/index. Doctor reports
-revision:null/dirty:true before commit and the actual clean commit afterward. The prior
-fixture inventory assertion was updated to verify all four pinned shared files/bytes;
-no acceptance/assertions were weakened to accommodate broken output.
+Consumer `pilot/shared-skill-bootstrap` at
+`f31debf9810c8b989c924bc534add4848fffd6f3` pins that executable source. Actual fresh
+Cloud-runtime/Ubuntu clones ran the README fetch-and-run command twice, verified
+all four shared hashes, preserved project files/index and the tracked project skill,
+and remained Git-clean. Actual fresh unborn Git roots adopted and repeated with
+identical bytes/index; doctor reported null revision before the first reviewed
+commit and the exact clean SHA afterward. These are runtime proofs, not host discovery.
 
-Source864eb08 review additionally found repeated setup ignoring repository identity
-and source check accepting malformed version strings. Both were reproduced with
-failing-before public tests, repaired at2e5106a and included in10ff9cc and verified with actual wrong-identity
-Cloud/Ubuntu no-write negatives and79 tests. Consumer102706c and ed5a678 reviews completed with no
-major issues; sourceadbe2a review then found malformed installed versions accepted and
-missing adopted config checked too late. Both were reproduced before repair with
-actual pinned fetch/public CLI tests. One predicate now validates source/installed
-versions, and adopted config is required before writes. Actual Cloud/Ubuntu fresh
-consumer clones deny invalid versions, missing config and wrong identity before
-materialization, then repeat normally with preserved bytes/index. Current-head
-re-reviews still need actual results. Native independent
-current-head semantic review results must be read, not inferred
-from CI. Fresh published Cloud pre-agent discovery/use and Ubuntu agent-host discovery
-are still unperformed. The onboarding chat is not fresh-task evidence. Required-check
-administration reads are access-limited; workflow YAML and successful Actions do not
-prove enforced checks. No merge/Issue completion, protections/rulesets writes, release
-or remote branch deletion occurred. Those mutations remain pending separate authority.
-Use [the current Cloud handoff](cloud-bootstrap-handoff.md): publish/apply its install
-script, select the exact consumer branch, launch a genuinely fresh task and record the
-initial discovery catalog before agent-side bootstrap. F14 remains integration pending;
-F01–F13 are implemented/locally verified and ready for review, not merged or delivered.
+Consumer push/PR/metadata Actions37221025297/37221028092/37221026987 succeeded;
+metadata37222140846 also passed after the validation task corrected PR #8's body.
+Current-head Codex review5982650245 reports no major issues; all six consumer review
+threads are resolved. Issue7 and ReadyPR8 remain open. Application Issue1/ReadyPR6
+remains at `f95f0cae3b87bc8031b00a4150cf9670251ae978`: 11 tests on Cloud/Ubuntu and
+Python3.14, actual Actions and final review passed in earlier recorded executions.
+The new validation task inspected, rather than reran, those application/source suites.
+
+The user supplied the transcript of a genuinely fresh published Cloud task. It
+started on branch `work` at older main `5d05564919c55f1d4d0c2e1e020ad914252a2979`,
+with no repo-local skills in its initial catalogs. After agent-side branch recovery,
+bootstrap/check/doctor, actual manual skill use, safe all-state backlog reconciliation
+and targeted negative probes passed. This does not satisfy pre-agent discovery.
+Available logs do not establish install-hook execution/order. See
+[the validated published-run evidence](f14-published-cloud-run.md) for observations,
+independently rechecked GitHub state and the credential-override probe limitation.
+
+Next action: obtain actual published install/maintenance logs and selected-checkout
+ordering before another fresh task. Use [the current handoff](cloud-bootstrap-handoff.md)
+with the frozen consumer SHA/source pin above. Preparation must materialize before
+host discovery; inspect absent catalog exposure separately if files are present.
+Cloud and Ubuntu agent-host discovery remain unverified, and final source semantic
+re-review must be observed. Enforcement reads remain access-limited; green Actions
+and workflow YAML do not prove required checks. Actual merge→valid completed Issue
+observation and administration mutations require separate authorization. F14 stays
+integration pending and OpenSpec active; F01–F13 are implemented/locally verified
+and ready for review, not merged or delivered.
 
 ## Earlier implementation evidence
 

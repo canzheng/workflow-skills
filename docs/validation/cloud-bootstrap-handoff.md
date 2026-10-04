@@ -2,9 +2,9 @@
 
 Use existing repository canzheng/workflow-skills-test, branch
 `pilot/shared-skill-bootstrap`, exact tested consumer SHA
-`e22ab9a1e55c7457060fecfaef040283077c24ee` (PR8, Issue7).
+`f31debf9810c8b989c924bc534add4848fffd6f3` (PR8, Issue7).
 The tracked manifest pins workflow source
-`10ff9cc807a54aa0834d24de82e0b685048379de`. Main has the older tracked-skill model;
+`ef24d36f47dbbcdbb204375b53db055122c28269`. Main has the older tracked-skill model;
 no merge is authorized. Select this branch for preparation and the fresh task.
 Do not discard user changes or silently substitute main.
 
@@ -21,7 +21,7 @@ revision. Always fetch an explicit full SHA; never main/latest. The source
 
 ```sh
 set -eu
-WF2_SOURCE_SHA=10ff9cc807a54aa0834d24de82e0b685048379de
+WF2_SOURCE_SHA=ef24d36f47dbbcdbb204375b53db055122c28269
 WF2_CONSUMER_ROOT=/workspace/workflow-skills-test
 WF2_CONSUMER_REPOSITORY=canzheng/workflow-skills-test
 WF2_SOURCE_DIR=$(mktemp -d)
@@ -55,12 +55,35 @@ skill installation is needed. Git HTTPS read access to the exact source is requi
 for an empty dependency checkout. GitHub API access is separate: apply the existing
 api.github.com network draft if API operations remain proxy-blocked. Never print tokens.
 
+## Published-run diagnosis before retry
+
+The [fresh published-run transcript](f14-published-cloud-run.md) started on older
+main, with no repository-local skills exposed. Agent-side recovery passed, but
+pre-agent discovery and install-hook ordering remain unverified. Before another run,
+obtain the actual published install/maintenance logs and confirm which branch the
+host checked out at each preparation/discovery boundary. Do not interpret the
+executor registration log as install output. Do not enable shell tracing or dump
+credentials to collect this evidence.
+
+The task prompt cannot select its initial checkout retroactively. Select
+`pilot/shared-skill-bootstrap` at task creation and verify the full consumer SHA
+above. If the install hook runs on main and a later checkout replaces its files,
+identify a supported preparation hook after the selected checkout and before initial
+skill discovery. The generic installer must not force a branch or silently override
+an existing tracked pin. When files exist before discovery but skills are absent
+from the catalog, investigate host discovery separately from materialization.
+
+The transcript's failed source-fetch probe changed the credential helper to `gh`;
+it did not execute the normal README fetch binding. Test the exact pinned command
+in the intended preparation phase before requesting a token. Actual default-binding
+fetch and host ordering need their own evidence.
+
 ## Fresh task prompt
 
 ```text
 Use the existing isolated checkout /workspace/workflow-skills-test. Do not create
 another worktree. Verify pilot/shared-skill-bootstrap at
-e22ab9a1e55c7457060fecfaef040283077c24ee; preserve local changes and report mismatches.
+f31debf9810c8b989c924bc534add4848fffd6f3; preserve local changes and report mismatches.
 Read AGENTS.md, docs/workflow/contract.md, docs/workflow/README.md and docs/design.md.
 Continue F14 validation for Issue7/Ready PR8, not application implementation.
 
