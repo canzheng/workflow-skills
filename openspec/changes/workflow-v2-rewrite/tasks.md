@@ -39,3 +39,10 @@ repository read succeeded; parent create returned GitHub HTTP 403 Resource not
 accessible by integration. No Issue number, write, label or parent creation is
 claimed. `/tmp/wf2-issues.json` is reproducible via records.py, not a state store.
 Docs: docs/workflow/github.md and forms/template. Next: F05 skill and sample shaping.
+
+F04 committed at `6639c66`. F05 skill authored/read and exercised on the receipt
+shaping input; actual candidate artifact is the S08/S09 table in
+`docs/validation/skill-evaluations.md`. Unknown retention isolates its decision;
+no excluded enhancement authorized. 14 regression tests pass; semantic exercise
+is primary-author, not a fresh discovery run. Docs: usage and evaluation record.
+Next: F06 deliver skill and actual feature/bug fixture outcomes.
