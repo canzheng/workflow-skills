@@ -69,12 +69,16 @@ See [operations](docs/operations.md) for offline preview/update/uninstall and
 [migration/rollback](docs/migration-v1-v2.md). Source authoring uses .workflow/bundle.json;
 consumer provenance contains the durable dependency pin, not task state.
 
-If the host uses a **Start skill** for environment initialization, have that host
-entrypoint run the same pinned fetch-and-run command after resolving the intended
-consumer checkout and before workflow verification. It must materialize the shared
+If a consumer uses its own **Start skill** for environment initialization, that
+skill should resolve the consumer checkout and tracked dependency pin, read this
+README and the linked setup/development/operations guidance at that exact source
+revision, then follow the documented source-owned setup procedure. For first adoption,
+use an explicitly approved full source SHA; do not default to main/latest. Use the
+resolved pin in executable examples rather than copying a different example SHA.
+The consumer Start skill must materialize the shared
 dependency before running check/doctor; an older check-only startup instruction is
 insufficient for ignored skills. Keep the deterministic setup implementation in
-workflow-skills, rather than duplicating installation logic in a prompt. Capture
+workflow-skills, rather than duplicating installation logic in the consumer skill. Capture
 the command output/exit status and actual checkout/source pin. Do not assume that
 a published setup-command field executed automatically or before skill discovery.
 Startup performed by an already active agent proves initialization and explicit
