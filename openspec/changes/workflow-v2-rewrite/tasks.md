@@ -46,3 +46,11 @@ shaping input; actual candidate artifact is the S08/S09 table in
 no excluded enhancement authorized. 14 regression tests pass; semantic exercise
 is primary-author, not a fresh discovery run. Docs: usage and evaluation record.
 Next: F06 deliver skill and actual feature/bug fixture outcomes.
+
+F05 committed at `2f112c1`. F06 implemented/read deliver skill, ran actual cart
+bug/ordinary-feature fixtures, preserved quantity expectation and invalid cases,
+completed shipping default/error/example docs, and accepted no-impact for contract
+restoration. 16 tests pass; primary-author semantic exercise in skill-evaluations.
+Evidence belongs to current dirty content until this feature commit; no merge,
+remote write, independent review or fresh Cloud discovery claimed. Next: F07 pinned
+OpenSpec validation/archive fixtures and current implemented contracts.
