@@ -16,7 +16,7 @@ def source_bundle(source, revision):
     source = repository(source)
     git(source, 'cat-file', '-e', revision + '^{commit}')
     spec = load(safe(source, '.workflow/bundle.json'))
-    if spec.get('schema_version') != 1 or not isinstance(spec.get('bundle_version'), str) or not isinstance(spec.get('assets'), dict):
+    if not isinstance(spec, dict) or type(spec.get('schema_version')) is not int or spec.get('schema_version') != 1 or not isinstance(spec.get('bundle_version'), str) or not isinstance(spec.get('assets'), dict) or not re.fullmatch(r'2\.\d+\.\d+', spec['bundle_version']):
         raise Invalid('Unsupported source bundle schema')
     assets = spec['assets']
     required = ['.agents/skills/' + s + '/SKILL.md' for s in SKILLS]
@@ -39,10 +39,26 @@ def source_bundle(source, revision):
     return spec['bundle_version'], result
 
 
+def preflight_destinations(root, names):
+    for name in names:
+        p = safe(root, name)
+        if p.exists() and not p.is_file():
+            raise Conflict('Owned file destination is not a file: ' + name)
+        for parent in p.parents:
+            if parent == root:
+                break
+            if parent.exists() and not parent.is_dir():
+                raise Conflict('Destination parent is not a directory: ' + str(parent))
+        staged = p.with_name(p.name + '.wf2-staged')
+        if staged.exists() or staged.is_symlink():
+            raise Conflict('Staging collision: ' + str(staged))
+
+
 def transaction(root, changes, fail_after=None):
     """Stage all bytes and backups first; restore content/modes on apply failure."""
     if not changes:
         return
+    preflight_destinations(root, changes)
     created_dirs = set()
     originals = {}
     with tempfile.TemporaryDirectory(prefix='wf2-stage-') as td:
@@ -54,6 +70,10 @@ def transaction(root, changes, fail_after=None):
                 (stage / ('backup-' + str(i))).write_bytes(originals[name][0])
             if data is not None:
                 (stage / str(i)).write_bytes(data)
+        recovery_index = {name: {'backup': 'backup-' + str(i) if originals[name] is not None else None,
+                                 'mode': originals[name][1] if originals[name] is not None else None}
+                          for i, name in enumerate(changes)}
+        (stage / 'recovery-index.json').write_text(json.dumps(recovery_index, indent=2))
         applied = []
         try:
             for i, (name, data) in enumerate(changes.items()):
@@ -115,6 +135,9 @@ def setup(args):
     agents = safe(root, 'AGENTS.md')
     text = agents.read_text() if agents.exists() else ''
     current = block(text)
+    if not args.uninstall and ('<!-- Beginning of Workflow Section -->' in text or
+                               'bash install.sh' in text or 'must invoke `start-task`' in text):
+        raise Conflict('Active legacy instruction routing; inspect migration and perform a bounded cutover first')
     if not old and current:
         raise Conflict('Unmanaged workflow-v2 block; resolve ownership first')
     changes, residuals = {}, []
@@ -182,6 +205,7 @@ def setup(args):
         p = safe(root, '.workflow/install-manifest.json')
         if not p.exists() or p.read_bytes() != data:
             changes['.workflow/install-manifest.json'] = data
+    preflight_destinations(root, changes)
     if args.apply:
         transaction(root, changes)
     return list(changes), residuals

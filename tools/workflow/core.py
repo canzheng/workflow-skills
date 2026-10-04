@@ -125,7 +125,7 @@ def manifest(root):
     if not p.exists():
         return None
     m = load(p)
-    if not isinstance(m, dict) or m.get('schema_version') != 1 or not isinstance(m.get('files'), dict) or not re.fullmatch(r'[0-9a-f]{40}', str(m.get('source_revision', ''))) or not isinstance(m.get('bundle_version'), str):
+    if not isinstance(m, dict) or type(m.get('schema_version')) is not int or m.get('schema_version') != 1 or not isinstance(m.get('files'), dict) or not re.fullmatch(r'[0-9a-f]{40}', str(m.get('source_revision', ''))) or not isinstance(m.get('bundle_version'), str):
         raise Invalid('Invalid installation manifest')
     for name, h in m['files'].items():
         if not owned(name) or not isinstance(h, str) or not re.fullmatch(r'[0-9a-f]{64}', h):

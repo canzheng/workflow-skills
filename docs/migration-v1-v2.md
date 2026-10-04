@@ -61,3 +61,24 @@ residuals. Published Issues/PRs/history remain intact. If reverting live work to
 explicitly assign each open item's authority and leave rollback links. Never revive
 two-way synchronization or delete remote history. Application data rollback is
 outside this workflow. No user-global installation/configuration is changed here.
+
+## Final source asset/test disposition
+
+| Retired asset/test contract | Current proof / reason |
+| --- | --- |
+| Global installer tests / initialize scaffold | test_setup public pinned repo installation, preflight, modified assets, rollback and uninstall |
+| Missing-worktree / duplicated resolver helpers | test_setup explicit Git-root/symlink failures and test_handoff missing/stale target rejection; no resolver engine retained |
+| Structured review metadata/parser fields | test_risk emitted currency has real consumer; broken consumer fails L-001 proof, without a lifecycle engine |
+| v1 shaping / backlog promotion | design-to-backlog skill exercise and test_records stable identity/dependencies; native Issues own state |
+| v1 task wrappers / ledger / audit / repair / autonomous loop | Retired ceremony-specific contracts; no v2 task pointer, lifecycle wrappers or forced reviewer topology |
+| v1 OpenSpec integration | test_openspec actual pinned validation/archive and partial-owner obligation; no blanket apply prohibition |
+| v1 audit/remediation mutation corpora | Retired old linter/state APIs; current wrong-formula/consumer/assertion/target negative controls remain |
+| Conda launcher and environment tests | Portable verify/clean-venv/missing-suite proof; Conda is not required |
+| six old current OpenSpec specs | Replaced by implemented adoption/delivery/migration contracts and later checks/risk spec; original meanings retained in Git/archived changes |
+| docs/superpowers | Moved to explicitly non-current docs/history/v1/superpowers |
+| docs/planning / docs/lessons | Read-only labeled history; original acceptance/evidence remains inspectable; zero active work |
+
+The removed tests required APIs/ceremony intentionally replaced by v2; passing them
+would falsely require the old system. Their safety meanings are covered by current
+outcome tests, not just renamed assertions. No global files or historical Git commits
+were removed. The rewrite stays active for unperformed F14 environmental acceptance.

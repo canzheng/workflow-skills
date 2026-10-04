@@ -1,3 +1,5 @@
+> Historical v1 document — read-only, not current workflow instructions. See root AGENTS.md and docs/workflow/contract.md.
+
 # Workflow Reference
 
 ## Purpose

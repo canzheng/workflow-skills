@@ -180,3 +180,84 @@ class SetupTests(unittest.TestCase):
         c['verification']['local'] = ['echo unsafe']
         p.write_text(json.dumps(c))
         run('doctor', '--repo', self.target, expect=2)
+
+    def test_legacy_instruction_block_and_bad_parent_fail_before_writes(self):
+        original = '<!-- Beginning of Workflow Section -->\nUse v1\n<!-- End of Workflow Section -->'
+        (self.target / 'AGENTS.md').write_text(original)
+        run(*self.args, '--apply', expect=1)
+        self.assertEqual((self.target / 'AGENTS.md').read_text(), original)
+        self.assertFalse((self.target / '.workflow').exists())
+        (self.target / 'AGENTS.md').write_text('Preserve unrelated rule.\n')
+        (self.target / 'tools').write_text('human file instead of directory')
+        r = run(*self.args, '--apply', expect=1)
+        self.assertIn('not a directory', r['findings'][0]['message'])
+        self.assertFalse((self.target / '.agents').exists())
+
+    def test_successful_pinned_update_and_marker_modification_conflict(self):
+        run(*self.args, '--apply')
+        p = self.source / 'docs/workflow/contract.md'
+        p.write_text('# Updated contract\n')
+        new_sha = commit(self.source)
+        args = self.args.copy()
+        args[args.index('--revision') + 1] = new_sha
+        run(*args, '--apply')
+        self.assertEqual((self.target / 'docs/workflow/contract.md').read_text(), '# Updated contract\n')
+        self.assertEqual(run(*args, '--apply')['changes'], [])
+        agents = self.target / 'AGENTS.md'
+        agents.write_text(agents.read_text().replace('Never use obsolete', 'Human changed: Never use obsolete'))
+        run(*args, '--apply', expect=1)
+        r = run('setup', '--target', self.target, '--uninstall', '--apply', expect=1)
+        self.assertIn('AGENTS.md managed block', r['residuals'])
+        self.assertIn('Human changed', agents.read_text())
+
+    def test_staging_failure_and_rollback_residual_have_exact_recovery(self):
+        # Stage failure happens before destination writes.
+        argv = [str(x) for x in self.args] + ['--apply', '--json']
+        with patch.object(installer.pathlib.Path, 'write_bytes', side_effect=OSError('staging disk full')), contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(workflow.main(argv), 1)
+        self.assertFalse((self.target / '.workflow').exists())
+        p = self.target / 'AGENTS.md'
+        original = p.read_bytes()
+        actual = pathlib.Path.write_bytes
+        def fail_restore(path, data):
+            if path == p:
+                raise OSError('restoration denied')
+            return actual(path, data)
+        with patch.object(pathlib.Path, 'write_bytes', fail_restore):
+            with self.assertRaisesRegex(installer.Conflict, 'Rollback residuals: AGENTS.md') as raised:
+                installer.transaction(self.target, {'AGENTS.md': b'replacement'}, fail_after=1)
+        recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
+        self.addCleanup(__import__('shutil').rmtree, recovery)
+        index = json.loads((recovery / 'recovery-index.json').read_text())
+        self.assertEqual((recovery / index['AGENTS.md']['backup']).read_bytes(), original)
+        self.assertIsNotNone(index['AGENTS.md']['mode'])
+        p.write_bytes(original)  # explicit fixture recovery before retry
+        run(*self.args, '--apply')
+
+    def test_tampered_manifest_path_and_unsupported_source_schema_fail(self):
+        run(*self.args, '--apply')
+        p = self.target / '.workflow/install-manifest.json'
+        m = json.loads(p.read_text())
+        m['files']['README.md'] = '0' * 64
+        p.write_text(json.dumps(m))
+        run('setup', '--target', self.target, '--uninstall', '--apply', expect=2)
+        spec = self.source / '.workflow/bundle.json'
+        m = json.loads(spec.read_text())
+        m['schema_version'] = 99
+        spec.write_text(json.dumps(m))
+        sha = commit(self.source)
+        args = self.args.copy()
+        args[args.index('--revision') + 1] = sha
+        # Manifest corruption is rejected before considering any new source writes.
+        run(*args, '--apply', expect=2)
+
+    def test_source_schema_is_rejected_on_fresh_target(self):
+        p = self.source / '.workflow/bundle.json'
+        spec = json.loads(p.read_text())
+        spec['schema_version'] = 99
+        p.write_text(json.dumps(spec))
+        sha = commit(self.source)
+        fresh = self.base / 'fresh-schema-target'
+        init(fresh)
+        run('setup', '--source', self.source, '--revision', sha, '--target', fresh, '--repository', 'fixture/fresh', '--apply', expect=2)
+        self.assertFalse((fresh / '.workflow').exists())

@@ -107,6 +107,8 @@ def check(root, args):
     if getattr(args, 'metadata_only', False):
         if not args.pr_json:
             raise Invalid('--metadata-only requires --pr-json')
+        if args.run_local or args.run_integration or args.specs or args.issues_json:
+            raise Invalid('--metadata-only cannot execute code/spec/integration checks')
         return findings
     for key in ('docs_index', 'contract'):
         if not safe(root, c[key]).is_file():
@@ -123,7 +125,7 @@ def check(root, args):
             findings.append(finding('instructions.modified', 'AGENTS.md', 'Managed instruction block differs', 'Resolve ownership'))
     else:
         spec = load(safe(root, '.workflow/bundle.json'))
-        if spec.get('schema_version') != 1 or not isinstance(spec.get('bundle_version'), str) or not isinstance(spec.get('assets'), dict):
+        if not isinstance(spec, dict) or type(spec.get('schema_version')) is not int or spec.get('schema_version') != 1 or not isinstance(spec.get('bundle_version'), str) or not isinstance(spec.get('assets'), dict):
             raise Invalid('Invalid source bundle schema')
         destinations = set()
         for source, dest in spec['assets'].items():
@@ -173,4 +175,19 @@ def check(root, args):
                 r = subprocess.run([str(cli), 'validate', '--all', '--strict', '--no-interactive'], cwd=root, capture_output=True, text=True, env=env, check=False)
                 if r.returncode:
                     findings.append(finding('specs.invalid', 'openspec', (r.stdout + r.stderr).strip(), 'Fix actual spec/delta errors; do not skip validation'))
+    for category, requested in [('local', args.run_local), ('integration', args.run_integration)]:
+        if not requested:
+            continue
+        commands = c['verification'][category]
+        if not commands:
+            findings.append(finding('verification.empty', '.workflow/config.json', category + ' has no declared commands; no pass claimed', 'Define required commands or record environmental acceptance separately', 'warning'))
+        for index, command in enumerate(commands, 1):
+            try:
+                result = subprocess.run(command, cwd=root, shell=False, capture_output=True, check=False)
+                passed = result.returncode == 0
+                findings.append(finding('verification.passed' if passed else 'verification.failed', '.workflow/config.json',
+                                        category + ' command ' + str(index) + ' exited ' + str(result.returncode),
+                                        'Record revision/environment; inspect the declared command for details', 'info' if passed else 'error'))
+            except OSError:
+                findings.append(finding('verification.unavailable', '.workflow/config.json', category + ' command ' + str(index) + ' could not launch', 'Install the declared runtime; never silently choose another interpreter'))
     return findings

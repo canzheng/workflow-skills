@@ -9,14 +9,15 @@ installation, and Superpowers are obsolete for this rewrite.
 ## Project structure
 Author v2 skills only in `.agents/skills/`; utilities in `tools/workflow/`;
 consumer assets in `templates/`; outcome tests in `tests/`.
-During bootstrap, those entrypoints are targets until implemented.
+Run `python3 tools/workflow/verify.py`; use the public setup/doctor/check/migrate
+utilities documented in docs/development.md and docs/operations.md.
 
 ## Coding and testing
 Prefer small reversible changes, ASCII unless Unicode is needed, 4-space
 Python indentation, standard-library-first imports, focused tests and relative
 path discovery. Start with relevant verification, broaden for integration risk.
 Preserve discriminating fixtures and assertions. Check `git diff --check` and
-`git status --short`. See docs/development.md once the portable entrypoint exists.
+`git status --short`. See docs/development.md for portable verification.
 
 ## Commits and review
 Use short imperative scoped subjects. Explain behavior, documentation impact,

@@ -19,9 +19,10 @@ def main():
     if not result.wasSuccessful():
         return 1
     cli = ROOT / 'tools/workflow/workflow.py'
-    if cli.exists() and (cli.parent / 'checks.py').exists():
-        return subprocess.run([sys.executable, str(cli), 'check', '--repo', str(ROOT)], check=False).returncode
-    return 0
+    if not cli.is_file() or not (cli.parent / 'checks.py').is_file():
+        print('Required v2 checker is missing; refusing a partial pass', file=sys.stderr)
+        return 1
+    return subprocess.run([sys.executable, str(cli), 'check', '--repo', str(ROOT)], check=False).returncode
 
 
 if __name__ == '__main__':

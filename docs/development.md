@@ -15,9 +15,9 @@ python3 -m venv .venv
 Offline equivalent: `python3 tools/workflow/verify.py`. Rerun installation after
 requirements changes, then capture `python3 --version` and installed versions.
 The entrypoint rejects an empty suite and propagates required failures.
-During transition only tests/v2 is the v2 suite. The old root tests and
-skills/_workflow/tests assert retired v1 lifecycle behavior and are not counted
-as v2 passes; safety outcomes are ported before F13 removes these tests.
+tests/v2 is the required suite. Old root tests and skills/_workflow/tests are
+retired, with disposition and ported safety outcomes documented in the migration
+report. They are preserved in Git, not silently counted as v2 passes.
 
 ## Cloud preparation
 Use the current host environment preparation UI to run the three commands above.

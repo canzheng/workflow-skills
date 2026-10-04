@@ -41,3 +41,10 @@ archive ownership and meaningful negative tests. A no-impact statement is allowe
 mechanical structure cannot prove it true. Required independent review, if any,
 is reported by actual authorship. Artifact retention is 14 days; preserve durable
 result summaries/revision in PRs/Issues. Missing write/admin access remains pending.
+
+Declared verification has an actual consumer: `check --run-local` and
+`check --run-integration` run reviewed config argv arrays with shell disabled and
+report each launch/exit. Plain check does not claim those tests ran. Empty integration
+arrays report no declared proof; required environment gates still apply. Metadata-only
+rejects execution flags, preserving its data-only boundary. Captured command output
+is not dumped into diagnostics; inspect the declared command directly for failures.

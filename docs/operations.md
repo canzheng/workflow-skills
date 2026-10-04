@@ -9,8 +9,8 @@ python3 tools/workflow/workflow.py setup --source /path/to/workflow-skills --rev
 
 Use an explicit Git root; paths with spaces need normal shell quoting. Inspect
 `changes`, then repeat with `--apply` within the user's adoption authorization.
-Missing skill assets fail; until F05/F06/F08 assemble the production bundle,
-only the fixture bundle is installable. Update uses the same command with a new
+Missing skill assets fail; the assembled real bundle is exercised by the
+production consumer test. Update uses the same command with a new
 checked-out revision. Bundle bytes must match that revision; uncommitted source
 bytes cannot be certified as HEAD. No global files are written.
 
@@ -35,5 +35,18 @@ to inspect another known location. CLI auth is tested without exposing tokens;
 Issue reads, writes, publication and administration are independent, unprobed
 capabilities until actually exercised. Return codes: 0 success, 1 check/conflict,
 2 invalid invocation/configuration. JSON findings include code/severity/path,
-message and remediation. During F03, `check`/`migrate` are reserved entrypoints
-implemented at F10/F12; they are not usable verification claims yet.
+message and remediation. `check` validates mechanical obligations; `migrate inspect` inventories known v1
+records without mutation. See workflow/checks.md and migration-v1-v2.md.
+
+A rollback residual's recovery directory includes recovery-index.json mapping each
+original path to backup bytes and original mode; a null backup identifies a newly
+created path. Use that index to restore originals deliberately before rerunning.
+Preflight rejects file-valued parents and staging collisions before destination writes.
+Conflicting known legacy instruction blocks require bounded migration cutover first.
+
+`check --run-local` executes the configured local argv arrays with shell disabled;
+`--run-integration` executes declared integration arrays only when this is the intended
+environment. Plain check is mechanical and does not run application tests. Output
+reports each exit without dumping potentially sensitive command output; rerun the
+specific declared command to investigate. Missing runtime never falls back. Empty
+integration arrays are not an environmental pass. Metadata-only forbids these flags.

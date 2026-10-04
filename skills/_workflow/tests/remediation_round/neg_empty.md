@@ -1,5 +1,0 @@
-## Gate N
-
-```yaml
-findings: []
-```

@@ -9,7 +9,7 @@
 
 Current documentation describes implemented branch behavior. Target behavior is
 explicitly labeled; docs/planning, docs/lessons and archived OpenSpec changes are
-historical v1 evidence, not instructions or a writable delivery queue.
+explicitly labeled historical v1 evidence, not instructions or a writable delivery queue.
 
 - [Development](development.md): portable setup and offline verification.
 - [Operations](operations.md): bounded setup, conflicts and recovery.

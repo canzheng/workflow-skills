@@ -22,7 +22,7 @@ def doctor(root, skill_roots=()):
     block(text)
     if 'github-v2' not in text and 'workflow-skills v2' not in text:
         findings.append(finding('instructions.missing', 'AGENTS.md', 'v2 routing is missing', 'Restore the repository entrypoint'))
-    for marker in ('bash install.sh', 'bin/run-python.sh', 'must invoke `start-task`', 'use Superpowers'):
+    for marker in ('<!-- Beginning of Workflow Section -->', 'bash install.sh', 'bin/run-python.sh', 'must invoke `start-task`', 'use Superpowers'):
         if marker in text:
             findings.append(finding('instructions.legacy', 'AGENTS.md', 'Active legacy routing: ' + marker, 'Cut over only the conflicting workflow rule'))
     if m:
@@ -73,7 +73,7 @@ def doctor(root, skill_roots=()):
         r = subprocess.run(['gh', 'auth', 'status'], capture_output=True, timeout=10, check=False)
         auth = 'authenticated' if r.returncode == 0 else 'unavailable'
     capabilities = dict(gh_authentication=auth, github_read='unprobed', github_write='unprobed', branch_publication='unprobed', actions_administration='unprobed', host_skill_discovery='unprobed')
-    return findings, dict(mode='installed-consumer' if m else 'source-checkout' if source else 'unknown', tools=tools, capabilities=capabilities)
+    return findings, dict(mode='installed-consumer' if m else 'source-checkout' if source else 'unknown', tools=tools, capabilities=capabilities, context=c)
 
 
 def main(argv=None):
@@ -100,6 +100,8 @@ def main(argv=None):
     k.add_argument('--pr-json')
     k.add_argument('--metadata-only', action='store_true')
     k.add_argument('--specs', action='store_true')
+    k.add_argument('--run-local', action='store_true')
+    k.add_argument('--run-integration', action='store_true')
     k.add_argument('--issues-json')
     k.add_argument('--json', action='store_true')
     m = sub.add_parser('migrate')

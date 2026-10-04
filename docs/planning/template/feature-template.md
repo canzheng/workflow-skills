@@ -1,3 +1,5 @@
+> Historical v1 document — read-only, not current workflow instructions. See root AGENTS.md and docs/workflow/contract.md.
+
 # Feature: <title>
 
 Create this file only when a backlog item moves from `[BACKLOG]` to `[SHAPING]`.

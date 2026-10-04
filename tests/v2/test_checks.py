@@ -111,3 +111,21 @@ class CheckTests(unittest.TestCase):
         self.assertIn('pull_request:', code)
         self.assertIn('synchronize', code)
         self.assertIn('python3 tools/workflow/verify.py', code)
+
+    def test_declared_verification_has_actual_argv_consumer(self):
+        p = self.target / '.workflow/config.json'
+        c = json.loads(p.read_text())
+        c['verification']['local'] = [['python3', '-c', "from pathlib import Path; Path('verification-ran').write_text('yes')"]]
+        p.write_text(json.dumps(c))
+        r = run('check', '--repo', self.target, '--run-local')
+        self.assertEqual((self.target / 'verification-ran').read_text(), 'yes')
+        self.assertTrue(any(x['code'] == 'verification.passed' for x in r['findings']))
+        c['verification']['local'] = [['python3', '-c', 'import sys; sys.exit(7)']]
+        p.write_text(json.dumps(c))
+        r = run('check', '--repo', self.target, '--run-local', expect=1)
+        self.assertTrue(any(x['code'] == 'verification.failed' for x in r['findings']))
+        c['verification']['local'] = [['definitely-missing-wf2-runtime']]
+        p.write_text(json.dumps(c))
+        r = run('check', '--repo', self.target, '--run-local', expect=1)
+        self.assertTrue(any(x['code'] == 'verification.unavailable' for x in r['findings']))
+        run('check', '--repo', self.target, '--pr-json', self.snapshot(BODY), '--metadata-only', '--run-local', expect=2)

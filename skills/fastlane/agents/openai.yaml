@@ -1,7 +1,0 @@
-interface:
-  display_name: "fastlane"
-  short_description: "Quick path for tiny, non-behavioral edits"
-  default_prompt: "Use fastlane only if the task clearly fits the skill boundary."
-
-policy:
-  allow_implicit_invocation: false

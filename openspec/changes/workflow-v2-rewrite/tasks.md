@@ -108,3 +108,15 @@ Interrupted-cutover fixtures reuse old IDs and preserve human edits. Docs: migra
 cutover/rollback runbook, current architecture and implemented migration spec.
 No historical Done Issues created; no consumer/global cutover performed. Live feature
 records now own shared state. Next: F13 removal/reconciliation and full v2 checks.
+
+F12 committed/tested at `dfaae09`: 40 tests and public source check passed. F13
+retired active v1 skills/runtime/global installer/Conda launcher/ceremony tests and
+six obsolete stable specs; history remains labeled/read-only and baseline reachable.
+Final code inspection strengthened filesystem preflight/recovery and provided an
+actual argv verification consumer (including failed/missing runtime paths), not
+parser-only config. Focused checks and strict current spec validation pass; real
+bundle regression reruns require the committed bundle bytes. Docs reconciled:
+README, routing/index, architecture, development/operations, history labels,
+asset/test disposition and current quality spec. Rewrite remains active for F14.
+Branch publication through Git succeeded without exposing CLI credentials; remote
+feature Issues exist. Next: committed full-suite rerun and F14 Ubuntu/Actions evidence.

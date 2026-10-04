@@ -25,7 +25,10 @@ where relevant. Select workflow-risk-review for material risk and load only rele
 methods. Preserve original acceptance and strong fixtures; do not broaden expected
 outputs or disable failures to pass. Raise actual contract changes explicitly.
 
-Run relevant checks on actual content. Record full revision, environment, command,
+Read .workflow/config.json and use its docs_index/contract and declared verification
+argv arrays. Run applicable local commands with `check --run-local` or native argv
+execution (no shell interpretation), and required integration commands only in the
+intended environment. Run relevant checks on actual content. Record full revision, environment, command,
 exit/result and passed/failed/skipped/pending requirements. Commit tested content
 or bind dirty-tree evidence to a patch/content digest, then verify the final revision.
 Material code/config changes invalidate affected evidence. Cloud local results
