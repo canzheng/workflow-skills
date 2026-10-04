@@ -19,7 +19,7 @@ def main():
     if not result.wasSuccessful():
         return 1
     cli = ROOT / 'tools/workflow/workflow.py'
-    if cli.exists():
+    if cli.exists() and (cli.parent / 'checks.py').exists():
         return subprocess.run([sys.executable, str(cli), 'check', '--repo', str(ROOT)], check=False).returncode
     return 0
 

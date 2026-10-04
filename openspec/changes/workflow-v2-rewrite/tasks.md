@@ -21,3 +21,11 @@ pinned optional pytest dependencies, config command and development guide;
 missing-suite negative control fails for the intended reason. Clean venv install
 and rerun succeeded (pytest 8.4.2). Docs: development/index/config. Actual fresh
 Cloud discovery remains pending. Next: F03 public setup/doctor negative paths.
+
+F02 committed at `35c0970`. F03 implemented public setup/doctor and minimal
+provenance/config validators; tested working content with 10 offline tests
+(`python3 -m unittest discover -s tests/v2 -v`). S01/S03/S05 fixture paths pass,
+including source mismatch, user-owned config, duplicate skill discovery, missing
+Git root, spaces and rollback. Production assembly deliberately incomplete until
+F05/F06/F08/F10/F12 assets exist. Documentation: operations, consumer guidance,
+bundle manifest and architecture-to-be. Next: F04 templates and Issue reconciliation.
