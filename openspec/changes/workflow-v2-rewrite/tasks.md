@@ -99,3 +99,12 @@ the user; a fresh identity search preceded successful parent Issue #1 and WF2 fe
 Issues #2–#15. Read/write restored; no token captured. Subsequent shared lifecycle
 uses GitHub; this existing plan retains technical acceptance evidence only.
 Next: F12 read-only known-format migration, then F13 active runtime retirement.
+
+F11 committed at `49f8543`. F12 implements read-only known v1 inventory, preserving
+original acceptance/evidence/blockers, explicit proposed dispositions and findings
+for malformed, duplicate, missing, unsafe or inconsistent records. Focused migration
+fixtures pass; actual source inventory is 19 historical Done and zero active.
+Interrupted-cutover fixtures reuse old IDs and preserve human edits. Docs: migration
+cutover/rollback runbook, current architecture and implemented migration spec.
+No historical Done Issues created; no consumer/global cutover performed. Live feature
+records now own shared state. Next: F13 removal/reconciliation and full v2 checks.

@@ -25,8 +25,8 @@ source CI/development dependencies are repository-specific, not installed into a
 OpenSpec 1.14.0 is an optional pinned local development dependency. Current v2 specs
 cover implemented adoption/delivery; the active rewrite delta retains required F14
 environment acceptance. Legacy runtime/spec removal follows F13; those interim
-assets are not v2 distribution or active workflow selection. migrate inspect is
-reserved for F12 and is not implemented at this revision.
+assets are not v2 distribution or active workflow selection. migration.py performs read-only known-format v1 inventory; it preserves original
+acceptance/evidence/blockers and proposes explicit dispositions without mutation.
 
 Tests execute public CLIs and installed fixture consumers, injected apply failures,
 metadata/head-data handling, content invalidation and numerical/consumer negative

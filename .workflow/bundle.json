@@ -17,6 +17,7 @@
     "templates/consumer/README.md": "docs/workflow/README.md",
     "templates/consumer/development.md": "docs/workflow/development.md",
     "templates/consumer/operations.md": "docs/workflow/operations.md",
-    ".agents/skills/workflow-risk-review/references/methods.md": ".agents/skills/workflow-risk-review/references/methods.md"
+    ".agents/skills/workflow-risk-review/references/methods.md": ".agents/skills/workflow-risk-review/references/methods.md",
+    "tools/workflow/migration.py": "tools/workflow/migration.py"
   }
 }
