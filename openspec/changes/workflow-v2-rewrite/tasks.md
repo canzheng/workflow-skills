@@ -64,3 +64,10 @@ Partial fixture keeps unchecked work active; CLI structural validation cannot it
 prove acceptance. Current six legacy specs remain until F13 reconciliation, so no
 all-spec v2 consistency claim yet. Docs: OpenSpec procedure/development/index;
 rewrite delta retains pending F14 gates. Next: F08 risk methods and negative controls.
+
+F07 committed at `65a01a9`. F08 implemented/read targeted risk skill and concise
+L-001/L-002 references. 21 tests pass; deliberately wrong arithmetic, parser-only
+currency consumer and weakened quantity expectation fail for their intended reasons.
+Missing target/apply interruption tests retained. Documentation: risk methods,
+primary-author findings and residual independent/fresh-host review limitations.
+Next: F09 same-content handoff and native-operation fault fixtures.

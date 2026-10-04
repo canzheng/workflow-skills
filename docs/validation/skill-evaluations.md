@@ -35,3 +35,20 @@ No per-task plan, feature ledger or forced reviewer was created for the fixture.
 These outputs are implemented and locally verified, not merged or delivered.
 Remote publication, fresh discovery and required integration remain pending.
 The evidence is primary-author; full semantic adversarial records follow in F11.
+
+## WF2-F08 risk selection/analysis: S19/S20/S21/S30
+
+Read workflow-risk-review and relevant methods; inspected the retained L-001/L-002
+source lessons and missing-worktree regression. Actual findings/proof artifacts:
+
+| Risk input | Primary-author finding | Proof/result |
+| --- | --- | --- |
+| Subtract 25 cents for 25% discount | Unit/formula mismatch; 10000 cents should become 7500 | Wrong formula produces 9975 and fails independent expectation |
+| Parse currency but always format USD | L-001: emitted contract has no effective downstream consumer | broken_consumer fails EUR 6.97 proof; actual consumer passes |
+| Accept 498 as quantity subtotal | Changes expected behavior rather than repairing it | Original 697 assertion still fails; weakening rejected |
+| Missing/symlink setup target | L-002: cannot fall back to current checkout | Public setup negative tests fail before writes |
+
+Risk methods apply to setup/remote/migration changes, while the clear quantity repair
+needs no separate reviewer. Denied values and filesystem interruption are covered.
+Auth/remote permission faults are fixture proof except the actual GitHub create 403.
+No independent reviewer was invoked; fresh-host semantic triggering remains pending.
