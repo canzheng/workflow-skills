@@ -237,3 +237,31 @@ and the real F14 consumer pilot without a new state engine or mandatory artifact
 Earlier implementation-SHA results above remain historical evidence; the final revised
 SHA/reruns and consumer pilot outcome are recorded in Issue15/PR16 after publication
 and [the durable consumer report](f14-consumer-pilot.md).
+
+## User-approved pinned dependency refinement (S34)
+
+Source `47320c363e538d2c8423e11e5ca9121c2d0303da` passed all62 tests without skips,
+public checks and strict specs on Debian Cloud and fresh Ubuntu24.04.5 remote clones.
+Actual source push/PR Actions37213148746/37213152015 pass. Eight additional meaningful
+bootstrap tests prove fresh Git clone/public CLI, scoped ignores/project skill tracking,
+project bytes/index preservation, ignored-byte evidence invalidation, exact fetch pin,
+denied fetch, modified/extra/symlinked assets, invalid URL/hash/policy, rollback/retry,
+and explicit old tracked-file migration. Existing setup tests prove no-op adoption.
+Approved design/capability/feature docs and adoption specs now describe S34 and the
+small repeatable bootstrap; no extra backlog or distribution engine was introduced.
+
+Consumer `pilot/shared-skill-bootstrap` at539580779e52eef5b976a0460d7d18e16833c2b0
+pins that exact source. Cloud-runtime and Ubuntu fresh-clone materialization/hash/
+no-op/clean-tree checks passed. Actual consumer push/draftPR/metadata Actions pass,
+and the bootstrap job step was observed. PR8 is Ready and Issue7 wf:review; required
+semantic result is pending until read. The older ingredient PR6 atf95f0cae3b87bc8031b00a4150cf9670251ae978
+passes11 tests on Cloud/Ubuntu/Python3.14 and its current-head Codex review reports
+no major issues, with all validated findings remediated and threads resolved.
+
+Use [the exact environment script and fresh task prompt](cloud-bootstrap-handoff.md)
+next. Fresh pre-agent Cloud discovery/use and Ubuntu agent-host discovery remain
+integration pending. Merge → completed Issue observation and administrative mutations
+remain pending authorization; enforcement read access is still limited. F14 remains
+incomplete and the rewrite change active; F01–F13 implemented/locally verified is
+not a merge or delivery claim. See [consumer evidence](f14-consumer-pilot.md) for actual
+Issue/PR/Actions mapping and the distinction between older adoption and S34 proof.

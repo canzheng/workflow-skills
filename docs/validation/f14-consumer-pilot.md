@@ -19,7 +19,7 @@ Adoption main: `5d05564919c55f1d4d0c2e1e020ad914252a2979`. This direct bootstrap
 publication added workflow assets/design, with the user's F14 authorization; it was
 not an implementation PR merge. Actual app changes use
 `pilot/ingredient-catalog`, current tested head
-`0b40f50ee12b3c07d0df9b15e93a0ef0a0b56b84`,
+`f95f0cae3b87bc8031b00a4150cf9670251ae978`,
 [Ready PR #6](https://github.com/canzheng/workflow-skills-test/pull/6),
 non-closing reference to [Issue #1](https://github.com/canzheng/workflow-skills-test/issues/1).
 Private CLI push was unavailable; connected Git-data APIs published trees whose
@@ -190,7 +190,17 @@ root/umask077 using the exact clean0b40f50e checkout mounted read-only. That con
 is not claimed to be an Ubuntu/fresh-agent clone; observed image digest is
 `python@sha256:c3e521df8b2b498a7a682e7e18676771cb80c6b75b8699af886b2d554ce40151`.
 [Final native re-review requested](https://github.com/canzheng/workflow-skills-test/pull/6#issuecomment-5981120139),
-outcome pending. No unrelated backlog work is dispatched. The report's task-specific no-publication
+That historical request found locale-dependent catalog reads, then surrogate-escaped
+CLI IDs. Both were reproduced and repaired, with an actual ASCII-locale round-trip
+regression retaining malformed/duplicate/unchanged-byte assertions. At
+`f95f0cae3b87bc8031b00a4150cf9670251ae978`, all 11 tests pass on Cloud Python3.12,
+fresh Ubuntu Python3.12 and actual Python3.14.8 under root/umask077. Current-head
+Codex review [5981620802](https://github.com/canzheng/workflow-skills-test/pull/6#issuecomment-5981620802)
+reports no major issues; all addressed inline threads are resolved. Actual push
+[37213062645](https://github.com/canzheng/workflow-skills-test/actions/runs/37213062645),
+PR [37213065265](https://github.com/canzheng/workflow-skills-test/actions/runs/37213065265)
+and metadata [37213064024](https://github.com/canzheng/workflow-skills-test/actions/runs/37213064024)
+pass. No unrelated backlog work is dispatched. The report's task-specific no-publication
 limit is evidence about that task, not a new authorization instruction for this one.
 
 ## Pending authorization
@@ -215,7 +225,7 @@ is needed for the currently authorized pilot path.
 
 Use the existing consumer environment and isolated checkout at
 `/workspace/workflow-skills-test`, branch `pilot/ingredient-catalog`, full SHA
-`0b40f50ee12b3c07d0df9b15e93a0ef0a0b56b84`. Inspect/preserve changes, fetch and
+`f95f0cae3b87bc8031b00a4150cf9670251ae978`. Inspect/preserve changes, fetch and
 confirm the actual head; if another task moved it, coordinate rather than reset.
 Read AGENTS.md, workflow contract/index/config, docs/design.md, all three installed
 skills, Issues #1–#5 and PR #6. Capture actual host-discovered names and actual use.
@@ -224,3 +234,52 @@ rewrites or dispatch of #2–#5. Verify #1/remediation and native review state, 
 configured verification, record exact revision/OS/results and post a handoff on #1.
 Do not merge, close completed, change administration, publish or delete branches.
 Source Issue #15 owns aggregate F14 acceptance; keep consumer and source SHAs distinct.
+
+
+## Pinned ignored dependency refinement (S34)
+
+The user subsequently approved tracked project policy/config plus tracked dependency
+pin, with only shared skills materialized locally and ignored. The older application
+pilot above does not prove that revised installation model. Independent infrastructure
+outcome [Issue7](https://github.com/canzheng/workflow-skills-test/issues/7) was searched
+across open/closed identities before creation and claimed Ready → in-progress.
+New branch `pilot/shared-skill-bootstrap` from unchanged main5d055649 uses source pin
+`47320c363e538d2c8423e11e5ca9121c2d0303da` and consumer SHA
+`539580779e52eef5b976a0460d7d18e16833c2b0`.
+
+Existing managed hashes were verified before migration. New setup refused tracked
+shared files before writes; explicit index-only untracking of exactly three namespaces
+preserved bytes. Setup then updated owned policy/tools/docs/CI/pin and added exactly
+three anchored ignore rules. Project-owned `pantry-project` remains tracked. Config,
+README/design, old application branch/PR and main were preserved. Repeated setup and
+bootstrap each returned `changes: []`. The native published tree exactly matched
+local Git tree `b3a090864684ccc388c4a277e384db1e28bfe357`.
+
+Source47320c3 passed 62 tests with no skips and strict current/delta OpenSpec checks on
+Debian Cloud and fresh Ubuntu24.04.5 clones; source Actions
+[37213148746](https://github.com/canzheng/workflow-skills/actions/runs/37213148746) and
+[37213152015](https://github.com/canzheng/workflow-skills/actions/runs/37213152015) pass.
+An initial Ubuntu run without optional npm dependencies had two explicit skips;
+the prepared repeat installed pinned tooling and passed all62 without skips.
+
+Actual fresh consumer clones in Cloud runtime and Ubuntu lacked shared skills,
+fetched the same pinned source via Git, materialized four pinned assets, passed
+configured check/doctor, repeated bootstrap as a no-op and remained Git-clean.
+All shared hashes and tracked project skill matched in both environments. The
+consumer has no application implementation on this branch; default checks certify
+workflow integrity only, not application acceptance or native agent discovery.
+
+[PR8](https://github.com/canzheng/workflow-skills-test/pull/8) began draft. Actual push
+[37213277277](https://github.com/canzheng/workflow-skills-test/actions/runs/37213277277),
+draft PR [37213280986](https://github.com/canzheng/workflow-skills-test/actions/runs/37213280986)
+and trusted-base metadata [37213281196](https://github.com/canzheng/workflow-skills-test/actions/runs/37213281196)
+passed. Job111468589629 explicitly ran `Materialize pinned shared skills` successfully.
+After self-verification/docs reassessment, PR8 became Ready before Issue7 entered
+wf:review. Native semantic review was requested via comment5981635279; its result
+must be read before claiming review completion. No merge/Issue closure occurred.
+
+The exact published environment script and fresh-task prompt are in
+[Cloud bootstrap handoff](cloud-bootstrap-handoff.md). Native pre-agent discovery/use
+on a fresh Cloud task and Ubuntu agent discovery remain unperformed. Actual merge →
+valid Issue completion and enforcement configuration mutations remain pending separate
+authorization; runtime bootstrap and workflow checks do not substitute for them.

@@ -196,3 +196,15 @@ clone, idempotence, preservation, hash/fetch/unsafe-path and rollback tests are 
 Full-head verification and real revised-model CI/Ubuntu/fresh Cloud discovery evidence
 must be recorded before claiming those gates. F14 remains incomplete; merge/Issue
 completion/admin mutation remain outside current authorization.
+
+Refinement implementation tested at source47320c363e538d2c8423e11e5ca9121c2d0303da:
+62 tests/no skips and strict specs pass on Cloud/fresh Ubuntu; source Actions pass.
+Real consumer Issue7/ReadyPR8, branchpilot/shared-skill-bootstrap,
+SHA539580779e52eef5b976a0460d7d18e16833c2b0, pins47320c3. Fresh Cloud-runtime/Ubuntu
+clones materialize identical hashes, repeat no-op, preserve tracked project skill and
+Git clean; actual CI bootstrap/push/PR/metadata pass. Native review requested, read
+result before claiming completion. AppPR6 atf95f0cae3b87bc8031b00a4150cf9670251ae978
+passes11 Cloud/Ubuntu/Python3.14 tests, final Codex review no major issues; addressed
+threads resolved. Exact fresh published Cloud script/prompt is documented in
+ docs/validation/cloud-bootstrap-handoff.md. F14 stays unchecked until actual fresh
+host discovery/use and other required gates; merge/admin mutations need separate authority.

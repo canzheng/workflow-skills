@@ -26,3 +26,5 @@ reachable through the recorded baseline in Git, not copied into the source head.
   targeted consumer-CI/PR-boundary adjustments.
 - [Real F14 consumer pilot](validation/f14-consumer-pilot.md): actual backlog, Ready PR,
   Actions negatives, review fixes, Ubuntu proof and remaining authorization gates.
+
+- [Fresh consumer Cloud bootstrap handoff](validation/cloud-bootstrap-handoff.md): published environment script, exact consumer/source pins and fresh-task prompt.
