@@ -70,6 +70,7 @@ class SetupTests(unittest.TestCase):
         self.target = self.base / 'consumer with spaces'
         init(self.target)
         (self.target / 'AGENTS.md').write_text('User rule: preserve data.\n')
+        commit(self.target)
         self.args = ['setup', '--source', self.source, '--revision', self.sha,
                      '--target', self.target, '--repository', 'fixture/consumer']
 

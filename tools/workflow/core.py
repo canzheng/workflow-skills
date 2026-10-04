@@ -134,3 +134,25 @@ def manifest(root):
     if not re.fullmatch(r'[0-9a-f]{64}', str(m.get('agents_block_hash', ''))):
         raise Invalid('Invalid managed instruction hash')
     return m
+
+
+def content_identity(root):
+    """Bind diagnostics/evidence to actual tracked and nonignored untracked bytes."""
+    names = set(git(root, 'ls-files', '-z', '--cached', '--others', '--exclude-standard').decode().split('\0')) - {''}
+    h = hashlib.sha256()
+    for name in sorted(names):
+        relative(name)
+        p = root / name
+        # A tracked symlink is hashed as its link text, never its destination bytes.
+        if p.is_symlink():
+            data = ('symlink:' + p.readlink().as_posix()).encode()
+        elif not p.exists():
+            data = b'missing'
+        elif p.is_file():
+            data = p.read_bytes()
+        else:
+            data = b'non-file'
+        h.update(name.encode() + b'\0' + digest(data).encode() + b'\0')
+    return dict(revision=git(root, 'rev-parse', 'HEAD').decode().strip(),
+                branch=git(root, 'branch', '--show-current').decode().strip(),
+                dirty=bool(git(root, 'status', '--porcelain')), content_digest=h.hexdigest())

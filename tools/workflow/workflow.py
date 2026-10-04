@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import sys
 
-from core import (Conflict, Invalid, SKILLS, START, block, config, digest, finding,
+from core import (Conflict, Invalid, SKILLS, START, block, config, content_identity, digest, finding,
                   manifest, repository, safe)
 from setup import setup
 
@@ -90,6 +90,9 @@ def main(argv=None):
     d = sub.add_parser('doctor')
     d.add_argument('--repo', required=True)
     d.add_argument('--skill-root', action='append', default=[])
+    d.add_argument('--expect-branch')
+    d.add_argument('--expect-revision')
+    d.add_argument('--expect-content')
     d.add_argument('--json', action='store_true')
     # Added implementations are imported only by their public command.
     k = sub.add_parser('check')
@@ -111,7 +114,13 @@ def main(argv=None):
             findings = [finding('uninstall.residual', x, 'Modified asset preserved', 'Review and remove manually if desired', 'warning') for x in residuals]
             code = 1 if residuals else 0
         elif args.command == 'doctor':
-            findings, extra = doctor(repository(args.repo), args.skill_root)
+            root = repository(args.repo)
+            findings, extra = doctor(root, args.skill_root)
+            identity = content_identity(root)
+            extra['content'] = identity
+            for field, expected in [('branch', args.expect_branch), ('revision', args.expect_revision), ('content_digest', args.expect_content)]:
+                if expected is not None and identity[field] != expected:
+                    findings.append(finding('target.mismatch', root, field + ' does not match intended handoff', 'Select the recorded branch/content explicitly; never fall back'))
         elif args.command == 'check':
             from checks import check
             findings = check(repository(args.repo), args)

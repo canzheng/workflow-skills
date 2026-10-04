@@ -71,3 +71,11 @@ currency consumer and weakened quantity expectation fail for their intended reas
 Missing target/apply interruption tests retained. Documentation: risk methods,
 primary-author findings and residual independent/fresh-host review limitations.
 Next: F09 same-content handoff and native-operation fault fixtures.
+
+F08 committed at `13f1bc8`. F09: doctor reports full revision/branch/dirty/content
+digest and checks expected target/content without fallback. 24 tests pass, including
+missing worktree, stale branch/revision, changed dirty content, creation response
+loss reconciliation, repeated identities, permission loss and human edits. Remote
+fixtures are explicitly fixtures; real connected-tool reads/403 write remain separate.
+Docs: handoff/evidence/capability failure guide. Ubuntu/fresh Cloud acceptance pending;
+this host is Debian 13, not Ubuntu. Next: F10 executable checks/trusted CI metadata.

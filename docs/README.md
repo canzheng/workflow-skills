@@ -16,3 +16,4 @@ historical v1 evidence, not instructions or a writable delivery queue.
 - [GitHub records](workflow/github.md): phases, identity and bounded writes.
 - [Specifications](workflow/openspec.md): pinned validation, single-plan and archive ownership.
 - [Skill usage](workflow/usage.md) and [evaluation evidence](validation/skill-evaluations.md).
+- [Handoff and evidence](workflow/handoff.md): exact targets and same-content continuation.
