@@ -49,10 +49,17 @@ class MigrationTests(unittest.TestCase):
         r = run('migrate', 'inspect', '--repo', self.root, expect=1)
         self.assertTrue(any(x['code'] == 'migration.inconsistent' for x in r['findings']))
 
-    def test_actual_repository_empty_active_backlog_is_valid(self):
+    def test_final_source_is_empty_and_baseline_done_inventory_remains_reachable(self):
+        import subprocess
         r = run('migrate', 'inspect', '--repo', ROOT)
         self.assertEqual(r['active_count'], 0)
-        self.assertEqual(r['historical_done_count'], 19)
+        self.assertEqual(r['historical_done_count'], 0)
+        baseline = pathlib.Path(self.temp.name) / 'baseline'
+        subprocess.run(['git', 'clone', '-q', '--local', str(ROOT), str(baseline)], check=True)
+        subprocess.run(['git', '-C', str(baseline), 'checkout', '-q', '--detach', 'd2aaf1904b2ccbe7fbab9733627e9c82fcf12f53'], check=True)
+        result = run('migrate', 'inspect', '--repo', baseline)
+        self.assertEqual(result['active_count'], 0)
+        self.assertEqual(result['historical_done_count'], 19)
 
     def test_missing_feature_and_escaping_link_are_findings(self):
         (self.folder / 'BACKLOG.md').write_text('## [READY]\n### `v1-f001` [Missing](features/missing.md)\n### `v1-f002` [Escape](../../../../outside.md)\n')

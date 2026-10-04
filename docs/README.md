@@ -8,8 +8,8 @@
   implementation and acceptance owner; its tasks hold temporary bootstrap evidence.
 
 Current documentation describes implemented branch behavior. Target behavior is
-explicitly labeled; docs/planning, docs/lessons and archived OpenSpec changes are
-explicitly labeled historical v1 evidence, not instructions or a writable delivery queue.
+explicitly labeled; v1-only histories are
+reachable through the recorded baseline in Git, not copied into the source head.
 
 - [Development](development.md): portable setup and offline verification.
 - [Operations](operations.md): bounded setup, conflicts and recovery.

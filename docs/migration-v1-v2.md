@@ -75,10 +75,32 @@ outside this workflow. No user-global installation/configuration is changed here
 | v1 audit/remediation mutation corpora | Retired old linter/state APIs; current wrong-formula/consumer/assertion/target negative controls remain |
 | Conda launcher and environment tests | Portable verify/clean-venv/missing-suite proof; Conda is not required |
 | six old current OpenSpec specs | Replaced by implemented adoption/delivery/migration contracts and later checks/risk spec; original meanings retained in Git/archived changes |
-| docs/superpowers | Moved to explicitly non-current docs/history/v1/superpowers |
-| docs/planning / docs/lessons | Read-only labeled history; original acceptance/evidence remains inspectable; zero active work |
+| docs/superpowers | Removed from final source; original remains in Git |
+| docs/planning / docs/lessons / v1 archived changes | Removed from final source; original acceptance/evidence remains inspectable at baseline; zero active work |
 
 The removed tests required APIs/ceremony intentionally replaced by v2; passing them
 would falsely require the old system. Their safety meanings are covered by current
 outcome tests, not just renamed assertions. No global files or historical Git commits
-were removed. The rewrite stays active for unperformed F14 environmental acceptance.
+were removed. The final source has no v1-only history directory. The rewrite stays active for unperformed F14 environmental acceptance.
+
+## Updated approved cleanup and exhaustive disposition
+
+Human design clarifications on main at `e5747944a7e0520cf766db263834c8485fe63012`
+were incorporated into the rewrite branch without resetting its actual baseline.
+F13 now removes all v1-only planning/lesson/Superpowers/current/archive artifacts
+from the final tree rather than retaining labeled copies. Intermediate labeled
+history was removed to satisfy that updated contract. The source inventory is now
+empty; inspect a temporary checkout of the baseline to reproduce the 19 Done result.
+
+[Per-path disposition manifest](validation/v1-asset-disposition.json) accounts for
+all 321 tracked baseline paths as delete, translate or current-v2, with destinations
+and rationale. Primary-author review checked category meaning and final paths;
+independent PR review remains pending. test_retirement validates coverage and a
+clean clone; the manifest is fixed asset provenance, never a backlog/status ledger.
+No active old-ID migration mapping is needed because there was no remaining work.
+
+For prior global v1 installations, manually inspect the known global skill/policy
+locations and remove/disable conflicting routing only with the user's authorization.
+Doctor reports discoverable legacy/duplicate names but does not edit globals.
+Keeping v1 for another repository requires explicit repository guidance preventing
+its use here. This rewrite does not uninstall the user's global configuration.

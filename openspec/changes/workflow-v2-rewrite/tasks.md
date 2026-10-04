@@ -120,3 +120,14 @@ README, routing/index, architecture, development/operations, history labels,
 asset/test disposition and current quality spec. Rewrite remains active for F14.
 Branch publication through Git succeeded without exposing CLI credentials; remote
 feature Issues exist. Next: committed full-suite rerun and F14 Ubuntu/Actions evidence.
+
+F13 first implementation tested at `34b5e66430b58539bf98330701f0ccda908a4e0e`:
+47 tests, public check and strict specs passed; branch pushed and draft PR #16 opened.
+Main then contained human-approved cleanup clarifications at
+`e5747944a7e0520cf766db263834c8485fe63012`; integrated them without resetting the
+starting revision. F13 follow-up removes all v1-only in-tree history/archives,
+updates current docs and accounts for every baseline path in an exhaustive asset
+manifest. Prior "labeled history retained" records describe intermediate revisions,
+not final source behavior. Fresh clone checks and baseline inventory regression
+will be rerun at the cleanup commit. Next: F14 same-revision Ubuntu/Actions and
+fresh Cloud discovery/required enforcement handoff.

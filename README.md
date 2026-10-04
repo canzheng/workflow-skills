@@ -42,6 +42,6 @@ skill discovery, Ubuntu portability, live Actions or merge protection. The rewri
 change stays active until required acceptance completes. PR/Issue evidence reports
 implemented, locally verified, integration pending, ready for review, merged and
 delivered distinctly. Merge/release/admin/global changes require separate authorization.
-Historical v1 records under docs/planning, docs/lessons and docs/history are read-only
-and cannot select execution. Original runtime/tests/specs are reachable at the
+V1-only planning, lesson and archive trees are absent from the source head.
+Original runtime/tests/specs and evidence remain reachable at the
 [recorded baseline](docs/migration-v1-v2.md); they are retired from current distribution.

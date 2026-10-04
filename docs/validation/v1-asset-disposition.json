@@ -1,0 +1,1990 @@
+{
+  "schema_version": 1,
+  "baseline": "d2aaf1904b2ccbe7fbab9733627e9c82fcf12f53",
+  "paths": [
+    {
+      "path": ".gitignore",
+      "disposition": "translate",
+      "destinations": [
+        ".gitignore"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "AGENTS-global-workflow.md",
+      "disposition": "translate",
+      "destinations": [
+        "docs/workflow/contract.md"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "AGENTS.md",
+      "disposition": "translate",
+      "destinations": [
+        "AGENTS.md"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "CLAUDE.md",
+      "disposition": "translate",
+      "destinations": [
+        "CLAUDE.md"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "README.md",
+      "disposition": "translate",
+      "destinations": [
+        "README.md"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "bin/run-python.sh",
+      "disposition": "translate",
+      "destinations": [
+        "tools/workflow/verify.py"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "docs/lessons/lessons-schema.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/lessons/lessons.md",
+      "disposition": "translate",
+      "destinations": [
+        ".agents/skills/workflow-risk-review/references/methods.md"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "docs/lessons/notes-schema.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/lessons/notes.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/ROADMAP.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/WORKFLOW_REFERENCE.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/current_version",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/template/feature-template.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/BACKLOG.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/VERSION_SCOPE.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f001-legacy-openspec-audit-migration.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f002-integrate-openspec-shaping-readiness.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f003-resolve-cross-feature-task-readiness.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f004-detect-orphan-openspec-changes.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f005-harden-autonomous-backlog-loop-eligibility.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f006-add-feature-completion-handoff-gate.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f007-enforce-top-level-current-task-ids.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f008-clarify-workflow-owned-task-readiness.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f009-respect-legacy-exempt-features-in-resolver-scans.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f010-close-workflow-review-gaps.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f011-harden-workflow-validation.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f012-align-workflow-contract-and-templates.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f013-harden-installer-and-dev-environment.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f014-enforce-contract-proof-coverage.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f015-record-execution-evidence.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f016-integrate-lessons-with-workflow.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f017-extend-lessons-into-shaping-and-ready.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f018-reduce-status-only-workflow-coordination-overhead.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/planning/versions/v1/features/v1-f019-remediate-implementation-review-findings.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/superpowers/plans/2026-03-27-python-env-management.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/superpowers/specs/2026-03-27-python-env-management-design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "docs/v2/README.md",
+      "disposition": "current-v2",
+      "destinations": [
+        "docs/v2/README.md"
+      ],
+      "reason": "Approved v2 design/catalog/navigation; later human main edits preserved."
+    },
+    {
+      "path": "docs/v2/v2-capability-map.md",
+      "disposition": "current-v2",
+      "destinations": [
+        "docs/v2/v2-capability-map.md"
+      ],
+      "reason": "Approved v2 design/catalog/navigation; later human main edits preserved."
+    },
+    {
+      "path": "docs/v2/v2-design.md",
+      "disposition": "current-v2",
+      "destinations": [
+        "docs/v2/v2-design.md"
+      ],
+      "reason": "Approved v2 design/catalog/navigation; later human main edits preserved."
+    },
+    {
+      "path": "docs/v2/v2-feature-list.md",
+      "disposition": "current-v2",
+      "destinations": [
+        "docs/v2/v2-feature-list.md"
+      ],
+      "reason": "Approved v2 design/catalog/navigation; later human main edits preserved."
+    },
+    {
+      "path": "environment.yml",
+      "disposition": "translate",
+      "destinations": [
+        "docs/development.md",
+        "requirements.txt"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "install.sh",
+      "disposition": "translate",
+      "destinations": [
+        "tools/workflow/setup.py"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-add-feature-completion-handoff-gate/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-add-feature-completion-handoff-gate/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-add-feature-completion-handoff-gate/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-add-feature-completion-handoff-gate/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-add-feature-completion-handoff-gate/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-add-feature-completion-handoff-gate/specs/feature-execution-tracking/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-add-feature-completion-handoff-gate/specs/task-execution-handoff/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-add-feature-completion-handoff-gate/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-integrate-openspec-shaping-readiness/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-integrate-openspec-shaping-readiness/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-integrate-openspec-shaping-readiness/implementation-plans/4.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-integrate-openspec-shaping-readiness/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-integrate-openspec-shaping-readiness/specs/feature-execution-tracking/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-integrate-openspec-shaping-readiness/specs/openspec-change-integration/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-integrate-openspec-shaping-readiness/specs/task-execution-handoff/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-integrate-openspec-shaping-readiness/specs/workflow-audit-and-repair/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-integrate-openspec-shaping-readiness/specs/workflow-board-lifecycle/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-integrate-openspec-shaping-readiness/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-support-legacy-openspec-audit-migration/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-support-legacy-openspec-audit-migration/README.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-support-legacy-openspec-audit-migration/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-support-legacy-openspec-audit-migration/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-support-legacy-openspec-audit-migration/specs/feature-execution-tracking/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-support-legacy-openspec-audit-migration/specs/workflow-audit-and-repair/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-support-legacy-openspec-audit-migration/specs/workflow-board-lifecycle/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-25-support-legacy-openspec-audit-migration/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-clarify-workflow-task-readiness-convention/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-clarify-workflow-task-readiness-convention/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-clarify-workflow-task-readiness-convention/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-clarify-workflow-task-readiness-convention/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-clarify-workflow-task-readiness-convention/implementation-plans/3.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-clarify-workflow-task-readiness-convention/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-clarify-workflow-task-readiness-convention/specs/openspec-change-integration/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-clarify-workflow-task-readiness-convention/specs/task-execution-handoff/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-clarify-workflow-task-readiness-convention/specs/workflow-audit-and-repair/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-clarify-workflow-task-readiness-convention/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-fix-cross-feature-openspec-task-readiness/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-fix-cross-feature-openspec-task-readiness/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-fix-cross-feature-openspec-task-readiness/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-fix-cross-feature-openspec-task-readiness/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-fix-cross-feature-openspec-task-readiness/implementation-plans/3.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-fix-cross-feature-openspec-task-readiness/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-fix-cross-feature-openspec-task-readiness/specs/task-execution-handoff/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-fix-cross-feature-openspec-task-readiness/specs/workflow-audit-and-repair/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-fix-cross-feature-openspec-task-readiness/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-handle-legacy-exempt-resolver-scan/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-handle-legacy-exempt-resolver-scan/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-handle-legacy-exempt-resolver-scan/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-handle-legacy-exempt-resolver-scan/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-handle-legacy-exempt-resolver-scan/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-handle-legacy-exempt-resolver-scan/specs/feature-execution-tracking/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-handle-legacy-exempt-resolver-scan/specs/task-execution-handoff/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-26-handle-legacy-exempt-resolver-scan/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-detect-orphan-openspec-changes/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-detect-orphan-openspec-changes/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-detect-orphan-openspec-changes/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-detect-orphan-openspec-changes/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-detect-orphan-openspec-changes/implementation-plans/3.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-detect-orphan-openspec-changes/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-detect-orphan-openspec-changes/specs/workflow-audit-and-repair/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-detect-orphan-openspec-changes/specs/workflow-board-lifecycle/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-detect-orphan-openspec-changes/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-enforce-top-level-current-task-ids/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-enforce-top-level-current-task-ids/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-enforce-top-level-current-task-ids/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-enforce-top-level-current-task-ids/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-enforce-top-level-current-task-ids/implementation-plans/3.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-enforce-top-level-current-task-ids/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-enforce-top-level-current-task-ids/specs/feature-execution-tracking/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-enforce-top-level-current-task-ids/specs/workflow-audit-and-repair/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-enforce-top-level-current-task-ids/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-harden-autonomous-backlog-loop-eligibility/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-harden-autonomous-backlog-loop-eligibility/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-harden-autonomous-backlog-loop-eligibility/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-harden-autonomous-backlog-loop-eligibility/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-harden-autonomous-backlog-loop-eligibility/implementation-plans/3.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-harden-autonomous-backlog-loop-eligibility/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-harden-autonomous-backlog-loop-eligibility/specs/task-execution-handoff/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-harden-autonomous-backlog-loop-eligibility/specs/workflow-audit-and-repair/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-harden-autonomous-backlog-loop-eligibility/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f010-close-workflow-review-gaps/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f010-close-workflow-review-gaps/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f010-close-workflow-review-gaps/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f010-close-workflow-review-gaps/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f010-close-workflow-review-gaps/implementation-plans/3.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f010-close-workflow-review-gaps/implementation-plans/4.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f010-close-workflow-review-gaps/implementation-plans/5.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f010-close-workflow-review-gaps/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f010-close-workflow-review-gaps/specs/workflow-audit-and-repair/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f010-close-workflow-review-gaps/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f011-harden-workflow-validation/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f011-harden-workflow-validation/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f011-harden-workflow-validation/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f011-harden-workflow-validation/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f011-harden-workflow-validation/implementation-plans/3.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f011-harden-workflow-validation/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f011-harden-workflow-validation/specs/openspec-change-integration/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f011-harden-workflow-validation/specs/workflow-audit-and-repair/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f011-harden-workflow-validation/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f012-align-workflow-contract-and-templates/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f012-align-workflow-contract-and-templates/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f012-align-workflow-contract-and-templates/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f012-align-workflow-contract-and-templates/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f012-align-workflow-contract-and-templates/implementation-plans/3.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f012-align-workflow-contract-and-templates/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f012-align-workflow-contract-and-templates/specs/feature-execution-tracking/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f012-align-workflow-contract-and-templates/specs/task-execution-handoff/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f012-align-workflow-contract-and-templates/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f013-harden-installer-and-dev-environment/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f013-harden-installer-and-dev-environment/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f013-harden-installer-and-dev-environment/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f013-harden-installer-and-dev-environment/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f013-harden-installer-and-dev-environment/implementation-plans/3.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f013-harden-installer-and-dev-environment/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f013-harden-installer-and-dev-environment/specs/repo-development-tooling/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-03-27-v1-f013-harden-installer-and-dev-environment/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f014-enforce-contract-proof-coverage/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f014-enforce-contract-proof-coverage/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f014-enforce-contract-proof-coverage/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f014-enforce-contract-proof-coverage/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f014-enforce-contract-proof-coverage/implementation-plans/3.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f014-enforce-contract-proof-coverage/implementation-plans/4.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f014-enforce-contract-proof-coverage/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f014-enforce-contract-proof-coverage/specs/feature-execution-tracking/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f014-enforce-contract-proof-coverage/specs/openspec-change-integration/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f014-enforce-contract-proof-coverage/specs/task-execution-handoff/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f014-enforce-contract-proof-coverage/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f015-record-execution-evidence/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f015-record-execution-evidence/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f015-record-execution-evidence/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f015-record-execution-evidence/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f015-record-execution-evidence/specs/feature-execution-tracking/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f015-record-execution-evidence/specs/task-execution-handoff/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-05-v1-f015-record-execution-evidence/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-08-integrate-lessons-with-workflow/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-08-integrate-lessons-with-workflow/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-08-integrate-lessons-with-workflow/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-08-integrate-lessons-with-workflow/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-08-integrate-lessons-with-workflow/specs/feature-execution-tracking/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-08-integrate-lessons-with-workflow/specs/task-execution-handoff/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-08-integrate-lessons-with-workflow/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-11-extend-lessons-into-shaping-and-ready/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-11-extend-lessons-into-shaping-and-ready/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-11-extend-lessons-into-shaping-and-ready/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-11-extend-lessons-into-shaping-and-ready/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-11-extend-lessons-into-shaping-and-ready/implementation-plans/3.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-11-extend-lessons-into-shaping-and-ready/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-11-extend-lessons-into-shaping-and-ready/specs/feature-execution-tracking/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-11-extend-lessons-into-shaping-and-ready/specs/openspec-change-integration/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-11-extend-lessons-into-shaping-and-ready/specs/task-execution-handoff/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-11-extend-lessons-into-shaping-and-ready/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-reduce-status-only-workflow-overhead/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-reduce-status-only-workflow-overhead/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-reduce-status-only-workflow-overhead/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-reduce-status-only-workflow-overhead/implementation-plans/3.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-reduce-status-only-workflow-overhead/implementation-plans/4.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-reduce-status-only-workflow-overhead/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-reduce-status-only-workflow-overhead/specs/feature-execution-tracking/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-reduce-status-only-workflow-overhead/specs/task-execution-handoff/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-reduce-status-only-workflow-overhead/specs/workflow-audit-and-repair/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-reduce-status-only-workflow-overhead/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-remediate-overhead-gaps/.openspec.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-remediate-overhead-gaps/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-remediate-overhead-gaps/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-remediate-overhead-gaps/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-remediate-overhead-gaps/implementation-plans/3.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-remediate-overhead-gaps/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-remediate-overhead-gaps/specs/feature-execution-tracking/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-remediate-overhead-gaps/specs/task-execution-handoff/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-remediate-overhead-gaps/specs/workflow-audit-and-repair/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-13-v1-f018-remediate-overhead-gaps/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-19-v1-f019-remediate-implementation-review-findings/design.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-19-v1-f019-remediate-implementation-review-findings/implementation-plans/1.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-19-v1-f019-remediate-implementation-review-findings/implementation-plans/2.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-19-v1-f019-remediate-implementation-review-findings/implementation-plans/3.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-19-v1-f019-remediate-implementation-review-findings/implementation-plans/4.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-19-v1-f019-remediate-implementation-review-findings/proposal.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-19-v1-f019-remediate-implementation-review-findings/specs/feature-execution-tracking/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-19-v1-f019-remediate-implementation-review-findings/specs/repo-development-tooling/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/changes/archive/2026-04-19-v1-f019-remediate-implementation-review-findings/tasks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/specs/feature-execution-tracking/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/specs/openspec-change-integration/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/specs/repo-development-tooling/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/specs/task-execution-handoff/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/specs/workflow-audit-and-repair/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "openspec/specs/workflow-board-lifecycle/spec.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "requirements.txt",
+      "disposition": "translate",
+      "destinations": [
+        "requirements.txt"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "skills/_workflow/__init__.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/cli_helpers.py",
+      "disposition": "translate",
+      "destinations": [
+        "tools/workflow/core.py"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "skills/_workflow/feature_file.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/scripts/check_record_consistency.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/scripts/lint_openspec_claim_evidence.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/scripts/lint_remediation_round.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/scripts/mutation_sweep.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/scripts/reconcile_remediation_sites.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/scripts/report_remediation_health.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/scripts/snapshot_round_state.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/conftest.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/mutate_audit_checks.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/good.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/mutate.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_alias.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_bad_yaml.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_dup_key.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_empty.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_guard_no_mutants.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_guard_not_bool.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_loose_fence.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_merge_key.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_mutants_no_guard.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_no_block.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_no_command.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_no_revert.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_no_sites.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_no_substitute.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_nonstring_mutants.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_nonstring_value.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_placeholder_attr.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_scalar_fence.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_shape_placeholder.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_single_site_many.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_single_site_no_command.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_single_site_token.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_substitute_restates.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_two_blocks.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_typo_key.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/neg_zerowidth.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/pos_comparison_title.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/pos_git_grep.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/pos_symbol_probe.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/pos_untagged_example_inert.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/remediation_round/run.sh",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/snapshot_state/run.sh",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/test_audit_checks.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/test_cli_helpers.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/test_feature_file.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/test_prioritize_backlog_script.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/test_workflow_scripts.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/test_workflow_state.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/tests/test_workflow_state_fixes.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/_workflow/workflow_state.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/audit-workflow/SKILL.md",
+      "disposition": "translate",
+      "destinations": [
+        "tools/workflow/checks.py"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "skills/audit-workflow/scripts/audit_workflow.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/autonomous-backlog-loop/SKILL.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/autonomous-backlog-loop/scripts/resolve_autonomous_backlog_action.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/complete-task/SKILL.md",
+      "disposition": "translate",
+      "destinations": [
+        ".agents/skills/workflow-deliver-issue/SKILL.md"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "skills/complete-task/scripts/resolve_complete_task.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/complete-task/scripts/write_completion_ledger.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/defer-feature/SKILL.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/diagnose-workflow/SKILL.md",
+      "disposition": "translate",
+      "destinations": [
+        "tools/workflow/workflow.py"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "skills/diagnose-workflow/scripts/diagnose_workflow.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/fastlane/SKILL.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/fastlane/agents/openai.yaml",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/finish-feature/SKILL.md",
+      "disposition": "translate",
+      "destinations": [
+        ".agents/skills/workflow-deliver-issue/SKILL.md"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "skills/finish-feature/scripts/resolve_finish_feature.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/initialize-workflow-artifacts/SKILL.md",
+      "disposition": "translate",
+      "destinations": [
+        "tools/workflow/setup.py"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "skills/initialize-workflow-artifacts/scripts/init_workflow_artifacts.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/initialize-workflow-artifacts/templates/WORKFLOW_REFERENCE.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/prioritize-backlog/SKILL.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/prioritize-backlog/scripts/prioritize_backlog.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/ready-feature/SKILL.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/ready-feature/scripts/check_archive_readiness.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/repair-drift/SKILL.md",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/shape-backlog-item/SKILL.md",
+      "disposition": "translate",
+      "destinations": [
+        ".agents/skills/workflow-design-to-backlog/SKILL.md"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "skills/shape-backlog-item/scripts/render_feature_file.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/start-task/SKILL.md",
+      "disposition": "translate",
+      "destinations": [
+        ".agents/skills/workflow-deliver-issue/SKILL.md"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "skills/start-task/scripts/dry_run_plan_validation.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "skills/start-task/scripts/resolve_start_task.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "tests/conftest.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "tests/test_diagnose_workflow.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "tests/test_finish_feature.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "tests/test_initialize_workflow_artifacts.py",
+      "disposition": "translate",
+      "destinations": [
+        "tests/v2/test_setup.py"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "tests/test_install_script.py",
+      "disposition": "translate",
+      "destinations": [
+        "tests/v2/test_setup.py"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "tests/test_run_python_wrapper.py",
+      "disposition": "delete",
+      "destinations": [],
+      "reason": "v1-only runtime, ceremony, planning or archive; full original remains at recorded baseline in Git."
+    },
+    {
+      "path": "tests/test_shape_backlog_item_renderer.py",
+      "disposition": "translate",
+      "destinations": [
+        "tests/v2/test_records.py"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "tests/test_start_task_list_worktree_contract.py",
+      "disposition": "translate",
+      "destinations": [
+        "tests/v2/test_handoff.py"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "tests/test_workflow_contract_docs.py",
+      "disposition": "translate",
+      "destinations": [
+        "tests/v2/test_bootstrap.py",
+        "tests/v2/test_risk.py"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    },
+    {
+      "path": "tests/test_workflow_openspec_integration.py",
+      "disposition": "translate",
+      "destinations": [
+        "tests/v2/test_openspec.py"
+      ],
+      "reason": "Retain useful responsibility or safety meaning in v2 without the obsolete lifecycle/global dependency."
+    }
+  ]
+}
