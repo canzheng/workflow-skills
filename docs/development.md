@@ -52,6 +52,8 @@ python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
 
 Run it after checkout and before agent discovery in the actual host preparation hook,
 then the consumer's declared check/doctor commands. Repeat for branch/pin changes;
-never embed a second source SHA in environment configuration. See [operations](operations.md)
+the source-owned setup entrypoint may have its own pinned fetch revision, but it
+must never override an adopted consumer dependency pin. See the README for the
+complete Cloud install-script/local fetch-and-run command. See [operations](operations.md)
 for initial adoption, explicit untracking of old shared skills and conflict recovery.
 Source contributors do not run consumer bootstrap here: there is no consumer pin.

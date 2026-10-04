@@ -80,3 +80,10 @@ its authored shared skills tracked. Setup SHALL NOT modify the Git index.
 - **WHEN** broader or nested excludes hide project skills, or negations expose shared dependencies
 - **THEN** setup detects the effective policy conflict before destination writes
 - **AND** bootstrap/check/doctor report the conflict without rewriting unrelated rules
+
+#### Scenario: Source-owned environment entrypoint
+- **WHEN** Cloud install-script or local setup fetches an explicit workflow-skills commit
+- **THEN** its source-owned entrypoint adopts a fresh Git root and verifies the dependency
+- **AND** an adopted consumer retains its tracked pin and project files on repeated runs
+- **AND** no setup entrypoint is copied into the consumer or installed globally
+- **AND** before the first commit diagnostics report revision:null and dirty:true
