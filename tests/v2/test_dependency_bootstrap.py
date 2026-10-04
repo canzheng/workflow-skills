@@ -60,12 +60,13 @@ class DependencyBootstrapTests(unittest.TestCase):
         self.assertFalse((fresh / '.agents/skills/workflow-risk-review').exists())
         before = git(fresh, 'status', '--porcelain')
         preview = run('bootstrap', '--repo', fresh, '--source', self.source)
-        self.assertEqual(len(preview['changes']), 3)
+        expected = {'.agents/skills/' + skill + '/SKILL.md' for skill in SKILLS}
+        expected.add('.agents/skills/workflow-risk-review/references/methods.md')
+        self.assertEqual(set(preview['changes']), expected)
         self.assertFalse((fresh / '.agents/skills/workflow-risk-review').exists())
         result = subprocess.run([sys.executable, str(fresh / 'tools/workflow/workflow.py'), 'bootstrap', '--repo', str(fresh), '--source', str(self.source), '--apply', '--json'], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        for skill in SKILLS:
-            name = '.agents/skills/' + skill + '/SKILL.md'
+        for name in expected:
             self.assertEqual((fresh / name).read_bytes(), (self.source / name).read_bytes())
         self.assertEqual(git(fresh, 'status', '--porcelain'), before)
         run('doctor', '--repo', fresh)
