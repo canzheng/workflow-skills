@@ -88,3 +88,14 @@ permissions; body/head event coverage and injected shell/executable strings test
 no repository settings changed. All-spec check remains intentionally sensitive to
 legacy current contracts until F13 removal (never claimed passed). Docs: checks/
 runbook/architecture/index. Next: F11 real bundle consumer/scenario proof.
+
+F10 committed at `c36a85d`. F11: actual pinned production bundle installs, no-op
+rerun works and installed checker executes; exactly three skills, no _workflow
+runtime. Cross-module receipt CLI produces EUR 7.47 and denied quantity exits 1.
+34 tests/public source check pass. Semantic omission/contradiction/no-impact outcomes
+recorded as primary-author exercises, fresh-host triggering/independent review pending.
+Docs: scenario corpus and actual evaluation records. Connected app was updated by
+the user; a fresh identity search preceded successful parent Issue #1 and WF2 feature
+Issues #2–#15. Read/write restored; no token captured. Subsequent shared lifecycle
+uses GitHub; this existing plan retains technical acceptance evidence only.
+Next: F12 read-only known-format migration, then F13 active runtime retirement.

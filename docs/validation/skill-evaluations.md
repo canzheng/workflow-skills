@@ -52,3 +52,28 @@ Risk methods apply to setup/remote/migration changes, while the clear quantity r
 needs no separate reviewer. Denied values and filesystem interruption are covered.
 Auth/remote permission faults are fixture proof except the actual GitHub create 403.
 No independent reviewer was invoked; fresh-host semantic triggering remains pending.
+
+## WF2-F11 semantic adversarial and cross-module exercise
+
+S12 omission: inspected after/cart.py with before/README.md. Finding: shipping is a
+new public configuration value but default, denied values and effect are absent.
+Resolved in after/README.md; observed missing docs means unfinished, not optional.
+S13 contradiction: inspected delivery/contradiction.md with actual function default.
+Finding: docs claim 50 while code defaults to 0. A Markdown edit alone is not a pass;
+resolved current fixture docs say 0 and verified 50-cent example yields 747.
+S14 no-impact: implemented repaired/cart.py separately; quantity subtotal now returns
+697 under the unchanged before README, so its explanation is still accurate.
+No new OpenSpec change or task plan is needed for this bounded restoration.
+
+Cross-module pilot: receipt.py actually invokes cart.total with shipping and formats
+EUR 7.47; denied quantity returns exit 1 and Invalid line items. The significant
+protocol planning/validation/archive path is separately exercised by test_openspec
+on disposable producer/consumer behavior. test_scenarios installs the actual pinned
+three-skill bundle and invokes the installed checker; this proves consumer utility
+execution, not model discovery. Primary-author methods caught the listed semantic
+failures; fresh host/model triggering and independent semantic review remain pending.
+
+Pilot overhead observed: no user confirmations for fixture structure, no mandatory
+per-task plans/feature ledgers, and no forced review rounds. Shipping required one
+accurate documentation update; quantity repair required a reasoned no-impact record.
+No measured speedup or universal model-reliability claim is made.
