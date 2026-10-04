@@ -75,3 +75,8 @@ its authored shared skills tracked. Setup SHALL NOT modify the Git index.
 - **WHEN** Cloud, Ubuntu or consumer CI prepares an adopted repository
 - **THEN** bootstrap consumes the same tracked source pin before discovery or verification
 - **AND** local files or workflow YAML alone do not establish actual host discovery or enforcement
+
+#### Scenario: Effective ignore policy conflicts
+- **WHEN** broader or nested excludes hide project skills, or negations expose shared dependencies
+- **THEN** setup detects the effective policy conflict before destination writes
+- **AND** bootstrap/check/doctor report the conflict without rewriting unrelated rules

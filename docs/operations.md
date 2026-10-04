@@ -118,3 +118,9 @@ running it from an already-started agent does not prove fresh host discovery. Re
 after branch/pin changes and record consumer/source SHAs and the actual tested host
 profile. Uninstall removes the owned ignore block only when unchanged and no modified
 shared asset remains; retained modifications remain ignored and reported as residuals.
+
+Effective Git ignore policy is checked before adoption/update writes and during
+bootstrap/check/doctor, including nested/global/info excludes. A broad rule hiding
+project skills or a negation exposing a shared dependency is a conflict even when
+the managed block hash matches. Review and narrow the offending rule explicitly;
+setup never silently rewrites unrelated ignore policy.

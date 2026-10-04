@@ -181,3 +181,35 @@ class DependencyBootstrapTests(unittest.TestCase):
         self.assertTrue(all((self.target / p / 'SKILL.md').exists() for p in prefixes))
         self.assertIn('.agents/skills/project-rules/SKILL.md', git(self.target, 'ls-files').decode())
         run('bootstrap', '--repo', self.target, '--apply')
+
+    def test_broad_effective_ignore_rejects_project_skills_without_overwrite(self):
+        self.adopt()
+        p = self.target / '.gitignore'
+        p.write_text(p.read_text() + '/.agents/skills/\n')
+        self.assertEqual(subprocess.run(['git', '-C', str(self.target), 'check-ignore', '--no-index', '.agents/skills/project-rules/SKILL.md'], capture_output=True).returncode, 0)
+        before = self.tracked_bytes()
+        for command in [('check', '--repo'), ('doctor', '--repo'), ('bootstrap', '--repo')]:
+            result = run(*command, self.target, expect=1)
+            self.assertIn('Project-specific skill path is ignored', json.dumps(result))
+        run(*self.args, '--apply', expect=1)
+        self.assertEqual(self.tracked_bytes(), before)
+
+    def test_setup_preflights_negated_shared_and_nested_project_ignores(self):
+        self.adopt()
+        ignore = self.target / '.gitignore'
+        original = ignore.read_text()
+        self.erase_dependency()
+        ignore.write_text(original + '!/.agents/skills/workflow-risk-review/\n!/.agents/skills/workflow-risk-review/**\n')
+        before = self.tracked_bytes()
+        result = run(*self.args, '--apply', expect=1)
+        self.assertIn('Shared dependency path is not ignored', json.dumps(result))
+        self.assertEqual(self.tracked_bytes(), before)
+        self.assertFalse((self.target / '.agents/skills/workflow-risk-review').exists())
+        ignore.write_text(original)
+        nested = self.target / '.agents/skills/project-rules/.gitignore'
+        nested.write_text('*\n')
+        before = self.tracked_bytes()
+        run(*self.args, '--apply', expect=1)
+        self.assertEqual(self.tracked_bytes(), before)
+        nested.unlink()
+        run(*self.args, '--apply')
