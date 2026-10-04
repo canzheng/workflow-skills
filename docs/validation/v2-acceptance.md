@@ -277,3 +277,13 @@ pass. Final semantic review results must be read before claiming review completi
 The unified environment command was actually exercised from a new repo without tools
 and rerun unchanged. Current script/pins and exact next Cloud prompt are in the handoff.
 Documentation revisions update evidence/commands only; executable pin remains explicit.
+
+Current environment checkpoint: source7e71186ec8146b682f4c4cf40c8da5ecb6d3f608 passes
+70 tests/no skips and strict specs on Cloud/fresh Ubuntu; actual Actions pass. Consumer
+79efd96276e25e2c1a706a3c7972dbebf32d2a0a includes the project-owned unified environment
+shell script and corrected README, pins7e71186, and passes actual first-adoption/no-op/
+index-preservation plus fresh Cloud-runtime/Ubuntu exact-pin script checks and real
+push/PR/metadata CI. The standalone script, rather than implicit CLI adoption, handles
+repos initially missing tools. See the current handoff and consumer report. Latest
+requested semantic outcomes are not inferred from CI; native host discovery and
+merge/admin requirements remain explicit pending gates. F14 remains partial.

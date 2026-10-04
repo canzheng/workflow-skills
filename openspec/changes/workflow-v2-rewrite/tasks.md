@@ -220,3 +220,16 @@ and fresh task prompt are in docs/validation/cloud-bootstrap-handoff.md. F14 rem
 unchecked: actual fresh published Cloud pre-agent discovery/use, Ubuntu agent discovery,
 remaining required scenarios/final semantic acceptance and actual enforcement evidence
 remain distinct gates. Merge→valid completion/admin mutation need separate authorization.
+
+Current implementation source7e71186ec8146b682f4c4cf40c8da5ecb6d3f608 passes70 tests/no
+skips/strict specs on Cloud and fresh Ubuntu; source Actions pass. Current consumer
+pilot/shared-skill-bootstrap at79efd96276e25e2c1a706a3c7972dbebf32d2a0a pins7e71186.
+Its actual project-owned .workflow/cloud-setup.sh matches the pastable env command:
+new repo absent tools/pin fetches/adopts exact seed once, then unchanged repeat has
+no fetch/file/index changes. Real fresh Cloud-runtime/Ubuntu clones run that script,
+match shared hashes/project tracking and stay clean; actual push/PR/metadata pass.
+Installed-completeness and ledger symlink findings were reproduced and fixed. CLI
+bootstrap remains pin-only; consumer review's assumption that it was the standalone
+unadopted-repo entrypoint was not accepted, and README/script make routing concrete.
+Latest semantic outcomes must still be read. Fresh published Cloud host discovery/use
+and Ubuntu agent-host discovery remain unperformed; no merge/completion/admin authority.

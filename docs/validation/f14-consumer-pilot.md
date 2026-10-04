@@ -324,3 +324,42 @@ adoption files must be reviewed/committed. This proves the script's behavior, no
 host's preparation persistence/ordering or initial agent discovery. Those remain the
 fresh published Cloud gate. Ubuntu agent discovery is also unperformed; merge→Issue
 completion and enforcement mutations remain separately pending authorization.
+
+### Current unified environment entrypoint
+
+Source `7e71186ec8146b682f4c4cf40c8da5ecb6d3f608` also closes validated installed
+manifest completeness and ledger-symlink gaps. Both have failing-before public tests;
+all70 tests/no skips and strict checks pass on Debian Cloud and fresh Ubuntu24.04.5.
+Source push[37215771822](https://github.com/canzheng/workflow-skills/actions/runs/37215771822)
+and PR[37215776553](https://github.com/canzheng/workflow-skills/actions/runs/37215776553)
+pass. Partial uninstall provenance is preserved for recovery; diagnostics no longer
+mistake it for a complete installed bundle.
+
+Consumer current branch `pilot/shared-skill-bootstrap`, SHA
+`79efd96276e25e2c1a706a3c7972dbebf32d2a0a`, pins that exact source. The real project-owned
+`.workflow/cloud-setup.sh` and README expose the same complete pastable environment
+command. It was executed against a new Git root without tools: pinned fetch/adoption
+succeeded; repeat skipped fetch, changed no file/index and returned bootstrap changes:[].
+Exact-head fresh consumer clones on Cloud runtime and Ubuntu both ran that actual
+script twice, matched pinned shared hashes, kept project skill tracked and remained
+Git-clean. Consumer push
+[37215967922](https://github.com/canzheng/workflow-skills-test/actions/runs/37215967922),
+PR[37215972442](https://github.com/canzheng/workflow-skills-test/actions/runs/37215972442),
+metadata[37215970011](https://github.com/canzheng/workflow-skills-test/actions/runs/37215970011)
+pass. These are script/runtime/CI results, not native pre-agent skill discovery.
+
+Consumer review's stale README omission was confirmed and fixed. The request to make
+workflow.py bootstrap implicitly adopt an absent pin was not accepted: an entirely
+unadopted repo has no CLI. The standalone environment script performs pinned fetch
+and adoption before invoking CLI, while repeatable bootstrap retains its approved
+pin-only/project-preservation contract. Review replies provide actual script evidence;
+the concrete project-owned entrypoint removes the earlier visibility ambiguity.
+Final current source/consumer review outcomes remain required and must be read.
+
+Use the latest [Cloud handoff](cloud-bootstrap-handoff.md), publish/apply the full
+command in environment setup/maintenance, select the current consumer branch/SHA,
+and start a genuinely new task outside onboarding. Capture initial host discovery
+before agent-side installation. Generated adoption files must be committed in a
+new project; this pilot has already committed them. Ubuntu agent discovery, remaining
+fresh-context scenario/semantic acceptance, real merge→Issue completion and admin
+mutations remain separately pending. No merge or completed closure is simulated.

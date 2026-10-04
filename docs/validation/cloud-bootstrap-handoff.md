@@ -2,9 +2,9 @@
 
 Use existing repository canzheng/workflow-skills-test, branch
 `pilot/shared-skill-bootstrap`, exact tested consumer SHA
-`5efc5f5ffdcab46a440b2cb2237924ee476a5bd9` (PR8, Issue7).
+`79efd96276e25e2c1a706a3c7972dbebf32d2a0a` (PR8, Issue7).
 The tracked manifest pins workflow source
-`11fa051a7c4af359bd4728e1edf69cd8c7a61259`. Main has the older tracked-skill model;
+`7e71186ec8146b682f4c4cf40c8da5ecb6d3f608`. Main has the older tracked-skill model;
 no merge is authorized. Select this branch for preparation and the fresh task.
 Do not discard user changes or silently substitute main.
 
@@ -19,18 +19,20 @@ for another repository; never infer a different target from the current director
 
 ```sh
 set -eu
-cd /workspace/workflow-skills-test
+WF2_CONSUMER_ROOT=${WF2_CONSUMER_ROOT:-/workspace/workflow-skills-test}
+WF2_CONSUMER_REPOSITORY=${WF2_CONSUMER_REPOSITORY:-canzheng/workflow-skills-test}
+cd "$WF2_CONSUMER_ROOT"
 python3 -c 'import sys; assert sys.version_info >= (3, 10), "Python >=3.10 is required"; print(sys.version.split()[0])'
 git --version
 if [ ! -f .workflow/install-manifest.json ]; then
-    WF2_SOURCE_SHA=11fa051a7c4af359bd4728e1edf69cd8c7a61259
+    WF2_SOURCE_SHA=7e71186ec8146b682f4c4cf40c8da5ecb6d3f608
     WF2_SOURCE_DIR=$(mktemp -d)
     trap 'rm -rf -- "$WF2_SOURCE_DIR"' EXIT
     git -C "$WF2_SOURCE_DIR" init --quiet
     git -C "$WF2_SOURCE_DIR" fetch --no-tags --depth=1 https://github.com/canzheng/workflow-skills.git "$WF2_SOURCE_SHA"
     git -C "$WF2_SOURCE_DIR" checkout --detach --quiet "$WF2_SOURCE_SHA"
-    python3 "$WF2_SOURCE_DIR/tools/workflow/workflow.py" setup --source "$WF2_SOURCE_DIR" --revision "$WF2_SOURCE_SHA" --target "$PWD" --repository canzheng/workflow-skills-test --json
-    python3 "$WF2_SOURCE_DIR/tools/workflow/workflow.py" setup --source "$WF2_SOURCE_DIR" --revision "$WF2_SOURCE_SHA" --target "$PWD" --repository canzheng/workflow-skills-test --apply --json
+    python3 "$WF2_SOURCE_DIR/tools/workflow/workflow.py" setup --source "$WF2_SOURCE_DIR" --revision "$WF2_SOURCE_SHA" --target "$PWD" --repository "$WF2_CONSUMER_REPOSITORY" --json
+    python3 "$WF2_SOURCE_DIR/tools/workflow/workflow.py" setup --source "$WF2_SOURCE_DIR" --revision "$WF2_SOURCE_SHA" --target "$PWD" --repository "$WF2_CONSUMER_REPOSITORY" --apply --json
 fi
 python3 -c 'import json, pathlib, sys; m=json.loads(pathlib.Path(".workflow/install-manifest.json").read_text(encoding="utf-8")); sys.exit(0 if m.get("schema_version")==2 else "Existing adoption needs reviewed dependency migration; do not overwrite it during environment setup")'
 python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
@@ -67,7 +69,7 @@ api.github.com network draft if API operations remain proxy-blocked. Never print
 ```text
 Use the existing isolated checkout /workspace/workflow-skills-test. Do not create
 another worktree. Verify pilot/shared-skill-bootstrap at
-5efc5f5ffdcab46a440b2cb2237924ee476a5bd9; preserve local changes and report mismatches.
+79efd96276e25e2c1a706a3c7972dbebf32d2a0a; preserve local changes and report mismatches.
 Read AGENTS.md, docs/workflow/contract.md, docs/workflow/README.md and docs/design.md.
 Continue F14 validation for Issue7/Ready PR8, not application implementation.
 
