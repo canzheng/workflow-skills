@@ -23,8 +23,10 @@ integration commands are not launched. Metadata trust/body events retain malicio
 head/metadata negative proof. Existing safety and source verification remain required.
 
 The refinement invalidates affected installation/consumer/spec evidence from earlier
-revisions. Re-run final committed full suite, strict specs, Ubuntu and Actions; record
-those exact results in Issue15/PR16. Newly adopted consumer live CI, real fresh Cloud
+revisions. At `3386d008f809d32ebc6cf4f849b47750845c1cb6`, the full 51-test suite, public
+source check and strict specs passed on both this checkout and a fresh Ubuntu clone;
+Actions run 37205386850 succeeded. Final documentation-head reruns and exact handoff
+are recorded in Issue15/PR16. Newly adopted consumer live CI, real fresh Cloud
 and Ubuntu agent discovery, PR semantic review and authorized merge/closure remain
 integration pending. The source draft PR and per-feature review labels are the
 explicit cumulative bootstrap exception, never a consumer example to copy.

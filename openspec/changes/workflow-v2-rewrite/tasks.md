@@ -143,3 +143,12 @@ F14 remains partial: fresh Cloud discovery/resume, independent review and observ
 merge enforcement are pending; trusted-base metadata requires base adoption.
 See docs/validation/v2-acceptance.md and native Issue #15 for exact continuation.
 Do not archive or close the parent while required acceptance remains pending.
+
+Validated user-supplied reviewer comments against approved design/actual bundle:
+consumer CI absence confirmed, normal Ready-PR review boundary refined with fallback,
+optional phase automation deferred and no closure bot. At
+`3386d008f809d32ebc6cf4f849b47750845c1cb6`, 51 tests, public check and strict specs
+passed on Cloud checkout and fresh Ubuntu clone; Actions37205386850 succeeded.
+Consumer live CI and Cloud/Ubuntu agent discovery remain distinct pending gates.
+No merge/protection authorization was inferred from the review. Final report links
+all feature acceptance and scenarios; Issue15 owns the explicit final-SHA handoff.
