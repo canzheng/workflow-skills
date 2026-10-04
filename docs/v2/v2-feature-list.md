@@ -105,7 +105,7 @@ The default execution order below is already topological. All rows are required 
 | WF2-F10 | Add executable delivery checks and CI integration | F03, F07, F08, F09 | C04, C07, C10, C12 | B |
 | WF2-F11 | Prove behavior with workflow scenarios and negative controls | F05, F07, F08, F09, F10 | C07, C09, C12, C15 | B |
 | WF2-F12 | Build v1 migration inventory and cutover procedure | F03, F04, F09 | C13, C14 | C |
-| WF2-F13 | Retire v1 runtime and reconcile current documentation | F11, F12 | C01, C08, C15 | C |
+| WF2-F13 | Remove v1 files and reconcile the final v2 tree | F11, F12 | C01, C08, C15 | C |
 | WF2-F14 | Run Cloud and Ubuntu acceptance and prepare release | F13 | C02, C08, C11, C12, C16 | C |
 
 Milestone A: usable core with local/fixture proof. Milestone B: complete delivery and verification behavior. Milestone C: migration, retirement, and actual environment acceptance. Milestones are review groupings, not additional lifecycle states or required merge stops.
@@ -129,7 +129,7 @@ Milestone A: usable core with local/fixture proof. Milestone B: complete deliver
 
 1. Baseline is recorded without resetting or discarding newer work. The inventory identifies the real v1 artifacts and active work instead of assuming all projects match the researched snapshot.
 2. Repository instructions clearly select v2 for this rewrite and no longer require `start-task`, `complete-task`, v1 audits, or global installation. Unrelated rules remain.
-3. Retaining historical `docs/planning/` does not select v1. The default instructions do not claim unimplemented v2 commands exist.
+3. During the transition, retained `docs/planning/` does not select v1. F13 removes that v1-only tree from the final source checkout. The default instructions do not claim unimplemented v2 commands exist.
 4. The three input documents are linked and discoverable. The rewrite change references their scope without copying full designs or creating another editable backlog.
 5. The delivery contract includes documentation assessment, truthful evidence, scope limits, and no premature completion.
 
@@ -423,31 +423,32 @@ Milestone A: usable core with local/fixture proof. Milestone B: complete deliver
 
 **Documentation with this feature:** item dispositions, exact cutover steps, mapping, ambiguous cases, and rollback limits. **Not included:** universal legacy parser support or automatic migration of all the user's repositories/global installations.
 
-### WF2-F13 Retire v1 runtime and reconcile current documentation
+### WF2-F13 Remove v1 files and reconcile the final v2 tree
 
-**Outcome:** The active repository and consumer bundle present one coherent v2 system.
+**Outcome:** A fresh clone and installed consumer bundle present one coherent v2 system without a parallel v1 file tree.
 
 **References:** design sections 1.3, 8, 12; C01/C08/C15; S04/S15/S24/S25. **Dependencies:** F11/F12. **Risk:** obsolete instructions/specs remaining active.
 
 **Deliverables**
 
-- Remove obsolete active wrapper skills, local state engine, old global installer path, and required Superpowers dependency from the v2 distribution.
-- Migrate or retire v1 tests by the capability they protect; retain history through Git or explicitly labeled archives.
+- Remove v1-only files from the checked-out source tree, including `AGENTS-global-workflow.md`, the legacy `skills/` tree (including `skills/_workflow/` and all wrapper directories), `docs/planning/`, `docs/superpowers/`, v1-only lesson records, ceremony-specific tests, and v1-only current or archived OpenSpec artifacts. Delete or replace the old `install.sh` in place with the v2 setup entrypoint; it must not retain global-install behavior.
+- Migrate or retire v1 tests by the capability they protect. Preserve the old implementation through the recorded baseline commit and Git history, without copying it into a new in-tree legacy directory.
 - Update README, current architecture, development/operations docs, templates, and any active alternate-agent routing.
 - Reconcile current OpenSpec contracts and prepare the final documentation/spec consolidation. Leave the rewrite change active for F14 acceptance and archive.
 
 **Acceptance**
 
-1. Fresh v2 setup contains exactly the intended active skill bundle and no v1 resolver runtime or mandatory wrapper path.
-2. Active docs/specs describe v2 behavior. Historical v1 records are clearly non-current and cannot route execution.
+1. A fresh clone and fresh v2 setup contain exactly the intended v2 skill bundle and no v1 resolver, wrapper, feature board, feature file, Superpowers artifact, or old global workflow policy.
+2. Current docs/specs describe v2 behavior. V1 provenance remains reachable through the recorded baseline SHA, old-ID mapping, and Git history rather than checked-in duplicate history.
 3. Useful safety regressions remain in the v2 suite; deleted ceremony-specific tests have a documented disposition.
 4. No task ledger, current-task pointer, or two-way Markdown/GitHub status sync has reappeared under a new name.
 5. Current architecture explains the actual implementation without requiring all historical changes to be read.
 6. Required implementation/docs obligations are reconciled, but pending F14 acceptance is visible in the still-active rewrite change. Do not archive it at F13 to make the repository look finished.
+7. A reviewed asset-disposition manifest accounts for every path identified by F01 as delete, translate/move, or current v2. No unexplained v1-only path remains in the final tree.
 
-**Verification:** inspect the installed bundle and active instructions, run the v2 suite, search active paths for retired command references, and manually classify legitimate history/migration references. Do not use a raw zero-occurrences search that incorrectly deletes historical explanations.
+**Verification:** compare the final tree with the F01 asset inventory, inspect the installed bundle and instruction chain, run the v2 suite, and search for retired filenames, skill names, and commands. Manually classify legitimate migration-document references, which may name old paths but may not contain runnable copies. Clone the candidate branch into a clean directory and verify the deleted v1 paths do not reappear.
 
-**Documentation with this feature:** final current system docs, asset-disposition table, legacy cleanup guidance. **Not included:** deleting historical Git commits, modifying global skills, or publishing a release.
+**Documentation with this feature:** final current system docs, asset-disposition table, baseline Git reference, and global-v1 cleanup guidance for users who installed it previously. **Not included:** deleting historical Git commits, modifying global skills automatically, or publishing a release.
 
 ### WF2-F14 Run Cloud and Ubuntu acceptance and prepare release
 

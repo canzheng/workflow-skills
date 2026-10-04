@@ -33,7 +33,7 @@ The inspected v1 backlog contains completed historical features and no active en
 
 ### 1.3 What we retain and what we replace
 
-Retain useful behavior specifications, decisions, Git history, relevant engineering lessons, strong fixtures, regression cases, and proof methods. Replace the local scheduling model, feature ledger, mandatory task lifecycle, global installation default, and Superpowers dependency. Existing tests are evidence to inspect, not an API compatibility requirement.
+Retain useful behavior specifications, decisions, relevant engineering lessons, strong fixtures, regression cases, and proof methods by translating them into v2 artifacts. Preserve the complete v1 implementation through Git history and the recorded baseline commit. The final v2 working tree must not retain v1-only files merely as history. Replace the local scheduling model, feature ledger, mandatory task lifecycle, global installation default, and Superpowers dependency. Existing tests are evidence to inspect, not an API compatibility requirement.
 
 The essential quality obligations remain: respect approved scope, verify the actual behavior, maintain necessary documentation, preserve test contracts, and distinguish implementation from verification and delivery. Removing ceremony must not weaken these obligations.
 
@@ -420,13 +420,15 @@ F01 records the pre-rewrite SHA and inventory, then replaces the active reposito
 
 Keep the v1 baseline reachable in Git. A reference in the migration document is sufficient during implementation; tag/release creation is a separate authorized operation. Do not require a remote tag before work can begin.
 
-F13 removes retired active skills, resolvers, wrappers, and obsolete runtime specs from the v2 distribution. Historical plans/features/archived changes may remain under a clearly labeled history location or be reachable through Git. They must not trigger workflow applicability or be represented as current instructions. Update README, AGENTS, and any active `CLAUDE.md` routing consistently. Retired assertions may remain only in explicitly historical tests outside the v2 default suite.
+F13 performs a clean-head cutover for `workflow-skills`. It removes v1-only skills, resolvers, wrappers, installers, planning boards, feature records, Superpowers artifacts, obsolete tests, obsolete current specs, and v1-only archived OpenSpec change folders from the checked-out tree after their useful content has been translated. It also removes empty directories and stale references. The recorded baseline commit and Git history preserve the original materials. Do not create a `legacy/` or `archive/v1/` dump inside the final v2 tree. Update README, AGENTS, and any active `CLAUDE.md` routing consistently.
+
+The expected source-repository removals include, subject to the F01 inventory: `AGENTS-global-workflow.md`; the old global `install.sh` unless replaced in place by the v2 setup entrypoint; `docs/planning/`; `docs/superpowers/`; v1-only `docs/lessons/` records after their lessons are distilled; the old `skills/` wrappers and `skills/_workflow/`; ceremony-specific root tests; and archived/current OpenSpec artifacts that describe only the retired engine. Files with a continuing v2 purpose are rewritten or moved to their v2 homes instead of deleted blindly. Migration documentation may mention old paths and the baseline SHA; it must not embed copies of the old files.
 
 ### 12.2 Consumer migration
 
 Inventory each active v1 item and choose: finish under v1, migrate once, defer, or cancel. For migrated items, carry forward remaining acceptance, relevant design/spec links, evidence provenance, blockers, and old-ID-to-new-Issue mapping. Do not turn all historical Done records into Issues.
 
-Dry-run by default. Resolve duplicate IDs, missing changes, ambiguous worktrees, and modified local instructions before mutation. A migrated item changes authority once; archive its old ledger or mark it read-only with a link. Never run two-way sync. Retaining a history directory does not select a workflow.
+Dry-run by default. Resolve duplicate IDs, missing changes, ambiguous worktrees, and modified local instructions before mutation. A migrated item changes authority once; archive its old ledger or mark it read-only with a link according to that consumer repository's retention policy. Never run two-way sync. This consumer-project allowance does not override the clean-head rule for the `workflow-skills` source repository.
 
 Scope the first migration implementation to the existing known v1 formats. Unknown variants produce explicit findings and a manual mapping path. Do not invent data or a universal migration framework.
 
