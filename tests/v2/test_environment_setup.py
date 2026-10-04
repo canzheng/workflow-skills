@@ -68,6 +68,23 @@ class EnvironmentSetupTests(unittest.TestCase):
         self.assertEqual((self.target / '.workflow/install-manifest.json').read_bytes(), old_pin)
         self.assertEqual(git(self.target, 'status', '--porcelain'), b'')
 
+    def test_rerun_rejects_wrong_repository_identity_before_dependency_writes(self):
+        script = self.entrypoint()
+        self.execute(script, self.target)
+        test_setup.commit(self.target)
+        # Missing skills make it observable whether routing is checked before bootstrap.
+        import shutil
+        for name in SKILLS:
+            shutil.rmtree(self.target / '.agents/skills' / name)
+        before = {n: (self.target / n).read_bytes() for n in git(self.target, 'ls-files', '-z').decode().split('\0') if n}
+        index = git(self.target, 'ls-files', '--stage')
+        r = subprocess.run(['bash', str(script), str(self.target), 'fixture/wrong-project'], capture_output=True, text=True)
+        self.assertNotEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn('Repository identity mismatch', r.stdout + r.stderr)
+        self.assertFalse((self.target / '.agents/skills/workflow-risk-review').exists())
+        self.assertEqual(before, {n: (self.target / n).read_bytes() for n in before})
+        self.assertEqual(index, git(self.target, 'ls-files', '--stage'))
+
     def test_wrong_target_and_old_adoption_fail_without_writes(self):
         script = self.entrypoint()
         nested = self.target / 'nested'

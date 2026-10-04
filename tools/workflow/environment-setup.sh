@@ -10,14 +10,21 @@ WF2_CONSUMER_ROOT=$1
 WF2_CONSUMER_REPOSITORY=$2
 python3 -c 'import sys; assert sys.version_info >= (3, 10), "Python >=3.10 is required"; print(sys.version.split()[0])'
 git --version
-python3 - "$WF2_CONSUMER_ROOT" <<'PY'
-import pathlib, subprocess, sys
-p = pathlib.Path(sys.argv[1])
-if not p.is_absolute() or not p.is_dir() or p.is_symlink():
-    sys.exit('Target must be an explicit existing absolute Git root, not a symlink')
-r = subprocess.run(['git', '-C', str(p), 'rev-parse', '--show-toplevel'], capture_output=True, text=True)
-if r.returncode or pathlib.Path(r.stdout.strip()).resolve() != p.resolve():
-    sys.exit('Target must be the Git root; refusing missing or nested checkout')
+python3 - "$WF2_SOURCE_ROOT" "$WF2_CONSUMER_ROOT" "$WF2_CONSUMER_REPOSITORY" <<'PY'
+import pathlib, re, sys
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(pathlib.Path(sys.argv[1]) / 'tools/workflow'))
+from core import Invalid, config, repository, safe
+if not pathlib.Path(sys.argv[2]).is_absolute():
+    sys.exit('Target must be an explicit absolute Git root')
+if not re.fullmatch(r'[\w.-]+/[\w.-]+', sys.argv[3]):
+    sys.exit('Repository identity must be owner/repository')
+try:
+    root = repository(sys.argv[2])
+    if safe(root, '.workflow/config.json').exists() and config(root)['repository'] != sys.argv[3]:
+        sys.exit('Repository identity mismatch; refusing setup/bootstrap for a different project')
+except Invalid as exc:
+    sys.exit(str(exc))
 PY
 cd -- "$WF2_CONSUMER_ROOT"
 if [ ! -f .workflow/install-manifest.json ]; then

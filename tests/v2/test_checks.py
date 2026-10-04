@@ -56,6 +56,21 @@ class CheckTests(unittest.TestCase):
                 result = run('check', '--repo', self.source, expect=1)
                 self.assertTrue(any(x['code'] == 'bundle.incomplete' for x in result['findings']))
 
+    def test_source_check_and_setup_reject_invalid_bundle_versions(self):
+        (self.source / '.workflow/config.json').write_bytes((self.target / '.workflow/config.json').read_bytes())
+        p = self.source / '.workflow/bundle.json'
+        original = json.loads(p.read_text())
+        for version in ('not-a-version', '1.0.0', '2.0', '2.0.0-extra'):
+            with self.subTest(version=version):
+                spec = dict(original, bundle_version=version)
+                p.write_text(json.dumps(spec))
+                sha = commit(self.source)
+                checked = run('check', '--repo', self.source, expect=2)
+                self.assertFalse(checked['ok'])
+                run('setup', '--source', self.source, '--revision', sha, '--target', self.target, '--repository', 'fixture/consumer', '--apply', expect=2)
+        p.write_text(json.dumps(original))
+        run('check', '--repo', self.source)
+
     def test_installed_manifest_cannot_hide_deleted_runtime_or_ci_asset(self):
         pin = self.target / '.workflow/install-manifest.json'
         original = pin.read_bytes()

@@ -79,3 +79,6 @@ delivered distinctly. Merge/release/admin/global changes require separate author
 V1-only planning, lesson and archive trees are absent from the source head.
 Original runtime/tests/specs and evidence remain reachable at the
 [recorded baseline](docs/migration-v1-v2.md); they are retired from current distribution.
+
+Environment setup validates the explicit owner/repository against any existing
+project config before adoption or bootstrap, rejecting mismatches without writes.

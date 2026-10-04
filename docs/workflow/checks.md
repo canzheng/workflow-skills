@@ -56,3 +56,6 @@ report each launch/exit. Plain check does not claim those tests ran. Empty integ
 arrays report no declared proof; required environment gates still apply. Metadata-only
 rejects execution flags, preserving its data-only boundary. Captured command output
 is not dumped into diagnostics; inspect the declared command directly for failures.
+
+Source bundle schema checks use the installer's v2 version format (2.minor.patch);
+a string with an invalid version cannot certify an installable source bundle.

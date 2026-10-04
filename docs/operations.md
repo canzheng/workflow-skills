@@ -142,3 +142,6 @@ Completeness includes required docs, Issue/PR templates and risk references as w
 as runtime/CI/skill entrypoints. A new Git repository may bootstrap before its first
 commit; doctor then reports revision:null and dirty:true, not a fabricated SHA. Commit
 reviewed adoption files before claiming exact-commit/environment delivery evidence.
+
+Environment setup validates the explicit owner/repository against any existing
+project config before adoption or bootstrap, rejecting mismatches without writes.
