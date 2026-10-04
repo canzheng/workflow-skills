@@ -15,7 +15,7 @@ Actual clean starting commit: `d2aaf1904b2ccbe7fbab9733627e9c82fcf12f53` on `wor
 No reset to the research reference occurred. The approved clean-tree clarification
 at main `e5747944a7e0520cf766db263834c8485fe63012` was integrated on this branch.
 
-Implementation/test revision: `3386d008f809d32ebc6cf4f849b47750845c1cb6`.
+Historical implementation/test revision: `3386d008f809d32ebc6cf4f849b47750845c1cb6`.
 This includes consumer CI, the clarified PR boundary, actual consumer-before-archive
 proof and complete shaping output. The earlier bbbf1e5 revision passed 49 tests; its
 affected setup/consumer/spec evidence was superseded by the following 51-test reruns.
@@ -28,6 +28,17 @@ and PR #16 after publication; resolve that explicit SHA before continuing.
 | Managed Cloud task checkout, Debian 13 | Python 3.12.14, Node 24.19.0, npm 11.9.0, OpenSpec 1.14.0; fresh venv installation and rerun | `python3 tools/workflow/verify.py`: 51 tests, no skips, public source check passed; `check --repo . --specs --json`: strict current/delta validation passed; diff check passed |
 | Actual Ubuntu container, fresh remote clone | Ubuntu 24.04.5 LTS amd64, Python 3.12.3, Git 2.43.0, Node 24.19.0, npm 11.17.0; venv dependency install twice, npm ci | Same 51 tests with no skips, public source and strict specs checks passed; clean tree; exit 0 |
 | GitHub Actions | Real `v2 verification` job, pull_request event; Python 3.12, Node 24 | [Run 37205386850](https://github.com/canzheng/workflow-skills/actions/runs/37205386850), job 111445388641: all verification/spec/artifact steps succeeded |
+
+Current implementation/test revision: `139e66d5b43cfbd3821fe098c0119b93aaad4928`.
+The user-authorized one-shot initial-backlog refinement and S33 now pass all
+54 tests without skips, public check and strict current/delta spec validation on
+the managed Debian checkout and a fresh same-SHA Ubuntu24.04 clone.
+[Source Actions37206519129](https://github.com/canzheng/workflow-skills/actions/runs/37206519129)
+succeeded. Documentation-only consumer evidence updates follow this revision; their
+exact final-SHA verification is recorded in Issue #15/PR #16 after publication.
+The [real consumer pilot](f14-consumer-pilot.md) separately records source bundle pin,
+consumer branches/SHAs, actual Issues, Ready PR, successful generic/trusted-base CI,
+intentional metadata failure/restoration, Codex findings/fixes and Ubuntu tests.
 
 Ubuntu image recipe is [ubuntu.Dockerfile](../../tests/v2/environments/ubuntu.Dockerfile),
 base digest pinned; tested local image ID
@@ -60,16 +71,16 @@ proof, preserving their existing evidence. No feature is reported delivered.
 | F02 / C02 | 1–2: clean venv and actual Ubuntu preparation/rerun; 3: token-free fixtures and required missing-runtime failures; 4: pinned Python development dependencies/Node/OpenSpec versions; 5: runner missing-suite/checker negatives and disclosed old-test dispositions. Docs: development, environment recipe. | Fresh published Cloud preparation/discovery remains pending. |
 | F03 / C01,C03 | 1–2: test_setup public fresh/dry-run/apply, preserved unrelated data, source/marker/path/symlink/collision preflight; 3: no-op/update/conflicts; 4: staging/apply rollback and exact residual recovery; 5: bounded uninstall/user config; 6: doctor duplicate/legacy/config/target findings; 7: incomplete bundle rejection and test_scenarios actual production bundle. Docs: operations, consumer guides, bundle provenance; owned generic consumer CI with configured argv execution and collision/modified-workflow preservation proof in test_consumer_ci. | Filesystem presence is not host skill activation; do fresh discovery. |
 | F04 / C04,C13 | 1–4: Issue forms, PR template, lifecycle guidance and test_records phase/modifier/closure/parent representation; 5: open/closed identity fixtures plus live identity-safe publication; 6: link-only index, no state mirror. Docs: GitHub runbook/templates/index. | Live cancel/reopen/closure are fixture-only; do not close partial rewrite. |
-| F05 / C05 | 1–5: primary-author shaping/current.py inspection, design.md and candidates.md actual bounded bodies, dependencies, isolated unknown and excluded enhancements; 6: identity/human-edit fixtures plus live catalog reconciliation. Docs: skill/usage/evaluations. | Fresh host triggering and independent semantic review pending; no candidate execution authorization. |
-| F06 / C06,C07,C10,C16 | 1–2: exact-target delivery instructions and actual ordinary feature/bug outputs; 3–4: shipping defaults/errors/example updated, quantity repair justified no-impact; 5–7: original 697 expectation retained, reviewable branch/PR, remote-denied continuation actually occurred. test_delivery/test_scenarios and primary-author record. Docs: contract/skill/usage/evaluation/templates. | Fresh host execution and ordinary PR review pending; PR open is not delivery. |
+| F05 / C05 | 1–5: primary-author shaping/current.py inspection, bounded bodies, dependencies, unknown/exclusions; 6: identity/human-edit fixtures plus live reconciliation; 7–9: S33 realistic five-outcome one-shot MVP batch, durable design anchors, confirmed prerequisite URLs, Ready/blocked separation, no execution from approval alone, stable rerun/contradiction negatives. Actual consumer Issues #1–#5 published. Docs: skill/usage/evaluations, approved refinement and pilot report. | Fresh host triggering and independent shaping evaluation pending; bounded pilot #1 execution was separately authorized, #2–#5 remain unexecuted. |
+| F06 / C06,C07,C10,C16 | 1–2: exact-target delivery instructions and ordinary feature/bug outputs; 3–4: shipping defaults/errors/example updated, quantity repair justified no-impact; 5–7: original 697 retained, denied-remote continuation and actual consumer Issue → draft → checks → Ready PR6 → wf:review → independent review/fixes/re-review. Nested-JSON report finding reproduced/remediated with ten actual tests. Docs: contract/skill/usage/evaluation/templates/pilot. | Fresh host execution and nested-data re-review pending; PR open is not delivery. |
 | F07 / C08 | 1–3: bounded repair without change, significant receipt change with sole change-owned plan; 4–5: partial-owner obligation, disposable final archive/current-spec synchronization, real rewrite kept active; 6: actual CLI 1.14.0 strict validation plus producer/consumer proof before archive. test_openspec. Docs: OpenSpec runbook, four implemented current specs. | Real rewrite archive waits for F14; structural CLI alone permits premature archive, so owner/review remains necessary. |
 | F08 / C09,C15 | 1–2,6: risk-specific primary-author skill findings with honest authorship; 3: wrong 9975 vs hand-expected 7500; 4: ignored currency/missing target negatives; 5: weakened 498 assertion rejected against original 697. test_risk/test_setup. Docs: methods/L-001/L-002/evaluation. | Independent review and fresh-host risk selection pending. |
 | F09 / C02,C10,C11,C13,C16 | 1: actual initial 403 did not stop code; 2: timeout/human-edit/duplicate/permission fixtures and live reconciliation; 3: missing/ambiguous branch/revision no fallback; 5: actual same-SHA Ubuntu; 6: dirty-content identity invalidation/affected reruns; 7: separate read/write/push/admin evidence, no credentials emitted. Docs: handoff/evidence/GitHub guide. | 4 fresh context resume remains F14; live lost-response/permission-loss cases are simulated only. |
-| F10 / C04,C07,C10,C12 | 1: config argv has actual subprocess consumer; 2: missing sections/path/anchor negatives and installed checks; 3–4: head/body event and malicious-data fixtures, trusted-base/read-only code; 5: runbook and actual settings reads; 6: on-demand read-only Issue audit; 7: semantic limits explicitly documented. test_checks/test_consumer_ci, live source Actions. Generic consumer workflow actually executes declared commands, fails on exit7 and omits wrong-environment integration. Docs: checks/architecture/enforcement runbook. | Trusted-base metadata not active on first adoption; observed merge enforcement pending, no admin write. |
+| F10 / C04,C07,C10,C12 | 1: actual config argv consumer; 2: missing sections/path/anchor negatives; 3–4: malicious-data fixtures and actual consumer push/PR/body/Ready events, trusted-base/read-only checks; deliberate Documentation omission failed with pr.section, restoration passed; 5: runbook/settings reads; 6: read-only Issue audit; 7: semantic limits. Generic consumer CI executes application commands. Docs: checks/architecture/enforcement runbook/pilot. | Source trusted-base metadata needs main adoption; consumer trusted-base checks are active. Required merge enforcement remains unobserved, no admin write. |
 | F11 / C07,C09,C12,C15 | 1–3: ordinary/bug/cross-module/risk actual consumers, omission/contradiction/no-impact primary-author exercises and broken controls; 5–6: discriminating results, no widened expectations/hidden skips/model harness. test_scenarios/test_risk/corpus/evaluations. Docs: corpus/evidence/coverage. | 4 triggering only explicitly read in-turn, not automatic fresh Cloud discovery; retain gap. |
 | F12 / C13,C14 | 1–3: test_migration read-only known-format active/Done/deferred/inconsistent/missing/unsafe/duplicate proof and baseline 19 Done/0 active; 4–6: explicit disposition/freeze/one-authority/rollback procedure and interrupted identity/human-edit fixtures. Docs: migration runbook/current spec. | No active source work exists to migrate; actual consumer cutover and remote rollback not performed; universal formats excluded. |
 | F13 / C01,C08,C15 | 1: clean clone and pinned install have exactly 3 skills, no v1 tree/global installer; 2–3: all 321 baseline dispositions/destinations and retained risk regressions; 4–5: no ledger/synchronizer, current architecture; 6: active rewrite gate; 7: primary-author reviewed exhaustive manifest validated by test_retirement. Docs: all current routing/guides, disposition manifest, four specs, Git baseline. | Independent asset/spec/document review pending; no global cleanup performed. |
-| F14 / C02,C08,C11,C12,C16 | 3: actual Ubuntu same-SHA pass; 4: real GitHub creation/updates/PR/push/Actions; 5–8: complete gap mapping, settings evidence, pilot overhead, honest release report; 9: rewrite deliberately active. Docs: this report, release notes and handoff. | 1–2 fresh Cloud discovery/resume, required review, trusted-base/check enforcement remain unperformed; archive only after all required gates. |
+| F14 / C02,C08,C11,C12,C16 | 2: observed separate-context resume at9cf27f80 preserving local-only work; 3: actual source54 and consumer10-test same-SHA Ubuntu passes; 4: actual consumer design batch, claim/branch/draft/CI/Ready PR/review fixes and completed Codex re-review; 5–8: gap mapping, actual metadata negative/restoration, settings/access evidence and overhead; 9: rewrite active. Docs: acceptance/consumer pilot/release notes/handoff. | 1 and remaining2: fresh Cloud task discovery and live API-safe rerun, Ubuntu agent discovery, nested-data re-review, representative fresh-host scenarios and rewrite-wide independent review remain pending. Merge/completion and administrative mutations require separate authority. |
 
 ## Scenario proof and gaps
 
@@ -104,13 +115,13 @@ The following names are files under tests/v2. Skill evidence refers to
 | S24 | partial OpenSpec tasks remain open, closing owner, disposable completion/archive | No live multi-PR delivering merge performed |
 | S25 | original baseline/explicit dispositions, final clean clone, no dual ledger; rollback fixtures/guide | No active consumer rollback performed |
 | S26 | missing worktree/branch/revision CLI fails without cwd fallback | No pending deterministic path |
-| S27 | actual head Actions reruns; safe body/head event fixtures | Live consumer Actions and trusted-base body-edit rerun await adoption |
+| S27 | actual source/consumer push and PR Actions, Ready event, trusted-base body-edit missing Documentation failure and restoration success; malicious-data fixtures | No pending consumer deterministic event proof; source trusted-base adoption still pending |
 | S28 | SHA/dirty content invalidation fixtures and actual reruns after changed tests | Final docs head verification recorded remotely |
 | S29 | exact checkpoint/next action below | Required fresh Cloud task unperformed |
 | S30 | denied targets/permissions, staging/apply/interrupted migration negatives | Fresh-host targeted analysis pending |
 | S31 | rulesets GET returned []; branch-protection GET403 | Required contexts/merge blocking unobserved |
 | S32 | known v1 active/Done/deferred/malformed and partial remote success fixtures | Actual source0active means no live import |
-| S33 | realistic new-project design, five actual candidate bodies, one approval/Ready separation, preserved detail/unknown/later scope; test_initial_backlog pinned fresh install, dependency/link and rerun negatives | Fresh-host shaping and actual consumer batch publication remain separate pilot obligations |
+| S33 | realistic design, five actual published consumer Issues, user-authorized batch readiness with roots Ready/unknown and dependents blocked, preserved detail/design anchors, no task Issues/extra execution; test_initial_backlog link/dependency/rerun negatives | Fresh-host shaping rerun and discovery still pending; actual publication is proven separately from fixtures |
 
 ## GitHub, enforcement and review
 
@@ -124,17 +135,26 @@ updates, preserving human content and unrelated labels. Fault tests remain fixtu
 Read-only `GET /repos/canzheng/workflow-skills/rulesets` returned `[]`.
 `GET /repos/canzheng/workflow-skills/branches/main/protection` returned403
 Resource not accessible by integration. This does not prove classic protections
-are absent. No protection settings were changed. Consumer CI is now installed automatically as
-owned files, but live Actions in a newly adopted consumer repo remain unperformed. `v2 verification` is observed;
+are absent. No protection settings were changed. Consumer CI is installed automatically
+as owned files and actual Actions/trusted-base metadata passed in the newly adopted
+consumer; intentional body-edit failure/restoration is recorded in the pilot report.
+The consumer's ruleset/protection reads returned distinct403s, not proof of active
+merge blocking. `v2 verification` and consumer `v2 PR contract` are observed;
 `v2 PR contract` trusted-base metadata cannot run for first adoption while main
-lacks the new checker/workflow. Body-edit refresh and actual merge blocking must
-be observed after authorized adoption/configuration; see [runbook](../workflow/checks.md).
+lacks the new checker/workflow. Actual merge blocking must be observed after
+authorized configuration; see [runbook](../workflow/checks.md).
 No authorization to merge, configure protection, publish or delete branches exists.
 
 Semantic evaluations and final documentation assessment are primary-author.
 A user-supplied external reviewer examined architecture/skills/templates/Actions and
 reported targeted comments, validated in reviewer-findings.md. That limited input is
 not final independent acceptance review of the revised code/specs/docs/dispositions.
+Native independent Codex review of consumer PR6 completed with two P2 findings;
+both were validated by reproduction and remediated with discriminating tests/docs
+at the actual consumer head. Native re-review completed at2b4ecd69 and reported no
+major issues; an earlier supplied Cloud report's separate nested-JSON finding was
+then independently reproduced/remediated atcec53770 with ten-test Cloud/Ubuntu/CI
+proof; its targeted re-review is tracked separately rather than waived by prior review.
 The host's current Cloud platform-guide fetch returned403; no current published
 profile behavior, secret lifetime or automatic skill synchronization is inferred.
 
@@ -181,9 +201,12 @@ Do not repeat F01–F13 or create another plan/backlog. Use Issue #15 for remain
    operations. Record continuation using existing Issue/PR references.
 4. Preserve passed Ubuntu/Actions evidence if content is unchanged; rerun affected
    proof at any changed implementation SHA. Obtain final independent semantic review.
-5. In an authorized consumer repository, exercise the actual Ready Issue → claimed
-   work → draft PR → generic CI → Ready PR/review → semantic review/fixes path.
-   Ubuntu discovery must be observed in its actual agent host. Merge/completion can
+5. Continue the existing real consumer at the exact branch/SHA in
+   [its report](f14-consumer-pilot.md), Issue1 and Ready PR6. Preserve actual passed
+   publication/CI/Ubuntu/review-fix evidence; do not create another consumer or repeat
+   completed work. Fresh Cloud task has been launched by the user; collect actual
+   discovery/use, safe shaping rerun and continuation evidence. Ubuntu discovery
+   must be observed in its actual agent host. Merge/completion can
    be observed only with separate merge authorization; until then keep that final
    path pending. Report trusted-base metadata adoption and administrative enforcement as still
    pending unless observed by an authorized owner. Changing protection or merging
@@ -208,4 +231,5 @@ S33 was added to the approved capability/feature/design contract and current del
 spec, with realistic input/output and primary-author evaluation. This extends F05/F11
 and the real F14 consumer pilot without a new state engine or mandatory artifact.
 Earlier implementation-SHA results above remain historical evidence; the final revised
-SHA/reruns and consumer pilot outcome are recorded in Issue15/PR16 after publication.
+SHA/reruns and consumer pilot outcome are recorded in Issue15/PR16 after publication
+and [the durable consumer report](f14-consumer-pilot.md).

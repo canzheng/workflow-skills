@@ -9,6 +9,14 @@ workflow-design-to-backlog, workflow-deliver-issue and workflow-risk-review.
 GitHub Issues/PRs own shared work identity; ordinary fixes need no per-task ledger,
 mandatory plan, wrapper lifecycle or forced reviewer. OpenSpec is proportional.
 
+For a new project with an existing design, create the initial/MVP backlog in one
+design-to-backlog run: delivery outcomes, design references, direct prerequisite
+metadata and isolated unresolved decisions. One batch readiness approval does not
+start execution. Reruns reuse identities and preserve human edits. The
+[actual consumer pilot](validation/f14-consumer-pilot.md) exercises this entry point,
+installed generic CI, the Ready-PR boundary and independently reviewed fixes;
+fresh host and final merge/enforcement obligations remain explicit.
+
 Use the pinned source setup/doctor/check utilities in [operations](operations.md).
 Setup defaults to dry-run, preserves unrelated instructions and user configuration,
 rejects collisions/modified managed files and records provenance. Review changes

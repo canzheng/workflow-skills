@@ -24,3 +24,5 @@ reachable through the recorded baseline in Git, not copied into the source head.
 - [v2 release/migration notes](release-notes-v2.md): candidate behavior and adoption.
 - [Validated external review findings](validation/reviewer-findings.md): evidence and
   targeted consumer-CI/PR-boundary adjustments.
+- [Real F14 consumer pilot](validation/f14-consumer-pilot.md): actual backlog, Ready PR,
+  Actions negatives, review fixes, Ubuntu proof and remaining authorization gates.

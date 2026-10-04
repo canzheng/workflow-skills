@@ -152,3 +152,31 @@ passed on Cloud checkout and fresh Ubuntu clone; Actions37205386850 succeeded.
 Consumer live CI and Cloud/Ubuntu agent discovery remain distinct pending gates.
 No merge/protection authorization was inferred from the review. Final report links
 all feature acceptance and scenarios; Issue15 owns the explicit final-SHA handoff.
+
+User-authorized one-shot initial/MVP backlog refinement tested at
+`139e66d5b43cfbd3821fe098c0119b93aaad4928`: 54 tests, strict current/delta specs
+and public source checks passed on managed Cloud and fresh same-SHA Ubuntu clone;
+Actions37206519129 succeeded. Docs/specs/skill/corpus updated together for S33.
+Real consumer canzheng/workflow-skills-test adopted that pinned bundle; five Issues
+published with actual prerequisite URLs, explicit unknown and no task explosion.
+Issue1 was selected/claimed, implemented, published in draft PR6, then made Ready
+before wf:review. Actual generic push/PR and trusted-base metadata passed; removing
+Documentation produced its intended pr.section failure, restoration passed.
+Independent native Codex review found two reproducible failure-path/doc issues;
+both fixed at consumer `9cf27f803dd5cc2dc8b1ffbd12fe8fc643602fc6`, nine tests pass
+on Cloud and fresh Ubuntu, consumer Actions pass. Re-review found/reproduced one
+root/umask077 test-fixture defect, corrected at consumer
+`2b4ecd69a3455e6fb3bd8744537a23ed5dd3071e`; same-SHA Cloud/Ubuntu restrictive-umask
+and GitHub verification passes with original assertions. Final native re-review
+completed at2b4ecd69 with no major issues reported; the three addressed threads are
+resolved. An earlier user-supplied Cloud report's separate deeply nested JSON
+traceback was reproduced on2b4ecd69, then remediated at consumer
+`cec53770c17f670615f8f3bd610bde70d424434c` after reading the supplied task and
+confirming it idle. Ten actual tests pass on Cloud/fresh Ubuntu root/umask077 and
+real push/PR/metadata Actions; targeted re-review pending. The linked task's observed
+9cf27f80 continuation preserves local-only work, but is still onboarding context.
+Fresh consumer
+Cloud task launched by the user; actual discovery/continuation evidence not received.
+See docs/validation/f14-consumer-pilot.md for exact branches, runs and continuation.
+F14 remains unchecked: preserve required fresh-host/scenario/final-review gates;
+real merge/completed closure and administrative mutations are separately unauthorized.
