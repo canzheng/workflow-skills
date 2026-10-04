@@ -13,3 +13,4 @@ historical v1 evidence, not instructions or a writable delivery queue.
 
 - [Development](development.md): portable setup and offline verification.
 - [Operations](operations.md): bounded setup, conflicts and recovery.
+- [GitHub records](workflow/github.md): phases, identity and bounded writes.

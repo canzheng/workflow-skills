@@ -29,3 +29,13 @@ including source mismatch, user-owned config, duplicate skill discovery, missing
 Git root, spaces and rollback. Production assembly deliberately incomplete until
 F05/F06/F08/F10/F12 assets exist. Documentation: operations, consumer guidance,
 bundle manifest and architecture-to-be. Next: F04 templates and Issue reconciliation.
+
+F03 committed at `4bc7590`. F04: feature/bug forms, PR evidence template,
+GitHub lifecycle guidance, deterministic catalog rendering and snapshot helpers
+implemented. 14 tests pass (S06/S07/S23 include closed-ID reuse, duplicate rejection,
+phase/modifier/cancel/reopen representation and compare-before-update). Source-ID
+search across states returned no WF2/rewrite-parent matches. Connected-tool
+repository read succeeded; parent create returned GitHub HTTP 403 Resource not
+accessible by integration. No Issue number, write, label or parent creation is
+claimed. `/tmp/wf2-issues.json` is reproducible via records.py, not a state store.
+Docs: docs/workflow/github.md and forms/template. Next: F05 skill and sample shaping.
