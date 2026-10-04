@@ -110,3 +110,5 @@ its use here. This rewrite does not uninstall the user's global configuration.
 Inspection validates OpenSpec archive roots and matching archive directories with
 repository-relative symlink-safe checks. A symlinked archive cannot supply external
 change evidence; report an unsafe/ambiguous change finding and resolve it deliberately.
+Legacy BACKLOG.md files are also validated before reads; a ledger symlink is a finding
+and cannot import unrelated external acceptance into migration candidates.

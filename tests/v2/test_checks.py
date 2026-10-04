@@ -56,6 +56,26 @@ class CheckTests(unittest.TestCase):
                 result = run('check', '--repo', self.source, expect=1)
                 self.assertTrue(any(x['code'] == 'bundle.incomplete' for x in result['findings']))
 
+    def test_installed_manifest_cannot_hide_deleted_runtime_or_ci_asset(self):
+        pin = self.target / '.workflow/install-manifest.json'
+        original = pin.read_bytes()
+        for name in ('tools/workflow/migration.py', '.github/workflows/workflow-v2-verify.yml', '.github/workflows/workflow-v2-pr-metadata.yml'):
+            with self.subTest(asset=name):
+                asset = self.target / name
+                contents = asset.read_bytes()
+                m = json.loads(original)
+                del m['files'][name]
+                asset.unlink()
+                pin.write_text(json.dumps(m))
+                result = run('check', '--repo', self.target, expect=1)
+                self.assertTrue(any(x['code'] == 'bundle.incomplete' for x in result['findings']))
+                run('doctor', '--repo', self.target, expect=1)
+                run('bootstrap', '--repo', self.target, '--apply', expect=1)
+                self.assertFalse(asset.exists())
+                self.assertEqual(json.loads(pin.read_text()), m)
+                asset.write_bytes(contents)
+                pin.write_bytes(original)
+
     def test_missing_sections_broken_files_and_anchors_fail(self):
         p = self.snapshot(BODY.replace('## Documentation', '## Unrelated'))
         r = run('check', '--repo', self.target, '--pr-json', p, expect=1)

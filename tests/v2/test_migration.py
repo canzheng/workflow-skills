@@ -85,6 +85,17 @@ class MigrationTests(unittest.TestCase):
         self.assertIsNone(result['records'][0]['change_path'])
         self.assertTrue(any(x['code'] == 'migration.change' for x in result['findings']))
 
+    def test_symlinked_ledger_is_not_unrelated_migration_input(self):
+        external = pathlib.Path(self.temp.name) / 'outside-ledger.md'
+        text = '## [BACKLOG]\n### `v1-f001` External\nUnrelated external acceptance.\n'
+        external.write_text(text)
+        (self.folder / 'BACKLOG.md').symlink_to(external)
+        result = run('migrate', 'inspect', '--repo', self.root, expect=1)
+        self.assertEqual(result['records'], [])
+        self.assertTrue(any(x['code'] == 'migration.symlink' for x in result['findings']))
+        self.assertNotIn('Unrelated external acceptance', json.dumps(result))
+        self.assertEqual(external.read_text(), text)
+
     def test_interrupted_cutover_reconciles_old_identity_and_preserves_human_edits(self):
         from core import Conflict
         from records import source_match, managed_update

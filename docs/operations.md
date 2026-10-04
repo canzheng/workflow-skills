@@ -129,3 +129,8 @@ The pinned bundle must include every installed CLI runtime module, not just skil
 entrypoints and CI files. Missing runtime assets fail adoption preflight. Unmanaged
 files inside ignored shared namespaces are dependency modifications: diagnostics
 report dirty dependency content even when Git status is clean.
+
+Installed verification/diagnostics and dependency bootstrap also require the complete
+runtime/CI/skill destination set in provenance. Deleting a file and its manifest entry
+cannot turn an incomplete adoption into a pass. Partial uninstall residual provenance
+remains available for recovery; it does not certify a complete usable installation.
