@@ -34,3 +34,9 @@ its authored shared skills tracked. Setup SHALL NOT modify the Git index.
 - **AND** an adopted consumer retains its tracked pin and project files on repeated runs
 - **AND** no setup entrypoint is copied into the consumer or installed globally
 - **AND** before the first commit diagnostics report revision:null and dirty:true
+
+#### Scenario: Adopted configuration and provenance preflight
+- **WHEN** repeat environment setup finds an adopted repo with missing config or wrong explicit identity
+- **THEN** it fails before materializing missing shared dependencies or rewriting project files
+- **AND** malformed installed bundle versions fail check, doctor and bootstrap before writes
+- **AND** setup, source checks and installed provenance use the same v2 version format

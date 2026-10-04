@@ -12,16 +12,16 @@ itself uses the tracked consumer pin and needs no fetch when skills already matc
 No consumer policy/pin/index is rewritten by repeat setup. First adoption creates
 trackable policy and exactly three scoped ignore entries; project skills stay trackable.
 
-Tested implementation source `2e5106a007bb4da37b25a81e2bce1828a37d51eb` passes77 tests
+Tested implementation source `10ff9cc807a54aa0834d24de82e0b685048379de` passes79 tests
 without skips and strict OpenSpec checks on Debian Cloud and fresh Ubuntu24.04.5
 (Python3.12.14/3.12.3, Git2.52/2.43). A shallow source-suite attempt failed two historical
 baseline checks; fetching full history restored required evidence without weakening
-those checks. Source push/PR Actions37218367939/37218371437 succeeded.
-Consumer `pilot/shared-skill-bootstrap` at `ed5a678bbd7cda27cc3381cf80290acb8ebc2da8`
+those checks. Source push/PR Actions37219390322/37219395628 succeeded.
+Consumer `pilot/shared-skill-bootstrap` at `e22ab9a1e55c7457060fecfaef040283077c24ee`
 pins that exact source; fresh Cloud-runtime/Ubuntu clones executed the actual README
 fetch-and-run command twice, matched all four shared hashes, preserved tracked bytes
 and index, kept pantry-project tracked and stayed Git-clean. Actual consumer push/PR/
-metadata Actions37218631482/37218633718/37218632531 succeeded at that exact head. Issue7 and ReadyPR8
+metadata Actions37219574528/37219577664/37219576095 succeeded at that exact head. Issue7 and ReadyPR8
 remain open; PR6/Issue1 application evidence stays atf95f0cae3b87bc8031b00a4150cf9670251ae978.
 
 Mandatory completeness now includes all20 destinations, including docs/templates/risk
@@ -34,9 +34,15 @@ no acceptance/assertions were weakened to accommodate broken output.
 
 Source864eb08 review additionally found repeated setup ignoring repository identity
 and source check accepting malformed version strings. Both were reproduced with
-failing-before public tests, repaired at2e5106a and verified with actual wrong-identity
-Cloud/Ubuntu no-write negatives and77 tests. Consumer102706c review completed with no
-major issues; current-head re-reviews still need actual results. Native independent
+failing-before public tests, repaired at2e5106a and included in10ff9cc and verified with actual wrong-identity
+Cloud/Ubuntu no-write negatives and79 tests. Consumer102706c and ed5a678 reviews completed with no
+major issues; sourceadbe2a review then found malformed installed versions accepted and
+missing adopted config checked too late. Both were reproduced before repair with
+actual pinned fetch/public CLI tests. One predicate now validates source/installed
+versions, and adopted config is required before writes. Actual Cloud/Ubuntu fresh
+consumer clones deny invalid versions, missing config and wrong identity before
+materialization, then repeat normally with preserved bytes/index. Current-head
+re-reviews still need actual results. Native independent
 current-head semantic review results must be read, not inferred
 from CI. Fresh published Cloud pre-agent discovery/use and Ubuntu agent-host discovery
 are still unperformed. The onboarding chat is not fresh-task evidence. Required-check

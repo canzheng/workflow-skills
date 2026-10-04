@@ -35,7 +35,7 @@ with your local absolute checkout path. No global installation is involved.
 
 ```sh
 set -eu
-WF2_SOURCE_SHA=2e5106a007bb4da37b25a81e2bce1828a37d51eb
+WF2_SOURCE_SHA=10ff9cc807a54aa0834d24de82e0b685048379de
 WF2_CONSUMER_ROOT=/workspace/workflow-skills-test
 WF2_CONSUMER_REPOSITORY=canzheng/workflow-skills-test
 WF2_SOURCE_DIR=$(mktemp -d)
