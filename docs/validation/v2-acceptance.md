@@ -1,5 +1,21 @@
 # v2 rewrite acceptance evidence
 
+## User Ubuntu workstation bootstrap verified — 2026-10-05
+
+The [supplied workstation transcript](ubuntu-workstation-bootstrap.md) reports
+consumer `9bd23d72dc24a741d669c1ea92532f8bf337aa42`, Ubuntu26.04/Python3.13.13/
+Git2.53/codex-cli0.160.0. First bootstrap materialized the four ignored shared files;
+check --run-local and expected-revision doctor returned ok:true; repeat bootstrap
+returned changes:[]; shared git-ls-files and final status were empty. The enclosing
+validation exited0. This is additional actual-user Ubuntu install/check evidence,
+not a new run of all107 source tests. Global v1 skills produced three legacy warnings;
+no global changes are required. Doctor's host discovery and GitHub operation probes
+remain unprobed. Initial fresh-session discovery/use, no-chat continuation and final
+semantic review remain pending. Raw-index byte preservation was not separately
+measured in this transcript; earlier owned-clone evidence remains separate.
+Use the [Ubuntu session prompt](ubuntu-workstation-handoff.md#fresh-ubuntu-task-prompt)
+from that checkout; no reinstall or Cloud environment retry is needed.
+
 ## Current user-approved Ubuntu and distribution scope — 2026-10-05
 
 F14 now requires Ubuntu workstation discovery/use and portability; Cloud is

@@ -1,5 +1,18 @@
 # F14 real consumer pilot
 
+## Actual user Ubuntu bootstrap — 2026-10-05
+
+[Workstation evidence](ubuntu-workstation-bootstrap.md) now verifies first/repeat
+bootstrap and installed check/expected-revision doctor at consumer9bd23d72 on the
+reported Ubuntu26.04, Python3.13.13, Git2.53 and codex-cli0.160.0. Four shared files
+were installed; repeat changes:[]; no shared files indexed and final Git status clean;
+enclosing validation exit0. Three existing global v1 skills generated warnings,
+with no global mutation. Fresh agent discovery/use, continuation and final semantic
+review still need evidence. The workstation output did not run the source107-test
+suite or prove raw-index byte identity; previous runtime/index/CI/enforcement
+results retain their own revisions. Next: start Codex from the exact consumer root
+and use the [fresh-session prompt](ubuntu-workstation-handoff.md#fresh-ubuntu-task-prompt).
+
 ## Current user-approved Ubuntu and distribution scope — 2026-10-05
 
 F14 now requires Ubuntu workstation discovery/use and portability; Cloud is

@@ -5,6 +5,11 @@ and discovery are deferred, not reported as passed. Shared skills in consumers a
 ignored exact-pin dependencies; the source's authored skills stay tracked. Optional
 explicit global installation is separate from repo-local adoption.
 
+The user's [Ubuntu workstation bootstrap report](ubuntu-workstation-bootstrap.md)
+now passes installation/check/repeatability at the pinned consumer revision on
+Ubuntu26.04/Python3.13.13/codex-cli0.160.0. Fresh agent discovery/use remains pending;
+the next step for that prepared checkout is the fresh-session prompt below.
+
 ## Pinned targets
 
 Source: canzheng/workflow-skills, rewrite/workflow-skills-v2, tested implementation
@@ -25,14 +30,20 @@ Run outside an existing checkout, setting an unused absolute path. This selects
 and verifies the exact consumer revision before bootstrap/agent discovery:
 
 ```sh
-set -eu
-: "${WF2_CONSUMER_ROOT:?Set an unused absolute path for the consumer clone}"
-git clone --branch pilot/shared-skill-bootstrap https://github.com/canzheng/workflow-skills-test.git "$WF2_CONSUMER_ROOT"
-cd "$WF2_CONSUMER_ROOT"
-test "$(git rev-parse HEAD)" = "9bd23d72dc24a741d669c1ea92532f8bf337aa42"
-python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
-python3 tools/workflow/workflow.py check --repo . --run-local --json
-python3 tools/workflow/workflow.py doctor --repo . --expect-revision 9bd23d72dc24a741d669c1ea92532f8bf337aa42 --json
+# Isolate errexit so a failed validation does not terminate a tmux pane's shell.
+set +e
+(
+  set -eu
+  : "${WF2_CONSUMER_ROOT:?Set an unused absolute path for the consumer clone}"
+  test ! -e "$WF2_CONSUMER_ROOT"
+  git clone --branch pilot/shared-skill-bootstrap https://github.com/canzheng/workflow-skills-test.git "$WF2_CONSUMER_ROOT"
+  cd "$WF2_CONSUMER_ROOT"
+  test "$(git rev-parse HEAD)" = "9bd23d72dc24a741d669c1ea92532f8bf337aa42"
+  python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
+  python3 tools/workflow/workflow.py check --repo . --run-local --json
+  python3 tools/workflow/workflow.py doctor --repo . --expect-revision 9bd23d72dc24a741d669c1ea92532f8bf337aa42 --json
+)
+printf 'Validation exit status: %s\n' "$?"
 ```
 
 The exact source pin for first adoption/global install is:
