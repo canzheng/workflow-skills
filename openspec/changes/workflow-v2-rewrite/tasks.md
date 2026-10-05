@@ -862,60 +862,68 @@ current/delta adoption scenarios are updated. Full local/Ubuntu suites, actual
 installed proof, consumer repin/Actions, evidence and current semantic reviews are
 next. Reviews are disarmed on completion; no archive/merge/closure/admin change.
 
-## Latest Issue/PR snapshot boundary checkpoint — 2026-10-05
+## Latest mutation and metadata checkpoint — 2026-10-05
 
-Tested source `4c874734fdb17255ed7ffd881a6bcd015bbff105` passes153/no skips on
-managed Python3.12.14 (155.859s) and Ubuntu24.04.5/Python3.12.3 (136.533s), plus
-strict OpenSpec all5/public checks. Consumer `aea99fccc9ec21e9cc46ee93df25126677d9714c`,
-pilot/shared-skill-bootstrap/Ready PR8/Issue7, pins this source. Source push37347307749/
-PR37347316912 and consumer push37347365875/PR37347372589/existing-main metadata37347369794
-pass. New trusted-base metadata deployment/events still await authorized adoption merge.
+Tested source `c92d47e6bd6d63bc01b7aedee0d0d8d2e95189ee`, branch
+rewrite/workflow-skills-v2/Ready PR16, passes159/no skips on managed
+Python3.12.14 (166.501s) and Ubuntu24.04.5/Python3.12.3 (143.297s), plus
+strict OpenSpec all5/public checks. Consumer `9c51df949b75b98db8615065042a108f04d745d2`,
+pilot/shared-skill-bootstrap/Ready PR8/Issue7, pins that source. Source push37353694586/
+PR37353704450 and consumer push37353753931/PR37353761938/existing-main metadata37353758310
+are tracked separately in the PR checkpoint; consumer runs pass, source runs are
+pending at recording time. New trusted-base metadata deployment/events still await
+authorized adoption merge.
 
-Source review5418058854 at3daf5a0 returned P2s4186646709/4186646716, independently
-reproduced and repaired in fc6f80b. Two public-CLI controls fail42 old-code subcases
-(no errors);36 native state/reason pairs and39 evidence/state combinations pass
-with structured diagnostics, empty stderr and unchanged snapshot/index. Reopened
-belongs to open; completed/not_planned/duplicate belong to closed. Optional evidence
-must be string or null in every state; blank text cannot suppress completed-claim
-missing-evidence findings. An annotation never certifies acceptance, review or merge.
-Both threads resolved with evidence. Original detailed proof is revision-bound at
-[5b15557](https://github.com/canzheng/workflow-skills/blob/5b1555706f7f23d337dec5e43fc2cde72d976559/docs/validation/wider-boundary-review.md).
+Source reviews5418340222 at5b15557 and5418516880 at72adce4 returned five P2s.
+Malformed PR event shapes (4186881374) were already repaired at4c87473:40 old-code
+failing subcases/no errors,41 malformed inputs/three native body paths pass before
+any head fetch. Destination replacement (4186881365), rollback write boundary
+(4186881370), removal (4187030868) and body fragments (4187030879) are independently
+reproduced and repaired atc92d47e. Old-code controls fail8 destination cases, one
+rollback case, one deletion case and12 body-fragment cases, with no harness errors.
+Normal and native snapshots resolve fragments against body headings rather than a
+synthetic PR.md; missing headings fail even when a real head file contains them.
 
-Wider author risk review independently reproduced the same malformed-object pattern
-in PR events: null repository/pull_request and non-string head SHA caused traceback/
-empty stdout; wrong repository/body inputs could fetch before invalid-input rejection.
-The new public installed-CLI regression fails40 old-code subcases (no errors), uses
-an isolated fetch canary, and verifies41 malformed cases plus three native body paths.
-All event object/identity/body/SHA preflights now run before any head fetch. Null or
-absent native body still yields missing-section findings. Snapshot/index stay unchanged;
-metadata never executes head code or body fragments. All23 checker tests pass (23.596s).
-Current quality specification and check guidance are updated; no assertions narrowed.
+Existing destination writes use Linux renameat2 exchange, retaining the actual
+replaced entry; absent destinations require no-replace. Rollback stages originals
+instead of truncating live content. Deletion first captures/validates the actual
+entry and restores a mismatched entry when the destination remains absent. Missing
+atomic support has no unsafe overwrite fallback. New regressions also retain late
+in-place displaced-inode edits in concurrent_backup/concurrent_mode metadata.
+Focused34 setup/24 checker/6 global tests pass. Existing parent-chain, symlink,
+bytes/mode/inode/index and recovery assertions remain; fault hooks now target the
+new mutation helpers and staged rollback rather than retired live-file writes.
+Best-effort single-entry recovery is not a process lock or multi-file transaction.
 
-Actual installed30-test suite passes managed (63.115s) and Ubuntu (59.823s).
-Fresh managed local clone of the native-API-verified remote commit and fresh Ubuntu
-remote clone materialize11 missing ignored dependencies, match20 hashes, preserve
-four narrow ignores/project skill/files/raw index and repeat offline as no-op. Retained
-force-tracking, staged-policy, namespace/concurrency/discovery/rendering negatives pass.
-Literal exact-pin Ubuntu GitHub fetch-and-run first adoption/repeat exits0 with unchanged
-repeat bytes/absent index. Managed Git HTTPS consumer read unexpectedly required credentials;
-no authentication/global configuration changed. Native API proves remote treec4429979be1956fe08f464eed5dcccc352ab0c00
-matches reviewed localb3ad753d6c6ea884c050b8d33d4d92e11750c1b9, parent9ab5b10;
-raw native remote commit bytes independently hash to the exact published SHA. Guarded
-non-force publication and local same-tree ref reconciliation preserve clean files/index.
-Source-owned update preserves config/all skills/raw index2f1fd971ee02bb799b3d4117855ce46c90b8120a4f6a1d20986424069573af17
-before caller staging. An initial Ubuntu proof omitted the proxy CA mount and failed
-fetch; the recorded rerun uses CA trust with TLS verification intact. Actual global-host
-installation remains unperformed.
+Actual installed36-test suite passes managed (74.061s) and Ubuntu
+(70.169s). Fresh managed local clone of the native-API-verified remote
+commit and fresh Ubuntu remote clone materialize11 ignored dependencies, match20
+hashes, preserve four narrow ignores/project skill/files/raw index and repeat offline
+as no-op. Retained force-tracking, index-only nested policy, layout, concurrency,
+discovery and rendering negatives pass. Literal exact-pin Ubuntu GitHub fetch-and-run
+first adoption/repeat exits0 with absent index retained. An initial managed literal
+probe used a non-Git directory and was correctly rejected; it is not acceptance.
 
-F01–F13 implemented/verified/review-ready; F14 partial pending current-head semantic
-review and native archive/final checks. Reviews requested at5b15557/9ab5b10 precede
-this PR-event repair; their results cannot approve the newer heads. Five-minute active-
-turn monitors disarm on completion; repaired-head review follows. Native Ubuntu catalog/
-actual three-skill use remains original9bd23d72/a75c3f2 with unchanged skill hashes.
+Native API remote tree1c68c254c6ef4695ae29f97cf77797d7792d26c0 matches reviewed
+locala67ca66ade322f1f5bcda721160dcb3842d13f48, parentaea99fc. Exact native commit
+bytes independently hash to its published SHA. Guarded non-force publication and
+same-tree local ref reconciliation preserve files/index. Source-owned update leaves
+config/all skill bytes/raw indexee6e08f36dc93627ba94d88dbdf6b8fd2ca924d1d038d5ad9bce7ce66e9df251
+unchanged before explicit caller staging. Operations guidance in source/consumer,
+development/architecture/README, check guidance and current/active adoption/quality
+scenarios reflect the final repair. No shared-skill bytes changed.
+
+F01–F13 implemented/verified/review-ready; F14 partial pending repaired-head semantic
+review and native archive/final checks. Consumer review5999657254 ataea99fc found no
+major issues but predates the repin. Source review5418516880 is completed; its monitor
+is disarmed. Repaired-head review is requested separately with five-minute active-turn
+monitoring. Native Ubuntu startup catalog/actual three-skill use remains original
+9bd23d72/a75c3f2 with unchanged skill hashes; no new discovery claim is invented.
 Cloud deferred; historical Ubuntu26 full-suite invalid-JSON cause remains unexplained.
-Consumer required checks/source verification enforcement were observed read-only.
-New base metadata deployment/source PR-contract administration, real merge and valid
-completed Issue observation remain pending authorization. No merge/closure/admin/global/
-auth/release/remote deletion. Next: current review, then native archive/final checks.
+Required checks were observed read-only; new base metadata deployment/source PR-contract
+administration, real merge and valid completed-Issue observation remain pending
+authorization. Actual global-host installation/discovery remains unperformed.
+No merge/closure/admin/global/auth/release/remote deletion. Next: repaired-head review,
+then native archive/final checks; obtain separate authorization for real delivery.
 
 See [wider review](../../../docs/validation/wider-boundary-review.md) for proof.

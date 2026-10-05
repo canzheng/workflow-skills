@@ -9,7 +9,10 @@ Ubuntu workstation use is the required first-release path; Cloud discovery is de
 
 ## Development
 
-Runtime: Python >=3.10 and Git. Source verification: python3 tools/workflow/verify.py.
+Runtime: Python >=3.10 and Git. Installation mutations require Linux renameat2
+exchange/no-replace support from libc/kernel and the target filesystem; unsupported
+operations fail without an overwrite fallback. Source verification:
+python3 tools/workflow/verify.py.
 Optional pinned OpenSpec 1.14.0: npm ci --ignore-scripts, then
 python3 tools/workflow/workflow.py check --repo . --specs --json.
 [Development](docs/development.md) covers full history and supported versions.
