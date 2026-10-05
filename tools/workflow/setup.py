@@ -6,7 +6,7 @@ import re
 import shutil
 import tempfile
 
-from core import (Conflict, Invalid, START, END,
+from core import (Conflict, Invalid, START, END, SKILLS, CI_ASSETS, IGNORE_START, IGNORE_END,
                   SOURCE_URL, REQUIRED_ASSETS, block, config, digest, git, ignore_block, load, manifest,
                   owned, repository, safe, shared, shared_files, source_url, effective_ignore_policy, valid_bundle_version)
 
