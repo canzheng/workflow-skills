@@ -1,48 +1,60 @@
 # v2 rewrite acceptance evidence
 
-## Latest Issue audit relationship/reference checkpoint — 2026-10-05
+## Latest Issue/PR snapshot boundary checkpoint — 2026-10-05
 
-Source `fc6f80bfa4bd46c314b64c0dd3f67b53da4c3457` repairs source review5418058854
-at3daf5a0: P2s4186646709/4186646716 independently reproduced before accepting them.
-Two public-CLI tests fail42 old-code subcases (16 state/reason pairs and26 evidence
-cases), no errors. The repair rejects incompatible non-null reasons before classifying
-Issues: reopened is open; completed/not_planned/duplicate are closed. Optional
-reference values must be string or null for every state. Blank/whitespace references
-retain completed-claim missing-evidence findings. Native nulls/case normalization
-remain compatible; annotations never certify acceptance, review or merge. Broader
-matrices cover36 state/reason pairs and39 evidence/state combinations with unchanged
-snapshot/index and empty stderr. All4 snapshot regressions pass (8.080s); retained
-record tests pass. Current quality specification and check guidance are updated.
+Tested source `4c874734fdb17255ed7ffd881a6bcd015bbff105` passes153/no skips on
+managed Python3.12.14 (155.859s) and Ubuntu24.04.5/Python3.12.3 (136.533s), plus
+strict OpenSpec all5/public checks. Consumer `aea99fccc9ec21e9cc46ee93df25126677d9714c`,
+pilot/shared-skill-bootstrap/Ready PR8/Issue7, pins this source. Source push37347307749/
+PR37347316912 and consumer push37347365875/PR37347372589/existing-main metadata37347369794
+pass. New trusted-base metadata deployment/events still await authorized adoption merge.
 
-Full152/no skips passes on managed Python3.12.14 (160.110s) and
-Ubuntu24.04.5/Python3.12.3 (143.658s); public checks and strict OpenSpec all5
-pass. Actual installed29-test suite passes both hosts (70.882s/66.064s). Fresh remote
-consumer clones start with11 absent ignored dependencies, match20 managed hashes,
-retain four narrow ignores/tracked project skill, and preserve files/raw index on
-offline no-op repeat. Existing force-tracked setup, staged policy, concurrency,
-namespace and rendering negatives retain their assertions. Literal pinned Ubuntu
-GitHub fetch-and-run first adoption/repeat exits0, preserving repeated bytes and
-absent index. No actual global-host installation ran.
+Source review5418058854 at3daf5a0 returned P2s4186646709/4186646716, independently
+reproduced and repaired in fc6f80b. Two public-CLI controls fail42 old-code subcases
+(no errors);36 native state/reason pairs and39 evidence/state combinations pass
+with structured diagnostics, empty stderr and unchanged snapshot/index. Reopened
+belongs to open; completed/not_planned/duplicate belong to closed. Optional evidence
+must be string or null in every state; blank text cannot suppress completed-claim
+missing-evidence findings. An annotation never certifies acceptance, review or merge.
+Both threads resolved with evidence. Original detailed proof is revision-bound at
+[5b15557](https://github.com/canzheng/workflow-skills/blob/5b1555706f7f23d337dec5e43fc2cde72d976559/docs/validation/wider-boundary-review.md).
 
-Consumer `9ab5b107f9821fee6afbfcc2c9cb6d8eee577cb0`, pilot/shared-skill-bootstrap,
-Ready PR8/Issue7, pins that source. Only ignored records.py and tracked provenance
-changed; configuration/all skill bytes/raw index2764e3eac5dfe0c46bd1fc80fff0fa58f3b0b094ae4181e5bb3c0b4237f34dd7
-were preserved before caller staging. Remote tree6551309725418d3985c36ebb3d5796dc58b6cfe1
-matches reviewed localb95a95afd1b453fe4caf4a52e0faaf95db856c06, parent24c0fa2;
-guarded non-force publication. Consumer push37346503096/PR37346515707/existing-main
-metadata37346509596 pass. Source pin Actions37346432313/37346440523 and documentation
-head/edited-body checks are recorded in live PR evidence. Consumer clear review5999100737
-at24c0fa2 predates this repin; current-head independent review is required.
+Wider author risk review independently reproduced the same malformed-object pattern
+in PR events: null repository/pull_request and non-string head SHA caused traceback/
+empty stdout; wrong repository/body inputs could fetch before invalid-input rejection.
+The new public installed-CLI regression fails40 old-code subcases (no errors), uses
+an isolated fetch canary, and verifies41 malformed cases plus three native body paths.
+All event object/identity/body/SHA preflights now run before any head fetch. Null or
+absent native body still yields missing-section findings. Snapshot/index stay unchanged;
+metadata never executes head code or body fragments. All23 checker tests pass (23.596s).
+Current quality specification and check guidance are updated; no assertions narrowed.
 
-F01–F13 implemented/verified/review-ready; F14 partial pending current semantic
-review and native archive/final checks. Native Ubuntu startup catalog/actual skill
-use remains original9bd23d72/a75c3f2 with unchanged skill hashes. Cloud deferred;
-historical Ubuntu26 full-suite invalid-JSON cause remains unexplained. Required
-consumer checks/source verification enforcement were read-only observed separately.
-New trusted-base metadata deployment, source PR-contract administration, actual merge
-and valid completed Issue observation remain pending authorization. No merge/closure/
-admin/global/auth/release/remote deletion. Next: current-head review; archive after
-required premerge review clears. Five-minute review monitors run in this active turn.
+Actual installed30-test suite passes managed (63.115s) and Ubuntu (59.823s).
+Fresh managed local clone of the native-API-verified remote commit and fresh Ubuntu
+remote clone materialize11 missing ignored dependencies, match20 hashes, preserve
+four narrow ignores/project skill/files/raw index and repeat offline as no-op. Retained
+force-tracking, staged-policy, namespace/concurrency/discovery/rendering negatives pass.
+Literal exact-pin Ubuntu GitHub fetch-and-run first adoption/repeat exits0 with unchanged
+repeat bytes/absent index. Managed Git HTTPS consumer read unexpectedly required credentials;
+no authentication/global configuration changed. Native API proves remote treec4429979be1956fe08f464eed5dcccc352ab0c00
+matches reviewed localb3ad753d6c6ea884c050b8d33d4d92e11750c1b9, parent9ab5b10;
+raw native remote commit bytes independently hash to the exact published SHA. Guarded
+non-force publication and local same-tree ref reconciliation preserve clean files/index.
+Source-owned update preserves config/all skills/raw index2f1fd971ee02bb799b3d4117855ce46c90b8120a4f6a1d20986424069573af17
+before caller staging. An initial Ubuntu proof omitted the proxy CA mount and failed
+fetch; the recorded rerun uses CA trust with TLS verification intact. Actual global-host
+installation remains unperformed.
+
+F01–F13 implemented/verified/review-ready; F14 partial pending current-head semantic
+review and native archive/final checks. Reviews requested at5b15557/9ab5b10 precede
+this PR-event repair; their results cannot approve the newer heads. Five-minute active-
+turn monitors disarm on completion; repaired-head review follows. Native Ubuntu catalog/
+actual three-skill use remains original9bd23d72/a75c3f2 with unchanged skill hashes.
+Cloud deferred; historical Ubuntu26 full-suite invalid-JSON cause remains unexplained.
+Consumer required checks/source verification enforcement were observed read-only.
+New base metadata deployment/source PR-contract administration, real merge and valid
+completed Issue observation remain pending authorization. No merge/closure/admin/global/
+auth/release/remote deletion. Next: current review, then native archive/final checks.
 
 ## Latest source-check compatibility checkpoint — 2026-10-05
 
