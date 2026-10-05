@@ -10,37 +10,69 @@ Do not discard user changes or silently substitute main.
 
 ## Published environment setup command
 
-Paste this fetch-and-run command into the Codex Cloud environment **install script**
-field (and maintenance hook when available). For local/Ubuntu setup use the same Bash
-command with the actual absolute consumer checkout path. The setup entrypoint belongs
-only to workflow-skills, not to the target repository. A new target needs no tools;
-the source-owned entrypoint adopts once, then bootstraps/checks/diagnoses. An adopted
+For this existing, unmerged pilot, paste the following command into the Codex Cloud
+environment **install script** field (and maintenance hook when available). It also
+works for a local/Ubuntu clone of this pilot. Other consumers, including unborn Git
+roots, use the generic source [README](../../README.md) command without this pilot's
+checkout selection. The setup entrypoint belongs only to workflow-skills, not to the
+target repository. A new target needs no tools; the source-owned entrypoint adopts
+once, then bootstraps/checks/diagnoses. An adopted
 repo uses its own tracked dependency pin even if the fetched entrypoint has a different
 revision. Always fetch an explicit full SHA; never main/latest. The source
 [README](../../README.md) documents both Cloud and local setup.
 
+Install is the primary materialization path; an optional Start verifies the prepared
+checkout and handles runtime services when required. This pilot needs no Start.
+The command below includes an explicitly
+authorized, clean-checkout selection because its adoption remains unmerged. This
+selection belongs only to this consumer pilot's environment configuration; the
+generic source-owned installer never selects a branch. Require actual Install logs
+and exit status before publishing, then test the resulting fresh task. No snapshot
+or checkout-persistence guarantee is inferred from this command's local success.
+
 ```sh
 set -eu
+echo WF2_INSTALL_BEGIN
 WF2_SOURCE_SHA=b1fe9e0242753db54cc16dfc8768502eb74cb3ea
 WF2_CONSUMER_ROOT=/workspace/workflow-skills-test
 WF2_CONSUMER_REPOSITORY=canzheng/workflow-skills-test
+WF2_EXPECTED_CONSUMER_HEAD=fd4bf175e7b2ea22439511fdfef872ce8bc7c743
+if [ "$(git -C "$WF2_CONSUMER_ROOT" rev-parse --show-toplevel)" != "$WF2_CONSUMER_ROOT" ]; then
+    echo 'Expected the exact consumer Git root; preserving checkout' >&2
+    exit 1
+fi
+if [ "$(git -C "$WF2_CONSUMER_ROOT" rev-parse HEAD)" != "$WF2_EXPECTED_CONSUMER_HEAD" ]; then
+    if [ -n "$(git -C "$WF2_CONSUMER_ROOT" status --porcelain --untracked-files=all)" ]; then
+        echo 'Consumer has changes; refusing pilot checkout selection' >&2
+        exit 1
+    fi
+    git -C "$WF2_CONSUMER_ROOT" fetch --no-tags origin pilot/shared-skill-bootstrap
+    if [ "$(git -C "$WF2_CONSUMER_ROOT" rev-parse FETCH_HEAD)" != "$WF2_EXPECTED_CONSUMER_HEAD" ]; then
+        echo 'Pilot branch revision differs; preserving checkout' >&2
+        exit 1
+    fi
+    git -C "$WF2_CONSUMER_ROOT" switch --detach --no-overwrite-ignore --quiet "$WF2_EXPECTED_CONSUMER_HEAD"
+fi
 WF2_SOURCE_DIR=$(mktemp -d)
 trap 'rm -rf -- "$WF2_SOURCE_DIR"' EXIT
 git -C "$WF2_SOURCE_DIR" init --quiet
 git -C "$WF2_SOURCE_DIR" fetch --no-tags --depth=1 https://github.com/canzheng/workflow-skills.git "$WF2_SOURCE_SHA"
 git -C "$WF2_SOURCE_DIR" checkout --detach --quiet "$WF2_SOURCE_SHA"
 bash "$WF2_SOURCE_DIR/tools/workflow/environment-setup.sh" "$WF2_CONSUMER_ROOT" "$WF2_CONSUMER_REPOSITORY"
+echo WF2_INSTALL_END
 ```
 
 First adoption creates trackable tools/workflow, AGENTS, project workflow config/pin,
 GitHub workflows/templates/docs and exactly three owned ignore entries. Review and
 commit these generated adoption files so Git becomes the durable workflow authority;
 shared dependencies are already ignored and project-specific skills remain trackable.
-The script never changes the Git index, commits, publishes or silently migrates old
+The source-owned entrypoint never changes the Git index, commits, publishes or silently migrates old
 tracked skills. Existing tracked shared files need explicit reviewed migration in
 operations. In an already adopted consumer, no project files are rewritten and
 bootstrap repeats with changes:[]; the initial seed SHA does not override its pin.
 The pilot branch has already committed adoption, so it takes that repeatable path.
+The separate pilot-only checkout prelude intentionally selects the approved HEAD
+before bootstrap; preservation on repeat is measured after that selection.
 
 Publish/apply the environment configuration and use a new task outside onboarding.
 Ensure checkout precedes the hook and agent discovery follows it. Hook ordering,
@@ -80,93 +112,62 @@ fetch and host ordering need their own evidence.
 
 ## Start-skill entrypoint
 
-The consumer owns its Start skill for environment initialization. The user reports
-that the pinned command was placed in its published setup-command field. The
-field's execution/timing and this Start skill's current definition are not directly
-observable from the rewrite task. The earlier pasted Start-skill instruction ran
-check/doctor without bootstrap; that instruction cannot materialize ignored skills.
+A Start skill is optional for project runtime verification/services. This workflow-only
+pilot has no services and does not require Start. Its selected path is **Install
+script, publish/apply, fresh mini diagnostic**. Keep the source-owned setup entrypoint
+and tracked pin; no extra installer, skill or lifecycle engine is introduced.
 
-Have the consumer Start skill read the **workflow-skills README and linked setup
-guidance at the resolved full source pin**, then follow that documented procedure.
-The tracked manifest selects the source URL/revision for an adopted repository;
-first adoption requires an explicitly approved full source SHA. Do not require a
-setup script or workflow helpers already in the consumer. Keep the setup implementation
-in workflow-skills, rather than creating another installer or shared workflow skill.
-This is startup routing, not a v1 task wrapper. Preserve unrelated host rules,
-the existing isolated checkout, project files and the index. In the pilot, verify
-the full expected consumer SHA and manifest pin first. Report a mismatch before
-initialization; do not silently reset, migrate old main or substitute its source pin.
+If another project uses Start, it should verify prepared dependencies and start its
+services. Missing/modified dependencies or a pin mismatch must be reported, not
+silently overwritten or upgraded. Explicit authorized recovery uses the same pinned
+source-owned procedure and is recorded separately from pre-agent preparation.
+Neither a skill name nor publication alone establishes automatic invocation.
 
-Suggested **pilot-only** instruction for the consumer Start skill:
+Earlier Start-based recovery instructions required an unmerged pilot commit while
+forbidding its selection from older main; this author-supplied conflict was corrected.
+The startup-only diagnostic still reports older main with no confirmed initializer
+execution. Its schema1 manifest lacks source_url, whereas the current pilot schema2
+manifest has it. Those historical observations are retained in the published-run
+record; they do not prove a network failure or an Install/Start host guarantee.
+The current pilot Install command selects the exact authorized revision before
+materialization, so Start is no longer part of this pilot's preparation test.
+
+## Mini diagnostic task prompt
+
+Run this in a fresh task after the documented Install command succeeded in the
+published consumer environment. Capture Install output in the environment UI;
+repository logs need not contain it. The first observation must precede manual
+bootstrap, explicit skill-file reads or recovery. An empty executor-only catalog
+is not a complete discovery check; capture the actual available-skills metadata
+and supported catalog surfaces, including names and source locators.
 
 ```text
-Initialize workflow-skills for /workspace/workflow-skills-test. Preserve host
-instructions and user changes; do not create another consumer worktree or install
-global skills. At your first executed step, emit WF2_START_BEGIN and record the
-initial branch/full HEAD, working-tree status, manifest pin and exposed skills.
-Capture ordinary initialization command output and exit status, without credentials
-or shell tracing. These markers are execution evidence, not automatic discovery proof.
+Validate environment preparation only in /workspace/workflow-skills-test.
+Use the existing checkout; preserve user files and the Git index.
 
-This disposable F14 pilot explicitly authorizes selecting its unmerged consumer
-revision before initialization. Expected HEAD:
+Before any agent-side bootstrap, recovery or explicit skill-file reads, record
+initial consumer HEAD/branch, session working directory/project root, tracked
+workflow pin, Git status and actual available-skills metadata. Include any available
+Install output/exit result and WF2_INSTALL_BEGIN/END markers. A Start skill and
+WF2_START markers are not required for this CLI-only pilot.
+
+Expected consumer HEAD:
 fd4bf175e7b2ea22439511fdfef872ce8bc7c743
-If HEAD differs, require a clean working tree/index, fetch origin
-pilot/shared-skill-bootstrap and verify FETCH_HEAD equals that exact SHA before
-switching this existing checkout to it. A detached checkout is acceptable. Do not
-reset, discard changes, force checkout or select another revision. If changes or
-fetch/revision mismatches block safe selection, emit WF2_START_BLOCKED with the
-specific reason and preserve the checkout. If HEAD already matches, no switch is
-needed; a host-created branch name such as work is acceptable.
-
-Read the selected consumer AGENTS.md and its tracked manifest. Expected source URL:
-https://github.com/canzheng/workflow-skills.git
-Expected full source revision:
+Expected workflow revision:
 b1fe9e0242753db54cc16dfc8768502eb74cb3ea
-Require the selected manifest to contain that source URL and full revision; report
-a missing field or mismatch rather than inferring a source, upgrading or proceeding.
-Fetch that exact workflow-skills source, read README.md and linked development and
-operations guidance at the same revision, and follow the documented source-owned
-setup procedure. Use the resolved pin when adapting examples, not a different
-sample seed. Do not assume consumer tools exist, fetch main/latest, copy installer
-logic into this skill, change authentication or migrate older main during startup.
 
-Require bootstrap/check --run-local/doctor exit0 and ok:true. Repeat bootstrap and
-require changes:[] with tracked bytes/index preserved. Only the three shared skill
-namespaces are ignored; project-specific skills remain trackable. Emit WF2_START_END
-with the actual consumer/source revisions and verification results, or emit
-WF2_START_FAILED with the failed command/exit result.
+Check whether the three workflow skills are materialized and host-discoverable.
+After recording the initial state, run check --repo . --run-local --json and doctor
+--repo . --expect-revision fd4bf175e7b2ea22439511fdfef872ce8bc7c743 --json through
+python3 tools/workflow/workflow.py, if those tools exist. Require exit0 and ok:true.
+Do not bootstrap, repair, change branches or invoke Start to make a failing
+preparation check pass. Report missing tools, mismatches, failed commands and
+unavailable discovery evidence separately; file presence is not discovery proof.
 
-Record when skills became available and whether the host discovered/refreshed them
-or you explicitly read their files. Do not infer discovery from these markers or
-filesystem presence. No application execution, merge, completed Issue closure,
-protection/ruleset change, release, branch deletion or global configuration changes.
+Return initial revisions, skill metadata, commands/exits, available preparation
+logs and final Git status. No application work, merge, completed Issue closure,
+protection/ruleset change, release, branch deletion, authentication or global changes.
 ```
-
-The **normal consumer Start skill is branch-agnostic**: use the task-selected
-checkout and its tracked dependency pin; first adoption needs an explicitly approved
-full source revision. Do not add this pilot's branch/SHA to generic setup or the
-workflow-skills installer. Its safe selection belongs only to the authorized pilot
-startup routing while the test implementation remains unmerged.
-
-The user supplied the current published Start definition after the second run. It
-required the pilot HEAD but said to report mismatches before proceeding and not change
-branches. Both launches were on older main, so that definition could not initialize
-the intended pilot from their observed state. The rewrite author supplied that
-contradictory instruction and corrected it here. This establishes an instruction
-conflict, not proof that automatic Start executed or a diagnosis of catalog behavior.
-The subsequent startup-only diagnostic reports remaining on older main without
-confirmed initialization. Inspection of that commit's schema1 manifest confirms
-it has no source_url; the current pilot schema2 manifest contains the exact URL
-above. The pilot instruction now states both expected URL and revision explicitly,
-then verifies them after safe checkout selection. This removes a source-resolution
-ambiguity; it does not establish automatic invocation or a network failure.
-
-The consumer skill loads setup behavior from the pinned source documentation rather
-than depending on a separately supplied shell block or copying installer logic.
-A new consumer need not contain any workflow tools beforehand. Its project-owned
-Start skill remains separate from the three ignored shared workflow dependencies.
-If Start runs only after initial agent discovery, initialization/explicit use cannot
-silently change S34/F14's fresh-discovery contract. Establish actual host timing.
 
 ## Fresh task prompt
 

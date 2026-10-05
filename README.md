@@ -32,6 +32,9 @@ For Codex Cloud, paste the following into the environment **install script** fie
 (and maintenance hook when available). Set the exact source SHA, checkout path and
 owner/name for your project. For local/Ubuntu setup, run the same command in Bash
 with your local absolute checkout path. No global installation is involved.
+The Install script is the primary dependency preparation path. An optional consumer
+Start skill verifies the prepared checkout and starts required runtime services.
+The workflow-only pilot needs no Start skill or running services.
 
 ```sh
 set -eu
@@ -69,21 +72,21 @@ See [operations](docs/operations.md) for offline preview/update/uninstall and
 [migration/rollback](docs/migration-v1-v2.md). Source authoring uses .workflow/bundle.json;
 consumer provenance contains the durable dependency pin, not task state.
 
-If a consumer uses its own **Start skill** for environment initialization, that
-skill should resolve the consumer checkout and tracked dependency pin, read this
-README and the linked setup/development/operations guidance at that exact source
-revision, then follow the documented source-owned setup procedure. For first adoption,
-use an explicitly approved full source SHA; do not default to main/latest. Use the
-resolved pin in executable examples rather than copying a different example SHA.
-The consumer Start skill must materialize the shared
-dependency before running check/doctor; an older check-only startup instruction is
-insufficient for ignored skills. Keep the deterministic setup implementation in
-workflow-skills, rather than duplicating installation logic in the consumer skill. Capture
-the command output/exit status and actual checkout/source pin. Do not assume that
-a published setup-command field executed automatically or before skill discovery.
-Startup performed by an already active agent proves initialization and explicit
-skill use, while pre-agent automatic discovery still requires host evidence. See
-[the Start-skill handoff](docs/validation/cloud-bootstrap-handoff.md#start-skill-entrypoint).
+When a project uses a **Start skill**, it verifies its selected checkout, tracked dependency
+pin and materialized skills before check/doctor. It starts services only when the
+project requires them; the workflow-only pilot has none. Missing dependencies,
+modified files or a revision mismatch must be reported, not silently overwritten
+or upgraded. Explicit recovery may read this README and linked setup guidance at
+the approved full source revision and follow the same source-owned procedure.
+Use the resolved pin in examples, never main/latest. Keep installation logic in
+workflow-skills, rather than duplicating it in the consumer skill.
+
+Capture actual Install output/exit status, selected checkout/source pin and initial
+skill availability in a fresh task. A published environment filesystem is a derived
+cache; the tracked pin remains the version authority. Verify ignored-file persistence
+and checkout/refresh ordering on the actual host. Do not assume a field executed
+automatically, that repository refresh reran preparation, or that explicit Start
+use proves pre-agent discovery. See [the pilot handoff](docs/validation/cloud-bootstrap-handoff.md).
 
 ## Acceptance boundary
 

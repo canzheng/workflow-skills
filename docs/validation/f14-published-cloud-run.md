@@ -122,6 +122,49 @@ original f31/ef24 identities. No merge, completion or administrative mutation oc
 
 ## Initial preparation and discovery
 
+### Install/Start feedback and verification boundary
+
+The user supplied external feedback recommending Install as primary dependency
+preparation and Start for per-task verification/runtime services. That recommendation
+matches the existing source-owned entrypoint and was accepted as a documentation
+clarification, not a distribution redesign. The handoff now provides a bounded
+pilot-only Install prelude to select its authorized unmerged revision. The user
+then selected Install plus the mini diagnostic for this service-free pilot; Start
+is optional for other projects' runtime needs, not a gate in this pilot.
+Generic installation remains branch-agnostic;
+the tracked dependency pin stays authoritative and only three shared namespaces
+are ignored. Existing adoption/bootstrap responsibilities remain distinct from
+Cloud's environment/task lifecycle. Modified dependencies fail without overwrite.
+
+The feedback's citation placeholders contain no source URLs. Its claims about
+published-filesystem capture, refresh preservation and automatic hook execution
+are not independent proof. Direct Cloud/skills documentation requests still return
+proxy403 in this rewrite instance; its spec38 reports the package-manager preset
+with no custom allowed hosts. The runtime policy includes github.com, not
+api.github.com, so that preset's name alone does not establish a denied Git fetch.
+These are this instance's observations, not the consumer's effective policy.
+
+Official public Codex source at `7f892275e31002f0422477c6219189284560e689` separates
+host, executor and cloud skill catalogs, routes skills by explicit name or matching
+description, and implements lifecycle hooks separately. An empty executor catalog
+alone is not a complete discovery check. Capture initial available-skills context,
+exact name/source, configured session cwd/project root, actual Install/Start output
+and command exits. Compare the fresh consumer's HEAD/pin/materialized hashes with
+the prepared state. Explicit invocation is a separate result from automatic Start
+and pre-agent discovery; no undocumented Cloud guarantee is inferred from this
+public implementation snapshot. Existing catalog/discovery gates stay unverified.
+
+The exact revised handoff Install block (SHA256
+`7628c465a8fb16b7a2e1b95912f61dcb60d9f7db7b365a5af9c22488d521b0f4`)
+was executed in a fresh Ubuntu24.04.5 container (Python3.12.3, Git2.43.0). It cloned
+real consumer main, safely selected fd4, fetched source b1, ran the source-owned
+entrypoint and verified all20 manifest hashes. A second full execution preserved
+tracked bytes/index and clean Git; only three shared namespaces were ignored and
+the project skill stayed tracked. Separate disposable-clone negatives denied a
+dirty checkout before selection and an ignored project-skill collision during
+selection, preserving original user bytes/index/HEAD. These are actual mechanical
+command results, not published Cloud Install execution or filesystem persistence.
+
 The requested consumer was `canzheng/workflow-skills-test`, branch
 `pilot/shared-skill-bootstrap`, commit
 `f31debf9810c8b989c924bc534add4848fffd6f3`, with tracked source pin
