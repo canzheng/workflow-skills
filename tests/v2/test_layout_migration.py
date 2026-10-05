@@ -6,7 +6,7 @@ import subprocess
 import unittest
 
 import test_setup
-from core import IGNORE_START, IGNORE_END, LEGACY_RUNTIME_PREFIX, RUNTIME_PREFIX, SKILLS, digest, git
+from core import IGNORE_START, IGNORE_END, LEGACY_RUNTIME_PREFIX, RUNTIME_PREFIX, SKILLS, Conflict, staged_installation, digest, git
 from test_setup import commit, init, run
 
 
@@ -207,3 +207,23 @@ class LayoutMigrationTests(unittest.TestCase):
             report = run(command, '--repo', self.target, expect=2)
             self.assertIn('Mixed legacy/new', json.dumps(report))
             self.assertEqual(self.snapshot(self.target), before)
+
+    def test_index_only_dependency_ancestor_files_cannot_certify_bootstrap(self):
+        run(*self.args_for(self.target), '--apply')
+        commit(self.target)
+        oid = git(self.target, 'rev-parse', 'HEAD:AGENTS.md').decode().strip()
+        for name in ['.agents', '.agents/tools', '.agents/skills']:
+            with self.subTest(path=name):
+                git(self.target, 'update-index', '--add', '--cacheinfo', '100644,' + oid + ',' + name)
+                before = self.snapshot(self.target)
+                try:
+                    with self.assertRaisesRegex(Conflict, 'ancestor'):
+                        staged_installation(self.target)
+                    for command in ['check', 'doctor', 'bootstrap']:
+                        result = run(command, '--repo', self.target, expect=1)
+                        self.assertIn('ancestor', json.dumps(result).lower())
+                        self.assertEqual(self.snapshot(self.target), before)
+                finally:
+                    git(self.target, 'update-index', '--force-remove', '--', name)
+        run('check', '--repo', self.target, '--run-local')
+        self.assertEqual(run('bootstrap', '--repo', self.target, '--apply')['changes'], [])

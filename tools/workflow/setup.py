@@ -10,7 +10,7 @@ import tempfile
 from core import (Conflict, Invalid, START, END, SKILLS, CI_ASSETS, IGNORE_START, IGNORE_END,
                   SOURCE_URL, REQUIRED_ASSETS, block, config, digest, git, ignore_block, load, manifest,
                   owned, repository, safe, shared, shared_files, source_url, effective_ignore_policy, valid_bundle_version,
-                  dependency_policy, relative, untracked_shared_policy, PROJECT_FILES, head_revision, dependency, dependency_files, required_assets, runtime_prefix, RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX, LEGACY_RUNTIME_ASSETS, retired_runtime_policy)
+                  dependency_policy, relative, untracked_shared_policy, PROJECT_FILES, head_revision, dependency, dependency_files, required_assets, runtime_prefix, RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX, LEGACY_RUNTIME_ASSETS, retired_runtime_policy, indexed_ancestor_policy)
 
 
 def source_bundle(source, revision):
@@ -269,11 +269,7 @@ def setup(args):
             untracked_shared_policy(root, runtime=runtime_prefix(assets))
         # An indexed/HEAD-owned file or gitlink can be an absent destination
         # ancestor. Never repurpose its deletion as an installer directory.
-        for name in set(assets) | PROJECT_FILES | {'.gitignore'}:
-            for parent in pathlib.PurePosixPath(name).parents:
-                ancestor = parent.as_posix()
-                if ancestor != '.' and ancestor in index_owned:
-                    raise Conflict('Indexed destination ancestor deletion preserved: ' + ancestor)
+        indexed_ancestor_policy(assets, index_owned)
         if runtime_prefix(assets) == RUNTIME_PREFIX:
             if not old or runtime_prefix(old['files']) == LEGACY_RUNTIME_PREFIX:
                 for name in LEGACY_RUNTIME_ASSETS:

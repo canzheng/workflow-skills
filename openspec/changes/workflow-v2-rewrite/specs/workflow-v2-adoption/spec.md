@@ -172,3 +172,9 @@ source authoring from installed consumers and authentication from unprobed write
 - **WHEN** a discovery root contains an unrelated skill file that is not valid UTF-8
 - **THEN** doctor reports a per-file warning and continues inspecting other entries
 - **AND** valid duplicates are still detected and the invalid file remains unchanged
+
+#### Scenario: Indexed dependency ancestor is a file
+- **WHEN** a staged snapshot contains a file or gitlink at an ancestor of a managed dependency destination
+- **THEN** check, doctor and bootstrap reject the candidate even when working directories remain intact
+- **AND** they preserve dependency bytes, project files and the raw index
+- **AND** an explicitly staged coherent migration remains valid without requiring the old HEAD to be merged

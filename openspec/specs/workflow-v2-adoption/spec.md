@@ -200,3 +200,9 @@ install globally as a side effect; global installation SHALL NOT claim project a
 - **WHEN** repo-local and global shared names are both visible
 - **THEN** report duplicate discovery and choose one active location explicitly
 - **AND** global skill instructions resolve contract/docs from the selected project rather than a global docs tree
+
+#### Scenario: Indexed dependency ancestor is a file
+- **WHEN** a staged snapshot contains a file or gitlink at an ancestor of a managed dependency destination
+- **THEN** check, doctor and bootstrap reject the candidate even when working directories remain intact
+- **AND** they preserve dependency bytes, project files and the raw index
+- **AND** an explicitly staged coherent migration remains valid without requiring the old HEAD to be merged

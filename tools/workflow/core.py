@@ -230,6 +230,16 @@ def retired_runtime_policy(names, tracked):
                        '; review and stage owned legacy runtime deletions')
 
 
+def indexed_ancestor_policy(names, tracked):
+    """No commit candidate can replace a dependency directory with an index file."""
+    tracked = set(tracked)
+    for name in set(names) | PROJECT_FILES | {'.gitignore'}:
+        for parent in pathlib.PurePosixPath(name).parents:
+            ancestor = parent.as_posix()
+            if ancestor != '.' and ancestor in tracked:
+                raise Conflict('Indexed destination ancestor conflict preserved: ' + ancestor)
+
+
 def dependency_policy(root, m):
     """Validate project tracking and declared dependency storage without index writes."""
     if m['schema_version'] not in (3, 4, 5):
@@ -247,6 +257,7 @@ def dependency_policy(root, m):
     effective_ignore_policy(root, m['files'], ignored_shared=ignored_dependency, ignored_runtime=m['schema_version'] == 5)
     tracked = set(os.fsdecode(git(root, 'ls-files', '-z')).split('\0')) - {''}
     retired_runtime_policy(m['files'], tracked)
+    indexed_ancestor_policy(m['files'], tracked)
     committed = (set(os.fsdecode(git(root, 'ls-tree', '-r', '--name-only', '-z', 'HEAD')).split('\0')) - {''}
                  if head_revision(root) else set())
     required = {name for name in m['files'] if not ignored_dependency or not dependency(name, m)} | PROJECT_FILES
@@ -301,6 +312,7 @@ def staged_installation(root):
         if m['schema_version'] not in (1, 3, 4, 5) or not required_assets(m['files']) <= m['files'].keys():
             raise Conflict('Provenance must describe a complete adoption')
         retired_runtime_policy(m['files'], entries)
+        indexed_ancestor_policy(m['files'], entries)
         if m['schema_version'] in (4, 5):
             if any(dependency(name, m) or name == runtime_prefix(m['files']).rstrip('/') and m['schema_version'] == 5 for name in entries):
                 raise Conflict('Shared dependency must not be staged/tracked')
