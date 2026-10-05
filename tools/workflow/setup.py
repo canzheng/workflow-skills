@@ -10,7 +10,7 @@ import tempfile
 from core import (Conflict, Invalid, START, END, SKILLS, CI_ASSETS, IGNORE_START, IGNORE_END,
                   SOURCE_URL, REQUIRED_ASSETS, block, config, digest, git, ignore_block, load, manifest,
                   owned, repository, safe, shared, shared_files, source_url, effective_ignore_policy, valid_bundle_version,
-                  dependency_policy, relative, untracked_shared_policy)
+                  dependency_policy, relative, untracked_shared_policy, dependency, dependency_files, required_assets, runtime_prefix)
 
 
 def source_bundle(source, revision):
@@ -31,8 +31,9 @@ def source_bundle(source, revision):
     for name, dest in assets.items():
         relative(name)
         relative(dest)
-    if not REQUIRED_ASSETS <= set(assets.values()):
-        raise Conflict('Incomplete production bundle: required consumer assets omitted: ' + ', '.join(sorted(REQUIRED_ASSETS - set(assets.values()))))
+    required = required_assets(assets.values())
+    if not required <= set(assets.values()):
+        raise Conflict('Incomplete production bundle: required consumer assets omitted: ' + ', '.join(sorted(required - set(assets.values()))))
     paths = {'.workflow/bundle.json', *assets.keys()}
     result = {}
     for name in sorted(paths):
@@ -240,10 +241,10 @@ def setup(args):
             changes['AGENTS.md'] = text.replace(current, '', 1).encode()
         elif current:
             residuals.append('AGENTS.md managed block')
-        if old['schema_version'] in (2, 4) and current_ignore:
+        if old['schema_version'] in (2, 4, 5) and current_ignore:
             if digest(current_ignore.encode()) != old['gitignore_block_hash']:
                 residuals.append('.gitignore managed block')
-            elif not any(shared(name) for name in remaining):
+            elif not any(dependency(name, old) for name in remaining):
                 changes['.gitignore'] = ignore_text.replace(current_ignore + ('\n' if current_ignore + '\n' in ignore_text else ''), '', 1).encode()
         mpath = '.workflow/install-manifest.json'
         if residuals:
@@ -256,17 +257,17 @@ def setup(args):
             raise Invalid('setup requires --source and --revision')
         version, assets = source_bundle(args.source, args.revision)
         url = source_url(getattr(args, 'source_url', SOURCE_URL))
-        if args.skill_storage == 'ignored' and (not old or old['schema_version'] == 4):
+        if args.skill_storage == 'ignored' and (not old or old['schema_version'] in (4, 5)):
             # Explicit tracked-to-ignored migration remains a caller-owned untrack;
             # fresh/ignored adoption must reject indexed paths before any writes.
-            untracked_shared_policy(root)
-        for name in shared_files(root):
+            untracked_shared_policy(root, runtime=runtime_prefix(assets))
+        for name in dependency_files(root, {'schema_version': 5, 'files': assets}):
             safe(root, name)
             if name not in assets and (not old or name not in old['files']):
                 raise Conflict('Unmanaged shared dependency asset: ' + name)
-        if current_ignore and (not old or old['schema_version'] not in (2, 4)):
+        if current_ignore and (not old or old['schema_version'] not in (2, 4, 5)):
             raise Conflict('Unmanaged shared-dependency gitignore block; resolve ownership first')
-        if old and old['schema_version'] in (2, 4) and (not current_ignore or digest(current_ignore.encode()) != old['gitignore_block_hash']):
+        if old and old['schema_version'] in (2, 4, 5) and (not current_ignore or digest(current_ignore.encode()) != old['gitignore_block_hash']):
             raise Conflict('Managed shared-dependency ignore block modified or missing')
         # Existing configuration is user owned and must remain valid.
         cp = safe(root, '.workflow/config.json')
@@ -275,11 +276,11 @@ def setup(args):
         if old:
             if not current or digest(current.encode()) != old['agents_block_hash']:
                 raise Conflict('Managed AGENTS block modified or missing')
-            if old['schema_version'] == 4:
+            if old['schema_version'] in (4, 5):
                 dependency_policy(root, old)
             for name, h in old['files'].items():
                 p = safe(root, name)
-                if shared(name) and old['schema_version'] in (2, 4) and not p.exists():
+                if dependency(name, old) and old['schema_version'] in (2, 4, 5) and not p.exists():
                     continue  # Legacy ignored dependencies may be absent in fresh clones.
                 if not p.is_file() or digest(p.read_bytes()) != h:
                     raise Conflict('Modified/missing managed file: ' + name)
@@ -295,7 +296,7 @@ def setup(args):
         entry = (START + '\nUse the repo-local workflow-skills v2 in .agents/skills/. Read\n'
                  'docs/workflow/contract.md and docs/workflow/README.md.\n'
                  'Run pinned bootstrap before Codex starts; then verify with\n'
-                 'python3 tools/workflow/workflow.py check --repo .\n'
+                 'python3 ' + runtime_prefix(assets) + 'workflow.py check --repo .\n'
                  'Historical planning directories do not select v1. Never use obsolete\n'
                  'repository wrappers or global installation here. Preserve unrelated rules.\n' + END)
         new_text = text.replace(current, entry, 1) if current else text + ('\n' if text and not text.endswith('\n') else '') + entry + '\n'
@@ -305,9 +306,9 @@ def setup(args):
         # Other root/nested/global ignores are preserved and checked for conflicts.
         new_ignore = ignore_text.replace(current_ignore + ('\n' if current_ignore + '\n' in ignore_text else ''), '', 1) if current_ignore else ignore_text
         if ignored_dependency:
-            dependency_ignore = (IGNORE_START + '\n' + '\n'.join('/.agents/skills/' + s + '/' for s in SKILLS) + '\n' + IGNORE_END)
+            dependency_ignore = (IGNORE_START + '\n' + '\n'.join('/.agents/skills/' + s + '/' for s in SKILLS) + '\n/' + runtime_prefix(assets) + '\n' + IGNORE_END)
             new_ignore += ('\n' if new_ignore and not new_ignore.endswith('\n') else '') + dependency_ignore + '\n'
-        effective_ignore_policy(root, assets, proposed=new_ignore, ignored_shared=ignored_dependency)
+        effective_ignore_policy(root, assets, proposed=new_ignore, ignored_shared=ignored_dependency, ignored_runtime=ignored_dependency)
         if new_ignore != ignore_text:
             changes['.gitignore'] = new_ignore.encode()
         if not cp.exists():
@@ -315,11 +316,12 @@ def setup(args):
                 raise Invalid('Fresh setup requires --repository owner/name')
             c = dict(schema_version=1, workflow='github-v2', repository=args.repository,
                      docs_index='docs/workflow/README.md', contract='docs/workflow/contract.md',
-                     openspec='on-demand', verification={'local': [['python3', 'tools/workflow/workflow.py', 'check', '--repo', '.']], 'integration': []})
+                     openspec='on-demand', verification={'local': [['python3', runtime_prefix(assets) + 'workflow.py', 'check', '--repo', '.']], 'integration': []})
             changes['.workflow/config.json'] = (json.dumps(c, indent=2) + '\n').encode()
-        m = dict(schema_version=4 if ignored_dependency else 3, skill_storage=args.skill_storage, bundle_version=version, source_revision=args.revision, source_url=url,
+        m = dict(schema_version=5 if ignored_dependency else 3, skill_storage=args.skill_storage, bundle_version=version, source_revision=args.revision, source_url=url,
                  files={name: digest(data) for name, data in assets.items()}, agents_block_hash=digest(entry.encode()))
         if ignored_dependency:
+            m['dependency_storage'] = 'ignored'
             m['gitignore_block_hash'] = digest(dependency_ignore.encode())
         data = (json.dumps(m, indent=2) + '\n').encode()
         p = safe(root, '.workflow/install-manifest.json')

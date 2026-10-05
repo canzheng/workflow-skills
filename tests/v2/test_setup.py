@@ -46,7 +46,7 @@ def fixture_source(root):
         name = 'tools/workflow/' + file
         (root / name).parent.mkdir(parents=True, exist_ok=True)
         (root / name).write_bytes((TOOLS / file).read_bytes())
-        assets[name] = name
+        assets[name] = name.replace('tools/workflow/', '.agents/tools/workflow/', 1)
     for name in installer.SKILLS:
         path = '.agents/skills/' + name + '/SKILL.md'
         p = root / path
@@ -376,7 +376,7 @@ class SetupTests(unittest.TestCase):
         run(*self.args, '--apply', expect=1)
         self.assertFalse((self.target / '.workflow').exists())
         (self.target / 'AGENTS.md').write_text('Unrelated\n')
-        p = self.target / 'tools/workflow/core.py'
+        p = self.target / '.agents/tools/workflow/core.py'
         p.parent.mkdir(parents=True)
         p.write_text('human')
         run(*self.args, '--apply', expect=1)
@@ -613,10 +613,10 @@ class SetupTests(unittest.TestCase):
         self.assertEqual((self.target / 'AGENTS.md').read_text(), original)
         self.assertFalse((self.target / '.workflow').exists())
         (self.target / 'AGENTS.md').write_text('Preserve unrelated rule.\n')
-        (self.target / 'tools').write_text('human file instead of directory')
+        (self.target / '.agents').write_text('human file instead of directory')
         r = run(*self.args, '--apply', expect=1)
         self.assertIn('not a directory', r['findings'][0]['message'])
-        self.assertFalse((self.target / '.agents').exists())
+        self.assertEqual((self.target / '.agents').read_text(), 'human file instead of directory')
 
     def test_successful_pinned_update_and_marker_modification_conflict(self):
         run(*self.args, '--apply')

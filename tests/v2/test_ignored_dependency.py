@@ -10,7 +10,7 @@ from unittest.mock import patch
 import test_setup
 import bootstrap
 import workflow
-from core import SKILLS, git, shared
+from core import SKILLS, git, shared, dependency
 from test_setup import commit, run
 
 
@@ -31,7 +31,7 @@ class IgnoredDependencyTests(unittest.TestCase):
         root = root or self.target
         return ({p.relative_to(root): p.read_bytes() for p in root.rglob('*')
                  if p.is_file() and '.git' not in p.relative_to(root).parts},
-                (root / '.git/index').read_bytes())
+                (root / '.git/index').read_bytes() if (root / '.git/index').exists() else None)
 
     def fresh(self):
         self.ignored_adopt()
@@ -56,9 +56,11 @@ class IgnoredDependencyTests(unittest.TestCase):
         for skill in SKILLS:
             self.assertEqual(git(self.target, 'ls-files', '--', '.agents/skills/' + skill), b'')
             self.assertIn('/.agents/skills/' + skill + '/', policy)
+        self.assertIn('/.agents/tools/workflow/', policy)
+        self.assertEqual(git(self.target, 'ls-files', '--', '.agents/tools/workflow'), b'')
         self.assertIn(b'project-rules', git(self.target, 'ls-files', '--', '.agents/skills'))
         m = json.loads((self.target / '.workflow/install-manifest.json').read_text())
-        self.assertEqual((m['schema_version'], m['skill_storage'], m['source_revision']), (4, 'ignored', self.sha))
+        self.assertEqual((m['schema_version'], m['skill_storage'], m['source_revision']), (5, 'ignored', self.sha))
         before = self.snapshot()
         self.assertEqual(run(*args, '--apply')['changes'], [])
         run('check', '--repo', self.target)
@@ -67,7 +69,8 @@ class IgnoredDependencyTests(unittest.TestCase):
 
     def test_fresh_clone_dry_run_then_materialize_exact_pin_and_offline_repeat(self):
         fresh = self.fresh()
-        expected = {p for p in json.loads((fresh / '.workflow/install-manifest.json').read_text())['files'] if shared(p)}
+        manifest = json.loads((fresh / '.workflow/install-manifest.json').read_text())
+        expected = {p for p in manifest['files'] if dependency(p, manifest)}
         self.assertTrue(all(not (fresh / p).exists() for p in expected))
         run('check', '--repo', fresh, expect=1)
         before = self.snapshot(fresh)
@@ -76,7 +79,8 @@ class IgnoredDependencyTests(unittest.TestCase):
         self.assertEqual(self.snapshot(fresh), before)
         run('bootstrap', '--repo', fresh, '--source', self.source, '--apply')
         self.assertEqual((fresh / '.git/index').read_bytes(), before[1])
-        self.assertTrue(all((fresh / p).read_bytes() == (self.source / p).read_bytes() for p in expected))
+        mapping = {dest: src for src, dest in json.loads((self.source / '.workflow/bundle.json').read_text())['assets'].items()}
+        self.assertTrue(all((fresh / p).read_bytes() == (self.source / mapping[p]).read_bytes() for p in expected))
         git(fresh, 'remote', 'remove', 'origin')
         before = self.snapshot(fresh)
         self.assertEqual(run('bootstrap', '--repo', fresh, '--apply')['changes'], [])
@@ -148,6 +152,55 @@ class IgnoredDependencyTests(unittest.TestCase):
             self.assertIn('remains tracked', json.dumps(report))
             self.assertEqual(self.snapshot(), before)
 
+    def test_newly_staged_initial_policy_requires_complete_adoption(self):
+        for name in ['AGENTS.md', '.workflow/config.json', '.gitignore']:
+            for existing in (False, True) if name == 'AGENTS.md' else (False,):
+                with self.subTest(path=name, preexisting=existing):
+                    self.target = self.base / ('initial-' + name.replace('/', '-') + str(existing))
+                    test_setup.init(self.target)
+                    if existing:
+                        (self.target / name).write_text('Preserve existing human policy.\n')
+                        commit(self.target)
+                    args = self.args[:-2]
+                    args[args.index('--target') + 1] = self.target
+                    run(*args, '--apply')
+                    before = self.snapshot()
+                    run('check', '--repo', self.target)
+                    self.assertEqual(self.snapshot(), before)
+                    git(self.target, 'add', '--', name)
+                    before = self.snapshot()
+                    for command in ['check', 'doctor', 'bootstrap']:
+                        report = run(command, '--repo', self.target, expect=1)
+                        self.assertIn('not tracked', json.dumps(report))
+                        self.assertEqual(self.snapshot(), before)
+                    commit(self.target)
+                    run('check', '--repo', self.target)
+
+    def test_runtime_dependencies_reject_edits_extras_and_tracking(self):
+        args = self.ignored_adopt()
+        p = self.target / '.agents/tools/workflow/core.py'
+        original = p.read_bytes()
+        for fault in ['bytes', 'extra', 'tracked']:
+            with self.subTest(fault=fault):
+                extra = p.parent / 'human.py'
+                if fault == 'bytes':
+                    p.write_bytes(b'Human runtime edit\n')
+                elif fault == 'extra':
+                    extra.write_bytes(b'Human runtime addition\n')
+                else:
+                    git(self.target, 'add', '-f', '--', str(p.relative_to(self.target)))
+                before = self.snapshot()
+                for command in ['bootstrap', 'check', 'doctor']:
+                    run(command, '--repo', self.target, expect=1)
+                    self.assertEqual(self.snapshot(), before)
+                run(*args, '--apply', expect=1)
+                self.assertEqual(self.snapshot(), before)
+                if fault == 'tracked':
+                    git(self.target, 'rm', '--cached', '--', str(p.relative_to(self.target)))
+                if extra.exists():
+                    extra.unlink()
+                p.write_bytes(original)
+
     def test_setup_update_rejects_tracked_ignored_dependency_before_writes(self):
         self.assert_rejected_setup_update(committed=False)
 
@@ -155,7 +208,8 @@ class IgnoredDependencyTests(unittest.TestCase):
         args = self.args[:-2]
         paths = ['.agents/skills/' + skill + '/SKILL.md' for skill in SKILLS]
         paths += ['.agents/skills/workflow-risk-review/references/human.md',
-                  '.agents/skills/workflow-deliver-issue']
+                  '.agents/skills/workflow-deliver-issue',
+                  '.agents/tools/workflow/core.py', '.agents/tools/workflow']
         for i, name in enumerate(paths):
             for committed in (False, True):
                 with self.subTest(path=name, committed=committed):
@@ -267,7 +321,7 @@ class IgnoredDependencyTests(unittest.TestCase):
     def test_corrupt_staged_policy_cannot_hide_behind_good_working_tree(self):
         self.ignored_adopt()
         for name in ['.gitignore', '.workflow/install-manifest.json', '.workflow/config.json',
-                     'AGENTS.md', 'tools/workflow/core.py', 'docs/workflow/README.md']:
+                     'AGENTS.md', 'docs/workflow/README.md']:
             with self.subTest(path=name):
                 p = self.target / name; original = p.read_bytes()
                 p.write_text('Broken staged policy\n'); git(self.target, 'add', '--', name)
@@ -318,7 +372,7 @@ class IgnoredDependencyTests(unittest.TestCase):
         run(*self.args[:-2], '--apply')
         self.assertEqual((self.target / '.git/index').read_bytes(), index)
         run('check', '--repo', self.target, expect=1)
-        git(self.target, 'rm', '--cached', '-r', '--', *['.agents/skills/' + s for s in SKILLS])
+        git(self.target, 'rm', '--cached', '-r', '--', *['.agents/skills/' + s for s in SKILLS], '.agents/tools/workflow')
         commit(self.target)
         run('check', '--repo', self.target)
         self.assertTrue(all((self.target / ('.agents/skills/' + s + '/SKILL.md')).exists() for s in SKILLS))

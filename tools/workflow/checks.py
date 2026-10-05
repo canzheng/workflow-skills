@@ -7,7 +7,7 @@ import shutil
 import subprocess
 from urllib.parse import unquote, urlsplit
 
-from core import (Conflict, Invalid, SKILLS, CI_ASSETS, REQUIRED_ASSETS, START, block, config, dependency_policy, digest, finding, git, load,
+from core import (Conflict, Invalid, SKILLS, CI_ASSETS, REQUIRED_ASSETS, required_assets, START, block, config, dependency_policy, digest, finding, git, load,
                   manifest, owned, relative, safe, valid_bundle_version)
 from records import issue_findings
 
@@ -120,7 +120,7 @@ def check(root, args):
             findings.append(finding('config.path', c[key], 'Configured document is missing', 'Restore or correct configured path'))
     m = manifest(root)
     if m:
-        if not REQUIRED_ASSETS <= m['files'].keys():
+        if not required_assets(m['files']) <= m['files'].keys():
             findings.append(finding('bundle.incomplete', '.workflow/install-manifest.json', 'Installed manifest omits required assets', 'Restore reviewed complete adoption; do not hide missing files in provenance'))
         if m:
             try:

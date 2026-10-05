@@ -1,4 +1,4 @@
-# Workflow operations
+# Operations
 
 ## One-time adoption and explicit updates
 
@@ -10,8 +10,8 @@ python3 /pinned/source/tools/workflow/workflow.py setup --source /pinned/source 
 ```
 
 Repeat with `--apply` for authorized adoption/update. Setup installs tracked project
-policy/config/helpers/docs/CI/templates and materializes the three shared skill
-directories as ignored dependencies. Schema-4 .workflow/install-manifest.json tracks
+policy/config/docs/CI/templates and materializes shared skills plus the Python
+runtime as ignored dependencies. Schema-5 .workflow/install-manifest.json tracks
 the full source commit, credential-free URL, asset hashes and owned ignore-block hash.
 It is provenance, not task state. Only these anchored root rules are added:
 
@@ -20,10 +20,11 @@ It is provenance, not task state. Only these anchored root rules are added:
 /.agents/skills/workflow-design-to-backlog/
 /.agents/skills/workflow-deliver-issue/
 /.agents/skills/workflow-risk-review/
+/.agents/tools/workflow/
 # workflow-v2-dependency:end
 ```
 
-Project skills remain trackable. Never ignore all of .agents or force-add shared
+Project skills/tools remain trackable. Never ignore all of .agents or force-add shared
 files around this policy. Existing unrelated rules/config/skills are preserved.
 Modified managed bytes or instruction/ignore blocks, unmanaged collisions, unsafe
 paths and symlinks conflict before writes. Multi-file apply stages backups and
@@ -41,7 +42,7 @@ lock or an atomic multi-file transaction. Review residuals before retrying. Setu
 
 Fresh ignored adoption rejects shared namespaces present in the Git index, including
 deleted working copies and indexed files at a namespace root, before preview/apply.
-An existing schema-4 update preflights dependency/index policy before any writes.
+An existing schema-4/5 update preflights dependency/index policy before any writes.
 Force-tracked shared files, incomplete project staging or invalid staged policy are
 conflicts preserving files/manifest/raw index. Resolve the reviewed index conflict
 explicitly; setup never untracks a file for you. Schema-3 migration below remains
@@ -54,20 +55,23 @@ applies to malformed/untrusted PR links; neither output mode executes PR content
 ## Migrate a tracked adoption
 
 Existing schema-3 snapshots remain verifiable. Use the new source's setup preview
-and explicit apply to migrate to schema 4, preserving the index. Then review and
-untrack only the shared directories without deleting working files:
+and explicit apply to migrate to schema 5, preserving the index. Then review and
+untrack only the dependency namespaces without deleting working files:
 
 ```sh
-git rm --cached -r -- .agents/skills/workflow-design-to-backlog .agents/skills/workflow-deliver-issue .agents/skills/workflow-risk-review
+git rm --cached -r -- .agents/skills/workflow-design-to-backlog .agents/skills/workflow-deliver-issue .agents/skills/workflow-risk-review .agents/tools/workflow
 ```
 
 This is a caller-authorized Git change, not an installer side effect. Stage reviewed
-project/provenance/.gitignore changes and commit. Until untracking/staging is complete,
+project/provenance/.gitignore changes and commit. Schema-4 consumers instead review
+the removal of their old tracked tools/workflow runtime, stage those deletions and
+update only workflow CLI references in project-owned config/docs to the new path.
+Do not delete unrelated project tools. Then commit. Until untracking/staging is complete,
 checks can fail because the working adoption and staged commit are inconsistent.
 Old schema-1/2 consumers also require explicit reviewed setup; startup does not migrate.
-`--skill-storage tracked` preserves schema-3 behavior for compatibility, not the default.
+`--dependency-storage tracked` (legacy alias `--skill-storage tracked`) preserves schema-3 behavior for compatibility, not the default.
 
-All non-shared manifest assets, provenance/config, AGENTS and .gitignore must remain
+All non-dependency manifest assets, provenance/config, AGENTS and .gitignore must remain
 indexed after any adoption is staged/committed. Removing provenance cannot bypass
 verification. Canonical staged hashes, schemas, configured docs and instruction/ignore
 blocks must agree with regular files/no merge stages; good working bytes cannot hide
@@ -82,14 +86,20 @@ reviewable only with trackable project files; commit it before host acceptance.
 From the exact consumer Git root, before starting a fresh agent:
 
 ```sh
-python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
-python3 tools/workflow/workflow.py check --repo . --run-local --json
-python3 tools/workflow/workflow.py doctor --repo . --json
+python3 .agents/tools/workflow/workflow.py bootstrap --repo . --apply --json
+python3 .agents/tools/workflow/workflow.py check --repo . --run-local --json
+python3 .agents/tools/workflow/workflow.py doctor --repo . --json
 git --no-optional-locks status --short --untracked-files=all
 ```
 
+A fresh clone lacks both dependency directories. Fetch the tracked source URL/full
+SHA and run its source-owned environment-setup.sh as documented in the source
+README before running the commands above; never expect an absent consumer CLI to
+bootstrap itself. The source entrypoint preserves existing pins and tracked files,
+materializes missing dependency files, then runs the installed checker/doctor.
+
 Bootstrap fetches only the manifest's full commit when ignored files are missing,
-verifies canonical pinned skill bytes/hashes and writes only missing shared files.
+verifies canonical pinned skill bytes/hashes and writes only missing shared skill/runtime files.
 `--source /pinned/source` permits offline materialization. Omit --apply to preview;
 preview may fetch source into a temporary directory but does not change the consumer.
 A complete matching rerun is offline and returns changes:[]. Modified/extra/symlinked
@@ -138,6 +148,11 @@ Doctor is read-only; inaccessible host catalogs and unperformed remote capabilit
 remain unprobed. Record consumer/source SHAs, OS/runtime, initial catalog and actual
 skill use independently. A file/hash check, explicit file reading or green CI alone
 cannot establish automatic discovery, semantic review, merge or delivery.
+
+The source-owned tools/workflow/environment-setup.sh can adopt a new Git root
+without existing tools/first commit. Resolve its README and Ubuntu handoff from
+the tracked manifest source_url/source_revision, never an implicit latest branch.
+Cloud is optional/deferred for this release.
 
 Doctor reports an unreadable/undecodable discovery file as a per-file warning and
 continues scanning other entries, including duplicate-name checks. It preserves

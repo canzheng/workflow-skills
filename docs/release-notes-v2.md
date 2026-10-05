@@ -40,12 +40,12 @@ separate capabilities. Deterministic checks cannot certify semantic documentatio
 Issue closure or merge protection; adoption of trusted-base checks and protection
 configuration need their own observed evidence and authorization.
 
-The default consumer setup tracks project policy/config, helpers, CI/templates,
-docs/specs, project skills and schema-4 exact-source provenance. Shared skills are
-repo-local ignored dependencies, materialized before Ubuntu Codex starts. Only their
-three directories are ignored. Complete matching bootstrap repeats offline and does
+The default consumer setup tracks project policy/config, CI/templates,
+docs/specs, project skills and schema-5 exact-source provenance. Shared skills and Python runtime in .agents/tools/workflow are
+repo-local ignored dependencies, materialized before Ubuntu Codex starts. Only those
+four dependency namespaces are ignored. Complete matching bootstrap repeats offline and does
 not change tracked files/index; modified dependencies fail without overwrite.
-Tracked schema-3 consumers migrate explicitly; setup never untracks or stages.
+Tracked schema-3 and mixed schema-4 consumers migrate explicitly; setup never untracks or stages.
 Optional explicit global skills-only installation into ~/.agents/skills is supported,
 without installing global project policy or changing authentication. No real global
 installation was performed by this rewrite task; tests use isolated targets.

@@ -2,7 +2,8 @@
 
 User-approved distribution refinement (2026-10-05): consumer shared workflow skills
 are gitignored pinned dependencies, materialized before Ubuntu Codex startup. Only
-the three shared directories are ignored; project skills remain trackable. Explicit
+the three shared skill directories and .agents/tools/workflow runtime are ignored;
+project skills/tools remain trackable (user-approved runtime alignment, 2026-10-05). Explicit
 optional shared-skills-only global installation into `~/.agents/skills` is supported.
 Source-authored skills remain tracked; global/project policy is never installed
 automatically. This supersedes the earlier tracked-consumer refinement.
@@ -244,7 +245,7 @@ Use these IDs in tests, evaluation records, and PR evidence. A scenario ID is a 
 | S31 | CI exists but merge rules are not configured: report available checks, not active enforcement | Repository settings inspection | F10/F14 |
 | S32 | Migration with done/active/deferred/malformed records and partial remote success: safe inventory and bounded resume | Migration integration | F12 |
 | S33 | Fresh project with MVP/later scope, dependencies and one unknown: one design-to-backlog run produces a coherent outcome Issue batch, one approval yields correct Ready/backlog/blocked separation, design links survive reruns, no coding-task explosion or implementation starts | Skill evaluation + authorized consumer GitHub pilot | F05/F11/F14 |
-| S34 | Fresh consumer clone bootstraps the recorded commit into only three ignored shared directories; repeat is offline/idempotent, project skills remain tracked, project/provenance/index are preserved; modified/extra/symlinked dependencies and bad pins fail; explicit tracked-to-ignored migration and optional global shared-only installation preserve user files; Ubuntu discovery/use is tested separately | Public CLI clone/fault tests + real CI/environment pilot | F02/F03/F10/F11/F14 |
+| S34 | Fresh consumer clone bootstraps the recorded commit into three ignored shared skill directories and the ignored .agents/tools/workflow runtime; repeat is offline/idempotent, project skills remain tracked, project/provenance/index are preserved; modified/extra/symlinked dependencies and bad pins fail; explicit tracked-to-ignored migration and optional global shared-only installation preserve user files; Ubuntu discovery/use is tested separately | Public CLI clone/fault tests + real CI/environment pilot | F02/F03/F10/F11/F14 |
 
 ## 4. Platform responsibilities we reuse
 

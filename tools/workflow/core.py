@@ -16,7 +16,9 @@ PROJECT_FILES = frozenset(('AGENTS.md', '.workflow/config.json', '.workflow/inst
 SKILLS = ('workflow-design-to-backlog', 'workflow-deliver-issue', 'workflow-risk-review')
 CI_ASSETS = ('.github/workflows/workflow-v2-verify.yml',
              '.github/workflows/workflow-v2-pr-metadata.yml')
-RUNTIME_ASSETS = tuple('tools/workflow/' + p for p in
+LEGACY_RUNTIME_PREFIX = 'tools/workflow/'
+RUNTIME_PREFIX = '.agents/tools/workflow/'
+RUNTIME_ASSETS = tuple(RUNTIME_PREFIX + p for p in
                       ('workflow.py', 'core.py', 'setup.py', 'bootstrap.py', 'checks.py', 'records.py', 'migration.py'))
 REQUIRED_ASSETS = (frozenset('.agents/skills/' + s + '/SKILL.md' for s in SKILLS) |
                    frozenset(CI_ASSETS) | frozenset(RUNTIME_ASSETS) | frozenset((
@@ -157,6 +159,34 @@ def ignore_block(text):
     return text[text.index(IGNORE_START):text.index(IGNORE_END) + len(IGNORE_END)]
 
 
+def runtime_prefix(names):
+    return RUNTIME_PREFIX if any(name.startswith(RUNTIME_PREFIX) for name in names) else LEGACY_RUNTIME_PREFIX
+
+
+def required_assets(names):
+    # Existing exact pins remain verifiable in their original layout.
+    if runtime_prefix(names) == LEGACY_RUNTIME_PREFIX:
+        return frozenset(name.replace(RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX, 1) for name in REQUIRED_ASSETS)
+    return REQUIRED_ASSETS
+
+
+def dependency(name, m):
+    return shared(name) or (m['schema_version'] == 5 and name.startswith(runtime_prefix(m['files'])))
+
+
+def dependency_files(root, m):
+    result = shared_files(root)
+    if m['schema_version'] == 5:
+        prefix = runtime_prefix(m['files'])
+        folder = safe(root, prefix.rstrip('/'))
+        if folder.exists() and not folder.is_dir():
+            raise Conflict('Runtime dependency namespace is not a directory: ' + prefix)
+        for p in folder.rglob('*') if folder.exists() else ():
+            if p.is_file() or p.is_symlink():
+                result.add(p.relative_to(root).as_posix())
+    return result
+
+
 def source_url(value):
     if not isinstance(value, str) or not re.fullmatch(r'https://github\.com/[\w.-]+/[\w.-]+', value):
         raise Invalid('Dependency source URL must be an explicit HTTPS GitHub repository without credentials')
@@ -175,41 +205,57 @@ def shared_files(root):
     return result
 
 
-def untracked_shared_policy(root, tracked=None):
+def untracked_shared_policy(root, tracked=None, runtime=None):
     """Check the index even when shared paths are absent from the worktree."""
     if tracked is None:
         tracked = set(os.fsdecode(git(root, 'ls-files', '--cached', '-z')).split('\0')) - {''}
     namespaces = {'.agents/skills/' + skill for skill in SKILLS}
-    if any(shared(name) or name in namespaces for name in tracked):
-        raise Conflict('Shared dependency remains tracked; review git rm --cached for only the three shared directories')
+    if runtime:
+        namespaces.add(runtime.rstrip('/'))
+    if any(shared(name) or name in namespaces or (runtime and name.startswith(runtime)) for name in tracked):
+        raise Conflict('Shared dependency remains tracked; review explicit cached removal for only the shared dependency namespaces')
 
 
 def dependency_policy(root, m):
     """Validate project tracking and declared dependency storage without index writes."""
-    if m['schema_version'] not in (3, 4):
+    if m['schema_version'] not in (3, 4, 5):
         raise Conflict('Existing adoption needs reviewed setup/update (schema 3 or 4)')
-    ignored_dependency = m['schema_version'] == 4
+    ignored_dependency = m['schema_version'] in (4, 5)
     if ignored_dependency:
         policy = safe(root, '.gitignore')
         current = ignore_block(policy.read_text()) if policy.is_file() else None
         if not current or digest(current.encode()) != m['gitignore_block_hash']:
             raise Conflict('Managed shared-dependency ignore block modified or missing')
-    for name in shared_files(root):
+    for name in dependency_files(root, m):
         safe(root, name)
         if name not in m['files']:
             raise Conflict('Unmanaged shared dependency asset: ' + name)
-    effective_ignore_policy(root, m['files'], ignored_shared=ignored_dependency)
+    effective_ignore_policy(root, m['files'], ignored_shared=ignored_dependency, ignored_runtime=m['schema_version'] == 5)
     tracked = set(os.fsdecode(git(root, 'ls-files', '-z')).split('\0')) - {''}
     committed = (set(os.fsdecode(git(root, 'ls-tree', '-r', '--name-only', '-z', 'HEAD')).split('\0')) - {''}
                  if head_revision(root) else set())
-    required = {name for name in m['files'] if not ignored_dependency or not shared(name)} | PROJECT_FILES
+    required = {name for name in m['files'] if not ignored_dependency or not dependency(name, m)} | PROJECT_FILES
     if ignored_dependency:
         required.add('.gitignore')
-        untracked_shared_policy(root, tracked)
+        untracked_shared_policy(root, tracked, runtime_prefix(m['files']) if m['schema_version'] == 5 else None)
     # A completely unstaged initial adoption is reviewable. Indexed/committed
     # managed assets identify adoption even when provenance was removed from the
     # index. Existing project-owned AGENTS/config alone are not that sentinel.
-    adoption = {name for name in m['files'] if not ignored_dependency or not shared(name)} | {'.workflow/install-manifest.json'}
+    adoption = {name for name in m['files'] if not ignored_dependency or not dependency(name, m)} | {'.workflow/install-manifest.json'}
+    policy_names = PROJECT_FILES | {'.gitignore'}
+    adoption |= policy_names & (tracked - committed)
+    # Existing human policy files are not adoption by themselves. Introducing
+    # the managed routing/ignore block into their staged snapshot is adoption.
+    for name, marker in [('AGENTS.md', START), ('.gitignore', IGNORE_START)]:
+        if name in tracked & committed:
+            previous = git(root, '--no-replace-objects', 'show', 'HEAD:' + name)
+            try:
+                indexed = git(root, '--no-replace-objects', 'show', ':' + name)
+            except Invalid:
+                adoption.add(name)
+                continue
+            if marker.encode() in indexed and marker.encode() not in previous:
+                adoption.add(name)
     if adoption & (tracked | committed) and required - tracked:
         raise Conflict('Workflow installation path is not tracked: ' + sorted(required - tracked)[0] +
                        '; review and commit the complete adoption')
@@ -237,21 +283,21 @@ def staged_installation(root):
         m = validate_manifest(root, json.loads(read('.workflow/install-manifest.json')))
         # An explicit schema-1 update may leave a coherent old tracked snapshot
         # in the index until the caller stages the migration; setup owns no index.
-        if m['schema_version'] not in (1, 3, 4) or not REQUIRED_ASSETS <= m['files'].keys():
+        if m['schema_version'] not in (1, 3, 4, 5) or not required_assets(m['files']) <= m['files'].keys():
             raise Conflict('Provenance must describe a complete adoption')
-        if m['schema_version'] == 4:
-            if any(shared(name) for name in entries):
+        if m['schema_version'] in (4, 5):
+            if any(dependency(name, m) or name == runtime_prefix(m['files']).rstrip('/') and m['schema_version'] == 5 for name in entries):
                 raise Conflict('Shared dependency must not be staged/tracked')
             policy = ignore_block(read('.gitignore').decode())
             if not policy or digest(policy.encode()) != m['gitignore_block_hash']:
                 raise Conflict('Managed ignore block differs from staged provenance')
             effective_ignore_policy(root, m['files'], proposed=read('.gitignore').decode(),
-                                    ignored_shared=True, staged_paths=entries, read_staged=read)
+                                    ignored_shared=True, ignored_runtime=m['schema_version'] == 5, staged_paths=entries, read_staged=read)
         c = validate_config(root, json.loads(read('.workflow/config.json')))
         for key in ('docs_index', 'contract'):
             read(c[key])
         for name, expected in m['files'].items():
-            if m['schema_version'] == 4 and shared(name):
+            if m['schema_version'] in (4, 5) and dependency(name, m):
                 continue  # Pinned dependency bytes are validated in the working tree/bootstrap.
             if digest(read(name)) != expected:
                 raise Conflict('Owned bytes differ from staged provenance: ' + name)
@@ -262,11 +308,13 @@ def staged_installation(root):
         raise Conflict('Staged workflow installation invalid: ' + str(exc)) from exc
 
 
-def effective_ignore_policy(root, names, proposed=None, ignored_shared=False,
+def effective_ignore_policy(root, names, proposed=None, ignored_shared=False, ignored_runtime=False,
                             staged_paths=None, read_staged=None):
     """Read Git's effective policy, including nested/global/info rules, before writes."""
     skills_root = safe(root, '.agents/skills')
-    projects = {'.agents/skills/workflow-project-trackability-probe/SKILL.md'}
+    projects = {'.agents/skills/workflow-project-trackability-probe/SKILL.md',
+                '.agents/tools/workflow-project-trackability-probe.py'}
+    prefix = runtime_prefix(names)
     if staged_paths is None:
         for p in skills_root.rglob('*') if skills_root.exists() else ():
             name = p.relative_to(root).as_posix()
@@ -286,7 +334,7 @@ def effective_ignore_policy(root, names, proposed=None, ignored_shared=False,
                     if str(parent) == '.agents/skills':
                         break
                     projects.add((parent / 'workflow-project-trackability-probe.md').as_posix())
-    dependency = {name for name in names if shared(name)} if ignored_shared else set()
+    dependency = {name for name in names if shared(name) and ignored_shared or name.startswith(prefix) and ignored_runtime}
     required = (set(names) - dependency) | PROJECT_FILES
     if ignored_shared:
         required.add('.gitignore')
@@ -345,7 +393,7 @@ def effective_ignore_policy(root, names, proposed=None, ignored_shared=False,
 
 def owned(name):
     relative(name)
-    return (name.startswith('tools/workflow/') or
+    return (name.startswith(LEGACY_RUNTIME_PREFIX) or name.startswith(RUNTIME_PREFIX) or
             any(name.startswith('.agents/skills/' + s + '/') for s in SKILLS) or
             name in ('docs/workflow/contract.md', 'docs/workflow/README.md',
                      'docs/workflow/development.md', 'docs/workflow/operations.md',
@@ -368,15 +416,17 @@ def manifest(root):
 
 
 def validate_manifest(root, m):
-    if not isinstance(m, dict) or type(m.get('schema_version')) is not int or m.get('schema_version') not in (1, 2, 3, 4) or not isinstance(m.get('files'), dict) or not re.fullmatch(r'[0-9a-f]{40}', str(m.get('source_revision', ''))) or not valid_bundle_version(m.get('bundle_version')):
+    if not isinstance(m, dict) or type(m.get('schema_version')) is not int or m.get('schema_version') not in (1, 2, 3, 4, 5) or not isinstance(m.get('files'), dict) or not re.fullmatch(r'[0-9a-f]{40}', str(m.get('source_revision', ''))) or not valid_bundle_version(m.get('bundle_version')):
         raise Invalid('Invalid installation manifest')
-    if m['schema_version'] in (2, 3, 4):
+    if m['schema_version'] in (2, 3, 4, 5):
         source_url(m.get('source_url'))
     if m['schema_version'] == 3 and m.get('skill_storage') != 'tracked':
         raise Invalid('Schema-3 adoption requires tracked skill storage')
-    if m['schema_version'] == 4 and m.get('skill_storage') != 'ignored':
+    if m['schema_version'] in (4, 5) and m.get('skill_storage') != 'ignored':
         raise Invalid('Schema-4 adoption requires ignored skill storage')
-    if m['schema_version'] in (2, 4):
+    if m['schema_version'] == 5 and m.get('dependency_storage') != 'ignored':
+        raise Invalid('Schema-5 adoption requires ignored skills and runtime dependencies')
+    if m['schema_version'] in (2, 4, 5):
         if not re.fullmatch(r'[0-9a-f]{64}', str(m.get('gitignore_block_hash', ''))):
             raise Invalid('Invalid shared-dependency ignore hash')
     for name, h in m['files'].items():
@@ -407,12 +457,12 @@ def content_identity(root):
     names = set(os.fsdecode(git(root, 'ls-files', '-z', '--cached', '--others', '--exclude-standard')).split('\0')) - {''}
     m = manifest(root)
     dependency_modified = False
-    if m and m['schema_version'] in (2, 3, 4):
-        actual_shared = shared_files(root)
+    if m and m['schema_version'] in (2, 3, 4, 5):
+        actual_shared = dependency_files(root, m)
         names.update(actual_shared)
         dependency_modified = bool(actual_shared - m['files'].keys())
         for name, expected in m['files'].items():
-            if shared(name):
+            if dependency(name, m):
                 names.add(name)
                 p = safe(root, name)
                 dependency_modified |= not p.is_file() or digest(p.read_bytes()) != expected

@@ -42,7 +42,7 @@ class CheckTests(unittest.TestCase):
     def test_public_installed_checker_and_no_impact_pr(self):
         run('check', '--repo', self.target)
         run('check', '--repo', self.target, '--pr-json', self.snapshot(BODY))
-        installed = self.target / 'tools/workflow/workflow.py'
+        installed = self.target / '.agents/tools/workflow/workflow.py'
         r = subprocess.run(['python3', str(installed), 'check', '--repo', str(self.target)], capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
 
@@ -77,7 +77,7 @@ class CheckTests(unittest.TestCase):
     def test_installed_manifest_cannot_hide_deleted_runtime_or_ci_asset(self):
         pin = self.target / '.workflow/install-manifest.json'
         original = pin.read_bytes()
-        for name in ('tools/workflow/migration.py', '.github/workflows/workflow-v2-verify.yml', '.github/workflows/workflow-v2-pr-metadata.yml',
+        for name in ('.agents/tools/workflow/migration.py', '.github/workflows/workflow-v2-verify.yml', '.github/workflows/workflow-v2-pr-metadata.yml',
                      '.github/ISSUE_TEMPLATE/feature.yml', '.github/ISSUE_TEMPLATE/bug.yml', '.github/pull_request_template.md',
                      'docs/workflow/contract.md', 'docs/workflow/README.md', 'docs/workflow/development.md', 'docs/workflow/operations.md',
                      '.agents/skills/workflow-risk-review/references/methods.md'):

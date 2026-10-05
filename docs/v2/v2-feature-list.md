@@ -2,7 +2,8 @@
 
 User-approved distribution refinement (2026-10-05): consumer shared workflow skills
 are gitignored pinned dependencies, materialized before Ubuntu Codex startup. Only
-the three shared directories are ignored; project skills remain trackable. Explicit
+the three shared skill directories and .agents/tools/workflow runtime are ignored;
+project skills/tools remain trackable (user-approved runtime alignment, 2026-10-05). Explicit
 optional shared-skills-only global installation into `~/.agents/skills` is supported.
 Source-authored skills remain tracked; global/project policy is never installed
 automatically. This supersedes the earlier tracked-consumer refinement.
@@ -197,8 +198,8 @@ Milestone A: usable core with local/fixture proof. Milestone B: complete deliver
 5. Uninstall removes only unmodified managed assets and the managed instruction block, retaining user-owned documents/configuration as documented.
 6. Doctor reports malformed config, active legacy routing, supported tool availability, and discoverable duplicate skills. It never deletes global skills or claims to inspect inaccessible host locations.
 7. Incomplete production bundle assembly is a reported failure, not a falsely successful install of missing skills.
-8. Consumer policy/configuration, helpers, CI/templates, docs/specs, project skills and schema-4 provenance are tracked. Only the three shared skill directories/references are ignored; provenance pins the full source commit, URL and hashes.
-9. Fresh-clone bootstrap materializes missing skills from that exact pin before Codex startup. Preview is nonmutating; --apply writes only missing ignored skill files. Matching reruns are offline/no-op; project files and index are preserved. Modified/extra/symlinked dependencies and invalid pins fail meaningfully (S34).
+8. Consumer policy/configuration, CI/templates, docs/specs, project skills and schema-5 provenance are tracked. The three shared skill directories/references and .agents/tools/workflow runtime are ignored together; provenance pins the full source commit, URL and hashes.
+9. Fresh-clone bootstrap materializes missing shared skill/runtime files from that exact pin before Codex startup. Preview is nonmutating; --apply writes only missing ignored skill/runtime files. Matching reruns are offline/no-op; project files and index are preserved. Modified/extra/symlinked dependencies and invalid pins fail meaningfully (S34).
 10. Source-owned first adoption works without consumer tools/first commit; the entrypoint is not copied into the target. Generic CI bootstraps the same pin before checks. Initial Ubuntu discovery/use remains separate F14 acceptance; Cloud is deferred.
 11. Optional explicit install-skills defaults to ~/.agents/skills, installs only the three skills/references and provenance, preserves unrelated global files, and supports bounded update/uninstall. Default repository setup never installs globally.
 

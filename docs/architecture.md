@@ -6,12 +6,16 @@ skills live only in .agents/skills: design-to-backlog, deliver-issue and risk-re
 Native Codex execution handles internal work; GitHub owns shared delivery identity
 and state. There is no task-state service, feature ledger or synchronizer.
 
-The Python standard-library utility entrypoint is tools/workflow/workflow.py.
+The source Python standard-library utility entrypoint is tools/workflow/workflow.py;
+consumers materialize the same pinned runtime at .agents/tools/workflow/workflow.py.
+Both shared skills and runtime are dependencies with one storage policy and exact pin.
+Fresh clones/CI fetch the source-owned entrypoint before bootstrap; trusted-base PR
+metadata selects the base pin and reads head content only as data.
 core.py validates configuration/paths/provenance and computes actual content identity.
 setup.py preflights pinned source assets/target ownership, stages backups and restores
 on apply failure; installation provenance is generated only for consumers.
-bootstrap.py materializes only missing ignored shared skills from the exact source
-pin. Schema-4 provenance records ignored storage/URL/full SHA/asset and ignore hashes.
+bootstrap.py materializes only missing ignored shared skills/runtime from the exact source
+pin. Schema-5 provenance records ignored storage/URL/full SHA/asset and ignore hashes.
 Setup preserves project policy/config and index; caller handles explicit untracking
 when migrating schema 3. Complete bootstrap reruns are offline/no-op; tracked schema-3
 compatibility verifies only. Optional explicit install-skills installs shared bytes
@@ -58,7 +62,7 @@ not a requirement for unrelated project edits to match HEAD or the working tree.
 ## Approved Ubuntu distribution refinement — 2026-10-05
 
 Canonical source skills remain tracked; consumer skills are ignored dependencies.
-Setup owns only three anchored ignore entries and schema-4 pin/hash provenance.
+Setup owns four anchored dependency ignore entries and schema-5 pin/hash provenance.
 Bootstrap uses canonical exact Git objects, never latest, and writes only missing
 skills after policy/project preflight. Consumer CI performs the same bootstrap.
 Optional explicit install-skills installs shared bytes/provenance at a chosen root

@@ -67,13 +67,15 @@ are in [acceptance evidence](validation/v2-acceptance.md).
 ## Consumer preparation versus source authoring
 
 Source canonical skills remain tracked. Consumers track project policy/config,
-helpers/CI/docs/project skills and schema-4 provenance; shared skills are ignored.
+CI/docs/project skills and schema-5 provenance; shared skills and
+.agents/tools/workflow runtime are ignored dependencies. Fetch the tracked pin and
+run the source-owned entrypoint before using a fresh consumer clone.
 Run installed exact-pin bootstrap before launching Ubuntu Codex at the consumer root:
 
 ```sh
-python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
-python3 tools/workflow/workflow.py check --repo . --run-local --json
-python3 tools/workflow/workflow.py doctor --repo . --json
+python3 .agents/tools/workflow/workflow.py bootstrap --repo . --apply --json
+python3 .agents/tools/workflow/workflow.py check --repo . --run-local --json
+python3 .agents/tools/workflow/workflow.py doctor --repo . --json
 ```
 
 Fresh clones fetch only the recorded source commit if dependency files are missing;

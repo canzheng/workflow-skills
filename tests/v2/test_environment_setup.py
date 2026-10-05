@@ -8,6 +8,7 @@ import shlex
 import shutil
 import subprocess
 import unittest
+from unittest.mock import patch
 
 import test_setup
 from core import SKILLS, git, shared
@@ -59,7 +60,7 @@ class EnvironmentSetupTests(unittest.TestCase):
         tracked = git(fresh, 'ls-files', '-z').decode().split('\0')
         self.assertIn('.agents/skills/project-rules/SKILL.md', tracked)
         self.assertTrue(all('.agents/skills/' + name + '/SKILL.md' not in tracked for name in SKILLS))
-        self.assertEqual(manifest['schema_version'], 4)
+        self.assertEqual(manifest['schema_version'], 5)
         self.assertEqual(manifest['skill_storage'], 'ignored')
         self.assertEqual(test_setup.run('doctor', '--repo', fresh)['content']['revision'], sha)
         self.assertEqual(git(fresh, 'status', '--porcelain'), b'')
@@ -74,6 +75,36 @@ class EnvironmentSetupTests(unittest.TestCase):
         self.execute(script, self.target)
         self.assertEqual((self.target / '.workflow/install-manifest.json').read_bytes(), old_pin)
         self.assertEqual(git(self.target, 'status', '--porcelain'), b'')
+
+    def test_source_entrypoint_bootstraps_a_clone_with_no_consumer_runtime(self):
+        script = self.entrypoint()
+        self.execute(script, self.target)
+        test_setup.commit(self.target)
+        pin = json.loads((self.target / '.workflow/install-manifest.json').read_text())
+        fresh = self.base / 'clone without workflow runtime'
+        subprocess.run(['git', 'clone', '--quiet', '--no-local', str(self.target), str(fresh)], check=True)
+        self.assertFalse((fresh / '.agents/tools/workflow').exists())
+        self.assertFalse((fresh / '.agents/skills/workflow-deliver-issue').exists())
+        project = {name: (fresh / name).read_bytes() for name in
+                   git(fresh, 'ls-files', '-z').decode().split('\0') if name}
+        index = (fresh / '.git/index').read_bytes()
+        skill = self.source / '.agents/skills/workflow-deliver-issue/SKILL.md'
+        skill.write_bytes(skill.read_bytes() + b'Latest must not replace the pin.\n')
+        self.assertNotEqual(test_setup.commit(self.source), pin['source_revision'])
+        env = {'GIT_CONFIG_COUNT': '1',
+               'GIT_CONFIG_KEY_0': 'url.' + self.source.as_uri() + '.insteadOf',
+               'GIT_CONFIG_VALUE_0': 'https://github.com/canzheng/workflow-skills.git'}
+        with patch.dict(os.environ, env):
+            self.execute(script, fresh)
+        for name, expected in pin['files'].items():
+            self.assertEqual(hashlib.sha256((fresh / name).read_bytes()).hexdigest(), expected)
+        self.assertEqual((fresh / '.git/index').read_bytes(), index)
+        self.assertEqual(project, {name: (fresh / name).read_bytes() for name in project})
+        with patch.dict(os.environ, {**env, 'GIT_CONFIG_VALUE_0': 'https://github.com/canzheng/workflow-skills.git',
+                                    'GIT_CONFIG_KEY_0': 'url.file:///missing-offline-source.insteadOf'}):
+            self.execute(script, fresh)
+        self.assertEqual((fresh / '.git/index').read_bytes(), index)
+        self.assertEqual(git(fresh, 'status', '--porcelain'), b'')
 
     def test_rerun_rejects_wrong_repository_identity_before_dependency_writes(self):
         script = self.entrypoint()

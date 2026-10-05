@@ -17,9 +17,10 @@ python3 tools/workflow/workflow.py check --repo . --specs --json.
 ## Pinned consumer adoption
 
 Shared skills are tracked only in this source repository. Consumers track their
-AGENTS/config, helpers, CI/templates, docs/specs, project skills and exact source pin;
-the three shared directories/references are materialized repo-locally and ignored.
-Setup adds only their anchored ignore rules, never all of .agents. It is idempotent,
+AGENTS/config, CI/templates, docs/specs, project skills and exact source pin;
+the three shared skill directories/references and Python runtime in
+`.agents/tools/workflow/` are materialized repo-locally and ignored together.
+Setup adds only those four anchored ignore rules, never all of .agents. It is idempotent,
 previews before apply, preserves unrelated files/index and never stages/commits.
 
 The source owns the installer; a fresh target needs no existing workflow tools.
@@ -27,6 +28,7 @@ Set the full tested source SHA from the [Ubuntu handoff](docs/validation/ubuntu-
 and actual consumer root/owner/name, then fetch/run in Bash:
 
 ```sh
+(
 set -eu
 : "${WF2_SOURCE_SHA:?Set the exact tested 40-character source commit from the handoff}"
 : "${WF2_CONSUMER_ROOT:?Set the absolute consumer Git root}"
@@ -37,12 +39,23 @@ git -C "$WF2_SOURCE_DIR" init --quiet
 git -C "$WF2_SOURCE_DIR" fetch --no-tags --depth=1 https://github.com/canzheng/workflow-skills.git "$WF2_SOURCE_SHA"
 git -C "$WF2_SOURCE_DIR" checkout --detach --quiet "$WF2_SOURCE_SHA"
 bash "$WF2_SOURCE_DIR/tools/workflow/environment-setup.sh" "$WF2_CONSUMER_ROOT" "$WF2_CONSUMER_REPOSITORY"
+)
+printf 'Installation exit status: %s\n' "$?"
 ```
 
-Review/commit project adoption and schema-4 provenance before acceptance. Existing
+Review/commit project adoption and schema-5 provenance before acceptance. Existing
 tracked consumers need an explicit reviewed source setup/update and caller-owned
-untracking of only the three directories; startup never changes storage/index.
+untracking of only the dependency namespaces; startup never changes storage/index.
 See [operations](docs/operations.md) for preview/apply, migration and recovery.
+
+The Python entry point in consumers is `.agents/tools/workflow/workflow.py`.
+A fresh clone has no shared Python files yet: fetch the exact source pin and run
+this source-owned entrypoint first. It bootstraps the pin before running consumer
+checks. Matching reruns are offline/idempotent once the pinned source checkout is
+available. CI similarly fetches its tracked pin; PR metadata uses the base checkout's
+pin and never executes PR head code. `--dependency-storage tracked` explicitly
+tracks both runtime and skills for compatibility. Source authoring retains the
+canonical runtime in `tools/workflow/`.
 
 ### Repository workflow routing
 

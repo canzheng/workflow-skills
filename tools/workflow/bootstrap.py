@@ -3,7 +3,7 @@ import pathlib
 import tempfile
 
 from core import (Conflict, REQUIRED_ASSETS, block, dependency_policy, digest, git,
-                  manifest, repository, safe, shared)
+                  manifest, repository, safe, shared, dependency, required_assets)
 from setup import source_bundle, transaction
 
 
@@ -12,13 +12,13 @@ def bootstrap(args):
     m = manifest(root)
     if not m:
         raise Conflict('Installation provenance missing; perform one-time adoption first')
-    if not REQUIRED_ASSETS <= m['files'].keys():
+    if not required_assets(m['files']) <= m['files'].keys():
         raise Conflict('Incomplete installed manifest; restore reviewed complete adoption')
     dependency_policy(root, m)
-    expected = {name: h for name, h in m['files'].items() if shared(name)}
+    expected = {name: h for name, h in m['files'].items() if dependency(name, m)}
     # Reject project/managed edits before any fetch or dependency writes.
     for name, h in m['files'].items():
-        if not shared(name):
+        if not dependency(name, m):
             p = safe(root, name)
             if not p.is_file() or digest(p.read_bytes()) != h:
                 raise Conflict('Missing/modified project asset preserved: ' + name)
@@ -29,7 +29,7 @@ def bootstrap(args):
     missing = []
     for name, h in expected.items():
         p = safe(root, name)
-        if not p.exists() and m['schema_version'] == 4:
+        if not p.exists() and m['schema_version'] in (4, 5):
             missing.append(name)
         elif not p.is_file() or digest(p.read_bytes()) != h:
             raise Conflict('Missing/modified skill preserved: ' + name +
@@ -37,7 +37,7 @@ def bootstrap(args):
 
     def resolve(source):
         version, assets = source_bundle(source, m['source_revision'])
-        skills = {name: digest(data) for name, data in assets.items() if shared(name)}
+        skills = {name: digest(data) for name, data in assets.items() if dependency(name, m)}
         if version != m['bundle_version'] or skills != expected:
             raise Conflict('Pinned source skill bytes differ from provenance hashes')
         return {name: assets[name] for name in missing}

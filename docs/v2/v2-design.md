@@ -2,7 +2,8 @@
 
 User-approved distribution refinement (2026-10-05): consumer shared workflow skills
 are gitignored pinned dependencies, materialized before Ubuntu Codex startup. Only
-the three shared directories are ignored; project skills remain trackable. Explicit
+the three shared skill directories and .agents/tools/workflow runtime are ignored;
+project skills/tools remain trackable (user-approved runtime alignment, 2026-10-05). Explicit
 optional shared-skills-only global installation into `~/.agents/skills` is supported.
 Source-authored skills remain tracked; global/project policy is never installed
 automatically. This supersedes the earlier tracked-consumer refinement.
@@ -155,9 +156,8 @@ openspec/changes/
 ```
 
 The source `.agents/skills/` directories are canonical tracked authored copies.
-Consumers track project policy/configuration, helpers, CI/templates, docs/specs,
-project-specific skills and schema-4 provenance. The three shared directories and
-risk references are materialized repo-locally and ignored with one narrow owned
+Consumers track project policy/configuration, CI/templates, docs/specs,
+project-specific skills and schema-5 provenance. The three shared skill directories/references and .agents/tools/workflow runtime are materialized repo-locally and ignored with one narrow owned
 .gitignore block. Provenance pins a full source commit, credential-free source URL,
 asset hashes and ignore-block hash; it never records task state or its own hash.
 Fresh clones bootstrap the exact pin before Codex starts. Complete matching
@@ -181,11 +181,11 @@ Required behavior:
 - On update, replace an owned file only if its previous hash still matches. Report local modifications as conflicts; preserve them. Do not silently overwrite or assume the source repository's `HEAD` identifies uncommitted bundle bytes.
 - Repeating setup with unchanged inputs is a no-op. Uninstall removes only unmodified managed files and its instruction block, retaining user documents and modifications.
 - Consumer configuration is user-owned after creation. New defaults do not overwrite it.
-- Default adoption materializes shared skills and adds only anchored ignore rules
-  for the three directories, preserving unrelated root/nested/global ignore policy.
-  Schema 4 declares ignored storage. Project files/config/skills remain tracked.
+- Default adoption materializes shared skills/runtime and adds only anchored ignore rules
+  for those four dependency namespaces, preserving unrelated root/nested/global ignore policy.
+  Schema 5 declares ignored skill/runtime storage. Project files/config/skills remain tracked.
 - Setup never changes the index. A tracked consumer migrates explicitly: review
-  the update, untrack only the three shared directories without deleting working
+  the update, untrack only the shared dependency namespaces without deleting working
   files, stage project/provenance/.gitignore changes, and commit. Tracked schema-3
   consumers remain verifiable until an explicit update; legacy mode is compatibility.
 - Repeat `bootstrap` previews missing shared files; `--apply` fetches only the full

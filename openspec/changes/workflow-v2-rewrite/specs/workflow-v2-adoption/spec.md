@@ -1,17 +1,17 @@
 ## ADDED Requirements
 
 ### Requirement: Tracked policy and pinned local skill dependencies
-Consumer adoption SHALL track project policy/configuration, utilities, CI/templates,
-docs/specs, project-specific skills and schema-4 provenance. The three shared skill
-namespaces/references SHALL be ignored repo-local dependencies, with an exact source
+Consumer adoption SHALL track project policy/configuration, CI/templates,
+docs/specs, project-specific skills and schema-5 provenance. The three shared skill
+namespaces/references and .agents/tools/workflow runtime SHALL be ignored repo-local dependencies, with an exact source
 commit, credential-free URL, managed hashes and a narrow owned ignore-block hash.
 Setup SHALL NOT stage/untrack/commit or ignore all of .agents. Source canonical
 skills SHALL remain tracked. Required Ubuntu discovery/use SHALL be tested separately.
 
 #### Scenario: Fresh clone and repeat bootstrap
 - **WHEN** a fresh consumer clone contains committed project adoption but lacks shared dependency files
-- **THEN** bootstrap previews missing shared files and --apply fetches only the recorded commit or uses an explicitly matching source
-- **AND** canonical source bytes/hashes are validated before writing only missing shared files
+- **THEN** bootstrap previews missing shared skill/runtime files and --apply fetches only the recorded commit or uses an explicitly matching source
+- **AND** canonical source bytes/hashes are validated before writing only missing shared skill/runtime files
 - **AND** complete matching reruns are offline no-ops preserving project files, pin and raw index
 - **AND** consumer CI bootstraps the same pin before configured local/mechanical checks
 
@@ -50,9 +50,9 @@ skills SHALL remain tracked. Required Ubuntu discovery/use SHALL be tested separ
 - **AND** blocking or nonregular indexed policies fail without mutation while valid project-owned policy differences remain allowed
 
 #### Scenario: Explicit tracked-to-ignored migration
-- **WHEN** setup explicitly updates tracked schema-1/3 adoption to schema 4
+- **WHEN** setup explicitly updates tracked schema-1/3 adoption to schema 5
 - **THEN** it preserves the index and adds only its owned shared-directory ignore block
-- **AND** the caller reviews/untracks only shared directories without deleting their working files, stages project changes and commits
+- **AND** the caller reviews/untracks only shared dependency namespaces without deleting their working files, stages project changes and commits
 - **AND** modified assets/blocks and unsafe destinations conflict before writes
 - **AND** failed writes restore originals or report recoverable residuals
 
@@ -87,6 +87,18 @@ skills SHALL remain tracked. Required Ubuntu discovery/use SHALL be tested separ
 - **WHEN** pinned source has local Git replacement refs
 - **THEN** setup/bootstrap read canonical commit/assets and reject substituted worktree bytes before writes
 - **AND** a replacement-free source clone reproduces the same shared bytes without altering local refs/configuration
+
+#### Scenario: Runtime and skills use one dependency policy
+- **WHEN** a fresh consumer adopts the default schema-5 bundle
+- **THEN** shared skills and runtime are ignored/untracked at the same exact pin
+- **AND** the runtime resides under .agents/tools/workflow while project tools/skills remain trackable
+- **AND** source-owned bootstrap and CI fetch the tracked pin before running the consumer CLI
+- **AND** metadata review fetches only the trusted base pin and never executes head code
+
+#### Scenario: Partial initial policy staging
+- **WHEN** the caller stages only newly adopted policy/configuration or introduces managed routing into a previously committed human policy
+- **THEN** verification rejects the incomplete commit candidate while preserving working files and raw index
+- **AND** pre-existing human policy alone does not turn entirely unstaged adoption into a completed commit
 
 ### Requirement: Explicit optional global shared skills
 An explicit install-skills command SHALL preview by default and install only the

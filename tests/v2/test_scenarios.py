@@ -17,7 +17,7 @@ class ScenarioTests(unittest.TestCase):
             commit(target)
             run('setup', '--source', ROOT, '--revision', sha, '--target', target, '--repository', 'fixture/real-consumer', '--apply')
             self.assertEqual(run('setup', '--source', ROOT, '--revision', sha, '--target', target, '--repository', 'fixture/real-consumer', '--apply')['changes'], [])
-            installed = target / 'tools/workflow/workflow.py'
+            installed = target / '.agents/tools/workflow/workflow.py'
             r = subprocess.run(['python3', str(installed), 'check', '--repo', str(target), '--json'], capture_output=True, text=True)
             self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
             skills = {p.parent.name for p in (target / '.agents/skills').glob('*/SKILL.md')}
