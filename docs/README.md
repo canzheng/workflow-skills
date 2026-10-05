@@ -27,5 +27,6 @@ reachable through the recorded baseline in Git, not copied into the source head.
 - [Real F14 consumer pilot](validation/f14-consumer-pilot.md): actual backlog, Ready PR,
   Actions negatives, review fixes, Ubuntu proof and remaining authorization gates.
 
-- [Fresh consumer Cloud bootstrap handoff](validation/cloud-bootstrap-handoff.md): published environment script, exact consumer/source pins and fresh-task prompt.
+- [Ubuntu workstation handoff](validation/ubuntu-workstation-handoff.md): required first-release setup, repository-root launch and fresh-session acceptance.
+- [Historical Cloud handoff](validation/cloud-bootstrap-handoff.md): deferred setup/discovery experiment; not an F14 release gate.
 - [Published Cloud run evidence](validation/f14-published-cloud-run.md): revision mismatch, successful recovery, discovery limits and next preparation diagnosis.

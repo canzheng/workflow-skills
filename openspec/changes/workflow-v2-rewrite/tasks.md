@@ -3,7 +3,7 @@
 - [x] 1. Establish repository-scoped foundation (WF2-F01–F06).
 - [x] 2. Implement specifications, risk proof, handoffs, checks and scenarios (WF2-F07–F11).
 - [x] 3. Inventory migration and retire active v1 assets (WF2-F12–F13).
-- [ ] 4. Complete required Cloud/Ubuntu/GitHub/enforcement acceptance and archive (WF2-F14).
+- [ ] 4. Complete required Ubuntu skill-use/runtime/GitHub/review/enforcement acceptance and archive (WF2-F14).
 
 ## Bootstrap checkpoint evidence
 
@@ -422,3 +422,17 @@ read-only in disposable Ubuntu container. Evidence stored in published-run/accep
 handoff. Ubuntu native CLI catalog subset verified; Ubuntu skill execution and
 Cloud initial catalog/use still pending. This strengthens host root lead but does
 not prove current Cloud implementation/root. No reinstall/main merge inferred fix.
+
+## User-approved acceptance/storage refinement — 2026-10-05
+
+Resume starts at source1f6aba5dcc4b0e9e801b638fd6eafc48b3f437bb. Ubuntu workstation
+is the required F14 host; Cloud is deferred, historical reports retained unverified.
+Shared consumer skills are ignored exact-pin schema-4 dependencies; setup owns only
+three ignore entries, bootstrap materializes missing canonical bytes before agent/CI,
+and matching repeats preserve project files/index offline. Tracked compatibility
+regressions remain. Optional explicit global shared-only install-skills defaults to
+~/.agents/skills and is tested only in isolated targets. Current/delta specs and
+source/consumer docs are reconciled. Aggregate/committed Ubuntu/actual CI and real
+consumer migration are being verified; Ubuntu fresh agent use/final review and
+separately authorized merge/completion remain pending. No archive/global/admin change.
+Next: record exact tested source/consumer pins in the Ubuntu workstation handoff.

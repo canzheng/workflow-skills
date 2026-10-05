@@ -21,8 +21,9 @@ python3 tools/workflow/workflow.py doctor --repo /exact/repository --expect-bran
 
 A same-SHA Ubuntu handoff must run the documented setup/verify/spec commands on
 Ubuntu and record OS/runtime/revision/exit result. This Debian checkout is not an
-Ubuntu acceptance environment. Missing Ubuntu or fresh Cloud discovery remains
-integration pending. Preserve summaries in PR/Issue records; raw logs may be CI
+Ubuntu acceptance environment. Missing required Ubuntu runtime or fresh agent discovery/use remains
+integration pending. Cloud is deferred for the v2 first release and is not an F14
+blocker; preserve its historical unverified results. Preserve summaries in PR/Issue records; raw logs may be CI
 artifacts with declared retention (CI uses 14 days), not permanent proof by URL alone.
 
 Read/auth/write/publication/admin are independent capabilities. Doctor's gh auth

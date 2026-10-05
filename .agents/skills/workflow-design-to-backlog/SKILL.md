@@ -3,6 +3,11 @@ name: workflow-design-to-backlog
 description: Create the initial or MVP GitHub backlog in one batch from one or more high-level or detailed design documents, or safely refine existing candidate Issues as the design evolves. Use for "Create the initial backlog from this design"; not for an already-ready small implementation request.
 ---
 
+Resolve documentation from the selected repository's .workflow/config.json
+(contract/docs_index), never from the global skills directory. Authored Markdown
+links below describe the repo-local layout; a global installation uses the same
+project documents in the selected repository. Preserve host instructions.
+
 Read [the delivery contract](../../../docs/workflow/contract.md). It owns workflow
 rules; this skill translates intent into delivery outcomes, not execution authority.
 

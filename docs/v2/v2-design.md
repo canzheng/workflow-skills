@@ -1,5 +1,18 @@
 # Workflow Skills v2 Design
 
+User-approved distribution refinement (2026-10-05): consumer shared workflow skills
+are gitignored pinned dependencies, materialized before Ubuntu Codex startup. Only
+the three shared directories are ignored; project skills remain trackable. Explicit
+optional shared-skills-only global installation into `~/.agents/skills` is supported.
+Source-authored skills remain tracked; global/project policy is never installed
+automatically. This supersedes the earlier tracked-consumer refinement.
+
+User-approved acceptance refinement (2026-10-05): Ubuntu workstation execution is
+the required first-release environment. Cloud setup/discovery is deferred and does
+not block WF2-F14. Preserve portable Cloud-compatible implementation and historical
+results; do not claim Cloud validation. GitHub, review, documentation, merge and
+authorization obligations are unchanged.
+
 Version: 1.0 • Design baseline: 2026-10-04 • Target repository: `canzheng/workflow-skills`
 
 Status: implementation specification for a replacement workflow. This document describes the target, not a claim that v2 already exists. Read with [the capability map](v2-capability-map.md) and [the feature list](v2-feature-list.md). Keep all three together at `docs/v2/` in the repository.
@@ -8,7 +21,7 @@ Status: implementation specification for a replacement workflow. This document d
 
 ### 1.1 Why we are rewriting this project
 
-We have decided to move development to GitHub and Codex Cloud, with Ubuntu available for environment-specific validation. This changes where work is managed, how execution starts, and how context survives between sessions. The existing workflow was built around a local checkout, globally installed skills, a Markdown backlog, feature records, task resolvers, and wrapper-driven execution. Adapting every wrapper to GitHub would retain most of the complexity while adding another synchronization boundary.
+We have decided to use GitHub and Codex on an Ubuntu workstation. Codex Cloud is an optional future execution path. This changes where work is managed, how execution starts, and how context survives between sessions. The existing workflow was built around a local checkout, globally installed skills, a Markdown backlog, feature records, task resolvers, and wrapper-driven execution. Adapting every wrapper to GitHub would retain most of the complexity while adding another synchronization boundary.
 
 The rewrite replaces that organization. GitHub Issues and PRs become the shared delivery system. Git remains the home for design, behavior specifications, current implementation documentation, and necessary long-running plans. Codex performs implementation within a bounded assignment. A small set of skills supplies project-specific delivery responsibilities and validation methods.
 
@@ -41,7 +54,7 @@ The essential quality obligations remain: respect approved scope, verify the act
 
 | Alternative | Why it is not selected |
 | --- | --- |
-| Thin v1 while retaining its state engine | Does not meet the already-selected GitHub and Cloud operating model |
+| Thin v1 while retaining its state engine | Does not meet the selected GitHub and Ubuntu operating model |
 | Translate v1 transitions into GitHub API calls | Preserves unnecessary internal task state and adds remote-write failure cases |
 | Delete all custom workflow rules | Leaves documentation, handoff, scope, and completion responsibilities implicit |
 | Build a new orchestrator or autonomous project manager | Reimplements services already supplied by GitHub and the host; increases maintenance and authorization risk |
@@ -52,11 +65,11 @@ Selected approach: three focused skills, a short repository contract, a few dete
 
 ### 2.1 Required outcomes
 
-1. A new Cloud session can identify its assignment, relevant design, repository rules, and verification commands without prior chat history.
+1. A new Ubuntu Codex session can identify its assignment, relevant design, repository rules, and verification commands without prior chat history.
 2. A high-level design can become bounded candidate Issues with dependencies, acceptance criteria, and explicit scope decisions.
 3. Ordinary development requires neither a feature ledger nor a per-task implementation plan.
 4. Necessary design, specification, implementation, and operations documentation is part of delivery.
-5. Work can move between Cloud and Ubuntu using a known commit and a concise handoff.
+5. Work can resume between Ubuntu sessions using a known commit and a concise handoff; other supported environments use the same evidence convention.
 6. Repository setup works without pre-existing global instruction files, Conda, Superpowers, or credentials for ordinary offline tests.
 7. A feature cannot be reported as delivered merely because files exist, a skill ran, or a PR was opened.
 8. Existing projects can migrate deliberately without simultaneous v1/v2 ownership of the same work.
@@ -65,7 +78,7 @@ Selected approach: three focused skills, a short repository contract, a few dete
 
 No custom backlog database, task scheduler, agent fleet, mandatory subagent topology, two-way Markdown/GitHub synchronization, autonomous product prioritization, universal semantic documentation checker, or permanent v1 compatibility layer. Do not build a dashboard, hosted service, MCP server, GitHub App, plugin marketplace package, or automatic multi-repository roll-out for the first release.
 
-GitHub Projects may display Issues, but Projects fields are not required. Repository-local delivery is the first distribution model. Global or plugin packaging can be considered later if a concrete use case justifies it.
+GitHub Projects may display Issues, but Projects fields are not required. Repository-local delivery is the first distribution model. Explicit optional shared-skills-only global installation is now approved; plugin packaging remains deferred.
 
 ### 2.3 Fixed decisions and delegated choices
 
@@ -141,17 +154,18 @@ openspec/specs/
 openspec/changes/
 ```
 
-The `.agents/skills/` directories are the canonical authored copies in the source;
-consumer setup copies their pinned bytes into tracked repo-local skill files.
-Project policy/configuration, utilities, CI/templates, docs/specs, project-specific
-skills and all three shared directories are committed. Schema-3 provenance records
-tracked storage, full source commit, credential-free source URL and asset hashes;
-it never includes its own hash or task state. Fresh Cloud/Ubuntu checkouts supply
-the same committed skills, without global installation or fetching main/latest.
-User-approved refinement (2026-10-05): replace environment-injected ignored skills
-with committed skill snapshots. Failed initial-discovery reports motivated the
-change but do not independently establish a host root cause. F14 still tests actual
-discovery/use separately from file presence, Git tracking and local checks.
+The source `.agents/skills/` directories are canonical tracked authored copies.
+Consumers track project policy/configuration, helpers, CI/templates, docs/specs,
+project-specific skills and schema-4 provenance. The three shared directories and
+risk references are materialized repo-locally and ignored with one narrow owned
+.gitignore block. Provenance pins a full source commit, credential-free source URL,
+asset hashes and ignore-block hash; it never records task state or its own hash.
+Fresh clones bootstrap the exact pin before Codex starts. Complete matching
+installations repeat offline without changing tracked files or the index.
+Optional explicit `install-skills` installs only shared skills/references and their
+provenance under ~/.agents/skills; it never installs global AGENTS/project policy.
+Choose one active discovery location per name; duplicate names remain conflicts.
+Ubuntu discovery/use is required; Cloud discovery is deferred for this first release.
 
 ### 4.3 Repository-scoped setup
 
@@ -167,18 +181,23 @@ Required behavior:
 - On update, replace an owned file only if its previous hash still matches. Report local modifications as conflicts; preserve them. Do not silently overwrite or assume the source repository's `HEAD` identifies uncommitted bundle bytes.
 - Repeating setup with unchanged inputs is a no-op. Uninstall removes only unmodified managed files and its instruction block, retaining user documents and modifications.
 - Consumer configuration is user-owned after creation. New defaults do not overwrite it.
-- Adoption produces commit-ready shared skills and schema-3 provenance. It adds no
-  shared-skill ignores and never changes the index. Review and commit adoption.
-- Explicit update from schema 2 removes only its verified owned ignore block;
-  unrelated rules and modified files remain preserved. Other rules hiding shared
-  or project skills conflict. Schema-1 tracked snapshots update without untracking.
-- Repeatable `bootstrap` is verification-only for existing callers: no fetch,
-  missing-file repair, project rewrites or index changes. `check`/`doctor` reject
-  ignored/untracked adopted assets, missing/modified files and invalid provenance.
-- Cloud/local first adoption fetches an explicit source commit and runs the
-  source-owned entrypoint, which is not copied into the consumer. Later environment
-  setup verifies committed files and the installed pin; it does not inject skills.
-  Source README documents one-time adoption and Cloud/local repeat verification.
+- Default adoption materializes shared skills and adds only anchored ignore rules
+  for the three directories, preserving unrelated root/nested/global ignore policy.
+  Schema 4 declares ignored storage. Project files/config/skills remain tracked.
+- Setup never changes the index. A tracked consumer migrates explicitly: review
+  the update, untrack only the three shared directories without deleting working
+  files, stage project/provenance/.gitignore changes, and commit. Tracked schema-3
+  consumers remain verifiable until an explicit update; legacy mode is compatibility.
+- Repeat `bootstrap` previews missing shared files; `--apply` fetches only the full
+  recorded commit (or uses explicit matching source), validates canonical bytes and
+  writes only missing ignored files. No main/latest fallback. Modified/extra/symlinked
+  skills, wrong policy, invalid provenance or project edits conflict without overwrite.
+- Fresh adoption uses the source-owned entrypoint without pre-existing consumer
+  tools. Subsequent Ubuntu startup uses installed bootstrap before launching Codex.
+- Optional `install-skills` defaults to ~/.agents/skills, previews before --apply,
+  pins shared hashes, preserves unrelated/global modifications and supports bounded
+  update/uninstall. Never run it implicitly during repository setup.
+
 
 
 Repo-local skills are the default on Cloud and Ubuntu. Diagnose discoverable legacy/global duplicates; do not assume one same-named skill overrides another. Do not delete or edit global skills automatically. A user deliberately retaining v1 for other projects may keep them, provided explicit repository guidance prevents v1 execution here. Identical v2 names in more than one active discovery location are a setup conflict to resolve.
@@ -209,7 +228,7 @@ Public utility surface for the first release:
 | Command family | Minimum contract |
 | --- | --- |
 | `setup` | Dry-run/apply install, update, and uninstall using explicit paths and provenance |
-| `bootstrap` | Read-only verification of tracked shared skills/provenance; no downloads, repairs or index rewrites |
+| `bootstrap` | Preview/materialize missing ignored shared skills from the exact pin; preserve project files/index; tracked legacy mode verifies only |
 | `doctor` | Read-only report of config, tool versions, instructions, duplicate skills, and available integration capabilities |
 | `check` | Check owned bundle consistency, schemas, local documentation links, selected spec validation, and declared PR contract structure |
 | `migrate inspect` | Read-only inventory and proposed v1 dispositions; no automatic state migration |
@@ -348,7 +367,7 @@ Use `docs/plans/` only when there is no change-owned plan and a cross-session ef
 
 For the v2 rewrite, the three supplied documents provide the initial design and decomposition. F01 creates one bounded rewrite change that references them instead of copying them. Implemented workflow contracts are added to current specs as they become true at the branch revision; unresolved target behavior stays in the active change. F13 reconciles current contracts and removes obsolete active v1 contracts. F14 archives the rewrite change only after its required acceptance work is complete, then reruns affected checks on the final archive/spec diff. Pending required environment acceptance keeps the rewrite change active. Do not create one OpenSpec change for each feature merely because the feature list has IDs.
 
-## 9. Cloud and Ubuntu execution
+## 9. Ubuntu execution and optional Cloud portability
 
 ### 9.1 Portable execution contract
 
@@ -358,7 +377,7 @@ Python utilities must run from a clean supported Python environment without Cond
 
 ### 9.2 Environment readiness
 
-F02 establishes a portable setup and verification command; document the actual supported Python/Node/OpenSpec versions after testing. In Cloud, configure the environment to run that command during preparation. Check repository revision and installed dependency versions at task start, because a published environment can retain prepared dependencies across repository updates.
+F02 establishes a portable setup and verification command; document the actual supported Python/Node/OpenSpec versions after testing. On Ubuntu, run it from the explicit repository root before starting a fresh Codex session. Cloud preparation is optional and outside required F14 acceptance. Check repository revision and installed dependency versions at task start, because a published environment can retain prepared dependencies across repository updates.
 
 The current Cloud guide distinguishes published environments and isolated task workspaces from legacy integration environments. Use the current setup flow available to the user; do not hard-code the legacy cache lifetime or setup-only secret behavior into the workflow. The implementation must record which environment profile was tested. See source S4.
 
@@ -381,7 +400,7 @@ Do not conflate an attached GitHub repository with CLI API credentials. Prefer h
 
 A handoff contains repository, Issue or feature ID, branch, full commit SHA, plan/spec paths if relevant, completed scope, exact passed/failed/pending checks, prerequisites, and next action. Record whether the worktree contains uncommitted changes. A verification result over a dirty worktree is not evidence for a bare commit; commit the tested content or bind evidence to an explicit patch/content hash and retest the final revision.
 
-Ubuntu verification uses the same commit as the Cloud result. Record environment identity without secrets, commands, exit/result, and artifact links. A later material code/config change invalidates affected evidence; rerun the affected checks. Tests may run at a feature commit and remain valid after documentation-only commits if the unchanged executable inputs and tested revision are clearly stated; do not mislabel old evidence as a fresh full-head run.
+Ubuntu verification uses the exact recorded source/consumer commits; an earlier session or CI pass does not substitute for Ubuntu verification. Record environment identity without secrets, commands, exit/result, and artifact links. A later material code/config change invalidates affected evidence; rerun the affected checks. Tests may run at a feature commit and remain valid after documentation-only commits if the unchanged executable inputs and tested revision are clearly stated; do not mislabel old evidence as a fresh full-head run.
 
 No chat-only completion. The default branch must eventually contain current documentation, specifications, and implementation. PR/Issue records retain the summary and evidence index.
 
@@ -466,11 +485,11 @@ Rollback restores the repository bundle/config/instruction changes from the reco
 
 The required feature set is WF2-F01 through WF2-F14. Their acceptance scenarios are mapped in the companion files. F01–F06 establish a usable issue-delivery foundation; F07–F11 complete specifications, risk methods, checks, and portability; F12–F14 migrate, retire v1, and prove the full experience.
 
-The first release must demonstrate ordinary feature work, a reproducible bug, a cross-module behavior change, and a high-risk fixture. It must include fresh setup, conflicting legacy instructions, missing permissions, interrupted writes, stale evidence, and documentation omissions. At least one real Cloud session must execute the installed/repository skills; a file-copy test is insufficient.
+The first release must demonstrate ordinary feature work, a reproducible bug, a cross-module behavior change, and a high-risk fixture. It must include fresh setup, conflicting legacy instructions, missing permissions, interrupted writes, stale evidence, and documentation omissions. At least one fresh Codex session on Ubuntu must discover and execute the repository-local skills; a file-copy test or catalog query alone is insufficient. Cloud discovery/execution is deferred, not a first-release gate.
 
 Record workflow overhead during the pilot: avoidable confirmations, extra artifact edits, duplicated plans, repeated reviews, and incorrect completion/state claims. Target no required per-task plan, no feature ledger, no mandatory independent review for ordinary work, and no invented status synchronization. Do not claim a percentage speedup without a measured comparable baseline.
 
-Separate implementation-complete, validated-in-Cloud, verified-in-Ubuntu, and enforcement-configured results. Missing environmental acceptance keeps the release gate pending even when all code is written.
+Separate implementation-complete, Ubuntu runtime verified, Ubuntu skill discovery/use verified, enforcement-configured, merged and released results. Report Cloud as deferred/unverified. Missing environmental acceptance keeps the release gate pending even when all code is written.
 
 ## 14. Sources and freshness
 

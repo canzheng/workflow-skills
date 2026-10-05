@@ -1,44 +1,36 @@
 # Workflow Skills v2
 
-Repository-scoped skills for bounded GitHub Issue delivery with Codex. The three
-skills shape approved design, implement/verify/document an Issue, and select risk
-proof. GitHub owns delivery records; Git owns design, current specs and documentation.
-No global installation, Conda, Superpowers, feature ledger or per-task wrapper is required.
-
-Read [the document index](docs/README.md) and [delivery contract](docs/workflow/contract.md).
-The [approved v2 design and acceptance](docs/v2/v2-feature-list.md) remain the rewrite
-baseline; [Issue links](docs/v2/issue-links.md) carry identity without local status mirrors.
+Three shared skills for bounded GitHub Issue delivery with Codex: design-to-backlog,
+deliver-issue and targeted risk-review. GitHub owns delivery records; Git owns project
+intent/specs/docs. No Conda, Superpowers, feature ledger or mandatory task wrappers.
+Read [the document index](docs/README.md), [contract](docs/workflow/contract.md),
+[approved scope](docs/v2/v2-feature-list.md) and [Issue links](docs/v2/issue-links.md).
+Ubuntu workstation use is the required first-release path; Cloud discovery is deferred.
 
 ## Development
 
-```sh
-python3 tools/workflow/verify.py
-```
+Runtime: Python >=3.10 and Git. Source verification: python3 tools/workflow/verify.py.
+Optional pinned OpenSpec 1.14.0: npm ci --ignore-scripts, then
+python3 tools/workflow/workflow.py check --repo . --specs --json.
+[Development](docs/development.md) covers full history and supported versions.
 
-Runtime/offline verification: Python >=3.10 and Git. Optional development dependencies
-are pinned in requirements.txt. `npm ci --ignore-scripts` installs pinned OpenSpec
-1.14.0 when relevant; `python3 tools/workflow/workflow.py check --repo . --specs`
-runs actual strict validation. See [development](docs/development.md).
+## Pinned consumer adoption
 
-## One-time adoption and explicit updates
+Shared skills are tracked only in this source repository. Consumers track their
+AGENTS/config, helpers, CI/templates, docs/specs, project skills and exact source pin;
+the three shared directories/references are materialized repo-locally and ignored.
+Setup adds only their anchored ignore rules, never all of .agents. It is idempotent,
+previews before apply, preserves unrelated files/index and never stages/commits.
 
-Shared workflow skills are installed repo-locally **and committed in the consumer**.
-Track all three `.agents/skills/` directories, risk references, project policy/config,
-helpers, CI/templates, docs and schema-3 source provenance. Project skills stay tracked.
-Fresh Cloud/Ubuntu tasks get the reviewed skills from Git, not environment injection.
-
-The adoption entrypoint lives in workflow-skills, not the consumer. Fetch an explicit
-full source commit and run [environment-setup.sh](tools/workflow/environment-setup.sh)
-with the exact consumer Git root and owner/name. Python >=3.10, Bash and Git are
-required; first fetch needs Git HTTPS access. A new target needs no existing tools
-or first commit. Set WF2_SOURCE_SHA to the tested full source SHA in the
-[current handoff](docs/validation/cloud-bootstrap-handoff.md), then run in Bash:
+The source owns the installer; a fresh target needs no existing workflow tools.
+Set the full tested source SHA from the [Ubuntu handoff](docs/validation/ubuntu-workstation-handoff.md)
+and actual consumer root/owner/name, then fetch/run in Bash:
 
 ```sh
 set -eu
-: "${WF2_SOURCE_SHA:?Set the tested full source commit from the handoff}"
-WF2_CONSUMER_ROOT=/workspace/workflow-skills-test
-WF2_CONSUMER_REPOSITORY=canzheng/workflow-skills-test
+: "${WF2_SOURCE_SHA:?Set the exact tested 40-character source commit from the handoff}"
+: "${WF2_CONSUMER_ROOT:?Set the absolute consumer Git root}"
+: "${WF2_CONSUMER_REPOSITORY:?Set owner/repository}"
 WF2_SOURCE_DIR=$(mktemp -d)
 trap 'rm -rf -- "$WF2_SOURCE_DIR"' EXIT
 git -C "$WF2_SOURCE_DIR" init --quiet
@@ -47,54 +39,53 @@ git -C "$WF2_SOURCE_DIR" checkout --detach --quiet "$WF2_SOURCE_SHA"
 bash "$WF2_SOURCE_DIR/tools/workflow/environment-setup.sh" "$WF2_CONSUMER_ROOT" "$WF2_CONSUMER_REPOSITORY"
 ```
 
-Review and commit generated files before publishing an agent environment. Setup
-never stages, commits, pushes, merges or changes protection/global configuration.
-For existing schema-1/2 adoption, use the new source's explicit setup preview/apply
-[procedure](docs/operations.md); repeat startup does not silently migrate it.
-Schema-2 migration removes only the verified owned shared-skill ignore block.
-Modified files or other conflicting ignore rules are preserved and reported.
+Review/commit project adoption and schema-4 provenance before acceptance. Existing
+tracked consumers need an explicit reviewed source setup/update and caller-owned
+untracking of only the three directories; startup never changes storage/index.
+See [operations](docs/operations.md) for preview/apply, migration and recovery.
 
-## Cloud install field and local repeat verification
+## Repeatable Ubuntu bootstrap
 
-For an adopted repo, the environment Install field needs only the following,
-with the actual consumer path. Run the same commands locally/on Ubuntu:
+Before starting Codex, from the selected consumer root:
 
 ```sh
-set -eu
-cd /workspace/workflow-skills-test
+python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
 python3 tools/workflow/workflow.py check --repo . --run-local --json
 python3 tools/workflow/workflow.py doctor --repo . --json
 git --no-optional-locks status --short --untracked-files=all
+codex
 ```
 
-No workflow repository fetch, global skills, ignored-file cache or Start skill is
-needed for this CLI-only pilot. Repeating the source-owned entrypoint also preserves
-project files/index/pin and only verifies an adopted schema-3 repository. Existing
-`bootstrap --apply` callers perform read-only verification; they never fetch/repair
-missing skills. Restore the reviewed Git checkout or perform an explicit update.
-The installed pin wins over a newer source entrypoint; updates are separate changes.
+Bootstrap installs only missing ignored skills from the manifest's full commit;
+complete matching reruns are offline/no-op. Project files/pin/index remain unchanged;
+modified/extra/symlinked dependencies fail without overwrite. Consumer CI runs the
+same bootstrap before declared verification. Never implicitly fetch main/latest.
+Launch a fresh agent from the repository root, capture its initial catalog before
+explicit skill-file reads, then record actual skill use. Presence/catalog alone is
+not use evidence. Cloud environments may run the same script, but are not F14 gates.
 
-Publish/apply the environment and launch a fresh task on the reviewed consumer
-revision. Record the initial host skill catalog before explicit skill reads; verify
-all shared files are committed, hashes/pin match and Git remains clean. Capture host
-cwd/project-root routing separately from shell cwd. Presence and manual use alone
-are not discovery proof. The [F14 handoff](docs/validation/cloud-bootstrap-handoff.md)
-contains the current revisions, diagnostic and remaining boundaries. Earlier
-ignored-file/receipt experiments are historical evidence, not the acceptance path.
+## Optional global shared skills
+
+Use the same exact checked-out source. Preview, then add --apply only when intended:
+
+```sh
+python3 /pinned/source/tools/workflow/workflow.py install-skills --source /pinned/source --revision FULL_40_CHAR_SHA --json
+```
+
+Default target is ~/.agents/skills; --target chooses an absolute alternate skills
+root. Only the three skills/references and their provenance are installed, with
+bounded update/uninstall and preservation of user modifications. Project/global
+AGENTS, project helpers/config, authentication and other skills are untouched.
+Repository adoption never installs globally. Choose one active location per name;
+duplicates are conflicts. Global installation alone does not adopt project policy
+or satisfy repo-local dependency checks. Global skills resolve project documents
+from the selected repository, not the global install directory.
 
 ## Acceptance boundary
 
-Code/local checks and primary-author skill exercises do not establish fresh Cloud
-skill discovery, Ubuntu portability, live Actions or merge protection. The rewrite
-change stays active until required acceptance completes. PR/Issue evidence reports
-implemented, locally verified, integration pending, ready for review, merged and
-delivered distinctly. Merge/release/admin/global changes require separate authorization.
-V1-only planning, lesson and archive trees are absent from the source head.
-Original runtime/tests/specs and evidence remain reachable at the
-[recorded baseline](docs/migration-v1-v2.md); they are retired from current distribution.
-
-Environment setup validates the explicit owner/repository against any existing
-project config before adoption or bootstrap, rejecting mismatches without writes.
-
-An adopted repository missing its project configuration fails before dependency writes.
-Source and installed provenance share the same v2 bundle-version validation.
+F01–F13 are implemented/locally verified; F14 retains required fresh Ubuntu agent
+use/review/integration gates. [Evidence](docs/validation/v2-acceptance.md) distinguishes
+runtime, native discovery, semantic use/review, actual CI/enforcement and merge.
+Cloud is deferred/unverified, not passed. Merge/release/admin/global writes require
+explicit authorization; no local pass or PR alone means delivered. The v1 tree is
+retired, with provenance at the [recorded baseline](docs/migration-v1-v2.md).

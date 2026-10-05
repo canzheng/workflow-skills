@@ -1,5 +1,28 @@
 # v2 rewrite acceptance evidence
 
+## Current user-approved Ubuntu and distribution scope — 2026-10-05
+
+F14 now requires Ubuntu workstation discovery/use and portability; Cloud is
+explicitly deferred, not passed. Consumer shared skills are ignored exact-pin
+schema-4 dependencies, bootstrapped before Codex and CI; project files/provenance/
+.gitignore/project skills stay tracked. Optional explicit global shared-only
+install-skills is supported; no actual global installation is performed here.
+Source canonical skills remain tracked. Existing schema-3 regressions are retained
+as compatibility proof; new ignored/bootstrap/global paths have their own tests.
+
+Current implementation starts from source1f6aba5dcc4b0e9e801b638fd6eafc48b3f437bb.
+Committed aggregate/Ubuntu/spec/CI evidence and migrated consumer SHA will be added
+after verification. Until then, prior a4eb/f639 checks remain historical evidence for
+the earlier tracked model and do not certify the new ignored/global implementation.
+Required Ubuntu initial catalog plus actual agent use, final semantic review and real
+merge→Issue completion remain separate. Cloud is not an active blocker or next action.
+[Workstation procedure and evidence request](ubuntu-workstation-handoff.md) replaces
+Cloud environment investigation. No merge/closure/admin/release/global mutation.
+
+The following dated records preserve earlier exact revisions and acceptance scopes;
+references to mandatory Cloud/committed consumer skills are superseded by this
+approved scope update, not retroactively counted as passes.
+
 ## Native CLI discovery subset verified — 2026-10-05
 
 Existing Codex CLI0.159.0-alpha.3 app-server initialize/skills-list query recognizes

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Source-owned Cloud/local entrypoint. Intentionally excluded from the consumer bundle.
+# Source-owned Ubuntu/local entrypoint; Cloud use is optional. Intentionally excluded from the consumer bundle.
 set -eu
 if [ "$#" -ne 2 ]; then
     echo 'Usage: bash environment-setup.sh /absolute/consumer/git/root owner/repository' >&2
@@ -33,7 +33,7 @@ if [ ! -f .workflow/install-manifest.json ]; then
     python3 "$WF2_SOURCE_ROOT/tools/workflow/workflow.py" setup --source "$WF2_SOURCE_ROOT" --revision "$WF2_SOURCE_SHA" --target "$PWD" --repository "$WF2_CONSUMER_REPOSITORY" --json
     python3 "$WF2_SOURCE_ROOT/tools/workflow/workflow.py" setup --source "$WF2_SOURCE_ROOT" --revision "$WF2_SOURCE_SHA" --target "$PWD" --repository "$WF2_CONSUMER_REPOSITORY" --apply --json
 fi
-python3 -c 'import json, pathlib, sys; m=json.loads(pathlib.Path(".workflow/install-manifest.json").read_text(encoding="utf-8")); sys.exit(0 if m.get("schema_version")==3 else "Existing adoption needs reviewed setup/update to tracked skills; do not migrate during environment startup")'
+python3 -c 'import json, pathlib, sys; m=json.loads(pathlib.Path(".workflow/install-manifest.json").read_text(encoding="utf-8")); sys.exit(0 if m.get("schema_version") in (3, 4) else "Existing adoption needs reviewed setup/update; do not migrate during environment startup")'
 python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
 python3 tools/workflow/workflow.py check --repo . --run-local --json
 python3 tools/workflow/workflow.py doctor --repo . --json

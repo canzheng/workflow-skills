@@ -3,6 +3,11 @@ name: workflow-risk-review
 description: Review material numerical, migration, permission, filesystem, remote-write or producer/consumer risks with specific proof and contract preservation. Select relevant methods only; ordinary low-risk work needs no separate review ceremony.
 ---
 
+Resolve documentation from the selected repository's .workflow/config.json
+(contract/docs_index), never from the global skills directory. Authored Markdown
+links below describe the repo-local layout; a global installation uses the same
+project documents in the selected repository. Preserve host instructions.
+
 Read [the contract](../../../docs/workflow/contract.md) and only the pertinent
 sections of [risk methods](references/methods.md). Inputs: approved acceptance,
 actual diff, implementation/consumer paths, existing evidence and relevant lessons.

@@ -20,9 +20,11 @@ class ConsumerCITests(unittest.TestCase):
         self.assertNotIn('pull_request_target', text)
         scripts = re.findall(r'^\s+run: (.+)$|^      - run: (.+)$', text, re.M)
         steps = [left or right for left, right in scripts]
-        self.assertEqual(len(steps), 1)
-        self.assertNotIn('bootstrap', text)
-        script = steps[0]
+        self.assertEqual(len(steps), 2)
+        self.assertIn('bootstrap --repo . --apply --json', text)
+        self.assertEqual(subprocess.run(steps[0], shell=True, cwd=self.target,
+                                       capture_output=True).returncode, 0)
+        script = steps[1]
         cp = self.target / '.workflow/config.json'
         config = json.loads(cp.read_text())
         config['verification']['local'] = [['python3', '-c', "from pathlib import Path; Path('application-ran').write_text('yes')"]]

@@ -88,7 +88,7 @@ class SetupTests(unittest.TestCase):
         (self.target / 'AGENTS.md').write_text('User rule: preserve data.\n')
         commit(self.target)
         self.args = ['setup', '--source', self.source, '--revision', self.sha,
-                     '--target', self.target, '--repository', 'fixture/consumer']
+                     '--target', self.target, '--repository', 'fixture/consumer', '--skill-storage', 'tracked']
 
     def test_annotated_tag_object_is_not_accepted_as_a_commit_pin(self):
         subprocess.run(['git', '-C', str(self.source), '-c', 'tag.gpgSign=false', 'tag', '-a', 'wf2-fixture', '-m', 'Immutable tag object'], check=True)

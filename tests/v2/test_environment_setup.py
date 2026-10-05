@@ -54,11 +54,13 @@ class EnvironmentSetupTests(unittest.TestCase):
         self.assertEqual(git(fresh, 'ls-files', '--stage'), index)
         self.assertEqual(before, {p.relative_to(fresh): p.read_bytes() for p in fresh.rglob('*') if p.is_file() and '.git' not in p.relative_to(fresh).parts})
         for name in SKILLS:
-            self.assertEqual(subprocess.run(['git', '-C', str(fresh), 'check-ignore', '--no-index', '-q', '.agents/skills/' + name + '/SKILL.md']).returncode, 1)
+            self.assertEqual(subprocess.run(['git', '-C', str(fresh), 'check-ignore', '--no-index', '-q', '.agents/skills/' + name + '/SKILL.md']).returncode, 0)
         sha = test_setup.commit(fresh)
         tracked = git(fresh, 'ls-files', '-z').decode().split('\0')
         self.assertIn('.agents/skills/project-rules/SKILL.md', tracked)
-        self.assertTrue(all('.agents/skills/' + name + '/SKILL.md' in tracked for name in SKILLS))
+        self.assertTrue(all('.agents/skills/' + name + '/SKILL.md' not in tracked for name in SKILLS))
+        self.assertEqual(manifest['schema_version'], 4)
+        self.assertEqual(manifest['skill_storage'], 'ignored')
         self.assertEqual(test_setup.run('doctor', '--repo', fresh)['content']['revision'], sha)
         self.assertEqual(git(fresh, 'status', '--porcelain'), b'')
 

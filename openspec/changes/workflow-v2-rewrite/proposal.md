@@ -1,5 +1,9 @@
 # Workflow Skills v2 rewrite
 
+Acceptance refinement approved by the user on 2026-10-05: Ubuntu workstation
+discovery/use and portability replace mandatory Cloud acceptance. Cloud is deferred;
+no merge, release, administration or global-change authority is added.
+
 ## Why
 Replace local v1 lifecycle machinery with repository-scoped skills and GitHub delivery.
 

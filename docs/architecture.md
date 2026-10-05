@@ -10,12 +10,12 @@ The Python standard-library utility entrypoint is tools/workflow/workflow.py.
 core.py validates configuration/paths/provenance and computes actual content identity.
 setup.py preflights pinned source assets/target ownership, stages backups and restores
 on apply failure; installation provenance is generated only for consumers.
-bootstrap.py is a read-only compatibility verifier for tracked skills; it no longer
-fetches or materializes dependencies. Schema-3 provenance records tracked storage,
-source URL/full SHA/hashes. Setup produces commit-ready skills; explicit migration
-removes only a verified old schema-2 ignore block. All shared and project skills are
-trackable. Fresh Git checkouts supply skills; repeat environment verification never
-repairs missing files or rewrites policy/index. No cache/distribution database or
+bootstrap.py materializes only missing ignored shared skills from the exact source
+pin. Schema-4 provenance records ignored storage/URL/full SHA/asset and ignore hashes.
+Setup preserves project policy/config and index; caller handles explicit untracking
+when migrating schema 3. Complete bootstrap reruns are offline/no-op; tracked schema-3
+compatibility verifies only. Optional explicit install-skills installs shared bytes
+at a chosen global/custom root without project/global policy. No cache/database or
 mutable environment version selector is introduced.
 records.py renders approved source bodies and provides pure snapshot checks/edits
 for native operations, with no GitHub client or durable remote state.
@@ -45,7 +45,7 @@ of fresh Cloud discovery or independent review. Actual Ubuntu portability eviden
 is recorded separately in docs/validation/v2-acceptance.md.
 
 Tracking validation covers every installed manifest asset and provenance/config/AGENTS,
-not only shared skills. Indexed or committed managed assets identify adoption even
+excluding ignored shared dependencies, which must remain absent from the index. Indexed or committed managed assets identify adoption even
 when the manifest is removed from the index. Initial unstaged review remains separate;
 all required files must be trackable. Ignore previews preserve ancestor, global and
 repository-info rules for every required destination before writes.
@@ -54,3 +54,14 @@ blobs and modes: staged provenance/config, configured documents, every managed h
 and the AGENTS block must form a coherent regular-file snapshot. A good working tree
 does not mask broken staged content. This is read-only commit-candidate validation,
 not a requirement for unrelated project edits to match HEAD or the working tree.
+
+## Approved Ubuntu distribution refinement — 2026-10-05
+
+Canonical source skills remain tracked; consumer skills are ignored dependencies.
+Setup owns only three anchored ignore entries and schema-4 pin/hash provenance.
+Bootstrap uses canonical exact Git objects, never latest, and writes only missing
+skills after policy/project preflight. Consumer CI performs the same bootstrap.
+Optional explicit install-skills installs shared bytes/provenance at a chosen root
+(default ~/.agents/skills), without project policy/helpers or authentication changes.
+Both installer paths reuse preflight/rollback and preserve edits and unrelated files.
+Ubuntu initial catalog plus actual use is the first-release host gate; Cloud is deferred.

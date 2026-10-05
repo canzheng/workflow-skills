@@ -1,8 +1,8 @@
 # v2 candidate release and migration notes
 
 This rewrite branch implements the approved v2 system and is available for review.
-It has not merged or released. Required fresh Cloud and enforcement acceptance
-remain open; see [actual evidence](validation/v2-acceptance.md).
+It has not merged or released. Required Ubuntu agent-use and final semantic review acceptance remain open.
+Cloud is deferred by the user-approved 2026-10-05 scope change; see [actual evidence](validation/v2-acceptance.md).
 
 V2 selects one short repository contract and three repository-scoped skills:
 workflow-design-to-backlog, workflow-deliver-issue and workflow-risk-review.
@@ -15,7 +15,8 @@ metadata and isolated unresolved decisions. One batch readiness approval does no
 start execution. Reruns reuse identities and preserve human edits. The
 [actual consumer pilot](validation/f14-consumer-pilot.md) exercises this entry point,
 installed generic CI, the Ready-PR boundary and independently reviewed fixes;
-fresh host and final merge/enforcement obligations remain explicit.
+required Ubuntu host use and final merge obligations remain explicit. Consumer
+required-check enforcement has actual configured/observed evidence.
 
 Use the pinned source setup/doctor/check utilities in [operations](operations.md).
 Setup defaults to dry-run, preserves unrelated instructions and user configuration,
@@ -38,11 +39,14 @@ separate capabilities. Deterministic checks cannot certify semantic documentatio
 Issue closure or merge protection; adoption of trusted-base checks and protection
 configuration need their own observed evidence and authorization.
 
-The consumer setup separates one-time adoption/update from read-only environment
-verification. Shared skills are committed alongside project policy, configuration,
-helpers, CI/templates and a full-SHA schema-3 provenance manifest. Setup never stages
-or commits; review the adoption diff and commit it before a fresh Cloud task. Explicit
-migration removes only the verified owned schema-2 ignore block. Repeat setup never
-fetches or repairs missing skills, and consumer CI verifies the checked-out files.
-Project-specific skills remain tracked. Fresh Cloud discovery and real merge/enforcement
-remain acceptance gates; this is not a published release.
+The default consumer setup tracks project policy/config, helpers, CI/templates,
+docs/specs, project skills and schema-4 exact-source provenance. Shared skills are
+repo-local ignored dependencies, materialized before Ubuntu Codex starts. Only their
+three directories are ignored. Complete matching bootstrap repeats offline and does
+not change tracked files/index; modified dependencies fail without overwrite.
+Tracked schema-3 consumers migrate explicitly; setup never untracks or stages.
+Optional explicit global skills-only installation into ~/.agents/skills is supported,
+without installing global project policy or changing authentication. No real global
+installation was performed by this rewrite task; tests use isolated targets.
+Required Ubuntu discovery/use, final review and authorized merge remain pending;
+Cloud is deferred. This is not a published release.

@@ -1,5 +1,17 @@
 # Workflow Skills v2 Capability Map
 
+User-approved distribution refinement (2026-10-05): consumer shared workflow skills
+are gitignored pinned dependencies, materialized before Ubuntu Codex startup. Only
+the three shared directories are ignored; project skills remain trackable. Explicit
+optional shared-skills-only global installation into `~/.agents/skills` is supported.
+Source-authored skills remain tracked; global/project policy is never installed
+automatically. This supersedes the earlier tracked-consumer refinement.
+
+User-approved environment refinement (2026-10-05): Ubuntu workstation discovery,
+use and same-revision verification are required for the first release. Cloud
+adoption is deferred; its historical failures are not required F14 gates.
+Capability/scenario identities and all other scope remain intact.
+
 Version: 1.0 • Baseline: 2026-10-04 • Target: `canzheng/workflow-skills`
 
 This document defines what v2 must enable, which component owns each responsibility, and how the rewrite proves coverage. It complements [the design](v2-design.md) and [the feature list](v2-feature-list.md). It is a scope and traceability map, not an implementation-status dashboard.
@@ -10,7 +22,7 @@ All capabilities C01–C16 are in the first release. A capability can be impleme
 
 | Domain | Capabilities | Intended result |
 | --- | --- | --- |
-| Adoption and execution environment | C01–C03 | A clean Cloud or Ubuntu checkout can use one known workflow bundle |
+| Adoption and execution environment | C01–C03 | A clean Ubuntu checkout can use one known workflow bundle; Cloud remains optional |
 | Design and delivery | C04–C08 | Approved intent becomes bounded, documented, verifiable delivery |
 | Quality and continuity | C09–C12 | Verification is meaningful and survives reviews and environment changes |
 | Shared state and transition | C13–C16 | Remote changes, migration, and continuation remain honest and bounded |
@@ -28,14 +40,14 @@ All capabilities C01–C16 are in the first release. A capability can be impleme
 - Proof: during migration, retained `docs/planning/` does not trigger old wrappers; in the final `workflow-skills` head, v1-only planning artifacts are absent. Malformed markers and duplicate names are surfaced.
 - Implements: **WF2-F01, WF2-F03, WF2-F13**. Design: sections 3, 4, 12. Scenarios: **S01, S03, S04, S25**.
 
-### C02 Portable development and Cloud readiness
+### C02 Portable development and Ubuntu readiness
 
 **Outcome:** Runtime tools and verification work in a clean supported environment without a preconfigured home directory or Conda.
 
 - Inputs: pinned dependency definitions, repository revision, available runtime, and required checks.
 - Owner: setup/development entrypoints and `docs/development.md`.
 - Outputs: tested commands, supported versions, and separate findings for missing runtime, network, or authentication.
-- Required behavior: check the actual Cloud profile; separate environment preparation from agent/runtime access; never assume local skills or credentials synchronize to Cloud.
+- Required behavior: check the actual Ubuntu runtime and repository root; separate preparation, skill discovery, agent use and remote access. Optional Cloud execution must not assume local skills/credentials synchronize.
 - Proof: clean setup, setup rerun, dependency change after environment preparation, and unavailable GitHub write access.
 - Implements: **WF2-F02, WF2-F09, WF2-F14**. Design: section 9. Scenarios: **S02, S16, S17, S29**.
 
@@ -44,7 +56,7 @@ All capabilities C01–C16 are in the first release. A capability can be impleme
 **Outcome:** A consumer repository adopts or updates v2 without global installation or destructive overwrites.
 
 - Inputs: explicit target repository, pinned source revision, current managed-file hashes, and apply intent.
-- Owner: `setup` adoption/update, read-only `bootstrap` verification and tracked installation provenance.
+- Owner: `setup` adoption/update, exact-pin dependency `bootstrap`, optional explicit `install-skills`, and tracked provenance.
 - Outputs: dry-run diff; applied version and managed-file provenance; conflicts or rollback report.
 - Required behavior: preflight before writes, recover from partial failure, preserve modified/user-owned files, reject unsafe targets, support no-op rerun and bounded uninstall.
 - Proof: exercise the public setup command in temporary repositories, including failures after staging and during apply.
@@ -127,7 +139,7 @@ All capabilities C01–C16 are in the first release. A capability can be impleme
 - Proof: modify executable content after a pass and ensure the pass no longer satisfies completion.
 - Implements: **WF2-F06, WF2-F09, WF2-F10**. Design: sections 9.3, 10. Scenarios: **S17, S22, S28**.
 
-### C11 Cloud and Ubuntu handoff
+### C11 Revision-bound session and environment handoff
 
 **Outcome:** Another session or environment can resume without relying on prior conversation memory.
 
@@ -214,8 +226,8 @@ Use these IDs in tests, evaluation records, and PR evidence. A scenario ID is a 
 | S13 | Docs file changed but describes behavior incorrectly: semantic review detects contradiction | Skill evaluation | F11 |
 | S14 | Internal implementation repair leaves docs accurate: reasoned no-impact outcome is accepted | Skill evaluation | F06/F11 |
 | S15 | Significant contract change: appropriate OpenSpec artifacts, real implementation, validated specs, and archive | End-to-end integration + review | F07 |
-| S16 | GitHub writes unavailable: authorized code work proceeds; no fabricated issue/PR/status update | Adapter fixture + Cloud exercise | F09 |
-| S17 | Cloud pass with required Ubuntu verification absent: integration pending; same-SHA handoff enables completion | Two-environment exercise | F09/F14 |
+| S16 | GitHub writes unavailable: authorized code work proceeds; no fabricated issue/PR/status update | Adapter fixture + authorized host exercise | F09 |
+| S17 | Prior session/CI pass with required Ubuntu verification absent: integration pending; same-SHA Ubuntu handoff enables completion | Revision-bound Ubuntu handoff exercise | F09/F14 |
 | S18 | Timeout or failure after a remote write: re-read before retry; no duplicate or false success | Fault-injection operation fixture | F09 |
 | S19 | Plausible wrong formula or weak fixture: independent expected result distinguishes the defect | Risk evaluation + negative control | F08 |
 | S20 | Structured metadata has parser support but no consumer: integration proof fails | Producer/consumer negative control | F08/F11 |
@@ -227,12 +239,12 @@ Use these IDs in tests, evaluation records, and PR evidence. A scenario ID is a 
 | S26 | Resume with missing or ambiguous branch/worktree: no current-directory fallback | CLI/skill negative test | F09 |
 | S27 | PR metadata changes/head changes: appropriate check reruns; injected shell content remains data | CI event fixture | F10 |
 | S28 | Tested dirty tree or later material change: evidence identifies exact content and affected checks are rerun | Evidence evaluation | F09/F10 |
-| S29 | Real fresh Cloud session follows the three files/installed skills and resumes a checkpoint | Host-run pilot | F14 |
+| S29 | Real fresh Ubuntu Codex session discovers/uses the repo-local skills and resumes a checkpoint without prior chat | Host-run pilot | F14 |
 | S30 | Permissions/migration/filesystem risk: denied, interrupted, missing-resource paths covered as relevant | Risk evaluation | F08 |
 | S31 | CI exists but merge rules are not configured: report available checks, not active enforcement | Repository settings inspection | F10/F14 |
 | S32 | Migration with done/active/deferred/malformed records and partial remote success: safe inventory and bounded resume | Migration integration | F12 |
 | S33 | Fresh project with MVP/later scope, dependencies and one unknown: one design-to-backlog run produces a coherent outcome Issue batch, one approval yields correct Ready/backlog/blocked separation, design links survive reruns, no coding-task explosion or implementation starts | Skill evaluation + authorized consumer GitHub pilot | F05/F11/F14 |
-| S34 | Fresh consumer clone contains all committed shared skills; startup verifies the tracked exact pin without network or writes, rejects missing/modified/ignored/untracked assets, and preserves project files/index; explicit setup/update safely migrates schema-2 ignores and validates pinned source bytes; fresh source-owned adoption works without tools/first commit, and Cloud/Ubuntu discovery is tested from the committed checkout | Public CLI clone/fault tests + real CI/environment pilot | F02/F03/F10/F11/F14 |
+| S34 | Fresh consumer clone bootstraps the recorded commit into only three ignored shared directories; repeat is offline/idempotent, project skills remain tracked, project/provenance/index are preserved; modified/extra/symlinked dependencies and bad pins fail; explicit tracked-to-ignored migration and optional global shared-only installation preserve user files; Ubuntu discovery/use is tested separately | Public CLI clone/fault tests + real CI/environment pilot | F02/F03/F10/F11/F14 |
 
 ## 4. Platform responsibilities we reuse
 

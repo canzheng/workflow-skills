@@ -1,5 +1,10 @@
 # F14 published Cloud run: recovery passed, discovery pending
 
+**Historical / deferred Cloud investigation (user decision, 2026-10-05).**
+Do not execute this document as the current F14 next action or create more Cloud
+environments for this release. Preserve the reports as unverified Cloud history.
+The required path is the [Ubuntu workstation handoff](ubuntu-workstation-handoff.md).
+
 ## Native Codex catalog root comparison — 2026-10-05
 
 Existing `codex-cli 0.159.0-alpha.3` app-server was queried with only `initialize`

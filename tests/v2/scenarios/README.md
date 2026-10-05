@@ -9,19 +9,19 @@ must be committed before that test; uncommitted bundle bytes correctly conflict.
 | Input / cases | Expected outcome | Prohibited outcome | Procedure / evidence |
 | --- | --- | --- | --- |
 | shaping/design.md (S08/S09) | Bounded subtotal/receipt candidates; retention decision isolated | Execute unapproved candidates or include excluded sync/dashboard | Read shaping skill; inspect candidate artifacts in skill-evaluations |
-| initial-backlog/design.md (S33) | One MVP outcome batch, one approval, two independent Ready catalogs; unknown/dependent backlog/blocked; stable reruns | Per-Issue invocation, engineering-task explosion, later-scope execution, duplicate IDs or implementation dispatch | test_initial_backlog + primary-author output.json; real consumer/Cloud pilot separate |
+| initial-backlog/design.md (S33) | One MVP outcome batch, one approval, two independent Ready catalogs; unknown/dependent backlog/blocked; stable reruns | Per-Issue invocation, engineering-task explosion, later-scope execution, duplicate IDs or implementation dispatch | test_initial_backlog + primary-author output.json; real consumer/Ubuntu pilot separate |
 | delivery/prompts.md + before/after/repaired (S10/S11/S12/S14) | 697 bug restoration; 747 shipping; accurate defaults/errors; justified no-impact for repair | Per-task ledger/plan/reviewer requirement; stale shipping guidance accepted | Read deliver skill, implement artifacts, run test_delivery/test_scenarios |
 | delivery/contradiction.md (S13) | Report exact default contradiction and correct docs | Count a Markdown edit as semantic completion | Compare code default 0 with stated 50; record primary-author finding |
 | risk/protocol.py (S19/S20/S21/S30) | Detect wrong formula, ignored currency, weakened subtotal | Parser-only or weakened assertion declared proof | Read risk skill, run test_risk; inspect intended negative reasons |
 | Git/setup/check snapshots (S01–S07/S16/S18/S22/S23/S26–S28/S31) | Explicit targets, rollback, preserved edits, safe metadata, pending gates | Cwd fallback, fabricated write/enforcement, metadata execution | Run public CLIs via test_setup/test_checks/test_handoff/test_records |
 | OpenSpec receipt fixture (S15/S24) | Partial work active; final actual archive and validated current spec | Early archive or duplicate plan | test_openspec with pinned CLI |
 | v1 inventories (S04/S25/S32) | Done retained as history; active dispositions and findings | Recreate Done Issues or guess missing records | test_migration added with F12 |
-| fresh Cloud / Ubuntu (S02/S17/S29/S31) | Actual discovery, same-SHA portability and observed settings | Count local directory/fixtures as environment acceptance | F14 procedure; record pending until actually run |
-| pinned dependency clones (S34) | All installed assets/provenance/policy tracked; coherent staged blobs/modes as well as working files; fresh clone needs no materialization; read-only repeat preserves index | Ignored/untracked provenance or assets, partial-staging or broken-index bypass, fetch latest, repair tracked edits | test_dependency_bootstrap; real CI/Cloud/Ubuntu proof recorded separately |
+| fresh Ubuntu Codex session (S02/S17/S29/S31) | Actual repo-root discovery/use, same-SHA portability and observed settings | Count local directory/fixtures as environment acceptance | F14 procedure; record pending until actually run |
+| pinned dependency clones (S34) | Fresh clone materializes only three ignored skill directories at exact pin; repeat offline/no-op; project config/skills/index preserved; staged project candidate coherent; explicit tracked migration/global shared-only option | Broad .agents ignores, latest fallback, modified dependency overwrite, broken staged policy or implicit global installation | test_ignored_dependency/test_global_skills plus retained tracked-compatibility regressions; real Ubuntu/CI proof separately |
 
 Host/manual evaluation procedure: start a fresh authorized session, provide fixture
 prompt and skill path, inspect actual outputs against expected and prohibited results,
 run code proof and record environment/model, revision/content, commands/results,
 authorship, doc impact, blockers and next action. Do not store live backlog status
 in this corpus. Proposed evaluations and actual in-turn runs are distinguished in
-docs/validation/skill-evaluations.md; Cloud/Ubuntu gaps stay in v2-acceptance.md.
+docs/validation/skill-evaluations.md; Required Ubuntu gaps and deferred Cloud history stay in v2-acceptance.md.

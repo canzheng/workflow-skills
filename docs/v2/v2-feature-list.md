@@ -1,10 +1,23 @@
 # Workflow Skills v2 Feature List
 
+User-approved distribution refinement (2026-10-05): consumer shared workflow skills
+are gitignored pinned dependencies, materialized before Ubuntu Codex startup. Only
+the three shared directories are ignored; project skills remain trackable. Explicit
+optional shared-skills-only global installation into `~/.agents/skills` is supported.
+Source-authored skills remain tracked; global/project policy is never installed
+automatically. This supersedes the earlier tracked-consumer refinement.
+
+User-approved scope update (2026-10-05): WF2-F14 now accepts on an Ubuntu
+workstation. Cloud environment creation, automatic discovery and execution are
+deferred, not blocking acceptance. This is an explicit contract change, not a
+claim that unsuccessful Cloud checks passed. Other feature identities, acceptance,
+GitHub/review/documentation requirements and authorization boundaries remain intact.
+
 Version: 1.0 • Baseline: 2026-10-04 • Target: `canzheng/workflow-skills`
 
 This is the executable breakdown for the v2 rewrite. Read [the design](v2-design.md) for architectural decisions and [the capability map](v2-capability-map.md) for coverage and scenario definitions. The complete required implementation scope is **WF2-F01 through WF2-F14**. F01 is the starting point; do not first perform a v1 simplification project.
 
-Copy these three files together into `docs/v2/`. Use the launch instruction below in Codex Cloud. No previous chat history is required.
+Copy these three files together into `docs/v2/`. Use the launch instruction below in Codex on Ubuntu. No previous chat history is required.
 
 ## 1. Launch instruction
 
@@ -35,7 +48,7 @@ evidence, pending features, and next action. Never label unrun validation,
 unpublished changes, or unmerged work as delivered.
 ```
 
-This instruction authorizes a bounded implementation batch and related GitHub records; it does not supply missing service permissions. A Cloud run may need continuation. The repository artifacts and checkpoints must make continuation straightforward.
+This instruction authorizes a bounded implementation batch and related GitHub records; it does not supply missing service permissions. A session may need continuation. The repository artifacts and checkpoints must make continuation straightforward.
 
 ## 2. Execution protocol
 
@@ -85,7 +98,7 @@ Review / integration / remote publication still pending: ...
 Next action: ...
 ```
 
-A completed implementation record does not itself close the GitHub Issue. Required Cloud, Ubuntu, permission, and enforcement tests must be reported separately when unavailable.
+A completed implementation record does not itself close the GitHub Issue. Required Ubuntu, permission, and enforcement tests must be reported separately when unavailable; Cloud is deferred for this release.
 
 ## 3. Ordered feature index
 
@@ -106,7 +119,7 @@ The default execution order below is already topological. All rows are required 
 | WF2-F11 | Prove behavior with workflow scenarios and negative controls | F05, F07, F08, F09, F10 | C07, C09, C12, C15 | B |
 | WF2-F12 | Build v1 migration inventory and cutover procedure | F03, F04, F09 | C13, C14 | C |
 | WF2-F13 | Remove v1 files and reconcile the final v2 tree | F11, F12 | C01, C08, C15 | C |
-| WF2-F14 | Run Cloud and Ubuntu acceptance and prepare release | F13 | C02, C08, C11, C12, C16 | C |
+| WF2-F14 | Run Ubuntu acceptance and prepare release | F13 | C02, C08, C11, C12, C16 | C |
 
 Milestone A: usable core with local/fixture proof. Milestone B: complete delivery and verification behavior. Milestone C: migration, retirement, and actual environment acceptance. Milestones are review groupings, not additional lifecycle states or required merge stops.
 
@@ -158,7 +171,7 @@ Milestone A: usable core with local/fixture proof. Milestone B: complete deliver
 4. Runtime/package versions are captured and pinned appropriately. No unsupported exact version is invented from memory.
 5. The CI/local entrypoint actually executes the selected tests. Disabled or retired legacy tests are disclosed with rationale rather than silently omitted to obtain a green suite.
 
-**Verification:** a temporary virtual environment or clean container; run the documented commands and a missing-dependency case. Actual Cloud acceptance is repeated in F14.
+**Verification:** a temporary virtual environment or clean container; run the documented commands and a missing-dependency case. Required Ubuntu acceptance is repeated in F14; Cloud preparation remains optional.
 
 **Documentation with this feature:** setup, test commands, environment assumptions, and troubleshooting. **Not included:** migrating the entire repository to a new packaging framework without need.
 
@@ -184,21 +197,21 @@ Milestone A: usable core with local/fixture proof. Milestone B: complete deliver
 5. Uninstall removes only unmodified managed assets and the managed instruction block, retaining user-owned documents/configuration as documented.
 6. Doctor reports malformed config, active legacy routing, supported tool availability, and discoverable duplicate skills. It never deletes global skills or claims to inspect inaccessible host locations.
 7. Incomplete production bundle assembly is a reported failure, not a falsely successful install of missing skills.
-8. Adoption produces trackable shared skills, project-owned files and schema-3 exact-source provenance without changing the index. Review and commit all three shared skill directories and risk references; no shared-skill ignores are added.
-9. Repeat verification uses committed skills without fetch, repairs or writes. Missing/modified/extra/symlinked/ignored/untracked assets and invalid pins fail meaningfully (S34). Explicit update removes only a verified old schema-2 ignore block, preserves user files/config/index and safely restores on failure.
-10. Source-owned first adoption works from an exact source commit without tools/first commit; the entrypoint is not copied into the target. Source README distinguishes one-time adoption/update from Cloud/local read-only verification. Fresh clone and CI verify tracked skills directly; actual initial Cloud/Ubuntu discovery/use remains a separate F14 requirement.
+8. Consumer policy/configuration, helpers, CI/templates, docs/specs, project skills and schema-4 provenance are tracked. Only the three shared skill directories/references are ignored; provenance pins the full source commit, URL and hashes.
+9. Fresh-clone bootstrap materializes missing skills from that exact pin before Codex startup. Preview is nonmutating; --apply writes only missing ignored skill files. Matching reruns are offline/no-op; project files and index are preserved. Modified/extra/symlinked dependencies and invalid pins fail meaningfully (S34).
+10. Source-owned first adoption works without consumer tools/first commit; the entrypoint is not copied into the target. Generic CI bootstraps the same pin before checks. Initial Ubuntu discovery/use remains separate F14 acceptance; Cloud is deferred.
+11. Optional explicit install-skills defaults to ~/.agents/skills, installs only the three skills/references and provenance, preserves unrelated global files, and supports bounded update/uninstall. Default repository setup never installs globally.
 
-
-Tracking covers every installed manifest asset, provenance/config and AGENTS after
-staging/adoption. Removing the manifest from the index must not re-enable the initial
-unstaged exception; all paths must also be trackable before setup writes.
-Indexed membership alone is insufficient: the staged provenance/config, document
-paths, asset hashes and managed AGENTS block must form a valid regular-file commit
-candidate independently of working-tree validation; preserve both snapshots.
+All project/provenance/.gitignore paths remain trackable and indexed after adoption;
+untracking provenance cannot bypass verification. Staged project hashes, policy and
+managed instruction/ignore blocks must form a coherent regular-file commit candidate.
+Shared dependencies must be ignored and absent from the index. Tracked schema-3
+compatibility retains the earlier full indexed-asset validation and regressions.
+Explicit migration never changes the index itself; caller reviews/untracks/commits.
 
 **Verification:** public CLI tests in temporary Git repositories, including dirty/modified files, symlinks, spaces in paths, partial failure, and provenance mismatch. At F14 verify actual skill discovery, beyond filesystem presence.
 
-**Documentation with this feature:** setup/update/uninstall procedure and ownership/conflict policy. **Not included:** global installer compatibility, automatic repository discovery, or general plugin distribution.
+**Documentation with this feature:** setup/update/uninstall procedure and ownership/conflict policy. **Not included:** v1 global installer compatibility, automatic repository discovery, or plugin distribution.
 
 ### WF2-F04 Define GitHub delivery records and templates
 
@@ -250,7 +263,7 @@ candidate independently of working-tree validation; preserve both snapshots.
 8. One batch approval enables specified dependency-ready Issues, keeps later/unresolved/unsatisfied work backlog/blocked appropriately, and never starts implementation unless execution is separately requested.
 9. Delivery-level outcomes, stable logical identities, direct confirmed dependency links and design-section references provide lightweight design→Issue→PR traceability without coding-task Issue explosion or another editable backlog.
 
-**Verification:** run the skill against a sample design containing a usable first release, optional enhancements, one dependency, and one unknown. Inspect actual output artifacts. Static SKILL.md validation alone is insufficient. S33 uses a fresh realistic project design with explicit MVP/later scope/dependencies/one unknown, one batch approval and no implementation dispatch; distinguish fixture proof from actual consumer GitHub/Cloud execution.
+**Verification:** run the skill against a sample design containing a usable first release, optional enhancements, one dependency, and one unknown. Inspect actual output artifacts. Static SKILL.md validation alone is insufficient. S33 uses a fresh realistic project design with explicit MVP/later scope/dependencies/one unknown, one batch approval and no implementation dispatch; distinguish fixture proof from actual consumer GitHub/Ubuntu execution.
 
 **Documentation with this feature:** usage example from high-level design to Issues and the skill's precise scope. **Not included:** a prioritization algorithm or mandatory complete-system design before any implementation.
 
@@ -354,7 +367,7 @@ candidate independently of working-tree validation; preserve both snapshots.
 6. Material changes invalidate affected evidence. Results from a dirty tree are tied to actual tested content and cannot certify an unrelated commit.
 7. Read/write/authentication capabilities are tested separately; no raw credentials appear in logs or output.
 
-**Verification:** operation fault fixtures and a handoff to a clean session. Exercise actual GitHub reads/writes only in an authorized test scope; report fixture-only proof separately. Real two-environment acceptance is F14.
+**Verification:** operation fault fixtures and a handoff to a clean session. Exercise actual GitHub reads/writes only in an authorized test scope; report fixture-only proof separately. Real same-revision Ubuntu session acceptance is F14; another environment is not required.
 
 **Documentation with this feature:** continuation procedure, capability failures, remote retry rules, evidence/retention guidance. **Not included:** distributed locking, an automated issue claimer, or cross-environment remote execution service.
 
@@ -407,7 +420,7 @@ candidate independently of working-tree validation; preserve both snapshots.
 5. Negative control failure is shown for the intended reason; passing tests cannot hide skipped required checks or broadened expected outputs.
 6. Tests are focused on v2 outcomes; no mandatory model API harness, paid service dependency, or exhaustive mutation platform is introduced.
 
-**Verification:** run the deterministic suite and available skill evaluations; inspect outputs and failure reasons. Record environment/model only for reproducibility, not as a permanent product dependency. Carry unavailable actual Cloud runs to F14.
+**Verification:** run the deterministic suite and available skill evaluations; inspect outputs and failure reasons. Record environment/model only for reproducibility, not as a permanent product dependency. Carry unavailable required Ubuntu agent runs to F14; Cloud runs are deferred.
 
 **Documentation with this feature:** test/evaluation procedure and coverage/limitations. **Not included:** a new evaluation product or claims that one successful prompt proves universal reliability.
 
@@ -464,7 +477,7 @@ candidate independently of working-tree validation; preserve both snapshots.
 
 **Documentation with this feature:** final current system docs, asset-disposition table, baseline Git reference, and global-v1 cleanup guidance for users who installed it previously. **Not included:** deleting historical Git commits, modifying global skills automatically, or publishing a release.
 
-### WF2-F14 Run Cloud and Ubuntu acceptance and prepare release
+### WF2-F14 Run Ubuntu acceptance and prepare release
 
 **Outcome:** The implementation has concrete evidence that it works in the intended operating model, with any remaining external actions identified precisely.
 
@@ -472,8 +485,8 @@ candidate independently of working-tree validation; preserve both snapshots.
 
 **Deliverables**
 
-- Actual fresh Cloud setup/discovery/execution evidence for the real bundle.
-- Cloud-to-Ubuntu same-revision setup/verification handoff and result when that environment is available.
+- Actual fresh Ubuntu workstation setup, repo-local skill discovery and execution evidence for the real bundle.
+- Same-revision Ubuntu continuation and portable setup/verification evidence; no Cloud session prerequisite.
 - Representative ordinary-feature, bug, cross-module, and high-risk pilot outcomes using the delivered workflow.
 - Release-readiness report in a PR or `docs/validation/v2-acceptance.md`, identifying capabilities proven, pending acceptance, active checks/enforcement, versions, and revision.
 - Archive of the rewrite change only after required acceptance completes, with final specification/document checks rerun after the archive diff. If acceptance remains blocked, leave the change active with exact remaining work.
@@ -481,17 +494,17 @@ candidate independently of working-tree validation; preserve both snapshots.
 
 **Acceptance**
 
-1. Fresh Cloud task discovers the intended skills and follows the short contract; no global installation or previous chat is needed.
+1. A fresh Codex session launched from the intended Ubuntu repository root discovers and uses the three repo-local skills and follows the short contract; no global workflow installation or previous chat is needed. Catalog recognition alone does not prove agent use.
 2. A resumed task can continue from the recorded branch/revision and evidence without redoing completed work or inventing remote state.
 3. The portable setup/verify command works on Ubuntu for the tested revision, or this required environmental acceptance is explicitly still pending.
 4. Real GitHub Issue/PR operations and CI are exercised when authorized; fixtures and actual integration results are clearly distinguished.
 5. All mandatory scenario obligations have results. Missing access, failed runs, unperformed independent review, or unconfigured required checks cannot be reported as passed.
 6. Repository enforcement is reported as configured/observed or pending configuration. Lack of administrative access does not trigger an attempt to bypass it.
 7. Pilot records show whether extra confirmations, plans, documentation edits, or reviews were needed; no invented speedup metric.
-8. Final report separates implementation complete, Cloud validated, Ubuntu validated, merge protection configured, merged, and released. Only achieved outcomes are claimed.
+8. Final report separates implementation complete, Ubuntu runtime verified, Ubuntu skill discovery/use verified, merge protection configured, merged, and released. Cloud is reported deferred/unverified, not passed. Only achieved outcomes are claimed.
 9. The completed rewrite change is archived in the delivering branch only after required acceptance is satisfied. Archive does not claim that the branch has merged or a release has been published.
 
-**Verification:** real selected environments and repository, plus targeted reruns after defects are fixed. If this Cloud task cannot spawn a fresh independent task or reach Ubuntu, finish the implementation and produce exact test instructions/checkpoint for that remaining gate. Do not substitute a local directory for a Cloud discovery test or pretend missing infrastructure can be fixed by prose.
+**Verification:** real selected environments and repository, plus targeted reruns after defects are fixed. If the current task cannot run a fresh Ubuntu agent session, finish independent work and produce exact Ubuntu workstation instructions/checkpoint for that remaining gate. Do not substitute a container file/hash check or catalog-only query for actual skill use. Cloud environment investigation is deferred and does not block this release.
 
 **Documentation with this feature:** actual acceptance evidence, supported environment versions, release notes, remaining setup steps. **Not included:** automatic merge, release publication, or new product scope discovered during the pilot.
 
@@ -505,8 +518,9 @@ Before reporting the rewrite as fully validated, establish:
 | --- | --- | --- |
 | Core behavior | Scenario results tied to implemented consumer paths | Fix or keep relevant feature acceptance pending |
 | Documentation | Final-diff assessment plus actual current content and semantic review | Keep affected delivery unfinished |
-| Cloud adoption | Fresh task loads and uses intended bundle | Mark Cloud acceptance pending; provide exact start procedure |
-| Ubuntu portability | Same-content setup/verify result on Ubuntu | Mark Ubuntu acceptance pending; preserve handoff |
+| Ubuntu adoption | Fresh Codex session discovers and uses intended repo-local bundle from the repository root | Mark Ubuntu skill-use acceptance pending; provide workstation procedure |
+| Ubuntu portability | Exact source/consumer revision setup/verify result on Ubuntu | Mark Ubuntu runtime acceptance pending; preserve handoff |
+| Cloud adoption (deferred) | No first-release obligation; preserve historical evidence | Report deferred/unverified; do not investigate or block F14 |
 | GitHub integration | Confirmed identity-safe Issue/PR operations and Actions results | Mark live integration pending; retain fixture proof separately |
 | Enforcement | Read-back/observed required checks and ruleset behavior | Provide setup steps; do not claim active merge blocking |
 | Migration | Safe known-format inventory/cutover/rollback proof | Keep migration acceptance pending |
@@ -526,7 +540,7 @@ If reality contradicts a platform assumption, update the operational detail and 
 
 Do not implement these as part of the approved rewrite unless separately requested:
 
-- Global/plugin marketplace packaging and automatic updates across many repositories.
+- Plugin marketplace packaging and automatic updates across many repositories; explicit shared-skills-only global installation is included.
 - GitHub Projects field synchronization or custom dashboards.
 - Autonomous monitoring/draining of unapproved backlog and product reprioritization.
 - Distributed Issue locks or a hosted multi-agent coordinator.

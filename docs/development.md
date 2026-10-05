@@ -35,13 +35,15 @@ tests/v2 is the required suite. Old root tests and skills/_workflow/tests are
 retired, with disposition and ported safety outcomes documented in the migration
 report. They are preserved in Git, not silently counted as v2 passes.
 
-## Cloud preparation
+## Optional Cloud preparation
 Use the current host environment preparation UI to run the three commands above.
 At task start verify branch/SHA, dependency definitions and installed versions;
 published environments may retain prepared dependencies after repository changes.
 This execution is a /workspace task checkout, not a proven fresh published Cloud
 skill-discovery session. Current platform guide retrieval was attempted but the
 network proxy returned HTTP 403; no legacy cache or secret lifetime is assumed.
+Cloud discovery is deferred for this first release. Use the [Ubuntu workstation
+procedure](validation/ubuntu-workstation-handoff.md) for required F14 acceptance.
 Host GitHub tools and gh authentication are separate capabilities. An unavailable
 write must not stop local work or be described as a successful publication.
 
@@ -58,19 +60,19 @@ are in [acceptance evidence](validation/v2-acceptance.md).
 
 ## Consumer preparation versus source authoring
 
-Both source and consumer repositories track shared skills. Consumers also track
-project policy/config/utilities/CI/docs and schema-3 source provenance. One-time
-pinned setup writes reviewable adoption files; commit them before Cloud/Ubuntu
-agent startup. Repeat environment preparation verifies the committed snapshot:
+Source canonical skills remain tracked. Consumers track project policy/config,
+helpers/CI/docs/project skills and schema-4 provenance; shared skills are ignored.
+Run installed exact-pin bootstrap before launching Ubuntu Codex at the consumer root:
 
 ```sh
+python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
 python3 tools/workflow/workflow.py check --repo . --run-local --json
 python3 tools/workflow/workflow.py doctor --repo . --json
 ```
 
-No workflow-source fetch or ignored-file persistence is required after adoption.
-`bootstrap --apply` remains accepted as verification-only, not a repair command.
-See [operations](operations.md) for explicit update and ignored-to-tracked migration,
-and the source README for pinned first adoption. Actual host discovery remains a
-fresh-task gate, independent of file/hash checks and CI. Source contributors use
-.workflow/bundle.json and do not need a consumer manifest.
+Fresh clones fetch only the recorded source commit if dependency files are missing;
+complete matching reruns are offline/no-op. Optional --source allows offline source
+materialization. Project files/index/pin remain unchanged; dependency edits conflict.
+[Operations](operations.md) covers explicit tracked-to-ignored migration and optional
+global shared-only installation. Required Ubuntu discovery/use is a fresh-session
+gate independent of hashes and CI. Cloud is deferred. Source authoring uses bundle.json.

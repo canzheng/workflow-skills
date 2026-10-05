@@ -3,6 +3,11 @@ name: workflow-deliver-issue
 description: Implement or resume an authorized GitHub Issue or bounded approved bootstrap feature, verify behavior, complete documentation and prepare a reviewable branch or PR. Use for ordinary features and small bugs without extra wrappers.
 ---
 
+Resolve documentation from the selected repository's .workflow/config.json
+(contract/docs_index), never from the global skills directory. Authored Markdown
+links below describe the repo-local layout; a global installation uses the same
+project documents in the selected repository. Preserve host instructions.
+
 Read [the delivery contract](../../../docs/workflow/contract.md), which owns
 scope, documentation, evidence and completion rules. Resolve exact assignment,
 repository, checkout, branch/SHA, user authorization and relevant dependencies.

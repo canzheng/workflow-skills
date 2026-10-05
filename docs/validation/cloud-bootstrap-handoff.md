@@ -1,5 +1,10 @@
 # Fresh consumer Cloud verification handoff
 
+**Historical / deferred Cloud investigation (user decision, 2026-10-05).**
+Do not execute this document as the current F14 next action or create more Cloud
+environments for this release. Preserve the reports as unverified Cloud history.
+The required path is the [Ubuntu workstation handoff](ubuntu-workstation-handoff.md).
+
 ## Current tracked-skill checkpoint
 
 The user approved tracked shared skills on 2026-10-05 after fresh tasks failed to
