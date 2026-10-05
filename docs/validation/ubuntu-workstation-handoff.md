@@ -2,7 +2,8 @@
 
 The user approved Ubuntu-only first-release acceptance on 2026-10-05. Cloud setup
 and discovery are deferred, not reported as passed. Shared skills in consumers are
-ignored exact-pin dependencies; the source's authored skills stay tracked. Optional
+ignored exact-pin dependencies alongside the Python runtime at
+.agents/tools/workflow/; the source's authored skills stay tracked. Optional
 explicit global installation is separate from repo-local adoption.
 
 The user's [Ubuntu workstation bootstrap report](ubuntu-workstation-bootstrap.md)
@@ -16,13 +17,13 @@ do not repeat the original diagnostic merely because doctor says unprobed.
 ## Pinned targets
 
 Source: canzheng/workflow-skills, rewrite/workflow-skills-v2, tested implementation
-`9af59a503bc9d51f1570bb0d3c9385eaba7f528d`. All127 tests/no skips and strict specs pass on Ubuntu24.04.5
-and managed runtime; full suite tested at9af59a5; latest source Actions are recorded in the PR checkpoint.
+`ffe656fe8247ce96805fbf095fba8108c1253774`. All132 tests/no skips and strict specs pass on Ubuntu24.04.5
+and managed runtime; runtime full suite tested atc5c20d2; source verify132 also passed; latest source Actions are recorded in the PR checkpoint.
 Consumer: canzheng/workflow-skills-test, pilot/shared-skill-bootstrap, existing
 [Issue7](https://github.com/canzheng/workflow-skills-test/issues/7) and
 [Ready PR8](https://github.com/canzheng/workflow-skills-test/pull/8). Its explicit
-schema-4 reviewed repair is published at `a0401b89702eca70a7956ce043e8b545364f78fb`,
-pinning source `9af59a503bc9d51f1570bb0d3c9385eaba7f528d`. Current consumer/source Actions and exact-head reviews are recorded in the PR checkpoint.
+schema-5 reviewed shared-runtime migration is published at `47784787f17803da3051deed92bd818bdae388c1`,
+pinning source `ffe656fe8247ce96805fbf095fba8108c1253774`. Current consumer/source Actions and exact-head reviews are recorded in the PR checkpoint.
 Prior consumeradaad276 attempt1 fetch failures and successful attempt2 are retained
 as earlier revision-bound evidence; do not carry their approval to this new repair. Initial native discovery/use at
 previous consumer9bd23d72/sourcea75c3f2 remains verified; all shared hashes are unchanged. Existing main
@@ -43,10 +44,15 @@ set +e
   test ! -e "$WF2_CONSUMER_ROOT"
   git clone --branch pilot/shared-skill-bootstrap https://github.com/canzheng/workflow-skills-test.git "$WF2_CONSUMER_ROOT"
   cd "$WF2_CONSUMER_ROOT"
-  test "$(git rev-parse HEAD)" = "a0401b89702eca70a7956ce043e8b545364f78fb"
-  python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
-  python3 tools/workflow/workflow.py check --repo . --run-local --json
-  python3 tools/workflow/workflow.py doctor --repo . --expect-revision a0401b89702eca70a7956ce043e8b545364f78fb --json
+  test "$(git rev-parse HEAD)" = "47784787f17803da3051deed92bd818bdae388c1"
+  WF2_SOURCE_DIR=$(mktemp -d)
+  trap 'rm -rf -- "$WF2_SOURCE_DIR"' EXIT
+  git -C "$WF2_SOURCE_DIR" init --quiet
+  git -C "$WF2_SOURCE_DIR" fetch --no-tags --depth=1 https://github.com/canzheng/workflow-skills.git ffe656fe8247ce96805fbf095fba8108c1253774
+  git -C "$WF2_SOURCE_DIR" checkout --detach --quiet ffe656fe8247ce96805fbf095fba8108c1253774
+  bash "$WF2_SOURCE_DIR/tools/workflow/environment-setup.sh" "$PWD" canzheng/workflow-skills-test
+  python3 .agents/tools/workflow/workflow.py check --repo . --run-local --json
+  python3 .agents/tools/workflow/workflow.py doctor --repo . --expect-revision 47784787f17803da3051deed92bd818bdae388c1 --json
 )
 printf 'Validation exit status: %s\n' "$?"
 ```
@@ -54,7 +60,7 @@ printf 'Validation exit status: %s\n' "$?"
 The exact source pin for first adoption/global install is:
 
 ```sh
-WF2_SOURCE_SHA=9af59a503bc9d51f1570bb0d3c9385eaba7f528d
+WF2_SOURCE_SHA=ffe656fe8247ce96805fbf095fba8108c1253774
 ```
 
 Fetch it using the source README command. Global installation uses that checked-out
@@ -78,18 +84,19 @@ git branch --show-current
 git rev-parse HEAD
 cat .workflow/install-manifest.json
 git --no-optional-locks status --short --untracked-files=all
-python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
-python3 tools/workflow/workflow.py check --repo . --run-local --json
-python3 tools/workflow/workflow.py doctor --repo . --json
-python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
-git ls-files -- .agents/skills/workflow-design-to-backlog .agents/skills/workflow-deliver-issue .agents/skills/workflow-risk-review
-git check-ignore --no-index -- .agents/skills/workflow-design-to-backlog/SKILL.md .agents/skills/workflow-deliver-issue/SKILL.md .agents/skills/workflow-risk-review/SKILL.md
+# On a fresh clone first fetch its exact pin and run the source entrypoint above.
+python3 .agents/tools/workflow/workflow.py bootstrap --repo . --apply --json
+python3 .agents/tools/workflow/workflow.py check --repo . --run-local --json
+python3 .agents/tools/workflow/workflow.py doctor --repo . --json
+python3 .agents/tools/workflow/workflow.py bootstrap --repo . --apply --json
+git ls-files -- .agents/skills/workflow-design-to-backlog .agents/skills/workflow-deliver-issue .agents/skills/workflow-risk-review .agents/tools/workflow
+git check-ignore --no-index -- .agents/skills/workflow-design-to-backlog/SKILL.md .agents/skills/workflow-deliver-issue/SKILL.md .agents/skills/workflow-risk-review/SKILL.md .agents/tools/workflow/workflow.py
 git --no-optional-locks status --short --untracked-files=all
 ```
 
 Expect bootstrap/check/doctor exit0/ok:true; repeat bootstrap changes:[]. Shared
 files must exist and match the pin/hashes, shared git-ls-files output must be empty,
-and all three files must be ignored. Project skills remain trackable. Capture before/
+and all shared skill/runtime files must be ignored. Project skills remain trackable. Capture before/
 after tracked-file hashes and raw index hash as well as Git status; clean status alone
 cannot demonstrate no index writes. First missing-file materialization needs source
 read access; matching repeats are offline. Optional --source permits a checked-out
@@ -99,7 +106,7 @@ your working checkout merely to repeat them.
 
 For fresh adoption without tools, use the source README's pinned fetch-and-run
 command with your explicit root/owner/name. Review/commit only project-owned files,
-helpers/CI/templates/docs/project skills, manifest and .gitignore. Never force-add
+CI/templates/docs/project skills, manifest and .gitignore. Never force-add
 shared dependency files. Existing tracked consumers use the explicit migration in
 [operations](../operations.md); startup never untracks or migrates automatically.
 

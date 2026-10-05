@@ -1,8 +1,28 @@
 # User Ubuntu Codex session evidence — 2026-10-05
 
-The user supplied an independent, read-only WF2-F14 report: the first upload was
-truncated; its full continuation was subsequently supplied in chat. These are
-reported workstation observations, distinct from the rewrite agent's repair/tests.
+## Current shared-runtime checkpoint — 2026-10-05
+
+Source pin `ffe656fe8247ce96805fbf095fba8108c1253774`; consumer
+`47784787f17803da3051deed92bd818bdae388c1`, pilot/shared-skill-bootstrap/ReadyPR8.
+Schema5 materializes11 skill/runtime dependency files and ignores only the three
+shared skills plus .agents/tools/workflow; project assets remain tracked.
+All132 tests/no skips pass locally and Ubuntu24.04.5. Actual fresh remote clones
+on both runtimes pass source-owned initialization,20 hashes, installed verification,
+offline repeat/raw-index preservation and retained negative controls. Source and
+consumer push/PR Actions pass; existing-main metadata also passes. The new trusted-
+base pin-fetch YAML is locally exercised; actual deployment/event execution on main
+awaits the separately authorized adoption merge.
+
+[Exact evidence and review controls](wider-boundary-review.md) supersede earlier
+current/default claims below; earlier revision-specific observations remain historical.
+[Ubuntu setup handoff](ubuntu-workstation-handoff.md) records exact usable pins and
+source-first commands. Both latest P2s were reproduced before repair; current-head
+semantic review and final archive/docs/spec checks remain pending. Original native
+Ubuntu discovery/use retains its unchanged skill hashes. Consumer ruleset requires
+both checks; source ruleset now requires verification, while source PR-contract
+administration/deployment and merge→valid Issue completion remain separate gates.
+Cloud deferred, real global-host use unperformed, historical Ubuntu26 source-suite
+error unexplained. No merge/completed closure/admin/global/auth/release/deletion.
 
 ## Exact target and discovery
 

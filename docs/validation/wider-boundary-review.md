@@ -1,5 +1,74 @@
 # Wider local boundary review — 2026-10-05
 
+## Shared runtime layout and final index preflight repairs — 2026-10-05
+
+This checkpoint supersedes earlier current/default statements below; their exact
+revision-specific results remain historical evidence. Shared skills and scripts
+now have one consumer ownership model: schema5 ignores the three shared skill
+namespaces and `.agents/tools/workflow/`, with one exact tracked pin. Project
+policy/config/CI/templates/docs/project skills/tools remain tracked. Explicit
+tracked compatibility stores both runtime and skills; source authors the runtime
+in tools/workflow. Fresh clones fetch the pinned source-owned entrypoint before
+an absent consumer CLI can be invoked. CI does the same; metadata selects only the
+trusted base pin and treats head content as data. Existing schema3/4 startup does
+not migrate. Reviewed updates retire only owned legacy runtime files, with caller
+staging/untracking and config-path edits.
+
+Source pin `ffe656fe8247ce96805fbf095fba8108c1253774`, branch rewrite/workflow-skills-v2.
+Runtime commitc5c20d219c71d5367e69edec6795581f1a147a8f passed132/no skips on managed
+Python3.12.14 (95.051s) and Ubuntu24.04.5/Python3.12.3 (79.927s), with strict specs.
+Source verify132 passed (93.192s); the pinned follow-up changes documentation only.
+Source push[37313633419](https://github.com/canzheng/workflow-skills/actions/runs/37313633419)
+and PR[37313641419](https://github.com/canzheng/workflow-skills/actions/runs/37313641419) succeed.
+
+Consumer `47784787f17803da3051deed92bd818bdae388c1`, pilot/shared-skill-bootstrap,
+pinsffe656f. Tree5cde84d923738d051561e09ecfb5d10d119313b9 matches reviewed local
+6d83f3ef8ebb519d4daeb851b6c7dd31d3c28d77 with parenta0401b8 preserved by guarded
+non-force publication. Installer preserved raw index
+44d1248704655708bef14b4024fcd75daef7f26359ef9c86762c962d1f47b020,
+project configuration and pantry-project bytes before caller staging. Only the
+workflow argv path was explicitly changed afterward. Old tracked runtime deletions
+were reviewed/staged; all11 dependency files remain untracked and ignored.
+Fresh actual remote clones on managed runtime and Ubuntu begin with no runtime or
+shared skills; source-owned setup materializes11 exact files, matches20 managed
+hashes, passes installed check/run-local/doctor/offline repeat and preserves tracked
+files/raw index. Installed public negatives retain force-tracking/index-only nested
+policy, concurrent file/directory/staging recovery, NUL/native argv/URL/discovery
+and UTF8/ASCII controls; fresh shared/runtime indexed namespaces cover28 cases.
+An initial proof harness imported Python modules before disabling bytecode and
+created an unmanaged runtime cache. Corrected harness reruns pass; the public CLI
+already disables bytecode. No product failure or weakened assertion is inferred.
+
+Consumer push[37313732453](https://github.com/canzheng/workflow-skills-test/actions/runs/37313732453),
+PR[37313742632](https://github.com/canzheng/workflow-skills-test/actions/runs/37313742632)
+and metadata[37313737643](https://github.com/canzheng/workflow-skills-test/actions/runs/37313737643)
+succeed. Push job111775163509 logs prove exactffe656f fetch,11-file bootstrap and
+execution at .agents/tools/workflow. Metadata job111775182016 still runs the
+existing main checker/YAML: the new base-pin fetch workflow is tested by executing
+its actual YAML preparation locally, but deployment on main and its actual event
+execution require the separately authorized adoption merge. These are distinct.
+
+Latest P2 consumer4184018183 (policy-only initial staging) and source4184041079
+(index/HEAD-owned missing initial destinations) were reproduced before acceptance.
+The repair detects newly staged policy/config or newly introduced routing/ignore
+blocks;5-context x3-command tests preserve files/raw index. Missing owned project
+destinations reject before preview/apply, including committed removals from the
+index;13 paths x3 ownership states x2 modes provide78 controls (all78 fail before
+repair, all pass afterward). Fresh indexed dependency controls expand to runtime.
+Project-specific tools remain trackable under working and staged ignore snapshots.
+Existing discriminating assertions and rollback/global compatibility are retained.
+
+Read-only enforcement now observes consumer Active24484016 requiring both checks,
+no bypass; source Active24457981 now requires v2 verification, no bypass. Source
+v2 PR contract enforcement/base deployment and real merge→valid completed Issue
+observation remain separate authorization boundaries. Neither ruleset requires an
+approval review; green/mergeable is not semantic approval. Original independent
+Ubuntu26.04 native initial catalog/actual all3-skill use remains at unchanged skill
+hashes and original revisions. Cloud deferred, optional real global-host use
+unperformed, historical Ubuntu26 source JSON error unexplained. Final current-head
+semantic reviews and rewrite archive/final docs/spec checks remain pending. No
+merge/completed closure/admin/global/auth/release/remote-deletion mutation.
+
 This is a targeted primary-author review requested by the user after serial PR P2
 findings. It is not independent semantic approval or a new mandatory pre-PR stage.
 The resolved GitHub NUL-path finding motivated inspection of core validation,
