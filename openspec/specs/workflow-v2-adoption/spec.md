@@ -182,6 +182,13 @@ skills SHALL remain tracked. Required Ubuntu discovery/use SHALL be tested separ
 - **THEN** verification rejects the incomplete commit candidate while preserving working files and raw index
 - **AND** pre-existing human policy alone does not turn entirely unstaged adoption into a completed commit
 
+
+#### Scenario: Indexed dependency ancestor is a file
+- **WHEN** a staged snapshot contains a file or gitlink at an ancestor of a managed dependency destination
+- **THEN** check, doctor and bootstrap reject the candidate even when working directories remain intact
+- **AND** they preserve dependency bytes, project files and the raw index
+- **AND** an explicitly staged coherent migration remains valid without requiring the old HEAD to be merged
+
 ### Requirement: Explicit optional global shared skills
 An explicit install-skills command SHALL preview by default and install only the
 three shared skills/references plus provenance at ~/.agents/skills or an explicit
@@ -200,9 +207,3 @@ install globally as a side effect; global installation SHALL NOT claim project a
 - **WHEN** repo-local and global shared names are both visible
 - **THEN** report duplicate discovery and choose one active location explicitly
 - **AND** global skill instructions resolve contract/docs from the selected project rather than a global docs tree
-
-#### Scenario: Indexed dependency ancestor is a file
-- **WHEN** a staged snapshot contains a file or gitlink at an ancestor of a managed dependency destination
-- **THEN** check, doctor and bootstrap reject the candidate even when working directories remain intact
-- **AND** they preserve dependency bytes, project files and the raw index
-- **AND** an explicitly staged coherent migration remains valid without requiring the old HEAD to be merged

@@ -1,3 +1,6 @@
+## Purpose
+Define revision-bound Ubuntu, GitHub, review and enforcement acceptance for the v2 release, preserving explicit authorization gates and deferred Cloud evidence.
+
 ## ADDED Requirements
 
 ### Requirement: Revision-bound environment acceptance

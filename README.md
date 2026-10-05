@@ -28,13 +28,14 @@ Set the full tested source SHA from the [Ubuntu handoff](docs/validation/ubuntu-
 and actual consumer root/owner/name, then fetch/run in Bash:
 
 ```sh
+set +e
 (
 set -eu
 : "${WF2_SOURCE_SHA:?Set the exact tested 40-character source commit from the handoff}"
 : "${WF2_CONSUMER_ROOT:?Set the absolute consumer Git root}"
 : "${WF2_CONSUMER_REPOSITORY:?Set owner/repository}"
 WF2_SOURCE_DIR=$(mktemp -d)
-trap 'rm -rf -- "$WF2_SOURCE_DIR"' EXIT
+trap 'python3 -c "import shutil, sys; shutil.rmtree(sys.argv[1])" "$WF2_SOURCE_DIR"' EXIT
 git -C "$WF2_SOURCE_DIR" init --quiet
 git -C "$WF2_SOURCE_DIR" fetch --no-tags --depth=1 https://github.com/canzheng/workflow-skills.git "$WF2_SOURCE_SHA"
 git -C "$WF2_SOURCE_DIR" checkout --detach --quiet "$WF2_SOURCE_SHA"
@@ -114,8 +115,9 @@ from the selected repository, not the global install directory.
 
 ## Acceptance boundary
 
-F01–F13 are implemented/locally verified; F14 retains required fresh Ubuntu agent
-use/review/integration gates. [Evidence](docs/validation/v2-acceptance.md) distinguishes
+F01–F13 are implemented/locally verified. Required Ubuntu native skill discovery/use
+and runtime verification are recorded; F14 awaits final semantic review/archive
+and the separately authorized merge/deployed-base checks. [Evidence](docs/validation/v2-acceptance.md) distinguishes
 runtime, native discovery, semantic use/review, actual CI/enforcement and merge.
 Cloud is deferred/unverified, not passed. Merge/release/admin/global writes require
 explicit authorization; no local pass or PR alone means delivered. The v1 tree is

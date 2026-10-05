@@ -1,5 +1,33 @@
 # F14 real consumer pilot
 
+## Latest implementation checkpoint — 2026-10-05
+
+Source pin0f6b6766da7a86a039108891ec051306963425ae passes138/no skips on managed
+runtime and Ubuntu24.04.5. Consumerb33b0d4a938b2718a3adb686f4899b4689d46b20
+pins it; current-head push/PR/metadata Actions, source-first fresh-clone/index
+proof and actual installed six-test suite pass. Literal Ubuntu fetch-and-run
+first adoption/repeat pass. Native Ubuntu discovery/use remains revision-bound
+to unchanged skills at original9bd23d72/a75c3f2. Current semantic review/archive
+remain pending; Cloud deferred and real merge/valid completed closure/base
+deployment/admin configuration require separate authorization. See
+[wider review](wider-boundary-review.md) for exact tests, environments, CI and limitations.
+
+
+## Latest verified runtime and consumer checkpoint — 2026-10-05
+
+Source `f05cf27df47e008bf52e6f14a8dbd6bbf53e4f80`; consumer
+`d8ed0abca40a7fa4ed092f4facfb25fefee30977`, pilot/shared-skill-bootstrap/ReadyPR8.
+All137/no skips pass locally and Ubuntu24.04.5; current source/consumer docs/specs
+cover indexed ancestors, complete runtime retirement and executable migration.
+Actual remote fresh clones, installed public boundary tests and consumer push/PR/
+metadata pass;11 pinned dependencies remain ignored/untracked under four namespaces.
+[Exact current evidence](wider-boundary-review.md) supersedes earlier checkpoints.
+[Source-first Ubuntu command](ubuntu-workstation-handoff.md) records both full SHAs.
+Original native discovery/use keeps its actual unchanged skill hashes. Current-head
+semantic review and final archive remain pending; deployed-base new metadata and
+real merge→valid completion are separate authorization gates. Cloud deferred, real
+global-host use unperformed and historical Ubuntu26 source-suite error unexplained.
+
 ## Current shared-runtime checkpoint — 2026-10-05
 
 Source pin `ffe656fe8247ce96805fbf095fba8108c1253774`; consumer

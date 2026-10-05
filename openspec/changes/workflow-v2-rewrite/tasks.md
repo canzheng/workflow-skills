@@ -686,3 +686,72 @@ both checks; source ruleset now requires verification, while source PR-contract
 administration/deployment and merge→valid Issue completion remain separate gates.
 Cloud deferred, real global-host use unperformed, historical Ubuntu26 source-suite
 error unexplained. No merge/completed closure/admin/global/auth/release/deletion.
+
+## Latest verified runtime and consumer checkpoint — 2026-10-05
+
+Source `f05cf27df47e008bf52e6f14a8dbd6bbf53e4f80`; consumer
+`d8ed0abca40a7fa4ed092f4facfb25fefee30977`, pilot/shared-skill-bootstrap/ReadyPR8.
+All137/no skips pass locally and Ubuntu24.04.5; current source/consumer docs/specs
+cover indexed ancestors, complete runtime retirement and executable migration.
+Actual remote fresh clones, installed public boundary tests and consumer push/PR/
+metadata pass;11 pinned dependencies remain ignored/untracked under four namespaces.
+[Exact current evidence](../../../docs/validation/wider-boundary-review.md) supersedes earlier checkpoints.
+[Source-first Ubuntu command](../../../docs/validation/ubuntu-workstation-handoff.md) records both full SHAs.
+Original native discovery/use keeps its actual unchanged skill hashes. Current-head
+semantic review and final archive remain pending; deployed-base new metadata and
+real merge→valid completion are separate authorization gates. Cloud deferred, real
+global-host use unperformed and historical Ubuntu26 source-suite error unexplained.
+
+## Current ancestor/index checkpoint — 2026-10-05
+
+This checkpoint supersedes earlier current/default statements below. Tested source
+implementation/pin `0f6b6766da7a86a039108891ec051306963425ae`,
+`rewrite/workflow-skills-v2`: all138/no skips pass on managed Python3.12.14
+(144.107s) and Ubuntu24.04.5/Python3.12.3 (120.835s). Strict specs and public
+check pass. Consumer `b33b0d4a938b2718a3adb686f4899b4689d46b20`,
+`pilot/shared-skill-bootstrap`, Ready PR8/Issue7, pins this source. Published
+ce912ff51f434f04584e9875ab4356cf047b8271 matches reviewed local3fdef990 tree,
+parentd8ed0ab, guarded non-force publication. Source-owned update preserves
+config, all shared/project skill bytes and raw index
+b8ab7d37b1ccbc2b9b088e892c95678d5da570a8d2cc8eff37d596023db5a659.
+
+Additional wider review reproduced an index-only dependency ancestor file:
+intact working directories hid a non-bootstrapable staged snapshot. The before
+control fails3 subcases/no errors; centralized ancestor preflight now covers
+setup, check, doctor, bootstrap and independently validated staged installation.
+All reject without file/index changes; coherent migration still passes before
+old HEAD is merged. Source/consumer operations, current/delta adoption specs,
+README install example and Ubuntu handoff were reassessed. The delta now uses
+MODIFIED for requirements already present in current specs and supplies the
+release Purpose, so archive preparation does not duplicate implemented contracts.
+
+Actual fresh remote clones on managed runtime and Ubuntu start with no shared
+runtime/skills; source-first bootstrap installs11 canonical dependency files,
+matches20 manifest hashes, passes check/run-local/doctor and offline no-op repeat,
+and preserves tracked files/raw index. Prior installed rollback/native-input/
+indexed-policy controls pass. The installed six-test layout suite passes on both
+managed runtime (50.710s) and Ubuntu (37.311s). The literal pinned fetch-and-run
+install command succeeds twice in a fresh Ubuntu Git root without creating an
+index or requiring any existing consumer helper. Only the four dependency
+namespaces are ignored; project skills/tools and v2 AGENTS routing remain tracked.
+The first mounted-source Ubuntu attempt failed Git ownership policy; rerunning
+with an owned source copy passed without changing global Git configuration.
+
+Consumer current-head push[37320356900](https://github.com/canzheng/workflow-skills-test/actions/runs/37320356900),
+PR[37320366947](https://github.com/canzheng/workflow-skills-test/actions/runs/37320366947)
+and existing-main metadata[37320361118](https://github.com/canzheng/workflow-skills-test/actions/runs/37320361118)
+pass. Source pin push37320277173/PR37320287331 and later documentation-head CI
+are recorded in the live PR checkpoint. New trusted-base pin-fetch metadata is
+locally exercised; actual deployment/event execution on main remains pending an
+authorized merge, distinct from existing-main metadata success.
+
+Native Ubuntu discovery/actual all3-skill use retains its original9bd23d72/a75c3f2
+revision-bound evidence because all four shared skill hashes remain unchanged.
+F01–F13 implemented/verified/review-ready; F14 partial pending final current-head
+semantic review and rewrite archive/final specs/docs checks. Cloud deferred,
+real global-host use unperformed, historical Ubuntu26 source JSON error unexplained.
+Consumer two required checks and source required verification were observed;
+source PR-contract configuration/deployment and real merge→valid completed Issue
+observation remain separate authorization gates. No merge, completed closure,
+admin, global/auth, release or remote branch deletion. Next: current-head semantic
+reviews with awaited five-minute monitors; archive only after premerge acceptance.

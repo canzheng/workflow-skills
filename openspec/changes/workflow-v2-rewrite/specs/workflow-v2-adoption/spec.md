@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Tracked policy and pinned local skill dependencies
 Consumer adoption SHALL track project policy/configuration, CI/templates,
@@ -108,6 +108,13 @@ skills SHALL remain tracked. Required Ubuntu discovery/use SHALL be tested separ
 - **THEN** verification rejects the incomplete commit candidate while preserving working files and raw index
 - **AND** pre-existing human policy alone does not turn entirely unstaged adoption into a completed commit
 
+
+#### Scenario: Indexed dependency ancestor is a file
+- **WHEN** a staged snapshot contains a file or gitlink at an ancestor of a managed dependency destination
+- **THEN** check, doctor and bootstrap reject the candidate even when working directories remain intact
+- **AND** they preserve dependency bytes, project files and the raw index
+- **AND** an explicitly staged coherent migration remains valid without requiring the old HEAD to be merged
+
 ### Requirement: Explicit optional global shared skills
 An explicit install-skills command SHALL preview by default and install only the
 three shared skills/references plus provenance at ~/.agents/skills or an explicit
@@ -127,7 +134,6 @@ install globally as a side effect; global installation SHALL NOT claim project a
 - **THEN** report duplicate discovery and choose one active location explicitly
 - **AND** global skill instructions resolve contract/docs from the selected project rather than a global docs tree
 
-## MODIFIED Requirements
 
 ### Requirement: Pinned bounded repository setup
 Setup SHALL require an explicit Git root and full source commit, preview by default,
@@ -172,9 +178,3 @@ source authoring from installed consumers and authentication from unprobed write
 - **WHEN** a discovery root contains an unrelated skill file that is not valid UTF-8
 - **THEN** doctor reports a per-file warning and continues inspecting other entries
 - **AND** valid duplicates are still detected and the invalid file remains unchanged
-
-#### Scenario: Indexed dependency ancestor is a file
-- **WHEN** a staged snapshot contains a file or gitlink at an ancestor of a managed dependency destination
-- **THEN** check, doctor and bootstrap reject the candidate even when working directories remain intact
-- **AND** they preserve dependency bytes, project files and the raw index
-- **AND** an explicitly staged coherent migration remains valid without requiring the old HEAD to be merged
