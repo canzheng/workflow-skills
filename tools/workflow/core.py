@@ -20,6 +20,7 @@ LEGACY_RUNTIME_PREFIX = 'tools/workflow/'
 RUNTIME_PREFIX = '.agents/tools/workflow/'
 RUNTIME_ASSETS = tuple(RUNTIME_PREFIX + p for p in
                       ('workflow.py', 'core.py', 'setup.py', 'bootstrap.py', 'checks.py', 'records.py', 'migration.py'))
+LEGACY_RUNTIME_ASSETS = frozenset(name.replace(RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX, 1) for name in RUNTIME_ASSETS)
 REQUIRED_ASSETS = (frozenset('.agents/skills/' + s + '/SKILL.md' for s in SKILLS) |
                    frozenset(CI_ASSETS) | frozenset(RUNTIME_ASSETS) | frozenset((
                        'docs/workflow/contract.md', 'docs/workflow/README.md',
@@ -216,6 +217,14 @@ def untracked_shared_policy(root, tracked=None, runtime=None):
         raise Conflict('Shared dependency remains tracked; review explicit cached removal for only the shared dependency namespaces')
 
 
+def retired_runtime_policy(names, tracked):
+    # Reserve only the seven old shared filenames, never unrelated project tools.
+    if runtime_prefix(names) == RUNTIME_PREFIX and LEGACY_RUNTIME_ASSETS & set(tracked):
+        raise Conflict('Retired workflow runtime remains staged/tracked: ' +
+                       sorted(LEGACY_RUNTIME_ASSETS & set(tracked))[0] +
+                       '; review and stage owned legacy runtime deletions')
+
+
 def dependency_policy(root, m):
     """Validate project tracking and declared dependency storage without index writes."""
     if m['schema_version'] not in (3, 4, 5):
@@ -232,6 +241,7 @@ def dependency_policy(root, m):
             raise Conflict('Unmanaged shared dependency asset: ' + name)
     effective_ignore_policy(root, m['files'], ignored_shared=ignored_dependency, ignored_runtime=m['schema_version'] == 5)
     tracked = set(os.fsdecode(git(root, 'ls-files', '-z')).split('\0')) - {''}
+    retired_runtime_policy(m['files'], tracked)
     committed = (set(os.fsdecode(git(root, 'ls-tree', '-r', '--name-only', '-z', 'HEAD')).split('\0')) - {''}
                  if head_revision(root) else set())
     required = {name for name in m['files'] if not ignored_dependency or not dependency(name, m)} | PROJECT_FILES
@@ -285,6 +295,7 @@ def staged_installation(root):
         # in the index until the caller stages the migration; setup owns no index.
         if m['schema_version'] not in (1, 3, 4, 5) or not required_assets(m['files']) <= m['files'].keys():
             raise Conflict('Provenance must describe a complete adoption')
+        retired_runtime_policy(m['files'], entries)
         if m['schema_version'] in (4, 5):
             if any(dependency(name, m) or name == runtime_prefix(m['files']).rstrip('/') and m['schema_version'] == 5 for name in entries):
                 raise Conflict('Shared dependency must not be staged/tracked')

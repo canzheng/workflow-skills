@@ -10,7 +10,7 @@ import tempfile
 from core import (Conflict, Invalid, START, END, SKILLS, CI_ASSETS, IGNORE_START, IGNORE_END,
                   SOURCE_URL, REQUIRED_ASSETS, block, config, digest, git, ignore_block, load, manifest,
                   owned, repository, safe, shared, shared_files, source_url, effective_ignore_policy, valid_bundle_version,
-                  dependency_policy, relative, untracked_shared_policy, PROJECT_FILES, head_revision, dependency, dependency_files, required_assets, runtime_prefix)
+                  dependency_policy, relative, untracked_shared_policy, PROJECT_FILES, head_revision, dependency, dependency_files, required_assets, runtime_prefix, RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX, LEGACY_RUNTIME_ASSETS, retired_runtime_policy)
 
 
 def source_bundle(source, revision):
@@ -266,9 +266,21 @@ def setup(args):
         version, assets = source_bundle(args.source, args.revision)
         url = source_url(getattr(args, 'source_url', SOURCE_URL))
         if args.skill_storage == 'ignored' and (not old or old['schema_version'] in (4, 5)):
-            # Explicit tracked-to-ignored migration remains a caller-owned untrack;
-            # fresh/ignored adoption must reject indexed paths before any writes.
             untracked_shared_policy(root, runtime=runtime_prefix(assets))
+        # An indexed/HEAD-owned file or gitlink can be an absent destination
+        # ancestor. Never repurpose its deletion as an installer directory.
+        for name in set(assets) | PROJECT_FILES | {'.gitignore'}:
+            for parent in pathlib.PurePosixPath(name).parents:
+                ancestor = parent.as_posix()
+                if ancestor != '.' and ancestor in index_owned:
+                    raise Conflict('Indexed destination ancestor deletion preserved: ' + ancestor)
+        if runtime_prefix(assets) == RUNTIME_PREFIX:
+            if not old or runtime_prefix(old['files']) == LEGACY_RUNTIME_PREFIX:
+                for name in LEGACY_RUNTIME_ASSETS:
+                    if name in index_owned and (not old or name not in old['files']):
+                        raise Conflict('Unmanaged legacy runtime collision preserved: ' + name)
+            else:
+                retired_runtime_policy(assets, indexed)
         for name in dependency_files(root, {'schema_version': 5, 'files': assets}):
             safe(root, name)
             if name not in assets and (not old or name not in old['files']):

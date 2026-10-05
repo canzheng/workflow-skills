@@ -27,6 +27,10 @@ provenance, not task state or its own content hash.
 - **THEN** preview and apply reject before writing and preserve all files and the raw index
 - **AND** removing the cached path alone does not authorize replacing a committed deletion
 
+#### Scenario: Indexed ancestor is deleted
+- **WHEN** a destination ancestor is an index/HEAD-owned file or gitlink absent from the working tree, including a staged deletion
+- **THEN** preview/apply preserve its deletion without recreating a directory or modifying files/index
+
 #### Scenario: Apply is interrupted
 - **WHEN** a replacement fails during apply
 - **THEN** original bytes/modes are restored or exact recoverable residuals reported
@@ -125,6 +129,13 @@ skills SHALL remain tracked. Required Ubuntu discovery/use SHALL be tested separ
 - **AND** the caller reviews/untracks only shared dependency namespaces without deleting their working files, stages project changes and commits
 - **AND** modified assets/blocks and unsafe destinations conflict before writes
 - **AND** failed writes restore originals or report recoverable residuals
+
+#### Scenario: Runtime relocation is completely staged
+- **WHEN** a reviewed legacy runtime relocation introduces the new dependency pin but leaves an old shared Python file indexed
+- **THEN** setup/check/doctor/bootstrap reject the incomplete new-layout candidate without mutation
+- **AND** the documented untrack command tolerates paths absent from old layouts
+- **AND** the caller stages all owned legacy runtime deletions and project changes before verification succeeds
+- **AND** unrelated project tools in the old directory remain tracked and unchanged
 
 #### Scenario: Tracked compatibility
 - **WHEN** an existing schema-3 consumer has not explicitly migrated
