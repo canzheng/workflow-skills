@@ -161,7 +161,12 @@ def ignore_block(text):
 
 
 def runtime_prefix(names):
-    return RUNTIME_PREFIX if any(name.startswith(RUNTIME_PREFIX) for name in names) else LEGACY_RUNTIME_PREFIX
+    names = set(names)
+    if any(name.startswith(RUNTIME_PREFIX) for name in names):
+        if LEGACY_RUNTIME_ASSETS & names:
+            raise Invalid('Mixed legacy/new workflow runtime inventory')
+        return RUNTIME_PREFIX
+    return LEGACY_RUNTIME_PREFIX
 
 
 def required_assets(names):
@@ -447,6 +452,7 @@ def validate_manifest(root, m):
         if not owned(name) or not isinstance(h, str) or not re.fullmatch(r'[0-9a-f]{64}', h):
             raise Invalid('Unsafe manifest path/hash: ' + name)
         safe(root, name)
+    runtime_prefix(m['files'])
     if not re.fullmatch(r'[0-9a-f]{64}', str(m.get('agents_block_hash', ''))):
         raise Invalid('Invalid managed instruction hash')
     return m

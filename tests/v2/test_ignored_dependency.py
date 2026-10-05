@@ -285,6 +285,13 @@ class IgnoredDependencyTests(unittest.TestCase):
                             self.assertIn('remains tracked', json.dumps(report))
                             self.assertEqual(self.snapshot(), before)
                     git(self.target, 'rm', '--cached', '--', name)
+        # A staged deletion still belongs to HEAD: it cannot authorize creating
+        # a dependency directory over an unrelated committed namespace-root file.
+        before = self.snapshot()
+        report = run(*args, '--apply', expect=1)
+        self.assertIn('ancestor', json.dumps(report))
+        self.assertEqual(self.snapshot(), before)
+        git(self.target, 'commit', '-qm', 'Fixture explicit namespace retirement')
         before = self.snapshot()
         run(*args, '--apply')
         self.assertEqual((self.target / '.git/index').read_bytes(), before[1])

@@ -136,6 +136,7 @@ skills SHALL remain tracked. Required Ubuntu discovery/use SHALL be tested separ
 - **AND** the documented untrack command tolerates paths absent from old layouts
 - **AND** the caller stages all owned legacy runtime deletions and project changes before verification succeeds
 - **AND** unrelated project tools in the old directory remain tracked and unchanged
+- **AND** mixed old/new canonical runtime inventories are invalid before installer writes
 
 #### Scenario: Tracked compatibility
 - **WHEN** an existing schema-3 consumer has not explicitly migrated

@@ -173,3 +173,37 @@ class LayoutMigrationTests(unittest.TestCase):
         self.stage_project(root, m)
         run('check', '--repo', root, '--run-local')
 
+
+    def test_mixed_runtime_source_and_provenance_fail_before_writes(self):
+        bundle = self.source / '.workflow/bundle.json'
+        spec = json.loads(bundle.read_text())
+        extra = 'tools/workflow/legacy-core.py'
+        (self.source / extra).write_bytes((self.source / 'tools/workflow/core.py').read_bytes())
+        spec['assets'][extra] = 'tools/workflow/core.py'
+        bundle.write_text(json.dumps(spec))
+        self.sha = commit(self.source)
+        before = self.snapshot(self.target)
+        for command in ['setup', 'install-skills']:
+            target = self.target if command == 'setup' else self.base / 'isolated-skills'
+            for flags in ([], ['--apply']):
+                args = self.args_for(target) if command == 'setup' else [command, '--source', self.source,
+                       '--revision', self.sha, '--target', target]
+                report = run(*args, *flags, expect=2)
+                self.assertIn('Mixed legacy/new', json.dumps(report))
+                self.assertEqual(self.snapshot(self.target), before)
+                if command == 'install-skills':
+                    self.assertFalse(target.exists())
+        spec['assets'].pop(extra)
+        bundle.write_text(json.dumps(spec))
+        self.sha = commit(self.source)
+        run(*self.args_for(self.target), '--apply')
+        commit(self.target)
+        pin = self.target / '.workflow/install-manifest.json'
+        m = json.loads(pin.read_text())
+        m['files']['tools/workflow/core.py'] = '0' * 64
+        pin.write_text(json.dumps(m, indent=2) + '\n')
+        before = self.snapshot(self.target)
+        for command in ['check', 'doctor', 'bootstrap']:
+            report = run(command, '--repo', self.target, expect=2)
+            self.assertIn('Mixed legacy/new', json.dumps(report))
+            self.assertEqual(self.snapshot(self.target), before)

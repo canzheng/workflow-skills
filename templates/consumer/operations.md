@@ -73,7 +73,8 @@ update only workflow CLI references in project-owned config/docs to the new path
 The command tolerates dependency paths already untracked or absent from older
 layouts. Stage the owned legacy runtime deletions as well; an indexed old shared
 Python file cannot pass a new-layout commit check. The seven canonical legacy
-filenames are reserved, while unrelated project tools remain untouched. Then commit. Until untracking/staging is complete,
+filenames are reserved in the new-layout index, while unrelated project tools
+remain untouched. Bundles and provenance cannot mix old/new canonical runtimes. Then commit. Until untracking/staging is complete,
 checks can fail because the working adoption and staged commit are inconsistent.
 Old schema-1/2 consumers also require explicit reviewed setup; startup does not migrate.
 `--dependency-storage tracked` (legacy alias `--skill-storage tracked`) preserves schema-3 behavior for compatibility, not the default.
