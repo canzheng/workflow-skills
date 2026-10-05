@@ -471,6 +471,45 @@ class SetupTests(unittest.TestCase):
                 self.assertFalse(destination.exists())
                 self.assertEqual((self.target / '.git/index').read_bytes(), index)
 
+    def test_directory_identity_is_validated_after_final_event_read(self):
+        actual_read, actual_mkdir = installer.os.read, installer.os.mkdir
+        victim = self.target / 'AGENTS.md'
+        original, index = victim.read_bytes(), (self.target / '.git/index').read_bytes()
+        for case in ('same-mode-inode', 'symlink', 'deleted', 'permissions'):
+            with self.subTest(case=case):
+                victim.write_bytes(original)  # Reset only this owned reproduction fixture.
+                before = set((self.target / '.git').glob('.wf2-private-*'))
+                injected = []
+                def read(fd, size):
+                    try:
+                        return actual_read(fd, size)
+                    except BlockingIOError:
+                        if installer.os.readlink('/proc/self/fd/' + str(fd)) == 'anon_inode:inotify' and not injected:
+                            created = set((self.target / '.git').glob('.wf2-private-*')) - before
+                            self.assertEqual(len(created), 1)
+                            directory = created.pop()
+                            saved = directory.with_name(directory.name + '-saved')
+                            if case == 'permissions':
+                                directory.chmod(0o777)
+                            else:
+                                directory.rename(saved)
+                                if case == 'symlink':
+                                    directory.symlink_to(saved, target_is_directory=True)
+                                elif case == 'same-mode-inode':
+                                    actual_mkdir(directory, mode=0o700)
+                            injected.append((directory, saved))
+                        raise
+                with patch.object(installer.os, 'read', read), self.assertRaises(installer.Conflict):
+                    installer.transaction(self.target, {'AGENTS.md': b'Installer content'})
+                self.assertEqual(len(injected), 1)
+                directory, saved = injected[0]
+                if saved.exists():
+                    self.assertEqual(list(saved.iterdir()), [])
+                if directory.exists():
+                    self.assertEqual(list(directory.iterdir()), [])
+                self.assertEqual(victim.read_bytes(), original)
+                self.assertEqual((self.target / '.git/index').read_bytes(), index)
+
     def test_directory_creation_observation_unavailable_preserves_project(self):
         original = (self.target / 'AGENTS.md').read_bytes()
         index = (self.target / '.git/index').read_bytes()

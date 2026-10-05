@@ -109,6 +109,7 @@ provenance, not task state or its own content hash.
 - **WHEN** a private storage or staged-directory basename changes between mkdir and open
 - **THEN** kernel observation begun before creation rejects replacement, including a same-mode inode, before writes or publication
 - **AND** missing observation support, permission/owner mismatch, watch invalidation and event overflow fail closed without changing project files or index
+- **AND** the final pathname/descriptor identity check follows event draining and rejects replacement, symlink, deletion or changed permissions at the final read boundary
 
 #### Scenario: Capture storage has another filesystem
 - **WHEN** Git-private storage or explicit shared-only TMPDIR differs from the destination filesystem

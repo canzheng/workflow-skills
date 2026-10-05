@@ -153,8 +153,10 @@ def create_bound_directory(basename, *, dir_fd, mode=0o777, private=False):
         os.mkdir(basename, mode=mode, dir_fd=dir_fd)
         child_fd = os.open(basename, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=dir_fd)
         metadata = os.fstat(child_fd)
-        current = os.stat(basename, dir_fd=dir_fd, follow_symlinks=False)
         directory_birth_events(watch_fd, basename)
+        # This final path/fd comparison defines the end of observation. A cached
+        # pre-drain stat cannot detect substitution as the last read yields EAGAIN.
+        current = os.stat(basename, dir_fd=dir_fd, follow_symlinks=False)
         if (current.st_mode, current.st_dev, current.st_ino) != (metadata.st_mode, metadata.st_dev, metadata.st_ino):
             raise Conflict('Concurrent directory creation identity change: ' + basename)
         if metadata.st_uid != os.geteuid() or (private and stat.S_IMODE(metadata.st_mode) != 0o700):
