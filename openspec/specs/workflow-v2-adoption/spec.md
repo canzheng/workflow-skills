@@ -42,6 +42,11 @@ source authoring from installed consumers and authentication from unprobed write
 - **WHEN** a canonical v2 skill is discoverable in two inspected locations
 - **THEN** doctor reports a conflict without deleting global skills
 
+#### Scenario: Undecodable unrelated discovery file
+- **WHEN** a discovery root contains an unrelated skill file that is not valid UTF-8
+- **THEN** doctor reports a per-file warning and continues inspecting other entries
+- **AND** valid duplicates are still detected and the invalid file remains unchanged
+
 ### Requirement: Consumer CI adoption
 The pinned consumer bundle SHALL include read-only generic verification and
 trusted-base PR metadata workflows. Verification SHALL bootstrap the exact shared dependency pin, verify tracked project assets and consume reviewed local argv

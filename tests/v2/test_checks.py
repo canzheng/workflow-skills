@@ -27,6 +27,7 @@ class CheckTests(unittest.TestCase):
         self.root = pathlib.Path(self.temp.name)
         self.source, self.target = self.root / 'source', self.root / 'consumer'
         sha = fixture_source(self.source)
+        self.sha = sha
         init(self.target)
         (self.target / 'original').write_text('baseline')
         commit(self.target)
@@ -237,3 +238,53 @@ class CheckTests(unittest.TestCase):
                 self.assertEqual((self.target / '.git/index').read_bytes(), index)
         p.write_text('[valid](https://example.invalid/path#anchor)')
         run('check', '--repo', self.target)
+
+    def test_doctor_continues_after_an_undecodable_discovery_file(self):
+        folder = self.root / 'isolated-discovery'
+        bad = folder / 'a-unrelated/SKILL.md'
+        good = folder / 'z-valid/SKILL.md'
+        bad.parent.mkdir(parents=True)
+        good.parent.mkdir(parents=True)
+        bad.write_bytes(b'\xff\xfeinvalid UTF-8')
+        good.write_text('---\nname: workflow-deliver-issue\ndescription: duplicate fixture\n---\n')
+        index = (self.target / '.git/index').read_bytes()
+        r = run('doctor', '--repo', self.target, '--skill-root', folder, expect=1)
+        self.assertTrue(any(x['code'] == 'discovery.invalid' and x['path'] == str(bad)
+                            and x['severity'] == 'warning' for x in r['findings']))
+        self.assertTrue(any(x['code'] == 'discovery.duplicate' for x in r['findings']))
+        good.unlink()  # Remove only the disposable duplicate; invalid file remains.
+        r = run('doctor', '--repo', self.target, '--skill-root', folder)
+        self.assertTrue(r['ok'])
+        self.assertTrue(any(x['code'] == 'discovery.invalid' for x in r['findings']))
+        self.assertEqual(bad.read_bytes(), b'\xff\xfeinvalid UTF-8')
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+
+    def test_invalid_project_text_returns_json_without_mutation(self):
+        index = (self.target / '.git/index').read_bytes()
+        cases = {'AGENTS.md': ('check', 'doctor', 'bootstrap', 'setup'),
+                 '.gitignore': ('check', 'doctor', 'bootstrap', 'setup'),
+                 'README.md': ('check',),
+                 '.agents/skills/workflow-risk-review/SKILL.md': ('check',)}
+        for name, commands in cases.items():
+            with self.subTest(path=name):
+                p = self.target / name
+                original = p.read_bytes() if p.exists() else None
+                p.write_bytes(b'\xff\xfeinvalid UTF-8')
+                before = {x.relative_to(self.target): x.read_bytes()
+                          for x in self.target.rglob('*') if x.is_file()
+                          and '.git' not in x.relative_to(self.target).parts}
+                for command in commands:
+                    with self.subTest(command=command):
+                        args = (('--source', self.source, '--revision', self.sha, '--target', self.target,
+                                 '--repository', 'fixture/consumer', '--apply') if command == 'setup'
+                                else ('--repo', self.target, *(('--apply',) if command == 'bootstrap' else ())))
+                        r = run(command, *args, expect=2)
+                        self.assertEqual(r['findings'][0]['code'], 'invalid')
+                        self.assertEqual({x.relative_to(self.target): x.read_bytes()
+                                          for x in self.target.rglob('*') if x.is_file()
+                                          and '.git' not in x.relative_to(self.target).parts}, before)
+                        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                if original is None:
+                    p.unlink()
+                else:
+                    p.write_bytes(original)

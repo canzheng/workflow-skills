@@ -149,6 +149,108 @@ class SetupTests(unittest.TestCase):
                             self.assertEqual((self.target / '.git/index').read_bytes(), index)
                             self.assertFalse(global_target.exists())
 
+    def test_staging_creation_race_preserves_external_file_and_symlink(self):
+        run(*self.args, '--apply')
+        changed = self.source / 'docs/workflow/contract.md'
+        changed.write_text('Updated contract.\n')
+        revision = commit(self.source)
+        external = self.base / 'external-user-file'
+        external.write_bytes(b'HUMAN')
+        original = (self.target / 'docs/workflow/contract.md').read_bytes()
+        manifest = (self.target / '.workflow/install-manifest.json').read_bytes()
+        index = (self.target / '.git/index').read_bytes()
+        injected = []
+        actual_copy, actual_open = installer.shutil.copyfile, installer.os.open
+
+        def race(path):
+            p = pathlib.Path(path)
+            if p.name.endswith('.wf2-staged') and not injected:
+                p.symlink_to(external)
+                injected.append(p)
+
+        def copy(src, dst, *args, **kwargs):
+            race(dst)
+            return actual_copy(src, dst, *args, **kwargs)
+
+        def open_file(path, *args, **kwargs):
+            race(path)
+            return actual_open(path, *args, **kwargs)
+
+        with patch.object(installer.shutil, 'copyfile', copy), patch.object(installer.os, 'open', open_file), \
+                contextlib.redirect_stdout(io.StringIO()) as output:
+            status = workflow.main(['setup', '--source', str(self.source), '--revision', revision,
+                                    '--target', str(self.target), '--repository', 'fixture/consumer',
+                                    '--skill-storage', 'tracked', '--apply', '--json'])
+        self.assertEqual(external.read_bytes(), b'HUMAN')
+        self.assertEqual(status, 1, output.getvalue())
+        self.assertFalse(json.loads(output.getvalue())['ok'])
+        self.assertEqual(len(injected), 1)
+        self.assertTrue(injected[0].is_symlink())
+        self.assertEqual((self.target / 'docs/workflow/contract.md').read_bytes(), original)
+        self.assertEqual((self.target / '.workflow/install-manifest.json').read_bytes(), manifest)
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+
+    def test_failed_replace_preserves_concurrent_staging_changes(self):
+        run(*self.args, '--apply')
+        changed = self.source / 'docs/workflow/contract.md'
+        changed.write_text('Updated contract.\n')
+        revision = commit(self.source)
+        target = self.target / 'docs/workflow/contract.md'
+        staged = target.with_name(target.name + '.wf2-staged')
+        external = self.base / 'external-user-file'
+        external.write_bytes(b'HUMAN')
+        original = target.read_bytes()
+        manifest = (self.target / '.workflow/install-manifest.json').read_bytes()
+        index = (self.target / '.git/index').read_bytes()
+        for case in ('unchanged', 'bytes', 'mode', 'replacement', 'symlink'):
+            with self.subTest(case=case):
+                def replace(src, dst):
+                    self.assertEqual(pathlib.Path(src), staged)
+                    if case == 'bytes':
+                        staged.write_bytes(b'Concurrent staging content.')
+                    elif case == 'mode':
+                        staged.chmod(0o700 if staged.stat().st_mode & 0o777 != 0o700 else 0o750)
+                    elif case == 'replacement':
+                        contents, mode = staged.read_bytes(), staged.stat().st_mode
+                        replacement = self.base / 'replacement'
+                        replacement.write_bytes(contents)
+                        replacement.chmod(mode)
+                        staged.unlink()
+                        replacement.rename(staged)
+                    elif case == 'symlink':
+                        staged.unlink()
+                        staged.symlink_to(external)
+                    raise OSError('Injected replace failure')
+
+                with patch.object(installer.os, 'replace', replace), \
+                        contextlib.redirect_stdout(io.StringIO()) as output:
+                    status = workflow.main(['setup', '--source', str(self.source), '--revision', revision,
+                                            '--target', str(self.target), '--repository', 'fixture/consumer',
+                                            '--skill-storage', 'tracked', '--apply', '--json'])
+                self.assertEqual(status, 1, output.getvalue())
+                report = json.loads(output.getvalue())
+                message = report['findings'][0]['message']
+                self.assertEqual(target.read_bytes(), original)
+                self.assertEqual(external.read_bytes(), b'HUMAN')
+                self.assertEqual((self.target / '.workflow/install-manifest.json').read_bytes(), manifest)
+                self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                if case == 'unchanged':
+                    self.assertFalse(staged.exists())
+                    self.assertIn('original files restored', message)
+                else:
+                    self.assertTrue(staged.exists() or staged.is_symlink())
+                    if case == 'bytes':
+                        self.assertEqual(staged.read_bytes(), b'Concurrent staging content.')
+                    if case == 'symlink':
+                        self.assertTrue(staged.is_symlink())
+                    self.assertIn('Rollback residuals: docs/workflow/contract.md.wf2-staged', message)
+                    recovery = pathlib.Path(message.split('recoverable originals: ', 1)[1])
+                    metadata = json.loads((recovery / 'recovery-index.json').read_text())
+                    self.assertEqual(metadata['docs/workflow/contract.md.wf2-staged']['kind'], 'staging')
+                    self.assertEqual((recovery / metadata['docs/workflow/contract.md']['backup']).read_bytes(), original)
+                    installer.shutil.rmtree(recovery)
+                    staged.unlink()  # Explicit recovery cleanup only in this owned fixture.
+
     def test_annotated_tag_object_is_not_accepted_as_a_commit_pin(self):
         subprocess.run(['git', '-C', str(self.source), '-c', 'tag.gpgSign=false', 'tag', '-a', 'wf2-fixture', '-m', 'Immutable tag object'], check=True)
         tag = subprocess.check_output(['git', '-C', str(self.source), 'rev-parse', 'wf2-fixture'], text=True).strip()

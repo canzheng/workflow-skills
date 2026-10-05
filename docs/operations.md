@@ -31,7 +31,11 @@ restores only unchanged installer writes on failure. Concurrent edits, deletions
 permission changes or symlink replacements are preserved and reported as recoverable
 residuals with original backups. Newly created directories are removed only when
 their inode/mode still match and they remain empty; changed directories are retained
-and reported with creation metadata in recovery-index.json. This is best-effort
+and reported with creation metadata in recovery-index.json. Staging files are created exclusively, with writes/permissions bound to the opened
+file descriptor. A symlink introduced at creation is rejected without writing its
+external target. Cleanup removes only unchanged installer staging files; changed
+bytes/modes/replacements or symlinks remain residuals with staging creation metadata.
+This is best-effort
 recovery, not a multi-process
 lock or an atomic multi-file transaction. Review residuals before retrying. Setup never stages/commits or changes repository administration.
 
@@ -133,3 +137,8 @@ The source-owned [environment entrypoint](../tools/workflow/environment-setup.sh
 can adopt a new Git root without existing tools/first commit. The source README and
 [Ubuntu workstation handoff](validation/ubuntu-workstation-handoff.md) document
 pinned fetch/run and required acceptance. Cloud is optional/deferred for this release.
+
+Doctor reports an unreadable/undecodable discovery file as a per-file warning and
+continues scanning other entries, including duplicate-name checks. It preserves
+the file; this filesystem scan does not prove native host discovery. Invalid UTF-8
+project text is a structured invalid-input error, not permission to rewrite it.

@@ -124,3 +124,17 @@ provenance, not task state or its own content hash.
 - **AND** reports the exact residual path and recoverable original bytes/mode without following unsafe paths
 - **AND** newly created directories are removed only if their inode/mode is unchanged and they are empty; changed directories are retained/reported with creation metadata
 - **AND** unchanged installer writes can still be restored; no multi-process lock or atomic multi-file transaction is promised
+
+### Requirement: Bounded uninstall and diagnostics
+Uninstall SHALL remove only unmodified managed assets/block, retain configuration
+and user modifications, and report residuals. Doctor SHALL be read-only and distinguish
+source authoring from installed consumers and authentication from unprobed writes.
+
+#### Scenario: Duplicate active skill name
+- **WHEN** a canonical v2 skill is discoverable in two inspected locations
+- **THEN** doctor reports a conflict without deleting global skills
+
+#### Scenario: Undecodable unrelated discovery file
+- **WHEN** a discovery root contains an unrelated skill file that is not valid UTF-8
+- **THEN** doctor reports a per-file warning and continues inspecting other entries
+- **AND** valid duplicates are still detected and the invalid file remains unchanged
