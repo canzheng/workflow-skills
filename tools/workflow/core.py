@@ -1,6 +1,7 @@
 """Small shared validation and filesystem primitives; no task state."""
 import hashlib
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -80,7 +81,7 @@ def repository(value):
             raise Invalid('Repository path contains a symlink: ' + str(part))
     if not path.is_dir():
         raise Invalid('Repository target is missing: ' + str(path))
-    top = pathlib.Path(git(path, 'rev-parse', '--show-toplevel').decode().strip()).resolve()
+    top = pathlib.Path(os.fsdecode(git(path, 'rev-parse', '--show-toplevel')).strip()).resolve()
     if top != path.resolve():
         raise Invalid('Target must be the explicit Git repository root')
     return top
@@ -176,8 +177,8 @@ def dependency_policy(root, m):
         if name not in m['files']:
             raise Conflict('Unmanaged shared dependency asset: ' + name)
     effective_ignore_policy(root, m['files'], ignored_shared=ignored_dependency)
-    tracked = set(git(root, 'ls-files', '-z').decode().split('\0')) - {''}
-    committed = (set(git(root, 'ls-tree', '-r', '--name-only', '-z', 'HEAD').decode().split('\0')) - {''}
+    tracked = set(os.fsdecode(git(root, 'ls-files', '-z')).split('\0')) - {''}
+    committed = (set(os.fsdecode(git(root, 'ls-tree', '-r', '--name-only', '-z', 'HEAD')).split('\0')) - {''}
                  if head_revision(root) else set())
     required = {name for name in m['files'] if not ignored_dependency or not shared(name)} | PROJECT_FILES
     if ignored_dependency:
@@ -203,7 +204,7 @@ def staged_installation(root):
             continue
         metadata, name = record.split(b'\t', 1)
         mode, oid, stage = metadata.decode().split()
-        entries.setdefault(name.decode(), []).append((mode, oid, stage))
+        entries.setdefault(os.fsdecode(name), []).append((mode, oid, stage))
 
     def read(name):
         staged = entries.get(name, [])
@@ -268,13 +269,13 @@ def effective_ignore_policy(root, names, proposed=None, ignored_shared=False):
             if exclude.returncode not in (0, 1):
                 raise Invalid('Cannot inspect repository exclude configuration')
             if exclude.returncode == 0:
-                path = pathlib.Path(exclude.stdout.decode().strip())
+                path = pathlib.Path(os.fsdecode(exclude.stdout).strip())
                 command += ['-c', 'core.excludesFile=' + str(path if path.is_absolute() else root / path)]
         result = subprocess.run(command + ['check-ignore', '--no-index', '-z', '--stdin'],
-                                input=('\0'.join(candidates) + '\0').encode(), capture_output=True, check=False)
+                                input=os.fsencode('\0'.join(candidates) + '\0'), capture_output=True, check=False)
         if result.returncode not in (0, 1):
             raise Invalid('Cannot inspect effective shared/project skill ignore policy')
-        ignored = set(result.stdout.decode().split('\0')) - {''}
+        ignored = set(os.fsdecode(result.stdout).split('\0')) - {''}
         if required & ignored:
             raise Conflict('Workflow installation path is ignored; remove the conflicting rule: ' + sorted(required & ignored)[0])
         if dependency - ignored:
@@ -371,7 +372,7 @@ def head_revision(root):
 
 def content_identity(root):
     """Bind diagnostics/evidence to actual tracked and nonignored untracked bytes."""
-    names = set(git(root, 'ls-files', '-z', '--cached', '--others', '--exclude-standard').decode().split('\0')) - {''}
+    names = set(os.fsdecode(git(root, 'ls-files', '-z', '--cached', '--others', '--exclude-standard')).split('\0')) - {''}
     m = manifest(root)
     dependency_modified = False
     if m and m['schema_version'] in (2, 3, 4):
@@ -389,14 +390,14 @@ def content_identity(root):
         p = root / name
         # A tracked symlink is hashed as its link text, never its destination bytes.
         if p.is_symlink():
-            data = ('symlink:' + p.readlink().as_posix()).encode()
+            data = os.fsencode('symlink:' + p.readlink().as_posix())
         elif not p.exists():
             data = b'missing'
         elif p.is_file():
             data = p.read_bytes()
         else:
             data = b'non-file'
-        h.update(name.encode() + b'\0' + digest(data).encode() + b'\0')
+        h.update(os.fsencode(name) + b'\0' + digest(data).encode() + b'\0')
     revision = head_revision(root)
     return dict(revision=revision,
                 branch=git(root, 'branch', '--show-current').decode().strip(),

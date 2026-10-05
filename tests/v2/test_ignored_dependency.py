@@ -37,6 +37,8 @@ class IgnoredDependencyTests(unittest.TestCase):
         self.ignored_adopt()
         fresh = self.base / 'fresh consumer'
         subprocess.run(['git', 'clone', '--quiet', '--no-local', str(self.target), str(fresh)], check=True)
+        git(fresh, 'config', 'user.name', 'Fixture')
+        git(fresh, 'config', 'user.email', 'test@example.invalid')
         return fresh
 
     def test_default_setup_ignores_only_shared_dirs_preserves_index_and_repeats(self):
