@@ -13,6 +13,11 @@ SHALL fail rather than silently fall back or count skipped work as passed.
 - **WHEN** a selected local verification command exits nonzero
 - **THEN** the checker reports the actual failed exit and does not certify completion
 
+#### Scenario: Required OpenSpec subprocess hangs
+- **WHEN** selected OpenSpec version or validation execution times out or cannot launch
+- **THEN** the checker returns a structured required-check error with no pass or captured partial timeout output
+- **AND** version/validation deadlines are 10/120 seconds and the repository/index remain unchanged
+
 ### Requirement: Trusted metadata and bounded enforcement claims
 PR checks SHALL require the declared nonempty evidence/documentation sections and
 valid local references; trusted-base metadata SHALL treat body/head content as data,
@@ -42,6 +47,7 @@ SHALL be reported only after actual configuration/readback/observation.
 - **WHEN** a document selected for local link checking is a symlink, including a dangling or cyclic link
 - **THEN** check reports an unsafe repository-relative document path before reading the target
 - **AND** external content is not disclosed, document/link/index bytes remain unchanged, and regular local link diagnostics still run
+- **AND** no-follow/nonblocking directory/file descriptors reject substitutions and non-regular entries, and reads remain bound after opening
 
 ### Requirement: Discriminating risk proof
 Material risks SHALL select independent numerical expectations, actual downstream

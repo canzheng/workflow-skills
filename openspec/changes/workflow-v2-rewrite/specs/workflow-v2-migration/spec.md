@@ -1,9 +1,5 @@
-# Workflow v2 migration
+## MODIFIED Requirements
 
-## Purpose
-Known-format read-only inventory and deliberate one-time authority cutover with provenance.
-
-## Requirements
 ### Requirement: Read-only known-format inventory
 Migration inspection SHALL read known v1 backlog/feature/OpenSpec records, retain
 original acceptance/evidence/blockers and paths, distinguish historical Done from
@@ -22,12 +18,3 @@ remaining work, and propose dispositions without performing remote or local muta
 - **THEN** inventory reads only a bound regular-file descriptor or reports a finding without blocking or disclosing external records
 - **AND** original/replacement/index bytes and remote state are not modified
 
-### Requirement: Single authority and bounded rollback
-Authorized consumer cutover SHALL assign one explicit disposition per active item,
-reconcile remote source identities before retry, preserve human edits and freeze the
-old ledger for migrated items. Rollback SHALL preserve published remote history.
-
-#### Scenario: Partial remote creation
-- **WHEN** remote creation may have succeeded before an interruption
-- **THEN** the next operation re-reads open/closed identities before continuing
-- **AND** neither Done history nor confirmed migrated items are recreated

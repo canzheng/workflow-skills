@@ -4,8 +4,11 @@ import json
 import os
 import pathlib
 import re
+import stat
 import subprocess
 import tempfile
+
+DIRECTORY_READS_SUPPORTED = os.open in os.supports_dir_fd
 
 START = '<!-- workflow-v2:start -->'
 END = '<!-- workflow-v2:end -->'
@@ -101,9 +104,37 @@ def repository(value):
     return top
 
 
+def read_regular(path):
+    """Bind every directory and the final regular file without following links."""
+    native_text(os.fspath(path))
+    if any(not hasattr(os, flag) for flag in ('O_DIRECTORY', 'O_NOFOLLOW', 'O_NONBLOCK')) or not DIRECTORY_READS_SUPPORTED:
+        raise Invalid('Safe regular-file reading is unavailable on this platform')
+    full = pathlib.Path(os.path.abspath(path))
+    directory_flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_NONBLOCK
+    directory = os.open(full.anchor, directory_flags)
+    try:
+        for part in full.parts[1:-1]:
+            child = os.open(part, directory_flags, dir_fd=directory)
+            os.close(directory)
+            directory = child
+        descriptor = os.open(full.name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
+    finally:
+        os.close(directory)
+    try:
+        if not stat.S_ISREG(os.fstat(descriptor).st_mode):
+            raise Invalid('Expected a regular file: ' + str(path))
+        stream = os.fdopen(descriptor, 'rb')
+        descriptor = None
+        with stream:
+            return stream.read()
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+
+
 def load(path):
     try:
-        return json.loads(path.read_text())
+        return json.loads(read_regular(path).decode('utf-8'))
     except (OSError, ValueError) as exc:
         raise Invalid('Invalid JSON or missing file: ' + str(path)) from exc
 
@@ -247,7 +278,7 @@ def dependency_policy(root, m):
     ignored_dependency = m['schema_version'] in (4, 5)
     if ignored_dependency:
         policy = safe(root, '.gitignore')
-        current = ignore_block(policy.read_text()) if policy.is_file() else None
+        current = ignore_block(read_regular(policy).decode('utf-8')) if policy.is_file() else None
         if not current or digest(current.encode()) != m['gitignore_block_hash']:
             raise Conflict('Managed shared-dependency ignore block modified or missing')
     for name in dependency_files(root, m):
@@ -412,7 +443,7 @@ def effective_ignore_policy(root, names, proposed=None, ignored_shared=False, ig
             for name in sorted(policies):
                 if staged_paths is None:
                     p = safe(root, name)
-                    data = p.read_bytes() if p.is_file() else None
+                    data = read_regular(p) if p.is_file() else None
                 else:
                     data = read_staged(name) if name in staged_paths else None
                 if data is not None:
@@ -499,7 +530,7 @@ def content_identity(root):
             if dependency(name, m):
                 names.add(name)
                 p = safe(root, name)
-                dependency_modified |= not p.is_file() or digest(p.read_bytes()) != expected
+                dependency_modified |= not p.is_file() or digest(read_regular(p)) != expected
     h = hashlib.sha256()
     for name in sorted(names):
         relative(name)
@@ -510,7 +541,7 @@ def content_identity(root):
         elif not p.exists():
             data = b'missing'
         elif p.is_file():
-            data = p.read_bytes()
+            data = read_regular(p)
         else:
             data = b'non-file'
         h.update(os.fsencode(name) + b'\0' + digest(data).encode() + b'\0')

@@ -8,7 +8,7 @@ import subprocess
 from urllib.parse import unquote, urlsplit
 
 from core import (Conflict, Invalid, SKILLS, CI_ASSETS, required_assets, START, block, config, dependency_policy, digest, finding, git, load,
-                  manifest, owned, relative, safe, valid_bundle_version)
+                  manifest, owned, relative, safe, valid_bundle_version, read_regular)
 from records import issue_findings
 
 SECTIONS = ('Assignment', 'Changes', 'Evidence', 'Documentation', 'Remaining')
@@ -60,7 +60,7 @@ def links(root, text, origin, reader=None):
             if reader:
                 data = reader(normalized)
             elif p.is_file():
-                data = p.read_bytes()
+                data = read_regular(p)
             else:
                 raise FileNotFoundError(normalized)
             if fragment and normalized.endswith('.md') and fragment not in anchors(data.decode()):
@@ -146,9 +146,9 @@ def check(root, args):
                 findings.append(finding('dependency.policy', '.gitignore', str(exc), 'Review tracked project adoption and ignored shared dependency policy'))
         for name, h in m['files'].items():
             p = safe(root, name)
-            if not p.is_file() or digest(p.read_bytes()) != h:
+            if not p.is_file() or digest(read_regular(p)) != h:
                 findings.append(finding('bundle.modified', name, 'Owned bytes differ or are missing', 'Review edits; do not silently overwrite'))
-        text = safe(root, 'AGENTS.md').read_text() if safe(root, 'AGENTS.md').exists() else ''
+        text = read_regular(safe(root, 'AGENTS.md')).decode('utf-8') if safe(root, 'AGENTS.md').exists() else ''
         b = block(text)
         if not b or digest(b.encode()) != m['agents_block_hash']:
             findings.append(finding('instructions.modified', 'AGENTS.md', 'Managed instruction block differs', 'Resolve ownership'))
@@ -170,7 +170,7 @@ def check(root, args):
         p = safe(root, '.agents/skills/' + s + '/SKILL.md')
         if not p.is_file():
             findings.append(finding('skill.missing', p, 'Required skill is absent', 'Restore canonical source'))
-        elif not re.match(r'\A---\nname: ' + re.escape(s) + r'\ndescription: .+\n---\n', p.read_text()):
+        elif not re.match(r'\A---\nname: ' + re.escape(s) + r'\ndescription: .+\n---\n', read_regular(p).decode('utf-8')):
             findings.append(finding('skill.header', p, 'Invalid skill frontmatter', 'Provide canonical name and focused description'))
     docs = [root / x for x in ('README.md', 'AGENTS.md', 'CLAUDE.md')
             if (root / x).is_file() or (root / x).is_symlink()]
@@ -183,11 +183,12 @@ def check(root, args):
             continue
         try:
             p = safe(root, name)
-        except Invalid:
-            findings.append(finding('docs.unsafe', name, 'Unsafe document path; symlinks are not scanned',
-                                    'Use a regular repository-local document'))
+            text = read_regular(p).decode('utf-8')
+        except (Invalid, OSError):
+            findings.append(finding('docs.unsafe', name, 'Cannot read a regular repository-local document safely',
+                                    'Use a regular file without symlinked path components'))
             continue
-        findings.extend(links(root, p.read_text(), name))
+        findings.extend(links(root, text, name))
     if args.issues_json:
         snapshot = load(pathlib.Path(args.issues_json))
         if not isinstance(snapshot, dict) or snapshot.get('repository') != c['repository'] or not isinstance(snapshot.get('issues'), list):
@@ -204,13 +205,25 @@ def check(root, args):
             findings.append(finding('specs.unavailable', 'OpenSpec', 'Selected required spec check cannot run', 'Install pinned OpenSpec 1.14.0 with npm ci'))
         else:
             env = {**os.environ, 'OPENSPEC_TELEMETRY': '0', 'DO_NOT_TRACK': '1'}
-            version = subprocess.run([str(cli), '--version'], capture_output=True, text=True, env=env, check=False)
-            if version.returncode or version.stdout.strip() != '1.14.0':
-                findings.append(finding('specs.version', cli, 'OpenSpec version differs from pinned 1.14.0', 'Use repository-pinned CLI'))
-            else:
-                r = subprocess.run([str(cli), 'validate', '--all', '--strict', '--no-interactive'], cwd=root, capture_output=True, text=True, env=env, check=False)
-                if r.returncode:
-                    findings.append(finding('specs.invalid', 'openspec', (r.stdout + r.stderr).strip(), 'Fix actual spec/delta errors; do not skip validation'))
+            def required_probe(command, phase, timeout):
+                try:
+                    return subprocess.run(command, cwd=root, capture_output=True, text=True,
+                                          env=env, check=False, timeout=timeout)
+                except subprocess.TimeoutExpired:
+                    findings.append(finding('specs.timeout', 'OpenSpec', phase + ' timed out',
+                                            'Restore the required tool and rerun; no pass is claimed'))
+                except OSError:
+                    findings.append(finding('specs.unavailable', 'OpenSpec', phase + ' could not launch',
+                                            'Restore the required tool and rerun; no pass is claimed'))
+                return None
+            version = required_probe([str(cli), '--version'], 'version probe', 10)
+            if version is not None:
+                if version.returncode or version.stdout.strip() != '1.14.0':
+                    findings.append(finding('specs.version', cli, 'OpenSpec version differs from pinned 1.14.0', 'Use repository-pinned CLI'))
+                else:
+                    r = required_probe([str(cli), 'validate', '--all', '--strict', '--no-interactive'], 'validation', 120)
+                    if r is not None and r.returncode:
+                        findings.append(finding('specs.invalid', 'openspec', (r.stdout + r.stderr).strip(), 'Fix actual spec/delta errors; do not skip validation'))
     for category, requested in [('local', args.run_local), ('integration', args.run_integration)]:
         if not requested:
             continue

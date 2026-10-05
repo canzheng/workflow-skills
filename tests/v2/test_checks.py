@@ -654,6 +654,215 @@ class CheckTests(unittest.TestCase):
                     self.assertEqual({p.relative_to(self.target): p.read_bytes() for p in self.target.rglob('*')
                                       if p.is_file() and '.git' not in p.relative_to(self.target).parts}, contents)
 
+    def _read_fault_cli(self, command, injection, expect):
+        import test_setup
+        code = ('import pathlib,os,checks,core,migration,workflow\n' + injection +
+                '\nraise SystemExit(workflow.main(' +
+                repr([command, *(['inspect'] if command == 'migrate' else []),
+                      '--repo', str(self.target), '--json']) + '))\n')
+        try:
+            result = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True,
+                                    timeout=20, env={**os.environ, 'PYTHONPATH': str(test_setup.TOOLS)})
+        except subprocess.TimeoutExpired:
+            self.fail('Public reader blocked instead of returning structured diagnostics')
+        self.assertEqual(result.returncode, expect, result.stdout + result.stderr)
+        self.assertNotIn('TEST_PRIVATE_BOUND_READ', result.stdout + result.stderr)
+        return json.loads(result.stdout)
+
+    def test_document_reads_are_bound_and_reject_nonregular_entries(self):
+        external = self.root / 'private-documents/race.md'
+        external.parent.mkdir()
+        external.write_text('[private](https://[TEST_PRIVATE_BOUND_READ)\n')
+        private = external.read_bytes()
+        index = (self.target / '.git/index').read_bytes()
+        for case in ('symlink', 'fifo', 'ancestor', 'after-open'):
+            with self.subTest(case=case):
+                parent = self.target / 'docs' / ('race-' + case)
+                parent.mkdir()
+                path = parent / 'race.md'
+                path.write_text('# Safe\n')
+                moved = self.target / 'docs/saved-ancestor'
+                action = ("p.unlink(); p.symlink_to(external)" if case != 'fifo'
+                          else "p.unlink(); os.mkfifo(p)")
+                prefix = 'p=pathlib.Path(' + repr(str(path)) + ')\nexternal=pathlib.Path(' + repr(str(external)) + ')\nchanged=False\n'
+                if case == 'after-open':
+                    injection = prefix + (
+                        "actual=core.os.open\n"
+                        "def open_file(name, *args, **kwargs):\n"
+                        "    global changed\n"
+                        "    fd=actual(name, *args, **kwargs)\n"
+                        "    if name == 'race.md' and kwargs.get('dir_fd') is not None and not changed:\n"
+                        "        changed=True\n"
+                        "        p.unlink(); p.symlink_to(external)\n"
+                        "    return fd\n"
+                        "core.os.open=open_file\n")
+                else:
+                    if case == 'ancestor':
+                        action = 'p.parent.rename(' + repr(str(moved)) + '); p.parent.symlink_to(external.parent, target_is_directory=True)'
+                    injection = prefix + (
+                        "actual=checks.safe\n"
+                        "def safe(root, name):\n"
+                        "    global changed\n"
+                        "    found=actual(root, name)\n"
+                        "    if found == p and not changed:\n"
+                        "        changed=True\n"
+                        "        " + action + "\n"
+                        "    return found\n"
+                        "checks.safe=safe\n")
+                try:
+                    report = self._read_fault_cli('check', injection, 0 if case == 'after-open' else 1)
+                    if case != 'after-open':
+                        self.assertTrue(any(x['code'] == 'docs.unsafe' for x in report['findings']), report)
+                    self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                    self.assertEqual(external.read_bytes(), private)
+                    if case == 'ancestor':
+                        self.assertEqual(parent.readlink(), external.parent)
+                        self.assertEqual((moved / 'race.md').read_text(), '# Safe\n')
+                    elif case == 'fifo':
+                        import stat
+                        self.assertTrue(stat.S_ISFIFO(path.lstat().st_mode))
+                    else:
+                        self.assertEqual(path.readlink(), external)
+                finally:
+                    if parent.is_symlink():
+                        parent.unlink()
+                        moved.rename(parent)
+                    path.unlink()
+                    parent.rmdir()
+
+    def test_doctor_nonregular_entries_warn_and_continue(self):
+        import stat
+        import test_setup
+        bad = self.root / 'unsupported-catalog/unsupported/SKILL.md'
+        bad.parent.mkdir(parents=True)
+        good = self.root / 'healthy-catalog/valid/SKILL.md'
+        good.parent.mkdir(parents=True)
+        good.write_text('---\nname: workflow-deliver-issue\ndescription: duplicate\n---\n')
+        external = self.root / 'private-skill'
+        external.write_bytes(b'\xffTEST_PRIVATE_BOUND_READ')
+        index = (self.target / '.git/index').read_bytes()
+        for case in ('fifo', 'symlink', 'directory'):
+            with self.subTest(case=case):
+                if case == 'fifo':
+                    os.mkfifo(bad)
+                elif case == 'symlink':
+                    bad.symlink_to(external)
+                else:
+                    bad.mkdir()
+                try:
+                    result = subprocess.run([sys.executable, str(test_setup.TOOLS / 'workflow.py'),
+                                             'doctor', '--repo', str(self.target), '--json',
+                                             '--skill-root', str(bad.parent.parent),
+                                             '--skill-root', str(good.parent.parent)],
+                                            capture_output=True, text=True, timeout=20)
+                    self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                    report = json.loads(result.stdout)
+                    self.assertTrue(any(x['code'] == 'discovery.inaccessible' and x['path'] == str(bad)
+                                        for x in report['findings']), report)
+                    self.assertTrue(any(x['code'] == 'discovery.duplicate' for x in report['findings']))
+                    self.assertIn('tools', report)
+                    self.assertNotIn('TEST_PRIVATE_BOUND_READ', result.stdout + result.stderr)
+                    self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                    self.assertEqual(external.read_bytes(), b'\xffTEST_PRIVATE_BOUND_READ')
+                    if case == 'fifo':
+                        self.assertTrue(stat.S_ISFIFO(bad.lstat().st_mode))
+                    elif case == 'symlink':
+                        self.assertEqual(bad.readlink(), external)
+                except subprocess.TimeoutExpired:
+                    self.fail('Public doctor blocked on an unsupported catalog entry')
+                finally:
+                    bad.rmdir() if case == 'directory' else bad.unlink()
+
+    def test_required_openspec_probes_are_bounded_and_suppress_partial_output(self):
+        import test_setup
+        cli = self.target / 'node_modules/.bin/openspec'
+        cli.parent.mkdir(parents=True)
+        index = (self.target / '.git/index').read_bytes()
+        actual = subprocess.run
+        for phase in ('version', 'validate'):
+            with self.subTest(phase=phase):
+                cli.write_text('#!' + sys.executable + '\nimport sys,time\n'
+                               'version="--version" in sys.argv\n'
+                               'if version and ' + repr(phase == 'validate') + ':\n'
+                               '    print("1.14.0")\n'
+                               'else:\n'
+                               '    print("TEST_PRIVATE_SPEC_TIMEOUT", flush=True)\n'
+                               '    print("TEST_PRIVATE_SPEC_TIMEOUT", file=sys.stderr, flush=True)\n'
+                               '    time.sleep(2)\n')
+                cli.chmod(0o755)
+                calls = []
+                def bounded(command, **kwargs):
+                    if command[0] == str(cli):
+                        expected = 10 if '--version' in command else 120
+                        self.assertEqual(kwargs.get('timeout'), expected)
+                        calls.append(expected)
+                        kwargs['timeout'] = 0.1
+                    return actual(command, **kwargs)
+                with patch.object(subprocess, 'run', bounded), contextlib.redirect_stdout(io.StringIO()) as output:
+                    status = test_setup.workflow.main(['check', '--repo', str(self.target), '--specs', '--json'])
+                self.assertEqual(status, 1, output.getvalue())
+                report = json.loads(output.getvalue())
+                self.assertTrue(any(x['code'] == 'specs.timeout' and x['severity'] == 'error'
+                                    for x in report['findings']))
+                self.assertEqual(calls, [10] if phase == 'version' else [10, 120])
+                self.assertNotIn('TEST_PRIVATE_SPEC_TIMEOUT', output.getvalue())
+                self.assertEqual((self.target / '.git/index').read_bytes(), index)
+
+    def test_migration_record_reads_are_bound_and_nonblocking(self):
+        folder = self.target / 'docs/planning/versions/mvp'
+        folder.mkdir(parents=True)
+        ledger, feature = folder / 'BACKLOG.md', folder / 'feature.md'
+        tick = chr(96)
+        ledger_text = '## [READY]\n### ' + tick + 'mvp-f01' + tick + ' [Feature](feature.md)\nOriginal notes.\n'
+        feature_text = '- Feature ID: ' + tick + 'mvp-f01' + tick + '\n- OpenSpec Change: ' + tick + 'legacy-feature' + tick + '\nOriginal feature.\n'
+        change = self.target / 'openspec/changes/legacy-feature'
+        change.mkdir(parents=True)
+        external = self.root / 'private-legacy.md'
+        external.write_text('## [READY]\n### ' + tick + 'private-f99' + tick + ' Confidential\nTEST_PRIVATE_BOUND_READ\n')
+        index = (self.target / '.git/index').read_bytes()
+        for selected in (ledger, feature):
+            for kind in ('symlink', 'fifo'):
+                with self.subTest(path=selected.name, kind=kind):
+                    ledger.write_text(ledger_text)
+                    feature.write_text(feature_text)
+                    prefix = 'p=pathlib.Path(' + repr(str(selected)) + ')\nexternal=pathlib.Path(' + repr(str(external)) + ')\nchanged=False\n'
+                    action = 'p.unlink(); p.symlink_to(external)' if kind == 'symlink' else 'p.unlink(); os.mkfifo(p)'
+                    if selected == ledger:
+                        injection = prefix + (
+                            "actual=pathlib.Path.is_file\n"
+                            "def is_file(path):\n"
+                            "    global changed\n"
+                            "    found=actual(path)\n"
+                            "    if path == p and not changed:\n"
+                            "        changed=True\n"
+                            "        " + action + "\n"
+                            "    return found\n"
+                            "pathlib.Path.is_file=is_file\n")
+                    else:
+                        injection = prefix + (
+                            "actual=migration.safe\n"
+                            "def safe(root, name):\n"
+                            "    global changed\n"
+                            "    found=actual(root, name)\n"
+                            "    if found == p and not changed:\n"
+                            "        changed=True\n"
+                            "        " + action + "\n"
+                            "    return found\n"
+                            "migration.safe=safe\n")
+                    try:
+                        report = self._read_fault_cli('migrate', injection, 1)
+                        code = 'migration.record' if selected == ledger else 'migration.feature'
+                        self.assertTrue(any(x['code'] == code for x in report['findings']), report)
+                        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                        self.assertIn('TEST_PRIVATE_BOUND_READ', external.read_text())
+                    finally:
+                        selected.unlink()
+        ledger.write_text(ledger_text)
+        feature.write_text(feature_text)
+        report = run('migrate', 'inspect', '--repo', self.target)
+        self.assertEqual(report['records'][0]['original_record'], feature_text)
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+
     def test_public_commands_do_not_require_a_resolvable_home(self):
         import test_setup
         cli = test_setup.TOOLS / 'workflow.py'

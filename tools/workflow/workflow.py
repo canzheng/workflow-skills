@@ -10,7 +10,7 @@ import sys
 sys.dont_write_bytecode = True
 
 from core import (Conflict, Invalid, SKILLS, START, block, config, content_identity, digest, finding,
-                  SOURCE_URL, REQUIRED_ASSETS, required_assets, dependency_policy, manifest, repository, safe)
+                  SOURCE_URL, REQUIRED_ASSETS, required_assets, dependency_policy, manifest, repository, safe, read_regular)
 from setup import setup
 
 
@@ -21,7 +21,7 @@ def doctor(root, skill_roots=()):
     source = not m and safe(root, '.workflow/bundle.json').exists()
     if not m and not source:
         findings.append(finding('provenance.missing', '.workflow', 'Neither source bundle nor consumer manifest exists', 'Use pinned setup'))
-    text = safe(root, 'AGENTS.md').read_text() if safe(root, 'AGENTS.md').exists() else ''
+    text = read_regular(safe(root, 'AGENTS.md')).decode('utf-8') if safe(root, 'AGENTS.md').exists() else ''
     block(text)
     if 'github-v2' not in text and 'workflow-skills v2' not in text:
         findings.append(finding('instructions.missing', 'AGENTS.md', 'v2 routing is missing', 'Restore the repository entrypoint'))
@@ -38,7 +38,7 @@ def doctor(root, skill_roots=()):
                 findings.append(finding('dependency.policy', '.gitignore', str(exc), 'Review adoption, shared dependency ignores and tracked project files'))
         for name, h in m['files'].items():
             p = safe(root, name)
-            if not p.is_file() or digest(p.read_bytes()) != h:
+            if not p.is_file() or digest(read_regular(p)) != h:
                 findings.append(finding('bundle.modified', name, 'Managed bytes differ or are missing', 'Review local edits before update'))
         b = block(text)
         if not b or digest(b.encode()) != m['agents_block_hash']:
@@ -70,12 +70,12 @@ def doctor(root, skill_roots=()):
                      for p in child.glob('SKILL.md'))
             for p in paths:
                 try:
-                    text = p.read_text(encoding='utf-8')
+                    text = read_regular(resolved / p.relative_to(folder)).decode('utf-8')
                 except UnicodeError:
                     findings.append(finding('discovery.invalid', p, 'Skill file is not valid UTF-8',
                                             'Review the invalid skill in the actual host', 'warning'))
                     continue
-                except OSError:
+                except (Invalid, OSError):
                     findings.append(finding('discovery.inaccessible', p, 'Cannot read skill file',
                                             'Inspect permissions in the actual host', 'warning'))
                     continue

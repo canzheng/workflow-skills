@@ -3,7 +3,7 @@ import pathlib
 import tempfile
 
 from core import (Conflict, REQUIRED_ASSETS, block, dependency_policy, digest, git,
-                  manifest, repository, safe, shared, dependency, required_assets)
+                  manifest, repository, safe, shared, dependency, required_assets, read_regular)
 from setup import source_bundle, transaction
 
 
@@ -20,10 +20,10 @@ def bootstrap(args):
     for name, h in m['files'].items():
         if not dependency(name, m):
             p = safe(root, name)
-            if not p.is_file() or digest(p.read_bytes()) != h:
+            if not p.is_file() or digest(read_regular(p)) != h:
                 raise Conflict('Missing/modified project asset preserved: ' + name)
     instructions = safe(root, 'AGENTS.md')
-    current = block(instructions.read_text()) if instructions.is_file() else None
+    current = block(read_regular(instructions).decode('utf-8')) if instructions.is_file() else None
     if not current or digest(current.encode()) != m['agents_block_hash']:
         raise Conflict('Managed AGENTS block modified or missing')
     missing = []
@@ -31,7 +31,7 @@ def bootstrap(args):
         p = safe(root, name)
         if not p.exists() and m['schema_version'] in (4, 5):
             missing.append(name)
-        elif not p.is_file() or digest(p.read_bytes()) != h:
+        elif not p.is_file() or digest(read_regular(p)) != h:
             raise Conflict('Missing/modified skill preserved: ' + name +
                            '; restore reviewed bytes or perform explicit setup/update')
 

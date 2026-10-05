@@ -127,3 +127,10 @@ supported; structural validity does not prove delivery acceptance.
 
 The native closure-reason enum follows the [GitHub REST schema](https://github.com/github/rest-api-description/blob/836ce198db13a6fb194547e53eea99c6ddae495b/descriptions/api.github.com/api.github.com.json);
 validation uses the pinned implementation, without fetching schemas at runtime.
+
+Markdown and local linked-file reads bind no-follow directory/file descriptors and
+require regular files with nonblocking open. A replacement after validation cannot
+redirect the read, and unsupported entries produce diagnostics without blocking.
+OpenSpec version/validation have10s/120s timeouts; timeout/launch failures remain
+required-check errors with no captured partial timeout output. This requires the
+supported POSIX descriptor operations and does not create an atomic repository snapshot.

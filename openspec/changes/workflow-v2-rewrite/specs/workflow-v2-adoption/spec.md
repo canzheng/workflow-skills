@@ -272,6 +272,12 @@ source authoring from installed consumers and authentication from unprobed write
 - **THEN** doctor reports a per-root discovery warning and continues other catalogs and tool diagnostics
 - **AND** inaccessible roots and symlinks, repository bytes and index remain unchanged
 
+
+#### Scenario: Unsupported discovery file cannot block diagnostics
+- **WHEN** a catalog entry is a FIFO, directory or symlink, or its parent is substituted
+- **THEN** doctor opens no-follow/nonblocking, requires a regular file and reports a per-file warning instead of blocking or following the replacement
+- **AND** other catalogs and tools continue, with no file/index/global writes
+
 #### Scenario: Tool or authentication probe fails
 - **WHEN** a discovered tool version or authentication probe times out, cannot execute, or produces invalid version output, including an empty or whitespace-only first line
 - **THEN** doctor reports that result unavailable and continues other diagnostics with structured output

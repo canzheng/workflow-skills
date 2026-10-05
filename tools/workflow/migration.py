@@ -1,7 +1,7 @@
 """Read-only inventory for the repository's known v1 Markdown format."""
 import pathlib
 import re
-from core import Invalid, finding, relative, safe
+from core import Invalid, finding, relative, safe, read_regular
 
 STATES = {'BACKLOG', 'SHAPING', 'READY', 'IN_PROGRESS', 'DONE', 'DEFER'}
 META = re.compile(r'^- (Feature ID|OpenSpec Change|Current Task):\s*`([^`]+)`', re.M)
@@ -25,7 +25,12 @@ def inspect(root):
             continue
         if not ledger.is_file():
             continue
-        text = ledger.read_text()
+        try:
+            text = read_regular(ledger).decode('utf-8')
+        except (Invalid, OSError):
+            findings.append(finding('migration.record', ledger_name, 'Cannot read a regular legacy ledger safely',
+                                    'Restore the original regular record without symlinked path components'))
+            continue
         headings = list(re.finditer(r'^## \[([^\]]+)\]\s*$|^### (.+)$', text, re.M))
         phase = None
         for index, heading in enumerate(headings):
@@ -52,7 +57,7 @@ def inspect(root):
                     relative(link.group(1))
                     feature = safe(root, folder.relative_to(root).as_posix() + '/' + link.group(1))
                     feature_path = feature.relative_to(root).as_posix()
-                    feature_text = feature.read_text()
+                    feature_text = read_regular(feature).decode('utf-8')
                     metadata = dict(META.findall(feature_text))
                     spec_paths = re.findall(r'^\s+- `(openspec/specs/[^`]+)`', feature_text, re.M)
                     if metadata.get('Feature ID') != fid:
