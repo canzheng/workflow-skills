@@ -864,68 +864,65 @@ next. Reviews are disarmed on completion; no archive/merge/closure/admin change.
 
 ## Latest diagnostic-probe checkpoint — 2026-10-05
 
-Source implementation `98fb1593e1f44f1bed5e8dfabb45a2f54fa0b405` on
+Source implementation `fef212d70254c0b4c7d57fb65647f3ebee294444` on
 `rewrite/workflow-skills-v2` is implemented and verified. Consumer
-`07edc5b37902a82dc4347668513196f69feb5dc5` on `pilot/shared-skill-bootstrap`
+`43a877e4c07f696022270a54ab9e2021126f2147` on `pilot/shared-skill-bootstrap`
 pins that exact source. Both Ready PRs remain open. F01–F13 are implemented/verified;
-F14 remains partial pending current-head semantic review and native archive/final
+F14 remains partial pending current-head CI/semantic review and native archive/final
 checks. No merge, completed Issue closure or delivery is claimed.
 
-The five-minute monitor observed consumer clear6001353827 atc9229e14, disarmed it,
-and continued the source check. Source review5419444869 at4c0f5f1 completed with
-finding4187822028, then its monitor disarmed. The timeout defect independently
-reproduces for Git/gh/Node/OpenSpec version probes and gh auth status. Wider controls
-also reproduce diagnostic abort on a vanished executable or invalid UTF-8 version.
-Seven old-code subcases fail without errors; real sleeping fixture executables use
-an accelerated test deadline while asserting the production ten-second timeout.
+The five-minute monitor observed consumer clear6001659702 at07edc5b3
+(completed2026-10-05T19:36:55.843637Z) and disarmed it. Source review5419637961
+at704f276 completed2026-10-05T19:38:29.047533Z with P2 finding4187986666,
+then its monitor disarmed. The blank-version finding independently reproduces:
+20 old-code subcases fail/no errors across Git/gh/Node/OpenSpec for empty output,
+LF/CRLF blank headers, ASCII whitespace and Unicode whitespace. Four nonblank
+first-line positive controls pass; later content cannot substitute for a blank header.
 
-The repair reports failed probes unavailable, emits sanitized warnings and continues
-other probes. Version output is decoded separately; auth captures stay bytes and
-are never emitted. The resolved gh executable is reused for authentication. Positive
-controls require healthy tool results and unchanged project/index bytes, and canary
-output proves partial timeout/authentication output does not escape. Nonzero/failed
-auth results remain unavailable; local diagnostic success does not prove GitHub writes.
-All26 focused checker tests pass (30.412s); stronger healthy-probe assertions are
-included in the final source/installed suites. Current/active diagnostics scenarios
-and source/consumer operations guidance match. Acceptance tables/continuation now
-reflect required Ubuntu evidence and deferred Cloud; the enforcement runbook corrects
-its stale source-ruleset statement against a new read at2026-10-05T19:19:25Z.
+The repair accepts only a nonblank first line of successful UTF-8 version output.
+Empty/blank/whitespace-only headers remain unavailable with a sanitized tool.probe
+warning; healthy probes/authentication continue. Real executable fixtures exercise
+the public JSON CLI, keep captured invalid/auth output private and require unchanged
+project bytes/raw index. Earlier ten-second timeout, execution/encoding failure and
+auth-output controls remain. All27 focused checker tests pass (33.288s).
+Source/consumer operations and current/active diagnostics specifications match.
 
 | Verification | Actual result |
 | --- | --- |
-| Full source suite, managed Python3.12.14 | 174 tests, no skips, 190.330s, OK |
-| Full source suite, Ubuntu24.04.5/Python3.12.3 | 174 tests, no skips, 172.502s, OK |
-| Actual installed consumer suite, managed runtime | 51 tests, 86.274s, OK |
-| Actual installed consumer suite, Ubuntu | 51 tests, 81.846s, OK |
+| Full source suite, managed Python3.12.14 | 175 tests, no skips, 185.536s, OK |
+| Full source suite, Ubuntu24.04.5/Python3.12.3 | 175 tests, no skips, 163.689s, OK |
+| Actual installed consumer suite, managed runtime | 52 tests, 83.942s, OK |
+| Actual installed consumer suite, Ubuntu | 52 tests, 78.795s, OK |
 | Strict OpenSpec/public spec checker | All5 items pass; ok:true |
 | Literal exact-pin Ubuntu first adoption/repeat | Both exit0; absent index stays absent |
-| Consumer push/PR/existing-main metadata Actions | 37363592590 /37363603396 /37363597164 pass |
-| Source implementation CI at recording time | push37363433279 passes; PR37363442902 queued |
+| Current source implementation Actions at recording time | push37365358131 /PR37365366354 queued |
+| Current consumer Actions at recording time | push37365399907 /PR37365406338 /existing-main metadata37365402645 queued |
 
 Fresh managed clone of the API-verified remote commit and fresh Ubuntu remote clone
 materialize11 ignored dependencies, match20 managed hashes, preserve four narrow
 ignores/project skill/config/files/raw index, and repeat offline/no-op. Installed
-checks include both new public doctor controls and all earlier birth/final-read,
-retained-capture/parent/inode/bytes/mode/symlink, force-tracking/index-only policy,
-layout, discovery and PR-input/rendering/consumer-CI negatives. Original preservation
-assertions remain. Source-owned update preserves all shared-skill bytes/config/raw
-index `50cfdd5dbc69b23274c89f8bef8c63c28be797941a7845490a7691ae91ebfb76`
+checks retain all earlier filesystem birth/final-read/capture/parent/inode/bytes/mode/
+symlink, tracking/index-only policy/layout, discovery and PR-input/rendering/CI controls.
+Source-owned update preserves all shared-skill bytes/config/raw index
+`7d4a82f73a7f24556a0e99d17270f4e920ab5860b2e3187d4e5e9cbe2ea759bd`
 before caller staging only manifest and changed operations guidance. Native tree
-`88ed9e349d2dae6d7024da8ed45f14558ee415a2` matches reviewed localaf74d871,
-parentc9229e14. Native commit bytes independently hash to07edc5b3; guarded non-force
+`47e0c74aae869cb2fbd421ddf4cb46ddc665b454` matches reviewed local10d689ca,
+parent07edc5b3. Native commit bytes independently hash to43a877e4; guarded non-force
 publication and same-tree local ref reconciliation leave files/index clean.
 
-Creation observation remains a short-lived filesystem watch, not a process lock or
-workflow monitor. Captures are retained in Git-private/same-filesystem TMPDIR storage
-without automatic cleanup. Native Ubuntu startup discovery/actual three-skill use
-remains proven at9bd23d72/a75c3f2 with unchanged shared hashes. No fresh native CLI
-session at this repaired runtime pin, actual global-host discovery/use, or Cloud
-acceptance is claimed. Cloud is deferred; the historical Ubuntu26 harness JSON
-failure remains unexplained. Green metadata uses existing main trusted code;
+This is a diagnostic repair, not a version-format validator, authentication change
+or new workflow engine. Linux creation observation remains short-lived; recovery
+captures remain retained without automatic cleanup. Native Ubuntu startup catalog
+discovery and actual three-skill use remain proven at9bd23d72/a75c3f2 with unchanged
+shared hashes. No fresh native CLI session at this repaired runtime pin, actual
+global-host discovery/use, or Cloud acceptance is claimed. Cloud is deferred;
+the historical Ubuntu26 harness JSON failure remains unexplained.
+Earlier consumer07ed push/PR/metadata and its clear review remain valid for that
+revision, not proof for43a877e4. Green metadata uses existing main trusted code;
 new schema5 trusted-base deployment/events still need an authorized adoption merge.
-Read-only current rulesets require source verification and consumer both v2 checks,
-with no bypass actors. Source PR-contract administration, real merge and valid
+Read-only rulesets require source verification and consumer both v2 checks, with
+no bypass actors. Source PR-contract administration, real merge and valid
 Issue-completion observation remain pending separate authorization.
 No archive/merge/closure/admin/global/authentication/release/remote deletion occurred.
-Next: repaired-head review and remaining CI, then native archive/final checks;
-obtain separate real-delivery authorization only after those gates pass.
+Next: repaired-head review and queued CI, then native archive/final checks only
+after required premerge acceptance; real delivery needs separate authorization.
