@@ -1,5 +1,37 @@
 # F14 real consumer pilot
 
+## Malformed bundle review repair — 2026-10-05
+
+Consumer ReadyPR8 at fd49a238121b0c0bc54754fb79f792f290d880ff received independent
+Codex response5992697851: no major issues. This is review evidence at that exact
+commit, not approval of subsequent commits. Source ReadyPR16 at caa29d523513219374b0789f2e12a000d8aa40cc
+received P2 review4183023649: non-string source destinations reached set conversion,
+producing an unhandled TypeError for arrays/objects. Independently reproduced before
+acceptance; five bad destination cases failed on original code.
+
+Tested executable repair `d1de33ac3c6e889ea0c189ec53b000fe0bfddecc` validates string
+destinations before set conversion. A public regression covers array/object/null/
+integer/boolean destinations through setup and explicit install-skills: exit2 with
+ok:false JSON, unchanged target/index, no global-target creation. All113/no skips
+pass on managed runtime and Ubuntu24.04.5; strict specs pass. This restores the
+already documented invalid-configuration/structured-error/preflight contract, so
+no product or specification change is required. It does not establish the cause
+of the earlier intermittent Ubuntu26.04 source-suite error.
+
+Current consumer `2a59be9b42719e020c7888d61f9ea59e5214035a` pins d1de33a. Source-owned
+update preserved project policy/index and all four shared hashes. Reviewed tree
+acc18ae2795ef8d9e27823157c615056dee046c0 matches own local52f34c1a0255961329372c622495446d4e5e0ede,
+parentfd49 retained and original local commit in reflog. Guarded non-force publication;
+no main/global/auth/admin change. Current consumer/source CI and final semantic
+review are recorded in Issue15/PR16/PR8; do not carry the prior consumer review pass
+forward as a new-head pass. Fresh-checkout/runtime/Ubuntu verification is affected
+by runtime updates; initial native discovery/use remains at unchanged skill bytes.
+
+F14 remains partial pending current-head review and final archive/spec/docs checks.
+Both PRs are Ready/open/unmerged in different repositories: workflow-skills PR16
+for source delivery, workflow-skills-test PR8 for consumer adoption. Cloud deferred;
+merge/completed closure/admin/release require separate authorization.
+
 ## Ubuntu agent acceptance and reviewed repair — 2026-10-05
 
 The [independent workstation session](ubuntu-workstation-session.md) proves native

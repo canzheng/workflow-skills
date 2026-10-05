@@ -467,3 +467,18 @@ now preserves command/streams for diagnosis; no assertion weakened/skipped.
 Documentation/immutable consumer links and stale remote titles are reconciled;
 final Ready-head review and final archive/spec/docs acceptance are next. F14 remains
 unchecked until those complete; no Cloud/global/merge/closure/admin/release mutation.
+
+
+### Latest malformed-bundle review — 2026-10-05
+
+Consumer review5992697851 reports no major issues at fd49a23812. Source4183023649
+independently reproduced before acceptance: array/object destinations cause unhandled
+TypeError; scalar nonstrings also return wrong exit category. d1de33ac3c6e889ea0c189ec53b000fe0bfddecc
+validates destination types before set conversion; regression exercises five types
+through both public installers with structured exit2/no writes.113/no skips pass
+runtime/Ubuntu24.04.5; strict specs pass, unchanged documented contract. Consumer
+2a59be9b42719e020c7888d61f9ea59e5214035a pins repair, project/index/shared hashes preserved,
+guarded identical-tree publication. Actual CI/current-head review evidence remains
+revision-bound; previous review is not new-head approval. Next: finish affected
+consumer/CI proof, resolve repaired finding, obtain final review and archive/checks.
+No global/admin/merge/closure/release action; Ubuntu26 intermittent error cause not claimed fixed.
