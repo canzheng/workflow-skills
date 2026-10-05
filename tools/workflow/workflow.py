@@ -79,18 +79,35 @@ def doctor(root, skill_roots=()):
         if name in ('start-task', 'complete-task', 'audit-workflow'):
             findings.append(finding('discovery.legacy', paths[0], 'Legacy skill discoverable; v2 guidance must take precedence', 'Resolve applicable host routing manually', 'warning'))
     tools = {'python': sys.version.split()[0]}
+    def probe(command, label):
+        try:
+            return subprocess.run(command, capture_output=True, timeout=10, check=False)
+        except subprocess.TimeoutExpired:
+            reason = 'timed out'
+        except OSError:
+            reason = 'could not execute'
+        # Never expose captured output or exception details from auth/tool probes.
+        findings.append(finding('tool.probe', command[0], label + ' ' + reason,
+                                'Inspect the executable/environment; other diagnostics continue', 'warning'))
+        return None
+    executables = {}
     for tool in ('git', 'gh', 'node', 'openspec'):
         exe = shutil.which(tool)
+        executables[tool] = exe
+        tools[tool] = 'unavailable'
         if exe:
-            r = subprocess.run([exe, '--version'], capture_output=True, text=True, timeout=10, check=False)
-            tools[tool] = r.stdout.splitlines()[0] if r.returncode == 0 and r.stdout else 'unavailable'
-        else:
-            tools[tool] = 'unavailable'
+            r = probe([exe, '--version'], tool + ' version probe')
+            if r is not None and r.returncode == 0 and r.stdout:
+                try:
+                    tools[tool] = r.stdout.decode('utf-8').splitlines()[0]
+                except (UnicodeError, IndexError):
+                    findings.append(finding('tool.probe', exe, tool + ' version output is invalid',
+                                            'Inspect executable output; other diagnostics continue', 'warning'))
     # No token or CLI authentication output is emitted.
     auth = 'unavailable'
-    if shutil.which('gh'):
-        r = subprocess.run(['gh', 'auth', 'status'], capture_output=True, timeout=10, check=False)
-        auth = 'authenticated' if r.returncode == 0 else 'unavailable'
+    if executables['gh']:
+        r = probe([executables['gh'], 'auth', 'status'], 'gh authentication probe')
+        auth = 'authenticated' if r is not None and r.returncode == 0 else 'unavailable'
     capabilities = dict(gh_authentication=auth, github_read='unprobed', github_write='unprobed', branch_publication='unprobed', actions_administration='unprobed', merge_enforcement='unprobed', github_ci_execution='unprobed', host_skill_discovery='unprobed')
     return findings, dict(mode='installed-consumer' if m else 'source-checkout' if source else 'unknown', tools=tools, capabilities=capabilities, context=c)
 

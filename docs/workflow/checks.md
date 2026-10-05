@@ -63,9 +63,10 @@ main yet. Require the available verification check first; add `v2 PR contract` o
 after reviewed base adoption and an actual subsequent PR emits it. Requiring an
 absent check can block the bootstrap PR indefinitely. This does not authorize merge.
 
-At the 2026-10-05 tracked-model pilot, workflow-skills-test emits both contexts;
-workflow-skills emits only `v2 verification`. Source Protect-main (24457981) is Active
-on main with deletion/non-fast-forward rules only. The consumer initially hit a
+Read-only inspection at 2026-10-05T19:19:25Z confirms workflow-skills-test requires
+both contexts and workflow-skills requires `v2 verification`. Source Protect-main
+(24457981) is Active on main, with deletion/non-fast-forward and verification rules,
+and no bypass actors. The consumer initially hit a
 private-repository plan restriction; the user changed it to public. Consumer
 Protect-main (24484016) is now Active on main, requiring both contexts from GitHub
 Actions app15368, with no bypass actors. Strict/up-to-date is false. No PR-only,

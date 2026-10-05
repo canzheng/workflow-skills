@@ -1,4 +1,6 @@
 import json
+import contextlib
+import io
 import os
 import pathlib
 import shutil
@@ -6,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from test_setup import ROOT, init, fixture_source, commit, run
 from core import LEGACY_RUNTIME_PREFIX, RUNTIME_PREFIX
@@ -494,6 +497,112 @@ class CheckTests(unittest.TestCase):
             report = run('check', '--repo', self.target, '--pr-json', snapshot,
                          '--metadata-only', expect=1)
             self.assertTrue(any(x['code'] == code for x in report['findings']))
+
+    def test_doctor_tool_timeouts_continue_with_private_output_suppressed(self):
+        import test_setup
+        module = test_setup.workflow
+        folder = self.root / 'diagnostic-executables'
+        folder.mkdir()
+        for tool in ('git', 'gh', 'node', 'openspec'):
+            program = folder / tool
+            program.write_text('#!' + sys.executable + '\n' +
+                "import os,pathlib,sys,time\n" +
+                "name=pathlib.Path(sys.argv[0]).name\n" +
+                "operation=name+(':version' if sys.argv[1:]==['--version'] else ':auth')\n" +
+                "if operation==os.environ.get('WF2_HANG_PROBE'):\n" +
+                " print('TEST_PRIVATE_PROBE_OUTPUT',flush=True)\n" +
+                " print('TEST_PRIVATE_PROBE_ERROR',file=sys.stderr,flush=True)\n" +
+                " time.sleep(30)\n" +
+                "elif sys.argv[1:]==['--version']: print(name+' fixture')\n" +
+                "else: print('TEST_PRIVATE_AUTH_OUTPUT')\n")
+            program.chmod(0o755)
+        actual = subprocess.run
+        index = (self.target / '.git/index').read_bytes()
+        tracked = {p.relative_to(self.target): p.read_bytes() for p in self.target.rglob('*')
+                   if p.is_file() and '.git' not in p.relative_to(self.target).parts}
+        for selected in ('git:version', 'gh:version', 'node:version', 'openspec:version', 'gh:auth'):
+            with self.subTest(probe=selected):
+                calls = []
+                def execute(command, **kwargs):
+                    # Exercise real executable timeout/kill with an accelerated
+                    # test deadline; production still declares ten seconds.
+                    if pathlib.Path(command[0]).parent == folder or command[:3] == ['gh', 'auth', 'status']:
+                        self.assertEqual(kwargs['timeout'], 10)
+                        command = [str(folder / pathlib.Path(command[0]).name), *command[1:]]
+                        operation = pathlib.Path(command[0]).name + (':version' if command[1:] == ['--version'] else ':auth')
+                        if operation == selected:
+                            kwargs['timeout'] = 0.1
+                        calls.append(command)
+                    return actual(command, **kwargs)
+                with patch.object(module.shutil, 'which', lambda name: str(folder / name)), \
+                        patch.object(module.subprocess, 'run', execute), \
+                        patch.dict(os.environ, {'WF2_HANG_PROBE': selected}), \
+                        contextlib.redirect_stdout(io.StringIO()) as output:
+                    try:
+                        status = module.main(['doctor', '--repo', str(self.target), '--json'])
+                    except subprocess.TimeoutExpired:
+                        self.fail('Public doctor leaked a timed-out tool probe instead of producing JSON')
+                self.assertEqual(status, 0, output.getvalue())
+                report = json.loads(output.getvalue())
+                self.assertTrue(report['ok'])
+                self.assertEqual(len(calls), 5)  # Other probes and auth still run.
+                self.assertTrue(any(x['code'] == 'tool.probe' and x['severity'] == 'warning'
+                                    and 'timed out' in x['message'] for x in report['findings']))
+                if selected == 'gh:auth':
+                    self.assertEqual(report['capabilities']['gh_authentication'], 'unavailable')
+                else:
+                    self.assertEqual(report['tools'][selected.split(':')[0]], 'unavailable')
+                for tool in ('git', 'gh', 'node', 'openspec'):
+                    if selected != tool + ':version':
+                        self.assertEqual(report['tools'][tool], tool + ' fixture')
+                self.assertNotIn('TEST_PRIVATE', output.getvalue())
+                self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                self.assertEqual({p.relative_to(self.target): p.read_bytes() for p in self.target.rglob('*')
+                                  if p.is_file() and '.git' not in p.relative_to(self.target).parts}, tracked)
+
+    def test_doctor_unexecutable_and_invalid_tool_output_continue(self):
+        import test_setup
+        module = test_setup.workflow
+        folder = self.root / 'diagnostic-failures'
+        folder.mkdir()
+        index = (self.target / '.git/index').read_bytes()
+        actual = subprocess.run
+        def execute(command, **kwargs):
+            if command[:3] == ['gh', 'auth', 'status']:
+                command = [str(folder / 'gh'), *command[1:]]
+            return actual(command, **kwargs)
+        for case in ('missing-executable', 'invalid-version', 'failed-version', 'failed-auth'):
+            with self.subTest(case=case):
+                for tool in ('git', 'gh', 'node', 'openspec'):
+                    program = folder / tool
+                    program.write_text('#!' + sys.executable + '\n' +
+                        "import os,pathlib,sys\n" +
+                        "name=pathlib.Path(sys.argv[0]).name\n" +
+                        "version=sys.argv[1:]==['--version']\n" +
+                        "case=os.environ.get('WF2_FAILED_PROBE')\n" +
+                        "if name=='node' and version and case=='invalid-version': sys.stdout.buffer.write(b'\\xff')\n" +
+                        "elif (name=='node' and version and case=='failed-version') or (name=='gh' and not version and case=='failed-auth'):\n" +
+                        " print('TEST_PRIVATE_TOOL_ERROR',file=sys.stderr);sys.exit(3)\n" +
+                        "elif version: print(name+' fixture')\n" +
+                        "else: print('TEST_PRIVATE_AUTH_OUTPUT')\n")
+                    program.chmod(0o755)
+                def locate(name):
+                    return str(folder / ('missing' if name == 'node' and case == 'missing-executable' else name))
+                with patch.object(module.shutil, 'which', locate), \
+                        patch.object(module.subprocess, 'run', execute), \
+                        patch.dict(os.environ, {'WF2_FAILED_PROBE': case}), \
+                        contextlib.redirect_stdout(io.StringIO()) as output:
+                    status = module.main(['doctor', '--repo', str(self.target), '--json'])
+                self.assertEqual(status, 0, output.getvalue())
+                report = json.loads(output.getvalue())
+                self.assertTrue(report['ok'])
+                self.assertEqual(report['tools']['openspec'], 'openspec fixture')
+                if case == 'failed-auth':
+                    self.assertEqual(report['capabilities']['gh_authentication'], 'unavailable')
+                else:
+                    self.assertEqual(report['tools']['node'], 'unavailable')
+                self.assertNotIn('TEST_PRIVATE', output.getvalue())
+                self.assertEqual((self.target / '.git/index').read_bytes(), index)
 
     def test_doctor_continues_after_an_undecodable_discovery_file(self):
         folder = self.root / 'isolated-discovery'

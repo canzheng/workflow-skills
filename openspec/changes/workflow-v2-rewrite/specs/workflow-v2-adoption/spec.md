@@ -266,3 +266,8 @@ source authoring from installed consumers and authentication from unprobed write
 - **WHEN** a discovery root contains an unrelated skill file that is not valid UTF-8
 - **THEN** doctor reports a per-file warning and continues inspecting other entries
 - **AND** valid duplicates are still detected and the invalid file remains unchanged
+
+#### Scenario: Tool or authentication probe fails
+- **WHEN** a discovered tool version or authentication probe times out, cannot execute, or produces invalid version output
+- **THEN** doctor reports that result unavailable and continues other diagnostics with structured output
+- **AND** captured probe/authentication failure output is suppressed and repository files, index and credentials remain unchanged
