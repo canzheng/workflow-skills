@@ -862,65 +862,70 @@ current/delta adoption scenarios are updated. Full local/Ubuntu suites, actual
 installed proof, consumer repin/Actions, evidence and current semantic reviews are
 next. Reviews are disarmed on completion; no archive/merge/closure/admin change.
 
-## Latest post-drain identity checkpoint — 2026-10-05
+## Latest diagnostic-probe checkpoint — 2026-10-05
 
-Source implementation `0f6fc7b8a192d1843b41b3d7600f06a169871004` on
+Source implementation `98fb1593e1f44f1bed5e8dfabb45a2f54fa0b405` on
 `rewrite/workflow-skills-v2` is implemented and verified. Consumer
-`c9229e14825d5445c97ab4d277fd1fcf654be343` on `pilot/shared-skill-bootstrap`
-pins that exact source. Both Ready PRs remain open; F14 Issue15 and consumer Issue7
-remain open. F01–F13 are implemented/verified/review-ready; F14 remains partial.
-Neither repository has merged or delivered.
+`07edc5b37902a82dc4347668513196f69feb5dc5` on `pilot/shared-skill-bootstrap`
+pins that exact source. Both Ready PRs remain open. F01–F13 are implemented/verified;
+F14 remains partial pending current-head semantic review and native archive/final
+checks. No merge, completed Issue closure or delivery is claimed.
 
-The five-minute monitor observed source review5419306426 ated7b969 and consumer
-clear6001189911 atde407cb6, then disarmed both targets. Source finding4187706836
-is independently valid: pathname identity was cached before the final nonblocking
-event read. Four old-code controls fail without errors at that boundary: same-mode
-inode replacement, symlink, deletion and changed permissions. The repair performs
-the final pathname/descriptor comparison after event draining; this comparison
-defines the end of the observation window. All five focused birth/observation
-controls pass (0.194s before commit; 0.371s at the committed revision).
+The five-minute monitor observed consumer clear6001353827 atc9229e14, disarmed it,
+and continued the source check. Source review5419444869 at4c0f5f1 completed with
+finding4187822028, then its monitor disarmed. The timeout defect independently
+reproduces for Git/gh/Node/OpenSpec version probes and gh auth status. Wider controls
+also reproduce diagnostic abort on a vanished executable or invalid UTF-8 version.
+Seven old-code subcases fail without errors; real sleeping fixture executables use
+an accelerated test deadline while asserting the production ten-second timeout.
+
+The repair reports failed probes unavailable, emits sanitized warnings and continues
+other probes. Version output is decoded separately; auth captures stay bytes and
+are never emitted. The resolved gh executable is reused for authentication. Positive
+controls require healthy tool results and unchanged project/index bytes, and canary
+output proves partial timeout/authentication output does not escape. Nonzero/failed
+auth results remain unavailable; local diagnostic success does not prove GitHub writes.
+All26 focused checker tests pass (30.412s); stronger healthy-probe assertions are
+included in the final source/installed suites. Current/active diagnostics scenarios
+and source/consumer operations guidance match. Acceptance tables/continuation now
+reflect required Ubuntu evidence and deferred Cloud; the enforcement runbook corrects
+its stale source-ruleset statement against a new read at2026-10-05T19:19:25Z.
 
 | Verification | Actual result |
 | --- | --- |
-| Full source suite, managed Python3.12.14 | 172 tests, no skips, 184.944s, OK |
-| Full source suite, Ubuntu24.04.5/Python3.12.3 | 172 tests, no skips, 167.686s, OK |
-| Actual installed consumer tests, managed runtime | 49 tests, 84.651s, OK |
-| Actual installed consumer tests, Ubuntu | 49 tests, 81.134s, OK |
-| Strict OpenSpec and public spec checker | All5 items pass; ok:true |
+| Full source suite, managed Python3.12.14 | 174 tests, no skips, 190.330s, OK |
+| Full source suite, Ubuntu24.04.5/Python3.12.3 | 174 tests, no skips, 172.502s, OK |
+| Actual installed consumer suite, managed runtime | 51 tests, 86.274s, OK |
+| Actual installed consumer suite, Ubuntu | 51 tests, 81.846s, OK |
+| Strict OpenSpec/public spec checker | All5 items pass; ok:true |
 | Literal exact-pin Ubuntu first adoption/repeat | Both exit0; absent index stays absent |
-| Consumer push/PR/existing-main metadata Actions | 37361217469 /37361225271 /37361220449 pass |
+| Consumer push/PR/existing-main metadata Actions | 37363592590 /37363603396 /37363597164 pass |
+| Source implementation CI at recording time | push37363433279 passes; PR37363442902 queued |
 
 Fresh managed clone of the API-verified remote commit and fresh Ubuntu remote clone
-materialize11 ignored dependencies, match20 managed hashes, retain four narrow
-ignores and the tracked project skill/config/files, and preserve raw index. Matching
-repeat bootstrap is offline/no-op. Installed verification includes this final-read
-regression and earlier birth, overflow/unavailable support, capture/parent/inode/
-bytes/mode/symlink, force-tracking/index-only policy, layout, discovery, PR input/
-rendering and actual consumer-CI controls. No original preservation assertion is weakened.
-
-Source-owned update preserves all skill bytes/config/raw index
-`95749f0e54ae5c9cc074915ba24292cfc48d90923dde902d781b9123c104cb85`
+materialize11 ignored dependencies, match20 managed hashes, preserve four narrow
+ignores/project skill/config/files/raw index, and repeat offline/no-op. Installed
+checks include both new public doctor controls and all earlier birth/final-read,
+retained-capture/parent/inode/bytes/mode/symlink, force-tracking/index-only policy,
+layout, discovery and PR-input/rendering/consumer-CI negatives. Original preservation
+assertions remain. Source-owned update preserves all shared-skill bytes/config/raw
+index `50cfdd5dbc69b23274c89f8bef8c63c28be797941a7845490a7691ae91ebfb76`
 before caller staging only manifest and changed operations guidance. Native tree
-`0845408f2970d398278abbde4e5ec967c8f477d9` equals reviewed local6ec0f690,
-parentde407cb6. Native commit bytes independently hash toc9229e14; guarded non-force
+`88ed9e349d2dae6d7024da8ed45f14558ee415a2` matches reviewed localaf74d871,
+parentc9229e14. Native commit bytes independently hash to07edc5b3; guarded non-force
 publication and same-tree local ref reconciliation leave files/index clean.
-Current source Actions and fresh reviews are recorded by exact head in the PR checkpoint.
 
-Creation observation is a short-lived inotify parent watch, not a process lock or
-persistent task monitor. Captured files/directories remain retained in Git-private
-storage or same-filesystem TMPDIR, without automatic garbage collection. Current
-operations/current+active adoption scenarios explicitly define the post-drain check.
-Native Ubuntu startup discovery and actual three-skill use remain proven at
-9bd23d72/a75c3f2 with unchanged shared hashes; no new native CLI session at this pin
-is claimed. Cloud is deferred/unverified. Actual global-host discovery/use remains
-unperformed; the historical Ubuntu26 full-suite JSON failure remains unexplained.
-
-Repaired-head semantic review and native archive/final checks remain pending.
-Green consumer metadata executes the existing main trusted checker; new schema5
-trusted-base deployment/events require authorized adoption merge. Read-only ruleset
-inspection2026-10-05T18:27:07Z confirms active/no-bypass source24457981 verification
-and consumer24484016 both v2 checks. Source PR-contract administration, real merge
-and valid Issue-completion observation remain pending separate authorization.
-No merge/closure/admin/global/authentication/release/remote deletion occurred.
-Next: repaired-head review, then native archive/final checks; obtain separate delivery
-authorization only after those gates pass.
+Creation observation remains a short-lived filesystem watch, not a process lock or
+workflow monitor. Captures are retained in Git-private/same-filesystem TMPDIR storage
+without automatic cleanup. Native Ubuntu startup discovery/actual three-skill use
+remains proven at9bd23d72/a75c3f2 with unchanged shared hashes. No fresh native CLI
+session at this repaired runtime pin, actual global-host discovery/use, or Cloud
+acceptance is claimed. Cloud is deferred; the historical Ubuntu26 harness JSON
+failure remains unexplained. Green metadata uses existing main trusted code;
+new schema5 trusted-base deployment/events still need an authorized adoption merge.
+Read-only current rulesets require source verification and consumer both v2 checks,
+with no bypass actors. Source PR-contract administration, real merge and valid
+Issue-completion observation remain pending separate authorization.
+No archive/merge/closure/admin/global/authentication/release/remote deletion occurred.
+Next: repaired-head review and remaining CI, then native archive/final checks;
+obtain separate real-delivery authorization only after those gates pass.
