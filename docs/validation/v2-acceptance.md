@@ -1,5 +1,41 @@
 # v2 rewrite acceptance evidence
 
+## Staged-candidate review repair — 2026-10-05
+
+Source Ready-PR finding4181125358 was reproduced before acceptance: original code
+passed broken staged blobs/modes behind intact working files, producing28 focused
+negative-test failures. Source `a4eb9f1303d80cc18f83b5bbd734063cac03b9c3` adds read-only
+canonical index validation of staged provenance/config schemas, configured document
+paths, all managed asset hashes and AGENTS block. Regular files/stage0 are required.
+Valid project-owned policy differences and a coherent schema-1 snapshot during an
+explicit update remain supported. Four new tests cover23 corrupt paths, symlink and
+merge modes, invalid policy/schema/document references and valid policy edits;
+tracked working files and raw index stay unchanged on rejection.
+
+All87 tests/no skips and strict current/delta specs pass at that exact source on
+managed runtime and Ubuntu24.04.5. Actual source
+push[37271835612](https://github.com/canzheng/workflow-skills/actions/runs/37271835612)
+and PR[37271841711](https://github.com/canzheng/workflow-skills/actions/runs/37271841711)
+pass. Review thread was replied to and resolved on this evidence; final independent
+review of the repair remains pending.
+
+Owned fresh clones of actual consumer0e3fbc53 explicitly updated to that source pass
+installed check/doctor/bootstrap and five corrupt-staged-path negatives on both
+runtimes, preserving project config/skill bytes and raw index during setup/verification.
+Those local fixture commits (managed61a8237de8a2534f00597a55abb96294a17d30e9,
+Ubuntu9a1e5062628e93360d9f332f4d41f6503ad0ba2b) were not pushed and do not establish
+consumer Actions or initial host discovery for the new pin. Live consumer remains
+`0e3fbc530f21c4981230a5ef968eac2a5dda3d5e`/sourceaceba714 while the user's fresh
+environment diagnostic runs. Repin, consumer CI and final semantic review of this
+repair are integration pending; do not silently change the diagnostic's revision.
+
+Docs/specs updated: contract, architecture, operations/consumer operations, approved
+F03 tracking clarification, current/delta adoption scenario and test corpus. Cloud
+handoff now reflects the reported repository-only UI and official current flow, with
+no assumed branch selector. F14 discovery and separately authorized merge/completion
+remain pending; no release/archive/administration/global change.
+
+
 ## Latest submitted Cloud diagnostic — routing unresolved, 2026-10-05
 
 The user's [submitted tracked-skill report](f14-published-cloud-run.md#latest-submitted-tracked-skill-diagnostic--2026-10-05)

@@ -368,3 +368,15 @@ runs fresh-environment discovery; consumer repin/integration remains separate.
 User confirmed repo-only environment selection; official current Cloud docs do not
 document a branch selector in the published-environment flow. Handoff now distinguishes
 main discovery baseline from exact current schema-3 acceptance without an assumed UI.
+
+Validated staged-candidate source a4eb9f1303d80cc18f83b5bbd734063cac03b9c3:87/no skips
+and strict specs pass on managed runtime/Ubuntu24.04.5; actual source push37271835612
+and PR37271841711 pass. Finding4181125358 replied/resolved. Actual consumer0e3fbc53
+fresh clones updated only in owned temporary copies pass installed CLIs and five
+staged corruption negatives preserving user config/skills/raw index; local fixture
+commits61a8237de8a2534f00597a55abb96294a17d30e9 and9a1e5062628e93360d9f332f4d41f6503ad0ba2b
+are not remote integration or host discovery. Live pilot/source pin stay unchanged
+while the user compares a newly published environment. Next: collect that report,
+then explicitly repin current consumer to verified repair, run actual CI/current
+semantic review, and preserve any host routing/branch-selector limitations. Source
+docs/specs/evidence updated; F14 active/unarchived. No merge/closure/admin/global change.

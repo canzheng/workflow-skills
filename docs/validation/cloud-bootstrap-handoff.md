@@ -14,6 +14,11 @@ files and pantry-project are tracked. The earlier fd4/b1 ignored-skill model is
 superseded. Consumer is now public with Active required-check ruleset24484016. Actual metadata
 negative/restoration observed blocked/clean at the older6b9eb5d, with no merge.
 Current consumer push/PR/metadata pass; tracking review defects are repaired.
+New source staged-candidate repair `a4eb9f1303d80cc18f83b5bbd734063cac03b9c3` passes87
+tests/strict specs on both runtimes and actual source CI. This live consumer remains
+frozen at0e3fbc53/sourceaceba714 during the user's fresh-environment diagnostic; it
+does not yet include that repair. Consumer repin/CI/review follow after the diagnostic,
+as recorded in the [acceptance checkpoint](v2-acceptance.md#staged-candidate-review-repair--2026-10-05).
 No merge is authorized. Exact schema-3 acceptance needs this consumer revision
 selected before discovery; initial discovery on older main does not test that update.
 
