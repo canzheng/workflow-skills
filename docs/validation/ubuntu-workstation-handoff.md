@@ -300,54 +300,64 @@ or administration authorization; never substitute a simulated merge/closure.
 
 ## Python3.14 catalog-resolution checkpoint — 2026-10-05
 
-Source implementation `687552bf15e4c128deb584f8727fce23722d8b74` on rewrite/workflow-skills-v2 repairs
-review4189081517 at49553356: supported Python3.14 non-strict Path.resolve can leave
-cycles unresolved and Path.exists can return false, silently hiding bad catalogs.
-The review reports an actual Python3.14.4 full182 run with four cycle assertions
-failing. Code inspection confirms the default non-strict dependency; local process
-creation remains blocked, so this session has NOT independently executed that old
-Python3.14 reproduction.
+Source implementation `687552bf15e4c128deb584f8727fce23722d8b74` and tested/reviewed
+head `9517df4d9fb2f10fde9c571e962adb0b4e57373b` on rewrite/workflow-skills-v2
+repair all five latest P2s: descriptor-bound Markdown/catalog/migration reads,
+required OpenSpec timeouts and Python3.14 catalog-cycle semantics.
 
-Doctor now uses strict resolution. Self/mutual/ancestor cycles and dangling catalog
-components warn and permit subsequent catalog/tool checks; genuinely absent
-optional roots stay silent. A new public regression models changed non-strict
-resolution/exists behavior even on older Python, retains the healthy duplicate,
-and checks warnings plus index/symlink preservation. Expected183 tests are authored
-but not yet run at this implementation. Source CI now verifies real Python3.12
-and3.14 sequentially with strict OpenSpec checks under the stable v2 verification
-job name. Consumer generic CI remains Python3.12; no ruleset/admin change occurred.
+| Acceptance evidence | Actual result |
+| --- | --- |
+| Source push37377321908 | Passed on Ubuntu24.04.5/Python3.12.14 and3.14.7;183 tests/no skips per version;226.914s and245.864s. |
+| Source PR37377329392 | Passed on the same two runtimes;183 tests/no skips per version;169.911s and188.337s. |
+| Strict OpenSpec/source docs checks | Passed on both versions and both events at9517df4d. |
+| Fault regressions | Markdown symlink/FIFO/ancestor/after-open substitution, unsupported catalog entries, both OpenSpec timeouts, ledger/feature substitution and cycle/missing/dangling-root checks pass. Private canaries/index assertions and positive controls remain. |
+| Independent semantic review | Codex6003670456 reports no major issues at9517df4d9f, completed2026-10-05T21:46:52.535611Z. |
+| Review monitor / threads | Five-minute monitor observed completion and disarmed;4188772467/2484/2494/2507 and4189081517 were answered with exact proof and resolved. |
+| Local execution | Still blocked by process exhaustion. No local new-code pass or independent oldPython3.14 reproduction is claimed. |
+| New consumer adoption/runtime | Unperformed. Consumer75ed97dd still pins41df6a04. |
 
-Earlier bound-reader/OpenSpec repairs passed182/no skips and strict specs on
-Ubuntu24.04.5/Python3.12.14 at49553356, push37375800804 and PR37375806693. The four
-fault regressions passed on both. This is separate from new183/current3.14 acceptance.
-Review6003275783 completed2026-10-05T21:35:57.786803Z with this new P2; the
-five-minute monitor observed completion and disarmed. New repaired-head review
-and current push/PR checks remain required; no issue/thread completion is inferred.
+[Source push](https://github.com/canzheng/workflow-skills/actions/runs/37377321908),
+[source PR verification](https://github.com/canzheng/workflow-skills/actions/runs/37377329392)
+and [semantic review](https://github.com/canzheng/workflow-skills/pull/16#issuecomment-6003670456)
+are revision-bound evidence. This final evidence update changes only validation/
+handoff/task documentation; code, tests, CI, specs and consumer bundle bytes are
+identical to tested/reviewed9517df4d. Publication head and subsequent check results
+are recorded in the latest Issue15/PR16 checkpoint; do not invent a new-head pass.
 
-Consumer75ed97dd1030b64e806300686c86dc1ab3101304 still pins41df6a04ab04f436f5d5519bc7cc218c8fad6d17.
-Its actual push37372307833, PR37372314273 attempt2 and metadata37372310276,
-37372768469,37375906782 passed. The PR first attempt canceled before steps; one
-bounded retry succeeded, with no inferred cancellation cause. Consumer review at
-75ed is clear6002831610. None of these verify the two newer source implementations;
-no consumer repin has been performed while local setup cannot execute.
+Doctor resolves catalogs strictly, diagnoses self/mutual/ancestor cycles and
+dangling components, keeps genuinely absent optional roots silent and continues
+healthy catalogs/tools. The compatibility regression models non-strict3.14
+behavior on older Python and also passes on actual3.14.7. Source CI runs real3.12
+and3.14 under the same required job name; generic consumer CI remains3.12.
+Bound reads verify a regular file without following symlinks and do not promise
+an atomic repository snapshot. Required OpenSpec probes are10s/120s.
 
-F01–F13 remain implemented with prior revision-bound evidence. F14 remains partial,
-with new183/real3.14 source verification, current semantic review, actual new-pin
-consumer setup/installed60/fresh/literal verification and archive still pending.
-Initial native Ubuntu catalog/actual three-skill use are retained with unchanged
-shared hashes. Cloud is deferred; global-host use is unperformed. Existing
-enforcement readbacks/negative proof remain distinct from new deployment/admin
-gates. No merge, completed closure, ruleset/protection/global/auth mutation, release
-or remote deletion occurred.
+Consumer `75ed97dd1030b64e806300686c86dc1ab3101304` on pilot/shared-skill-bootstrap
+still pins `41df6a04ab04f436f5d5519bc7cc218c8fad6d17`. Its actual push37372307833,
+PR37372314273 attempt2 and metadata37372310276/37372768469/37375906782 passed.
+The first PR attempt canceled before steps; one bounded retry succeeded, with
+no inferred cancellation cause. Review6002831610 is clear at75ed. These are old-pin
+results, not new-runtime acceptance. No consumer manifest/bytes were fabricated
+or repinned while source-owned setup cannot execute locally.
 
-Next on a fresh healthy Ubuntu task: fetch the published rewrite head and read
-AGENTS/approved v2 docs/Issue15/PR16's latest checkpoint. Preserve unpublished local
-c1361214b6ec4608fc7ba1db1a348b34ea9be8f8 and any pending edits; do not reset. Observe
-and diagnose current dual-Python183/specs CI and repaired-head review. Once source
-repair is verified, use its exact implementation pin with the actual source-owned
-setup to preview/update consumer75ed, prove project config/skill/index preservation,
-commit only owned changes, then test actual installed runtime (expected60 affected
-tests with the retained runner), public check/run-local/doctor/offline repeat and
-fresh/literal exact-pin paths. Publish consumer changes and observe actual
-push/PR/body events and semantic review. Archive only after required premerge
-acceptance; await separate real merge/valid closure and administrative authorization.
+F01–F13 remain implemented with prior revision-bound evidence; F14 remains partial.
+Initial native Ubuntu catalog/actual three-skill use remain verified with unchanged
+shared hashes. New-pin source-owned consumer update, actual-installed60/fresh/
+literal checks, new consumer CI/review and required scenario completion remain
+pending. Archive task4 is unchecked. Cloud is deferred; real global-host use and
+historical Ubuntu26 harness JSON cause remain unverified. Existing enforcement
+readbacks and actual consumer negative proof remain distinct from deployment/admin
+gates. No merge/completed closure/protection/global/auth/release/deletion occurred.
+
+Exact next action for a fresh healthy Ubuntu task: fetch the published rewrite
+branch, read AGENTS/approved v2 documents and Issue15/PR16's latest checkpoint.
+Preserve unpublished localc1361214b6ec4608fc7ba1db1a348b34ea9be8f8 and pending edits;
+do not reset. Source183/dual-Python/specs and semantic review are established at9517,
+so repeat those only for changed code, failures or unresolved concerns. Use the
+actual source-owned setup at verified implementation687552bf15e4c128deb584f8727fce23722d8b74
+to preview/update consumer75ed. Prove project config/skill/raw-index preservation,
+commit only owned changes, then verify actual installed affected tests (expected60
+with the retained runner), public check/run-local/doctor/offline repeat and
+fresh/literal exact-pin paths. Publish consumer changes, observe actual push/PR/
+body events and semantic review. Archive only after required premerge acceptance;
+await separate real merge/valid closure and administrative authorization.
