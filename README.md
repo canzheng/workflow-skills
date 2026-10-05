@@ -10,7 +10,8 @@ Ubuntu workstation use is the required first-release path; Cloud discovery is de
 ## Development
 
 Runtime: Python >=3.10 and Git. Installation mutations require Linux renameat2
-exchange/no-replace support from libc/kernel and the target filesystem; unsupported
+exchange/no-replace and inotify directory creation observation from libc/kernel
+and the target filesystem; unsupported
 operations fail without an overwrite fallback. Source verification:
 python3 tools/workflow/verify.py.
 Optional pinned OpenSpec 1.14.0: npm ci --ignore-scripts, then

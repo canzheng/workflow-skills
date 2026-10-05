@@ -93,6 +93,12 @@ After rename, destination identity/content must match the owned staged inode; a
 foreign or changed destination remains a recoverable conflict. Snapshot helpers
 validate and normalize optional native closure reasons before completion audits.
 
+New private/staged directories use a short-lived inotify parent watch begun before
+mkdir. A single creation event, matching path/descriptor identity and owner, and
+mode0700 for private storage are required before use. Replacement, attribute/move/
+delete events, queue overflow or missing support fail closed. The watch closes after
+binding; it is not a task monitor, lock or workflow state engine.
+
 Single-entry writes use Linux renameat2 exchange/no-replace to retain the actual
 displaced destination for validation; rollback stages original content and deletion
 captures an entry before validating/removing it. This does not make multi-file apply
