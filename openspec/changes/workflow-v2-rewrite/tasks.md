@@ -436,3 +436,15 @@ source/consumer docs are reconciled. Aggregate/committed Ubuntu/actual CI and re
 consumer migration are being verified; Ubuntu fresh agent use/final review and
 separately authorized merge/completion remain pending. No archive/global/admin change.
 Next: record exact tested source/consumer pins in the Ubuntu workstation handoff.
+
+Verified refinement checkpoint: source `a75c3f20e5f4032568b1d1a5cb17d001fc781918` all107/no skips and strict
+specs pass managed runtime/Ubuntu24.04.5, actual source push37280549959/PR37280555919
+pass. Consumer `9bd23d72dc24a741d669c1ea92532f8bf337aa42` pins it; actual push37280700304/PR37280704952/
+metadata37280702909 pass. Fresh actual clones materialize4 ignored/untracked skills
+from exact pin, match20 hashes, preserve tracked/index bytes and repeat offline/no-op.
+Native Ubuntu catalog recognizes3 skills at root; parent negative passes, no agent
+invocation claim. Isolated global installer tests pass; actual global home unchanged.
+Non-UTF-8 reviewer finding4181357146 reproduced then repaired; public both-storage
+regression preserves bytes/index, thread resolved. Required fresh Ubuntu agent use
+and final review remain pending; Cloud deferred, real merge/completion/admin/release
+requires separate authority. Next: user workstation run from ubuntu-workstation-handoff.

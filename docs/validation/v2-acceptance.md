@@ -10,12 +10,44 @@ install-skills is supported; no actual global installation is performed here.
 Source canonical skills remain tracked. Existing schema-3 regressions are retained
 as compatibility proof; new ignored/bootstrap/global paths have their own tests.
 
-Current implementation starts from source1f6aba5dcc4b0e9e801b638fd6eafc48b3f437bb.
-Committed aggregate/Ubuntu/spec/CI evidence and migrated consumer SHA will be added
-after verification. Until then, prior a4eb/f639 checks remain historical evidence for
-the earlier tracked model and do not certify the new ignored/global implementation.
-Required Ubuntu initial catalog plus actual agent use, final semantic review and real
-merge→Issue completion remain separate. Cloud is not an active blocker or next action.
+Current verified implementation: source `a75c3f20e5f4032568b1d1a5cb17d001fc781918`; all107 tests/no
+skips and strict current/delta specs pass on managed runtime and Ubuntu24.04.5.
+Actual source push37280549959/PR37280555919 pass. Initial Ubuntu run at186bcbd
+found one fixture relying on a global Git identity; the fixture now configures its
+clone locally, with no skipped/relaxed assertion. New filesystem review4181357146
+was independently reproduced on old installed f639 code, fixed with surrogate
+path round trips and exercised against the same unchanged files/index before
+acceptance; public regression covers both tracked/ignored modes and symlink targets.
+Thread replied/resolved after proof.
+
+Actual consumer `9bd23d72dc24a741d669c1ea92532f8bf337aa42`, pilot/shared-skill-bootstrap,
+pins `a75c3f20e5f4032568b1d1a5cb17d001fc781918`; existing Issue7/ReadyPR8 remain open. Source-owned
+apply preserved raw index/config/pantry-project/unrelated ignores; caller explicitly
+untracked4 shared files, staged/committed project assets and provenance. App publication
+is guarded/non-force with reviewed treec03bfddff952dcfb36f8a3dcce6b087b56fa134a matching
+local e2eb080af691a251e42ea6193c2dc8c9e0fa8088; parentf639 preserved, own original commit
+retained in reflog. No main/global/auth/admin changes. Actual consumer push37280700304,
+PR37280704952 and metadata37280702909 pass.
+
+Fresh actual remote clones on managed runtime and Ubuntu initially lack shared
+files; installed bootstrap fetches the full source pin and materializes4 files.
+All20 hashes match, shared paths are ignored/untracked, pantry-project tracked,
+check/doctor pass and repeat bootstrap is an offline no-op with tracked/index bytes
+unchanged. Native codex-cli0.159.0-alpha.3 on both runtimes recognizes all3 repo skills
+after bootstrap at the Git root with no parser errors; parent-root controls list none.
+No model/session started by the catalog probe: required fresh Ubuntu agent use is
+still pending. Global installer/rollback/no-op/conflict tests pass on Ubuntu at
+isolated targets; the actual user's global home is untouched and global native-host
+use remains optional/unperformed.
+
+Required Ubuntu initial fresh-session catalog plus actual skill use and final
+independent semantic review remain pending. Source latest reviewretry5989444116
+failed unknown-error5989460204; a review failure is not approval. Real merge→Issue
+completion remains pending separate authorization. Consumer enforcement previously
+configured AND observed (24484016; actual fail37269275157→blocked, restore37269365402
+→clean); source required-check configuration is still absent/separate. Cloud is
+deferred/unverified, not an active blocker. OpenSpec remains active until required
+acceptance completes; no archive/merged/delivered/released claim.
 [Workstation procedure and evidence request](ubuntu-workstation-handoff.md) replaces
 Cloud environment investigation. No merge/closure/admin/release/global mutation.
 
