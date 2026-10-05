@@ -97,10 +97,14 @@ def doctor(root, skill_roots=()):
         tools[tool] = 'unavailable'
         if exe:
             r = probe([exe, '--version'], tool + ' version probe')
-            if r is not None and r.returncode == 0 and r.stdout:
+            if r is not None and r.returncode == 0:
                 try:
-                    tools[tool] = r.stdout.decode('utf-8').splitlines()[0]
-                except (UnicodeError, IndexError):
+                    lines = r.stdout.decode('utf-8').splitlines()
+                except UnicodeError:
+                    lines = []
+                if lines and lines[0].strip():
+                    tools[tool] = lines[0]
+                else:
                     findings.append(finding('tool.probe', exe, tool + ' version output is invalid',
                                             'Inspect executable output; other diagnostics continue', 'warning'))
     # No token or CLI authentication output is emitted.

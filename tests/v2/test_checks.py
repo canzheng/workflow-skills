@@ -604,6 +604,56 @@ class CheckTests(unittest.TestCase):
                 self.assertNotIn('TEST_PRIVATE', output.getvalue())
                 self.assertEqual((self.target / '.git/index').read_bytes(), index)
 
+    def test_doctor_rejects_blank_version_headers_and_continues_healthy_probes(self):
+        import test_setup
+        module = test_setup.workflow
+        folder = self.root / 'blank-version-executables'
+        folder.mkdir()
+        for tool in ('git', 'gh', 'node', 'openspec'):
+            program = folder / tool
+            program.write_text('#!' + sys.executable + '\n' +
+                "import os,pathlib,sys\n" +
+                "name=pathlib.Path(sys.argv[0]).name\n" +
+                "if sys.argv[1:]==['--version']:\n" +
+                " data=(bytes.fromhex(os.environ['WF2_VERSION_BYTES']) if name==os.environ['WF2_VERSION_TOOL'] else (name+' fixture\\n').encode())\n" +
+                " sys.stdout.buffer.write(data)\n" +
+                "else: print('TEST_PRIVATE_AUTH_OUTPUT')\n")
+            program.chmod(0o755)
+        index = (self.target / '.git/index').read_bytes()
+        contents = {p.relative_to(self.target): p.read_bytes() for p in self.target.rglob('*')
+                    if p.is_file() and '.git' not in p.relative_to(self.target).parts}
+        outputs = (b'', b'\nnot-a-version\n', b'\r\nnot-a-version\n',
+                   b' \t\nnot-a-version\n', '\u00a0\u2003\nnot-a-version\n'.encode(),
+                   b'valid fixture\nignored later line\n')
+        for selected in ('git', 'gh', 'node', 'openspec'):
+            for data in outputs:
+                with self.subTest(tool=selected, output=data):
+                    with patch.object(module.shutil, 'which', lambda name: str(folder / name)), \
+                            patch.dict(os.environ, {'WF2_VERSION_TOOL': selected,
+                                                    'WF2_VERSION_BYTES': data.hex()}), \
+                            contextlib.redirect_stdout(io.StringIO()) as output:
+                        status = module.main(['doctor', '--repo', str(self.target), '--json'])
+                    self.assertEqual(status, 0, output.getvalue())
+                    report = json.loads(output.getvalue())
+                    self.assertTrue(report['ok'])
+                    valid = data.startswith(b'valid fixture')
+                    self.assertEqual(report['tools'][selected], 'valid fixture' if valid else 'unavailable')
+                    warnings = [x for x in report['findings'] if x['code'] == 'tool.probe'
+                                and x['path'] == str(folder / selected)]
+                    self.assertEqual(len(warnings), 0 if valid else 1)
+                    if warnings:
+                        self.assertEqual(warnings[0]['severity'], 'warning')
+                        self.assertIn('version output is invalid', warnings[0]['message'])
+                    for tool in ('git', 'gh', 'node', 'openspec'):
+                        if tool != selected:
+                            self.assertEqual(report['tools'][tool], tool + ' fixture')
+                    self.assertEqual(report['capabilities']['gh_authentication'], 'authenticated')
+                    self.assertNotIn('TEST_PRIVATE', output.getvalue())
+                    self.assertNotIn('not-a-version', output.getvalue())
+                    self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                    self.assertEqual({p.relative_to(self.target): p.read_bytes() for p in self.target.rglob('*')
+                                      if p.is_file() and '.git' not in p.relative_to(self.target).parts}, contents)
+
     def test_doctor_continues_after_an_undecodable_discovery_file(self):
         folder = self.root / 'isolated-discovery'
         bad = folder / 'a-unrelated/SKILL.md'
