@@ -237,6 +237,11 @@ provenance, not task state or its own content hash.
 - **THEN** no-replace publication preserves the competing directory and reports recoverable ownership metadata
 - **AND** installer ownership derives from the privately opened staged inode instead of a public post-mkdir lookup
 
+#### Scenario: Private directory birth is observed before ownership
+- **WHEN** a private storage or staged-directory basename changes between mkdir and open
+- **THEN** kernel observation begun before creation rejects replacement, including a same-mode inode, before writes or publication
+- **AND** missing observation support, permission/owner mismatch, watch invalidation and event overflow fail closed without changing project files or index
+
 #### Scenario: Capture storage has another filesystem
 - **WHEN** Git-private storage or explicit shared-only TMPDIR differs from the destination filesystem
 - **THEN** apply fails before project writes without an unsafe copy/delete fallback

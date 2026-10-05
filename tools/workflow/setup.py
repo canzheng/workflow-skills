@@ -8,6 +8,7 @@ import re
 import secrets
 import shutil
 import stat
+import struct
 import tempfile
 
 from core import (Conflict, Invalid, START, END, SKILLS, CI_ASSETS, IGNORE_START, IGNORE_END,
@@ -97,6 +98,77 @@ def remove_entry(basename, *, dir_fd):
     return captured
 
 
+def directory_watch_functions():
+    try:
+        libc = ctypes.CDLL(None, use_errno=True)
+        return libc.inotify_init1, libc.inotify_add_watch
+    except (OSError, AttributeError) as exc:
+        raise Conflict('Directory creation observation unavailable; Linux inotify is required') from exc
+
+
+def directory_birth_events(watch_fd, basename):
+    # Observation starts before mkdir. A post-mkdir stat alone cannot distinguish
+    # our inode from a same-mode directory substituted before open.
+    created = 0
+    while True:
+        try:
+            events = os.read(watch_fd, 65536)
+        except BlockingIOError:
+            break
+        if not events:
+            raise Conflict('Directory creation observation ended unexpectedly')
+        offset = 0
+        while offset < len(events):
+            if len(events) - offset < 16:
+                raise Conflict('Incomplete directory creation observation')
+            _, mask, _, length = struct.unpack_from('iIII', events, offset)
+            offset += 16
+            if offset + length > len(events):
+                raise Conflict('Incomplete directory creation observation')
+            name = os.fsdecode(events[offset:offset + length].split(b'\0', 1)[0])
+            offset += length
+            if mask & (0x4000 | 0x8000 | 0x2000 | 0x400 | 0x800):
+                raise Conflict('Directory creation observation invalidated or overflowed')
+            if name == basename:
+                if mask != (0x100 | 0x40000000):  # IN_CREATE | IN_ISDIR
+                    raise Conflict('Concurrent directory creation change: ' + basename)
+                created += 1
+    if created != 1:
+        raise Conflict('Unconfirmed directory creation: ' + basename)
+
+
+def create_bound_directory(basename, *, dir_fd, mode=0o777, private=False):
+    initialize, add_watch = directory_watch_functions()
+    initialize.argtypes, initialize.restype = (ctypes.c_int,), ctypes.c_int
+    add_watch.argtypes, add_watch.restype = (ctypes.c_int, ctypes.c_char_p, ctypes.c_uint32), ctypes.c_int
+    watch_fd = initialize(os.O_NONBLOCK | os.O_CLOEXEC)
+    if watch_fd < 0:
+        raise Conflict('Cannot observe directory creation: ' + os.strerror(ctypes.get_errno()))
+    child_fd = None
+    try:
+        # Watch the opened parent inode, including moves/deletion of that parent.
+        mask = 0x4 | 0x40 | 0x80 | 0x100 | 0x200 | 0x400 | 0x800
+        if add_watch(watch_fd, os.fsencode('/proc/self/fd/' + str(dir_fd)), mask) < 0:
+            raise Conflict('Cannot observe directory creation: ' + os.strerror(ctypes.get_errno()))
+        os.mkdir(basename, mode=mode, dir_fd=dir_fd)
+        child_fd = os.open(basename, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=dir_fd)
+        metadata = os.fstat(child_fd)
+        current = os.stat(basename, dir_fd=dir_fd, follow_symlinks=False)
+        directory_birth_events(watch_fd, basename)
+        if (current.st_mode, current.st_dev, current.st_ino) != (metadata.st_mode, metadata.st_dev, metadata.st_ino):
+            raise Conflict('Concurrent directory creation identity change: ' + basename)
+        if metadata.st_uid != os.geteuid() or (private and stat.S_IMODE(metadata.st_mode) != 0o700):
+            raise Conflict('Directory creation ownership or private permissions changed: ' + basename)
+        result, child_fd = child_fd, None
+        return result
+    except OSError as exc:
+        raise Conflict('Cannot bind directory creation: ' + basename) from exc
+    finally:
+        if child_fd is not None:
+            os.close(child_fd)
+        os.close(watch_fd)
+
+
 @contextlib.contextmanager
 def private_storage(root, names):
     # Git-private storage keeps retained capture directories out of project state.
@@ -116,8 +188,7 @@ def private_storage(root, names):
             if parent.stat().st_dev != device:
                 raise Conflict('Private capture storage must share the target filesystem; choose a same-filesystem TMPDIR for shared-only installation')
         private = '.wf2-private-' + secrets.token_hex(16)
-        os.mkdir(private, mode=0o700, dir_fd=base_fd)
-        fd = os.open(private, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=base_fd)
+        fd = create_bound_directory(private, dir_fd=base_fd, mode=0o700, private=True)
         yield fd, base / private
     finally:
         if fd is not None:
@@ -420,8 +491,7 @@ def transaction(root, changes, fail_after=None):
                     directory_metadata(parent.parent)
                     with bound_parent(name, parent) as parent_fd:
                         staging_name = 'directory-' + secrets.token_hex(16)
-                        os.mkdir(staging_name, dir_fd=storage_fd)
-                        child_fd = os.open(staging_name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=storage_fd)
+                        child_fd = create_bound_directory(staging_name, dir_fd=storage_fd)
                         try:
                             metadata = os.fstat(child_fd)
                             created_owners[parent] = name

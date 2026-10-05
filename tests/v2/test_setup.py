@@ -409,6 +409,90 @@ class SetupTests(unittest.TestCase):
         self.assertEqual(retained.read_bytes(), original)
         self.assertEqual(retained.parent.stat().st_mode & 0o777, 0o700)
 
+    def test_private_storage_birth_rejects_replaced_or_changed_directory(self):
+        actual = installer.os.mkdir
+        victim = self.target / 'AGENTS.md'
+        original, index = victim.read_bytes(), (self.target / '.git/index').read_bytes()
+        for case in ('public-replacement', 'same-mode-replacement', 'mode-change', 'symlink'):
+            with self.subTest(case=case):
+                victim.write_bytes(original)  # Reset only this owned reproduction fixture.
+                injected = []
+                def mkdir(path, *args, **kwargs):
+                    result = actual(path, *args, **kwargs)
+                    resolved = operation_path(path, kwargs.get('dir_fd'))
+                    if resolved.name.startswith('.wf2-private-') and not injected:
+                        saved = resolved.with_name(resolved.name + '-saved')
+                        if case == 'mode-change':
+                            resolved.chmod(0o777)
+                        else:
+                            resolved.rename(saved)
+                            if case == 'symlink':
+                                resolved.symlink_to(saved, target_is_directory=True)
+                            else:
+                                actual(resolved, mode=0o700)
+                                resolved.chmod(0o777 if case == 'public-replacement' else 0o700)
+                        injected.append((resolved, saved, resolved.lstat()))
+                    return result
+                with patch.object(installer.os, 'mkdir', mkdir), self.assertRaises((installer.Conflict, OSError)):
+                    installer.transaction(self.target, {'AGENTS.md': b'Installer content'})
+                self.assertEqual(len(injected), 1)
+                resolved, saved, metadata = injected[0]
+                self.assertEqual(resolved.lstat().st_ino, metadata.st_ino)
+                self.assertEqual(list(resolved.iterdir()), [])
+                if saved.exists():
+                    self.assertEqual(list(saved.iterdir()), [])
+                self.assertEqual(victim.read_bytes(), original)
+                self.assertEqual((self.target / '.git/index').read_bytes(), index)
+
+    def test_private_staged_directory_birth_cannot_claim_concurrent_inode(self):
+        actual = installer.os.mkdir
+        index = (self.target / '.git/index').read_bytes()
+        for mode in (0o700, 0o777):
+            with self.subTest(mode=mode):
+                injected = []
+                destination = self.target / 'private-birth-race'
+                def mkdir(path, *args, **kwargs):
+                    result = actual(path, *args, **kwargs)
+                    resolved = operation_path(path, kwargs.get('dir_fd'))
+                    if resolved.name.startswith('directory-') and not injected:
+                        saved = resolved.with_name(resolved.name + '-saved')
+                        resolved.rename(saved)
+                        actual(resolved, mode=mode)
+                        resolved.chmod(mode)
+                        injected.append((resolved, saved, resolved.stat()))
+                    return result
+                with patch.object(installer.os, 'mkdir', mkdir), self.assertRaises(installer.Conflict):
+                    installer.transaction(self.target, {'private-birth-race/file.md': b'Installer content'})
+                self.assertEqual(len(injected), 1)
+                resolved, saved, metadata = injected[0]
+                self.assertEqual(resolved.stat().st_ino, metadata.st_ino)
+                self.assertEqual(list(resolved.iterdir()), [])
+                self.assertEqual(list(saved.iterdir()), [])
+                self.assertFalse(destination.exists())
+                self.assertEqual((self.target / '.git/index').read_bytes(), index)
+
+    def test_directory_creation_observation_unavailable_preserves_project(self):
+        original = (self.target / 'AGENTS.md').read_bytes()
+        index = (self.target / '.git/index').read_bytes()
+        before = set((self.target / '.git').iterdir())
+        with patch.object(installer, 'directory_watch_functions', side_effect=installer.Conflict('Observation unavailable')):
+            with self.assertRaisesRegex(installer.Conflict, 'Observation unavailable'):
+                installer.transaction(self.target, {'AGENTS.md': b'Installer content'})
+        self.assertEqual((self.target / 'AGENTS.md').read_bytes(), original)
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        self.assertEqual(set((self.target / '.git').iterdir()), before)
+
+    def test_directory_creation_observation_overflow_fails_closed(self):
+        import struct
+        read_fd, write_fd = installer.os.pipe2(installer.os.O_NONBLOCK | installer.os.O_CLOEXEC)
+        try:
+            installer.os.write(write_fd, struct.pack('iIII', -1, 0x4000, 0, 0))
+            with self.assertRaisesRegex(installer.Conflict, 'overflowed'):
+                installer.directory_birth_events(read_fd, 'directory-fixture')
+        finally:
+            installer.os.close(read_fd)
+            installer.os.close(write_fd)
+
     def test_private_storage_is_not_removed_by_a_checked_basename(self):
         actual = installer.os.rmdir
         index = (self.target / '.git/index').read_bytes()

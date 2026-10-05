@@ -1,7 +1,8 @@
 # Development
 
 Runtime: Python >=3.10 and Git. Installation mutations require Linux libc/kernel
-and filesystem support for renameat2 exchange/no-replace, accessed through the
+and filesystem support for renameat2 exchange/no-replace and inotify directory
+creation observation, accessed through the
 standard-library ctypes module; unsupported operations fail without an unsafe
 overwrite fallback. No additional Python package is required. Private capture storage must share the
 target filesystem (repository Git directory, or same-filesystem TMPDIR for explicit
