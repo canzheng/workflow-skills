@@ -234,9 +234,15 @@ Uploaded reports retain their historical f31/ef24 identities. They strengthen
 runtime/CI proof but do not expose automatic consumer Start/discovery. User-supplied
 Start text required pilot HEAD while forbidding selection from initial older main;
 author corrected pilot-only safe routing/markers in the handoff. Generic consumer
-startup stays branch-agnostic and uses its tracked pin. Need actual automatic-run
-output and host discovery ordering; this Start definition conflict does not prove
-it ran. Limited main summary reports protection disabled; authoritative admin reads
-denied, enforcement not proven. F14 stays unchecked/change active. Cloud/Ubuntu
+startup stays branch-agnostic and uses its tracked pin. The selected retry now uses
+Install script, publish/apply and the fresh mini diagnostic; Start is unnecessary
+for this service-free pilot. The exact documented Install command passed in fresh
+Ubuntu24.04.5/Python3.12.3/Git2.43.0: approved pilot selection, pinned fetch, all20
+hashes and repeated tracked-byte/index preservation. Dirty-checkout and ignored
+project-skill collision negatives preserve user bytes, HEAD and index on refusal.
+Need actual Cloud Install output/exit, publication persistence and initial host
+catalog before manual bootstrap/file reads; local command success does not prove
+those gates. Limited main summary reports protection disabled; authoritative admin
+reads denied, enforcement not proven. F14 stays unchecked/change active. Cloud/Ubuntu
 agent-host acceptance and real merge→valid Issue completion/admin mutation remain
 distinct; merges/closure/admin changes require separate authorization.

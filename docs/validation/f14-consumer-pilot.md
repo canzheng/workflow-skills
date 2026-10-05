@@ -71,16 +71,29 @@ Available logs do not establish install-hook execution/order. See
 [the validated published-run evidence](f14-published-cloud-run.md) for observations,
 independently rechecked GitHub state and the credential-override probe limitation.
 
-Next action: obtain actual published install/maintenance logs and selected-checkout
-ordering before another fresh task. Use [the current handoff](cloud-bootstrap-handoff.md)
-with the frozen consumer SHA/source pin above. Preparation must materialize before
-host discovery; inspect absent catalog exposure separately if files are present.
-Cloud and Ubuntu agent-host discovery remain unverified; source code-head review
-passed, while final documentation-head/consumer review outcomes remain separate. Enforcement reads remain access-limited; green Actions
-and workflow YAML do not prove required checks. Actual merge→valid completed Issue
-observation and administration mutations require separate authorization. F14 stays
-integration pending and OpenSpec active; F01–F13 are implemented/locally verified
-and ready for review, not merged or delivered.
+The selected retry uses **Install script, publish/apply, fresh mini diagnostic**;
+Start is optional and unnecessary for this service-free pilot. The exact handoff
+Install command was executed in fresh Ubuntu24.04.5 (Python3.12.3, Git2.43.0): it
+selected the approved consumer revision, fetched the exact pinned source, verified
+all20 asset hashes, and repeated with tracked bytes/index unchanged. Dirty-checkout
+and ignored project-skill collision negatives refused selection while preserving
+user bytes, HEAD and index. This establishes mechanical command behavior, not
+Cloud Install execution, publication persistence or host discovery.
+
+Next action: paste [the handoff Install command](cloud-bootstrap-handoff.md#published-environment-setup-command)
+into the consumer environment, capture actual successful Install output/exit status,
+then publish/apply and run [the mini diagnostic](cloud-bootstrap-handoff.md#mini-diagnostic-task-prompt)
+in a fresh task before manual bootstrap or skill-file reads. Keep the frozen
+consumer SHA/source pin above; Start markers are not required. Record initial
+checkout, session/project root, pin and actual available-skills metadata. Preparation
+must precede host discovery; inspect absent catalog exposure separately if files
+are present. Cloud and Ubuntu agent-host discovery remain unverified. Source
+code-head and consumer review passed; documentation-head results remain tied to
+their explicitly reviewed revisions. Enforcement reads remain access-limited;
+green Actions and workflow YAML do not prove required checks. Actual merge→valid
+completed Issue observation and administration mutations require separate
+authorization. F14 stays integration pending and OpenSpec active; F01–F13 are
+implemented/locally verified and ready for review, not merged or delivered.
 
 ## Earlier implementation evidence
 
