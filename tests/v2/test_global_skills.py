@@ -96,11 +96,13 @@ class GlobalSkillsTests(unittest.TestCase):
         with patch.object(installer, 'transaction', side_effect=lambda r, c: actual(r, c, fail_after=1)), contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(workflow.main(list(map(str, args)) + ['--apply', '--json']), 1)
         self.assertFalse((self.base / 'user').exists())
-        actual_replace = installer.os.replace
+        actual_replace = installer.replace_entry
         calls = 0
         changed_mode = None
         def replace(src, dst, **kwargs):
             nonlocal calls, changed_mode
+            if not str(src).endswith('.wf2-staged'):
+                return actual_replace(src, dst, **kwargs)
             calls += 1
             if calls == 2:
                 raise OSError('later failure')
@@ -108,7 +110,7 @@ class GlobalSkillsTests(unittest.TestCase):
             changed_mode = 0o700 if root.stat().st_mode & 0o777 != 0o700 else 0o750
             root.chmod(changed_mode)
         index = (self.target / '.git/index').read_bytes()
-        with patch.object(installer.os, 'replace', replace), contextlib.redirect_stdout(io.StringIO()) as out:
+        with patch.object(installer, 'replace_entry', replace), contextlib.redirect_stdout(io.StringIO()) as out:
             self.assertEqual(workflow.main(list(map(str, args)) + ['--apply', '--json']), 1)
         message = json.loads(out.getvalue())['findings'][0]['message']
         self.assertIn('Rollback residuals:', message)

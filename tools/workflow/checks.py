@@ -48,6 +48,10 @@ def links(root, text, origin, reader=None):
             continue
         path = unquote(parsed.path)
         fragment = unquote(parsed.fragment)
+        if not path:
+            if fragment and fragment not in anchors(text):
+                findings.append(finding('links.anchor', origin, 'Missing local anchor: ' + target, 'Correct the link or heading'))
+            continue
         candidate = pathlib.Path(origin).parent / path if path else pathlib.Path(origin)
         normalized = os.path.normpath(candidate.as_posix())
         try:

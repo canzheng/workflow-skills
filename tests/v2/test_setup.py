@@ -195,6 +195,162 @@ class SetupTests(unittest.TestCase):
         self.assertEqual((self.target / '.workflow/install-manifest.json').read_bytes(), manifest)
         self.assertEqual((self.target / '.git/index').read_bytes(), index)
 
+    def test_destination_edits_at_replacement_are_captured_without_loss(self):
+        binding, attribute = (installer, 'replace_entry') if hasattr(installer, 'replace_entry') else (installer.os, 'replace')
+        actual = getattr(binding, attribute)
+        index = (self.target / '.git/index').read_bytes()
+        external = self.base / 'external-race-data'
+        external.write_bytes(b'External human content')
+        for existing in (True, False):
+            for case in ('bytes', 'mode', 'inode', 'symlink'):
+                with self.subTest(existing=existing, case=case):
+                    victim = self.target / ('destination-' + str(existing) + '-' + case)
+                    if existing:
+                        victim.write_bytes(b'Original content')
+                    original = victim.read_bytes() if existing else None
+                    mode = victim.stat().st_mode if existing else None
+                    injected = []
+                    def replace(src, dst, **kwargs):
+                        if operation_path(dst, kwargs.get('dst_dir_fd')) == victim and not injected:
+                            if case == 'inode':
+                                new = self.base / 'foreign-inode'
+                                new.write_bytes(b'Original content' if existing else b'Human creation')
+                                if existing:
+                                    new.chmod(mode)
+                                    victim.unlink()
+                                new.rename(victim)
+                            elif case == 'symlink':
+                                victim.unlink(missing_ok=True)
+                                victim.symlink_to(external)
+                            else:
+                                victim.write_bytes(b'Concurrent human content')
+                                if case == 'mode':
+                                    victim.chmod(0o700)
+                            injected.append(victim.lstat())
+                        return actual(src, dst, **kwargs)
+                    with patch.object(binding, attribute, replace), self.assertRaisesRegex(installer.Conflict, 'Rollback residuals:') as raised:
+                        installer.transaction(self.target, {victim.name: b'Installer content'})
+                    self.assertEqual(len(injected), 1)
+                    self.assertEqual(victim.lstat().st_ino, injected[0].st_ino)
+                    self.assertEqual(victim.lstat().st_mode, injected[0].st_mode)
+                    if case == 'symlink':
+                        self.assertTrue(victim.is_symlink())
+                    elif case == 'inode':
+                        self.assertEqual(victim.read_bytes(), b'Original content' if existing else b'Human creation')
+                    else:
+                        self.assertEqual(victim.read_bytes(), b'Concurrent human content')
+                    self.assertEqual(external.read_bytes(), b'External human content')
+                    self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                    recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
+                    self.addCleanup(installer.shutil.rmtree, recovery)
+                    record = json.loads((recovery / 'recovery-index.json').read_text())[victim.name]
+                    if existing:
+                        self.assertEqual((recovery / record['backup']).read_bytes(), original)
+                        self.assertEqual(record['mode'], mode)
+                    else:
+                        self.assertIsNone(record['backup'])
+
+    def test_rollback_open_boundary_preserves_changed_installed_inode(self):
+        actual = installer.os.open
+        index = (self.target / '.git/index').read_bytes()
+        for case in ('bytes', 'mode', 'inode', 'deleted', 'symlink'):
+            with self.subTest(case=case):
+                victim = self.target / ('restore-' + case)
+                victim.write_bytes(b'Original content')
+                mode = victim.stat().st_mode
+                external = self.base / ('restore-external-' + case)
+                external.write_bytes(b'External human content')
+                injected = []
+                def open_file(path, flags, *args, **kwargs):
+                    resolved = operation_path(path, kwargs.get('dir_fd'))
+                    if resolved in (victim, victim.with_name(victim.name + '.wf2-restore')) and flags & installer.os.O_WRONLY and not injected:
+                        if case == 'inode':
+                            new = self.base / 'rollback-foreign-inode'
+                            new.write_bytes(victim.read_bytes())
+                            new.chmod(victim.stat().st_mode)
+                            victim.unlink()
+                            new.rename(victim)
+                        elif case == 'deleted':
+                            victim.unlink()
+                        elif case == 'symlink':
+                            victim.unlink()
+                            victim.symlink_to(external)
+                        else:
+                            victim.write_bytes(b'Concurrent human content')
+                            if case == 'mode':
+                                victim.chmod(0o700)
+                        injected.append(victim.lstat() if victim.exists() or victim.is_symlink() else None)
+                    return actual(path, flags, *args, **kwargs)
+                with patch.object(installer.os, 'open', open_file), self.assertRaisesRegex(installer.Conflict, 'Rollback residuals:') as raised:
+                    installer.transaction(self.target, {victim.name: b'Installer content'}, fail_after=1)
+                self.assertEqual(len(injected), 1)
+                if case == 'deleted':
+                    self.assertFalse(victim.exists())
+                else:
+                    self.assertEqual(victim.lstat().st_ino, injected[0].st_ino)
+                    self.assertEqual(victim.lstat().st_mode, injected[0].st_mode)
+                    self.assertEqual(victim.read_bytes(), b'Installer content' if case == 'inode' else b'External human content' if case == 'symlink' else b'Concurrent human content')
+                self.assertEqual(external.read_bytes(), b'External human content')
+                self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
+                self.addCleanup(installer.shutil.rmtree, recovery)
+                record = json.loads((recovery / 'recovery-index.json').read_text())[victim.name]
+                self.assertEqual((recovery / record['backup']).read_bytes(), b'Original content')
+                self.assertEqual(record['mode'], mode)
+
+    def test_deletion_boundary_preserves_concurrently_changed_entry(self):
+        binding, attribute = (installer, 'remove_entry') if hasattr(installer, 'remove_entry') else (installer.os, 'unlink')
+        actual = getattr(binding, attribute)
+        victim = self.target / 'delete-race'
+        victim.write_bytes(b'Original content')
+        index = (self.target / '.git/index').read_bytes()
+        def remove(path, **kwargs):
+            if operation_path(path, kwargs.get('dir_fd')) == victim:
+                victim.write_bytes(b'Concurrent human content')
+            return actual(path, **kwargs)
+        with patch.object(binding, attribute, remove), self.assertRaisesRegex(installer.Conflict, 'Rollback residuals:') as raised:
+            installer.transaction(self.target, {victim.name: None})
+        self.assertEqual(victim.read_bytes(), b'Concurrent human content')
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
+        self.addCleanup(installer.shutil.rmtree, recovery)
+        record = json.loads((recovery / 'recovery-index.json').read_text())[victim.name]
+        self.assertEqual((recovery / record['backup']).read_bytes(), b'Original content')
+
+    def test_atomic_replacement_unavailable_never_falls_back_to_overwrite(self):
+        victim = self.target / 'AGENTS.md'
+        original = victim.read_bytes()
+        index = (self.target / '.git/index').read_bytes()
+        with patch.object(installer.ctypes, 'CDLL', side_effect=OSError('unavailable')):
+            with self.assertRaisesRegex(installer.Conflict, 'Atomic filesystem replacement unavailable'):
+                installer.transaction(self.target, {'AGENTS.md': b'Installer content'})
+        self.assertEqual(victim.read_bytes(), original)
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        self.assertFalse(victim.with_name(victim.name + '.wf2-staged').exists())
+
+    def test_in_place_staging_cleanup_edit_is_preserved_in_recovery(self):
+        actual = installer.os.unlink
+        victim = self.target / 'AGENTS.md'
+        original = victim.read_bytes()
+        index = (self.target / '.git/index').read_bytes()
+        injected = []
+        def unlink(path, **kwargs):
+            resolved = operation_path(path, kwargs.get('dir_fd'))
+            if resolved == victim.with_name(victim.name + '.wf2-staged') and not injected:
+                resolved.write_bytes(b'Late concurrent staging content')
+                injected.append(True)
+            return actual(path, **kwargs)
+        with patch.object(installer, 'replace_entry', side_effect=OSError('before replacement')):
+            with patch.object(installer.os, 'unlink', unlink), self.assertRaisesRegex(installer.Conflict, 'Rollback residuals:') as raised:
+                installer.transaction(self.target, {'AGENTS.md': b'Installer content'})
+        self.assertEqual(injected, [True])
+        self.assertEqual(victim.read_bytes(), original)
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
+        self.addCleanup(installer.shutil.rmtree, recovery)
+        record = json.loads((recovery / 'recovery-index.json').read_text())['AGENTS.md.wf2-staged']
+        self.assertEqual((recovery / record['concurrent_backup']).read_bytes(), b'Late concurrent staging content')
+
     def test_successful_replace_rejects_foreign_staging_or_changed_destination(self):
         run(*self.args, '--apply')
         changed = self.source / 'docs/workflow/contract.md'
@@ -206,7 +362,7 @@ class SetupTests(unittest.TestCase):
         index = (self.target / '.git/index').read_bytes()
         external = self.base / 'external'
         external.write_bytes(b'External human content.\n')
-        actual_replace = installer.os.replace
+        actual_replace = installer.replace_entry
         for case in ('bytes', 'mode', 'same-content-inode', 'symlink', 'deleted'):
             with self.subTest(case=case):
                 try:
@@ -232,7 +388,7 @@ class SetupTests(unittest.TestCase):
                         if case == 'deleted':
                             victim.unlink()
                         injected.append(True)
-                    with patch.object(installer.os, 'replace', replace), contextlib.redirect_stdout(io.StringIO()) as output:
+                    with patch.object(installer, 'replace_entry', replace), contextlib.redirect_stdout(io.StringIO()) as output:
                         status = workflow.main(['setup', '--source', str(self.source), '--revision', revision,
                                                 '--target', str(self.target), '--repository', 'fixture/consumer',
                                                 '--skill-storage', 'tracked', '--apply', '--json'])
@@ -299,7 +455,7 @@ class SetupTests(unittest.TestCase):
                         staged.symlink_to(external)
                     raise OSError('Injected replace failure')
 
-                with patch.object(installer.os, 'replace', replace), \
+                with patch.object(installer, 'replace_entry', replace), \
                         contextlib.redirect_stdout(io.StringIO()) as output:
                     status = workflow.main(['setup', '--source', str(self.source), '--revision', revision,
                                             '--target', str(self.target), '--repository', 'fixture/consumer',
@@ -492,7 +648,7 @@ class SetupTests(unittest.TestCase):
 
     def test_failure_during_public_apply_restores_originals(self):
         original = (self.target / 'AGENTS.md').read_bytes()
-        actual = installer.os.replace
+        actual = installer.replace_entry
         calls = 0
         def fail(src, dst, **kwargs):
             nonlocal calls
@@ -501,7 +657,7 @@ class SetupTests(unittest.TestCase):
                 raise OSError('simulated disk failure')
             return actual(src, dst, **kwargs)
         argv = [str(x) for x in self.args] + ['--apply', '--json']
-        with patch.object(installer.os, 'replace', side_effect=fail), contextlib.redirect_stdout(io.StringIO()) as out:
+        with patch.object(installer, 'replace_entry', side_effect=fail), contextlib.redirect_stdout(io.StringIO()) as out:
             code = workflow.main(argv)
         self.assertEqual(code, 1)
         self.assertIn('original files restored', out.getvalue())
@@ -525,7 +681,7 @@ class SetupTests(unittest.TestCase):
         external_file = external / 'contract.md'
         external_file.write_bytes(b'External user content.\n')
         p = self.target / names[0]
-        actual = installer.os.replace
+        actual = installer.replace_entry
         for edit in ('bytes', 'mode', 'deleted', 'symlink', 'parent-symlink'):
             with self.subTest(edit=edit):
                 calls = 0
@@ -547,7 +703,7 @@ class SetupTests(unittest.TestCase):
                     else:
                         p.parent.rename(p.parent.with_name('saved-workflow'))
                         p.parent.symlink_to(external, target_is_directory=True)
-                with patch.object(installer.os, 'replace', side_effect=replace), contextlib.redirect_stdout(io.StringIO()) as out:
+                with patch.object(installer, 'replace_entry', side_effect=replace), contextlib.redirect_stdout(io.StringIO()) as out:
                     code = workflow.main(args + ['--apply', '--json'])
                 self.assertEqual(code, 1)
                 report = json.loads(out.getvalue())
@@ -581,12 +737,14 @@ class SetupTests(unittest.TestCase):
 
     def test_public_rollback_preserves_changed_created_directory(self):
         index = (self.target / '.git/index').read_bytes()
-        actual = installer.os.replace
+        actual = installer.replace_entry
         calls = 0
         created = None
         changed_mode = None
         def replace(src, dst, **kwargs):
             nonlocal calls, created, changed_mode
+            if not str(src).endswith('.wf2-staged'):
+                return actual(src, dst, **kwargs)
             calls += 1
             if calls == 2:
                 raise OSError('later replacement failure')
@@ -595,7 +753,7 @@ class SetupTests(unittest.TestCase):
             changed_mode = 0o700 if created.stat().st_mode & 0o777 != 0o700 else 0o750
             created.chmod(changed_mode)
         args = [str(x) for x in self.args] + ['--apply', '--json']
-        with patch.object(installer.os, 'replace', replace), contextlib.redirect_stdout(io.StringIO()) as out:
+        with patch.object(installer, 'replace_entry', replace), contextlib.redirect_stdout(io.StringIO()) as out:
             status = workflow.main(args)
         self.assertEqual(status, 1)
         message = json.loads(out.getvalue())['findings'][0]['message']
@@ -616,7 +774,7 @@ class SetupTests(unittest.TestCase):
             with self.subTest(edit=edit):
                 name = 'new-' + edit + '/file.md'
                 directory = (self.target / name).parent
-                actual = installer.os.replace
+                actual = installer.replace_entry
                 def replace(src, dst, **kwargs):
                     actual(src, dst, **kwargs)
                     if edit == 'replacement':
@@ -626,7 +784,7 @@ class SetupTests(unittest.TestCase):
                         directory.chmod(mode)
                     else:
                         (directory / 'human.md').write_bytes(b'Concurrent directory content.\n')
-                with patch.object(installer.os, 'replace', replace), self.assertRaisesRegex(installer.Conflict, 'Rollback residuals:') as raised:
+                with patch.object(installer, 'replace_entry', replace), self.assertRaisesRegex(installer.Conflict, 'Rollback residuals:') as raised:
                     installer.transaction(self.target, {name: b'Installer file.\n'}, fail_after=1)
                 self.assertTrue(directory.is_dir())
                 self.assertIn(directory.relative_to(self.target).as_posix(), str(raised.exception))
@@ -646,7 +804,7 @@ class SetupTests(unittest.TestCase):
         victim.write_bytes(b'Original owned content.\n')
         saved = directory.with_name('saved-parent')
         actual_path_unlink = pathlib.Path.unlink
-        actual_fd_unlink = installer.os.unlink
+        actual_fd_unlink = installer.remove_entry
         injected = False
         def swap():
             nonlocal injected
@@ -665,7 +823,7 @@ class SetupTests(unittest.TestCase):
             return actual_fd_unlink(path, *args, **kwargs)
         index = (self.target / '.git/index').read_bytes()
         with patch.object(pathlib.Path, 'unlink', path_unlink), \
-             patch.object(installer.os, 'unlink', fd_unlink), \
+             patch.object(installer, 'remove_entry', fd_unlink), \
              self.assertRaisesRegex(installer.Conflict, 'Rollback residuals:') as raised:
             installer.transaction(self.target, {'existing-parent/owned.md': None}, fail_after=1)
         self.assertTrue(injected)
@@ -689,7 +847,7 @@ class SetupTests(unittest.TestCase):
                     directory = victim.parent if depth == 'parent' else victim.parent.parent
                     saved = directory.with_name(directory.name + '-saved')
                     index = (self.target / '.git/index').read_bytes()
-                    actual_open, actual_replace, actual_unlink = installer.os.open, installer.os.replace, installer.os.unlink
+                    actual_open, actual_replace, actual_unlink = installer.os.open, installer.replace_entry, installer.os.unlink
                     injected = False
                     def swap():
                         nonlocal injected
@@ -702,7 +860,7 @@ class SetupTests(unittest.TestCase):
                     def open_file(path, *args, **kwargs):
                         if boundary == 'stage-open' and pathlib.Path(path).name.endswith('.wf2-staged') and args[0] & installer.os.O_CREAT:
                             swap()
-                        if boundary == 'restore' and pathlib.Path(path).name == victim.name and args[0] & installer.os.O_WRONLY:
+                        if boundary == 'restore' and pathlib.Path(path).name == victim.name + '.wf2-restore' and args[0] & installer.os.O_WRONLY:
                             swap()
                         return actual_open(path, *args, **kwargs)
                     def replace(src, dst, **kwargs):
@@ -715,7 +873,7 @@ class SetupTests(unittest.TestCase):
                         if boundary == 'stage-cleanup' and pathlib.Path(path).name.endswith('.wf2-staged'):
                             swap()
                         return actual_unlink(path, *args, **kwargs)
-                    with patch.object(installer.os, 'open', open_file), patch.object(installer.os, 'replace', replace), \
+                    with patch.object(installer.os, 'open', open_file), patch.object(installer, 'replace_entry', replace), \
                          patch.object(installer.os, 'unlink', unlink), \
                          self.assertRaisesRegex(installer.Conflict, 'Rollback residuals:') as raised:
                         installer.transaction(self.target, {name: b'Installer replacement.\n'}, fail_after=1)
@@ -737,17 +895,19 @@ class SetupTests(unittest.TestCase):
         second.write_bytes(b'Original second file.\n')
         original = (self.target / 'AGENTS.md').read_bytes()
         index = (self.target / '.git/index').read_bytes()
-        actual = installer.os.replace
+        actual = installer.replace_entry
         calls = 0
         def replace(src, dst, **kwargs):
             nonlocal calls
+            if pathlib.Path(src).name.endswith('.wf2-restore'):
+                return actual(src, dst, **kwargs)
             calls += 1
             actual(src, dst, **kwargs)
             if calls == 1:
                 saved = second.parent.with_name('saved-parent')
                 second.parent.rename(saved)
                 shutil.copytree(saved, second.parent)
-        with patch.object(installer.os, 'replace', replace), \
+        with patch.object(installer, 'replace_entry', replace), \
              self.assertRaisesRegex(installer.Conflict, 'Rollback residuals: existing-parent') as raised:
             installer.transaction(self.target, {'AGENTS.md': b'First replacement.', name: b'Second replacement.'},
                                   fail_after=2)
@@ -794,10 +954,11 @@ class SetupTests(unittest.TestCase):
                     directory = deleted.parent if depth == 'parent' else deleted.parent.parent
                     saved = directory.with_name(directory.name + '-saved')
                     external = self.base / ('external-' + depth + '-' + edit)
-                    actual_unlink = installer.os.unlink
-                    def unlink(path, *a, **kw):
+                    actual_remove = installer.remove_entry
+                    actual_replace = installer.replace_entry
+                    def remove(path, **kw):
                         resolved = operation_path(path, kw.get("dir_fd"))
-                        result = actual_unlink(path, *a, **kw)
+                        result = actual_remove(path, **kw)
                         if resolved == deleted:
                             directory.rename(saved)
                             if edit == 'same-content':
@@ -810,8 +971,12 @@ class SetupTests(unittest.TestCase):
                                 directory.mkdir()
                                 (directory / 'human.md').write_bytes(b'Concurrent human content.\n')
                         return result
-                    with patch.object(installer.os, 'unlink', unlink), \
-                         patch.object(installer.os, 'replace', side_effect=OSError('later apply failure')), \
+                    def replace(src, dst, **kw):
+                        if str(src).endswith('.wf2-staged'):
+                            raise OSError('later apply failure')
+                        return actual_replace(src, dst, **kw)
+                    with patch.object(installer, 'remove_entry', remove), \
+                         patch.object(installer, 'replace_entry', replace), \
                          contextlib.redirect_stdout(io.StringIO()) as out:
                         status = workflow.main(args + ['--apply', '--json'])
                     self.assertEqual(status, 1)
@@ -835,7 +1000,7 @@ class SetupTests(unittest.TestCase):
 
     def test_rollback_preserves_recreated_deletions_and_edited_new_files(self):
         p = self.target / 'AGENTS.md'
-        actual_unlink = installer.os.unlink
+        actual_unlink = installer.remove_entry
         def unlink(path, *args, **kwargs):
             resolved = operation_path(path, kwargs.get("dir_fd"))
             result = actual_unlink(path, *args, **kwargs)
@@ -845,13 +1010,13 @@ class SetupTests(unittest.TestCase):
         for changes in [{'AGENTS.md': None}, {'new.md': b'Installed content.\n'}]:
             name = next(iter(changes))
             path = self.target / name
-            patcher = patch.object(installer.os, 'unlink', unlink)
+            patcher = patch.object(installer, 'remove_entry', unlink)
             if name == 'new.md':
-                actual_replace = installer.os.replace
+                actual_replace = installer.replace_entry
                 def replace(src, dst, **kwargs):
                     actual_replace(src, dst, **kwargs)
                     path.write_bytes(b'Concurrent new-file edit.\n')
-                patcher = patch.object(installer.os, 'replace', replace)
+                patcher = patch.object(installer, 'replace_entry', replace)
             with patcher, self.assertRaisesRegex(installer.Conflict, 'Rollback residuals: ' + name) as raised:
                 installer.transaction(self.target, changes, fail_after=1)
             expected = b'Concurrent recreation.\n' if name == 'AGENTS.md' else b'Concurrent new-file edit.\n'
@@ -917,7 +1082,7 @@ class SetupTests(unittest.TestCase):
         original = p.read_bytes()
         actual = installer.os.open
         def fail_restore(path, *args, **kwargs):
-            if operation_path(path, kwargs.get('dir_fd')) == p and args[0] & installer.os.O_WRONLY:
+            if operation_path(path, kwargs.get('dir_fd')) == p.with_name(p.name + '.wf2-restore') and args[0] & installer.os.O_WRONLY:
                 raise OSError('restoration denied')
             return actual(path, *args, **kwargs)
         with patch.object(installer.os, 'open', fail_restore):

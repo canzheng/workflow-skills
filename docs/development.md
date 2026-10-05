@@ -1,6 +1,10 @@
 # Development
 
-Runtime: Python >=3.10 and Git. Tested: Python 3.12.14 on Debian 13 and Python 3.12.3 on Ubuntu 24.04. No Conda,
+Runtime: Python >=3.10 and Git. Installation mutations require Linux libc/kernel
+and filesystem support for renameat2 exchange/no-replace, accessed through the
+standard-library ctypes module; unsupported operations fail without an unsafe
+overwrite fallback. No additional Python package is required.
+ Tested: Python 3.12.14 on Debian 13 and Python 3.12.3 on Ubuntu 24.04. No Conda,
 Node, global AGENTS/skills or GitHub token is needed for offline verification.
 The required runner uses Python's standard library. The optional pytest runner
 and its dependencies are pinned in requirements.txt; never substitute an

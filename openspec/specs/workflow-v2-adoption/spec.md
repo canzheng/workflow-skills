@@ -59,6 +59,28 @@ provenance, not task state or its own content hash.
 - **THEN** destination bytes/mode/device/inode are compared with the owned staged identity before setup can succeed
 - **AND** mismatches preserve foreign/changed destination content or absence, original backups and the raw Git index with a recoverable conflict
 
+#### Scenario: Destination changes at replacement boundary
+- **WHEN** an existing destination changes or a previously absent destination is created immediately before replacement
+- **THEN** atomic exchange/no-replace preserves the actual competing entry and reports a recoverable conflict
+- **AND** original backups/modes and the raw Git index remain unchanged
+
+#### Scenario: Installed inode changes before rollback writes
+- **WHEN** applied content changes after rollback validation but before restoration
+- **THEN** restoration stages the original rather than truncating a live file and preserves the changed entry as a residual
+
+#### Scenario: Destination changes at deletion boundary
+- **WHEN** an owned entry changes immediately before removal
+- **THEN** removal captures and validates the actual entry before discarding it, restoring a mismatch when the path remains absent
+- **AND** concurrent content and original backups remain recoverable without changing the index
+
+#### Scenario: Atomic primitive is unavailable
+- **WHEN** libc/kernel/filesystem atomic exchange or no-replace is unavailable
+- **THEN** apply fails without falling back to an unchecked overwrite
+
+#### Scenario: Displaced inode changes during cleanup
+- **WHEN** in-place content changes while cleanup holds the displaced inode open through removal
+- **THEN** changed bytes and mode are retained in recovery metadata and a residual is reported
+
 ### Requirement: Bounded uninstall and diagnostics
 Uninstall SHALL remove only unmodified managed assets/block, retain configuration
 and user modifications, and report residuals. Doctor SHALL be read-only and distinguish

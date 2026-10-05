@@ -190,6 +190,36 @@ class CheckTests(unittest.TestCase):
         cp.write_text(json.dumps(c))
         run('check', '--repo', self.target, expect=2)
 
+    def test_pr_fragments_use_body_anchors_without_synthetic_head_file(self):
+        sha = commit(self.target)
+        index = (self.target / '.git/index').read_bytes()
+        def event(body):
+            return dict(repository={'full_name': 'fixture/consumer'}, pull_request=dict(
+                base={'repo': {'full_name': 'fixture/consumer'}}, head={'sha': sha}, body=body))
+        for native in (False, True):
+            for fragment, expected in [('#changes', 0), ('#documentation', 0), ('#%63hanges', 0),
+                                       ('#', 0), ('#missing-heading', 1)]:
+                with self.subTest(native=native, fragment=fragment):
+                    body = BODY + '\n[Jump](' + fragment + ')\n'
+                    snapshot = self.snapshot(body)
+                    if native:
+                        snapshot.write_text(json.dumps(event(body)))
+                    r = run('check', '--repo', self.target, '--pr-json', snapshot, '--metadata-only', expect=expected)
+                    if expected:
+                        self.assertTrue(any(x['code'] == 'links.anchor' for x in r['findings']))
+                    self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        # A real tracked file with this synthetic name must not supply PR anchors.
+        (self.target / 'PR.md').write_text('# File-only heading\n')
+        sha = commit(self.target)
+        for native in (False, True):
+            with self.subTest(native=native, decoy=True):
+                body = BODY + '\n[Wrong surface](#file-only-heading)\n'
+                snapshot = self.snapshot(body)
+                if native:
+                    snapshot.write_text(json.dumps(event(body)))
+                r = run('check', '--repo', self.target, '--pr-json', snapshot, '--metadata-only', expect=1)
+                self.assertTrue(any(x['code'] == 'links.anchor' for x in r['findings']))
+
     def test_pr_event_shapes_reject_before_fetch_without_tracebacks_or_writes(self):
         snapshot = self.root / 'event.json'
         fetched = self.root / 'MUST_NOT_FETCH'

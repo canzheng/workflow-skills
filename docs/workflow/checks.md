@@ -13,6 +13,10 @@ Malformed shapes and wrong identities return structured invalid-input diagnostic
 before fetching head objects, preserving the snapshot and index without a traceback.
 A trusted checker reads head files through Git blobs, fetching the exact SHA if
 needed; it never checks out/executes head content in the metadata job.
+Fragment-only links targeting #changes resolve against the supplied
+Markdown body, including decoded fragments. Missing body headings produce
+links.anchor even if a head file named PR.md contains that heading. A bare #
+refers to the current document; explicit file paths still use head Git blobs.
 `--metadata-only` requires a PR snapshot and limits work to that contract.
 `--specs` explicitly requires pinned OpenSpec 1.14.0 and validates actual specs;
 missing tool is a failure, not a skipped pass. Historical references are outside

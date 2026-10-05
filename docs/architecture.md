@@ -92,3 +92,10 @@ best-effort, without a multi-process lock or atomic multi-file promise.
 After rename, destination identity/content must match the owned staged inode; a
 foreign or changed destination remains a recoverable conflict. Snapshot helpers
 validate and normalize optional native closure reasons before completion audits.
+
+Single-entry writes use Linux renameat2 exchange/no-replace to retain the actual
+displaced destination for validation; rollback stages original content and deletion
+captures an entry before validating/removing it. This does not make multi-file apply
+atomic or provide a process lock. Unsupported primitives fail safely. PR-body
+fragment links resolve against the supplied body; explicit file links still read
+trusted head Git blobs in metadata checks.

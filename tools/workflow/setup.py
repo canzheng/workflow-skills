@@ -1,5 +1,6 @@
 """Repository-scoped install/update/uninstall with preflight and rollback."""
 import contextlib
+import ctypes
 import json
 import os
 import pathlib
@@ -62,9 +63,29 @@ def preflight_destinations(root, names):
                 break
             if parent.exists() and not parent.is_dir():
                 raise Conflict('Destination parent is not a directory: ' + str(parent))
-        staged = p.with_name(p.name + '.wf2-staged')
-        if staged.exists() or staged.is_symlink():
-            raise Conflict('Staging collision: ' + str(staged))
+        for suffix in ('.wf2-staged', '.wf2-restore', '.wf2-removed'):
+            staged = p.with_name(p.name + suffix)
+            if staged.exists() or staged.is_symlink():
+                raise Conflict('Staging collision: ' + str(staged))
+
+
+def replace_entry(src, dst, *, src_dir_fd, dst_dir_fd, exchange):
+    """Capture the actual replaced entry, or atomically require absence on Linux."""
+    try:
+        rename = ctypes.CDLL(None, use_errno=True).renameat2
+    except (OSError, AttributeError) as exc:
+        raise Conflict('Atomic filesystem replacement unavailable; Linux renameat2 is required') from exc
+    rename.argtypes = (ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint)
+    rename.restype = ctypes.c_int
+    if rename(src_dir_fd, os.fsencode(src), dst_dir_fd, os.fsencode(dst), 2 if exchange else 1):
+        error = ctypes.get_errno()
+        raise OSError(error, os.strerror(error), dst)
+
+
+def remove_entry(basename, *, dir_fd):
+    captured = basename + '.wf2-removed'
+    replace_entry(basename, captured, src_dir_fd=dir_fd, dst_dir_fd=dir_fd, exchange=False)
+    return captured
 
 
 def transaction(root, changes, fail_after=None):
@@ -163,6 +184,137 @@ def transaction(root, changes, fail_after=None):
             record_parents(name)
         applied = {}
         staging_residuals = []
+
+        def cleanup_entry(name, parent_fd, basename, expected):
+            try:
+                staged = file_state(parent_fd, basename)
+                if staged is not None:
+                    if staged != expected:
+                        raise Conflict('Concurrent staging edit: ' + name)
+                    # Keep the checked inode open through deletion. An in-place
+                    # writer may still hold this displaced entry after its swap.
+                    fd = os.open(basename, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=parent_fd)
+                    with os.fdopen(fd, 'rb') as stream:
+                        metadata = os.fstat(stream.fileno())
+                        if (stream.read(), metadata.st_mode, metadata.st_dev, metadata.st_ino) != expected:
+                            raise Conflict('Concurrent staging edit: ' + name)
+                        os.unlink(basename, dir_fd=parent_fd)
+                        stream.seek(0)
+                        metadata = os.fstat(stream.fileno())
+                        actual = (stream.read(), metadata.st_mode, metadata.st_dev, metadata.st_ino)
+                        if actual != expected:
+                            backup = 'concurrent-' + str(len(recovery_index))
+                            (stage / backup).write_bytes(actual[0])
+                            recovery_index[name]['concurrent_backup'] = backup
+                            recovery_index[name]['concurrent_mode'] = actual[1]
+                            raise Conflict('Concurrent displaced-inode edit: ' + name)
+            except (OSError, Invalid, Conflict) as cleanup_error:
+                staging_residuals.append(name)
+                raise Conflict('Staging cleanup residual: ' + name) from cleanup_error
+
+        @contextlib.contextmanager
+        def staged_file(name, p, parent_fd, data, mode, suffix):
+            basename, tmp_name = p.name + suffix, name + suffix
+            expected = [None]
+            created = False
+            try:
+                fd = os.open(basename, os.O_WRONLY | os.O_CREAT | os.O_EXCL |
+                             os.O_NOFOLLOW, 0o666, dir_fd=parent_fd)
+                created = True
+                with os.fdopen(fd, 'wb') as output:
+                    metadata = os.fstat(output.fileno())
+                    expected[0] = (b'', metadata.st_mode, metadata.st_dev, metadata.st_ino)
+                    recovery_index[tmp_name] = {
+                        'kind': 'staging', 'backup': None, 'mode': None,
+                        'created_mode': metadata.st_mode, 'created_device': metadata.st_dev,
+                        'created_inode': metadata.st_ino}
+                    if mode is not None:
+                        os.fchmod(output.fileno(), mode)
+                    output.write(data)
+                    output.flush()
+                    metadata = os.fstat(output.fileno())
+                    expected[0] = (data, metadata.st_mode, metadata.st_dev, metadata.st_ino)
+                if file_state(parent_fd, basename) != expected[0]:
+                    raise Conflict('Concurrent staging edit: ' + tmp_name)
+                yield basename, expected
+            finally:
+                if created:
+                    cleanup_entry(tmp_name, parent_fd, basename, expected[0])
+                validate_parents(name)
+
+        def checked_replace(name, p, parent_fd, basename, staging, expected_dst, record=None):
+            expected_src = staging[0]
+            validate_parents(name)
+            try:
+                replace_entry(basename, p.name, src_dir_fd=parent_fd, dst_dir_fd=parent_fd,
+                              exchange=expected_dst is not None)
+            except (OSError, Conflict):
+                try:
+                    changed = file_state(parent_fd, p.name) != expected_dst
+                except (OSError, Invalid, Conflict):
+                    changed = True
+                if changed:
+                    staging_residuals.append(name)
+                raise
+            # An exchange retains the actual displaced inode at the staging name.
+            # Never truncate a live destination or discard the unvalidated input.
+            staging[0] = expected_dst
+            if expected_dst is not None:
+                recovery_index[name + ('.wf2-restore' if basename.endswith('.wf2-restore') else '.wf2-staged')]['displaced_from'] = name
+            if record:
+                record(expected_src)
+            if expected_dst is not None:
+                try:
+                    captured = file_state(parent_fd, basename)
+                except (OSError, Invalid, Conflict):
+                    captured = None
+                if captured != expected_dst:
+                    # Put the actual human entry back when our own write remains
+                    # unchanged. Exchange also retains any late competing entry.
+                    if file_state(parent_fd, p.name) == expected_src:
+                        replace_entry(basename, p.name, src_dir_fd=parent_fd, dst_dir_fd=parent_fd,
+                                      exchange=True)
+                        staging[0] = expected_src
+                    raise Conflict('Concurrent destination edit captured during replacement: ' + name)
+            if file_state(parent_fd, p.name) != expected_src:
+                raise Conflict('Concurrent destination change after replacement: ' + name)
+
+        def checked_remove(name, p, parent_fd, expected, record=None):
+            validate_parents(name)
+            try:
+                captured = remove_entry(p.name, dir_fd=parent_fd)
+            except (OSError, Conflict):
+                try:
+                    changed = file_state(parent_fd, p.name) != expected
+                except (OSError, Invalid, Conflict):
+                    changed = True
+                if changed:
+                    staging_residuals.append(name)
+                raise
+            captured_name = name + '.wf2-removed'
+            recovery_index[captured_name] = {
+                'kind': 'capture', 'backup': None, 'displaced_from': name,
+                'expected_mode': expected[1], 'expected_device': expected[2], 'expected_inode': expected[3]}
+            if record:
+                record()
+            try:
+                try:
+                    state = file_state(parent_fd, captured)
+                except (OSError, Invalid, Conflict):
+                    state = None
+                if state != expected:
+                    try:
+                        replace_entry(captured, p.name, src_dir_fd=parent_fd, dst_dir_fd=parent_fd, exchange=False)
+                    except (OSError, Conflict):
+                        staging_residuals.append(captured_name)
+                    staging_residuals.append(name)
+                    raise Conflict('Concurrent deletion edit captured: ' + name)
+                if file_state(parent_fd, p.name) is not None:
+                    raise Conflict('Concurrent destination recreation: ' + name)
+            finally:
+                cleanup_entry(captured_name, parent_fd, captured, expected)
+                validate_parents(name)
+
         try:
             for i, (name, data) in enumerate(changes.items()):
                 p = safe(root, name)
@@ -202,51 +354,14 @@ def transaction(root, changes, fail_after=None):
                         raise Conflict('Concurrent local edit detected: ' + name)
                     if data is None:
                         if current is not None:
-                            os.unlink(p.name, dir_fd=parent_fd)
-                        applied[name] = None
+                            checked_remove(name, p, parent_fd, current, lambda: applied.__setitem__(name, None))
+                        else:
+                            applied[name] = None
                     else:
-                        # Bind staging, replacement and cleanup to the same verified
-                        # directory inode, even if its pathname is replaced mid-call.
-                        tmp_name = name + '.wf2-staged'
-                        basename = p.name + '.wf2-staged'
-                        tmp_state = None
-                        try:
-                            fd = os.open(basename, os.O_WRONLY | os.O_CREAT | os.O_EXCL |
-                                         os.O_NOFOLLOW, 0o666, dir_fd=parent_fd)
-                            with os.fdopen(fd, 'wb') as output:
-                                installed = os.fstat(output.fileno())
-                                tmp_state = (b'', installed.st_mode, installed.st_dev, installed.st_ino)
-                                recovery_index[tmp_name] = {
-                                    'kind': 'staging', 'backup': None, 'mode': None,
-                                    'created_mode': installed.st_mode, 'created_device': installed.st_dev,
-                                    'created_inode': installed.st_ino}
-                                if originals[name]:
-                                    os.fchmod(output.fileno(), originals[name][1])
-                                    installed = os.fstat(output.fileno())
-                                    tmp_state = (b'', installed.st_mode, installed.st_dev, installed.st_ino)
-                                output.write(data)
-                                output.flush()
-                                installed = os.fstat(output.fileno())
-                                tmp_state = (data, installed.st_mode, installed.st_dev, installed.st_ino)
-                            if file_state(parent_fd, basename) != tmp_state:
-                                raise Conflict('Concurrent staging edit: ' + tmp_name)
-                            validate_parents(name)
-                            os.replace(basename, p.name, src_dir_fd=parent_fd, dst_dir_fd=parent_fd)
-                            applied[name] = (data, installed.st_mode, installed.st_dev, installed.st_ino)
-                            if file_state(parent_fd, p.name) != applied[name]:
-                                raise Conflict('Concurrent destination change after replacement: ' + name)
-                        finally:
-                            if tmp_state is not None:
-                                try:
-                                    staged = file_state(parent_fd, basename)
-                                    if staged is not None:
-                                        if staged != tmp_state:
-                                            raise Conflict('Concurrent staging edit: ' + tmp_name)
-                                        os.unlink(basename, dir_fd=parent_fd)
-                                except (OSError, Invalid, Conflict) as cleanup_error:
-                                    staging_residuals.append(tmp_name)
-                                    raise Conflict('Staging cleanup residual: ' + tmp_name) from cleanup_error
-                            validate_parents(name)
+                        mode = originals[name][1] if originals[name] else None
+                        with staged_file(name, p, parent_fd, data, mode, '.wf2-staged') as (basename, staging):
+                            checked_replace(name, p, parent_fd, basename, staging, current,
+                                            lambda state: applied.__setitem__(name, state))
                 validate_parents(name)
                 if fail_after is not None and len(applied) == fail_after:
                     raise OSError('Injected apply failure')
@@ -262,24 +377,14 @@ def transaction(root, changes, fail_after=None):
                         original = originals[name]
                         if original is None:
                             if current is not None:
-                                os.unlink(p.name, dir_fd=parent_fd)
+                                checked_remove(name, p, parent_fd, current)
                         else:
-                            flags = os.O_WRONLY | os.O_NOFOLLOW | os.O_NONBLOCK
-                            if current is None:
-                                flags |= os.O_CREAT | os.O_EXCL
-                            fd = os.open(p.name, flags, original[1] & 0o7777, dir_fd=parent_fd)
-                            with os.fdopen(fd, 'wb') as output:
-                                metadata = os.fstat(output.fileno())
-                                if not stat.S_ISREG(metadata.st_mode) or (current is not None and
-                                        (metadata.st_mode, metadata.st_dev, metadata.st_ino) != current[1:]):
-                                    raise Conflict('Concurrent edit during rollback: ' + name)
-                                os.ftruncate(output.fileno(), 0)
-                                output.write(original[0])
-                                output.flush()
-                                os.fchmod(output.fileno(), original[1])
+                            with staged_file(name, p, parent_fd, original[0], original[1], '.wf2-restore') as (basename, staging):
+                                checked_replace(name, p, parent_fd, basename, staging, current)
                     validate_parents(name)
                 except (OSError, Invalid, Conflict):
                     residuals.append(name)
+            residuals.extend(name for name in staging_residuals if name not in residuals)
             residuals.extend(sorted(parent_residuals))
             for p in sorted(created_dirs, key=lambda p: len(p.parts), reverse=True):
                 name = directory_name(p)
