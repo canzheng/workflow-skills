@@ -1067,3 +1067,44 @@ before agent-side installation. Generated adoption files must be committed in a
 new project; this pilot has already committed them. Ubuntu agent discovery, remaining
 fresh-context scenario/semantic acceptance, real merge→Issue completion and admin
 mutations remain separately pending. No merge or completed closure is simulated.
+
+## Ubuntu Actions verification after publication — 2026-10-05
+
+Source review head `49553356d682e29d2ff8981c6cb60f00eacb4610`, implementation
+`dd0abff37c839bac3cdbcf3debbf344c46f2ec73`, passed real GitHub Ubuntu24.04.5 /
+CPython3.12.14 verification on both events:
+[push37375800804](https://github.com/canzheng/workflow-skills/actions/runs/37375800804)
+and [PR37375806693](https://github.com/canzheng/workflow-skills/actions/runs/37375806693).
+Decoded jobs111984125318/111984142333 show182 tests/no skips, including all four
+new fault regressions;185.837s on push and235.990s on PR. The strict OpenSpec
+verification step passed on both. This supersedes the frozen publication
+checkpoint's unrun SOURCE-suite status. Local execution remains blocked;
+no local test pass or independent old-code reproduction is claimed.
+
+Consumer remains75ed97dd/pin41df6a04. Its push37372307833 and metadata37372310276,
+37372768469,37375906782 passed. PR37372314273 attempt1 canceled before any steps;
+only job111972236795 was retried once. No cause beyond pre-step cancellation is
+established. New-pin consumer setup/installed59/fresh/literal verification remains
+unperformed. Existing initial native Ubuntu catalog/use evidence is retained
+with unchanged shared skill hashes; Cloud remains deferred.
+
+Source semantic review6003275783 at49553356 was still running at the first
+five-minute observation. Threads stay unresolved pending semantic review. These
+documentation changes alter no runtime, tests, shared skills, consumer assets or
+specifications. Final documentation checks and actual current-head CI remain
+separate. F14 remains partial; archive/merge/completed closure/admin/global/release
+actions have not occurred.
+
+Exact next action on a healthy Ubuntu workspace: fetch the current published
+rewrite branch and read Issue15/PR16's latest checkpoint. Preserve any unpublished
+localc1361214b6ec4608fc7ba1db1a348b34ea9be8f8 and pending edits; do not reset.
+The182-test source pass is established at49553356, so rerun source tests only for
+new code changes, failures or unresolved concerns. Use the source-owned setup
+entrypoint at verified implementationdd0abff37c839bac3cdbcf3debbf344c46f2ec73
+to preview/update consumer75ed97dd, prove project configuration/skill/raw-index
+preservation, then commit owned manifest/operations changes. Run actual installed
+affected tests (expected59 with the retained runner), public check/run-local/
+doctor/offline repeat and fresh/literal exact-pin verification. Observe new-head
+consumer push/PR/body Actions, remediate review findings and obtain semantic review.
+Archive only after required premerge acceptance. Await separate merge/completion
+or administration authorization; never substitute a simulated merge/closure.
