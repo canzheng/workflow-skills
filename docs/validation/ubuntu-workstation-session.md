@@ -178,3 +178,9 @@ Both PRs are Ready/open/unmerged in different repositories: workflow-skills PR16
 for source delivery, workflow-skills-test PR8 for consumer adoption. Cloud deferred;
 merge/completed closure/admin/release require separate authorization.
 
+Latest observed integration: source executable d1de33a push37297748431/PR37297752467
+both succeeded; consumer2a59be9 push37297839256/PR37297846639/metadata37297841685
+all succeeded. Fresh actual remote clones on runtime and Ubuntu materialize4 files,
+match20 hashes, pass check/doctor/repeat with tracked/index bytes unchanged and retain
+installed force-tracking/nested-index negatives. The malformed destination regression
+also verifies both public installers return structured exit2 without writes.
