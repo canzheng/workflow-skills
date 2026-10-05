@@ -1,5 +1,20 @@
 # v2 rewrite acceptance evidence
 
+## Wider local malformed-input review — 2026-10-05
+
+The user clarified that the latest PR P2 was already addressed and requested wider
+pattern review. [The local review](wider-boundary-review.md) records three independently
+reproduced analogous defects (argv partial execution, unencodable paths, malformed
+Markdown URLs), their public negative controls and inspected rollback ownership cases.
+Runtime7be9f1538b96d7dd98247e7e5eadffa042350496 passes121/no skips on managed runtime
+and Ubuntu24.04.5, with strict checks/specs. Consumer e1d59ab460c4fc8cb2196a75f3b3c8a87cf15524
+pins it; actual remote fresh-clone checks and installed public negatives pass on both
+runtimes. Shared skill/project/index policy stays unchanged. These are primary-author
+findings and runtime proof, not independent approval of this newly repaired content.
+Final exact-head Actions/reviews and final archive/spec/docs verification remain the
+next gates; older review results retain their actual revisions. No merge/closure/
+admin/global/auth/release/remote deletion and no persistent-host wake-up claim.
+
 ## NUL-path review repair and active-session monitoring — 2026-10-05
 
 The requested five-minute active-session timer observed completed consumer review
@@ -985,3 +1000,9 @@ push/PR/metadata CI. The standalone script, rather than implicit CLI adoption, h
 repos initially missing tools. See the current handoff and consumer report. Latest
 requested semantic outcomes are not inferred from CI; native host discovery and
 merge/admin requirements remain explicit pending gates. F14 remains partial.
+
+Latest consumer documentation head0ec3e90d3fe5726f4a06a8b2c897d38b82473839 repairs
+review4183725905: the stated source pin and immutable setup URL now match the
+7be9f15 manifest. Original Ubuntu evidence links retain original revisions.
+Full runtime121/no-skips and live source7be9f15/consumere1d59ab46 CI passed; latest
+Ready-head reviews and documentation-head Actions remain separately required.

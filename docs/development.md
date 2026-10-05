@@ -39,7 +39,7 @@ The user's Ubuntu26.04/Python3.13.13/codex-cli0.160.0 workstation separately pas
 consumer bootstrap/checks, native discovery and actual skill use. Its source-suite
 run reported an intermittent invalid-JSON helper error and two absent-pinned-tool
 OpenSpec skips; it is not a full source-suite pass on Ubuntu26.04. The prepared
-Ubuntu24.04.5 latest repair run at381e51c4bc8c5086dd7b23c35d2dd480a5ecca81 (installed bytes pinned atb36fab26859ba6b497fa926e766d948b8981b113) passes118/no skips. See [session evidence](validation/ubuntu-workstation-session.md).
+Ubuntu24.04.5 latest repair run at7be9f1538b96d7dd98247e7e5eadffa042350496 passes121/no skips. See [session evidence](validation/ubuntu-workstation-session.md).
 
 ## Optional Cloud preparation
 Use the current host environment preparation UI to run the three commands above.

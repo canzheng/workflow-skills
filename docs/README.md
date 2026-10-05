@@ -33,3 +33,5 @@ reachable through the recorded baseline in Git, not copied into the source head.
 - [Published Cloud run evidence](validation/f14-published-cloud-run.md): revision mismatch, successful recovery, discovery limits and next preparation diagnosis.
 
 - [Ubuntu workstation session evidence](validation/ubuntu-workstation-session.md): actual initial discovery/use, index proof, backlog reconciliation and reviewed runtime repair.
+
+- [Wider local boundary review](validation/wider-boundary-review.md): reproduced malformed native-input/URL defects, shared preflight repairs and retained concurrency controls.
