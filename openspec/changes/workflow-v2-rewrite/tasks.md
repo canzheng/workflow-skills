@@ -846,4 +846,3 @@ Current repaired-head semantic review and archive remain pending. Native Ubuntu
 catalog/use retains unchanged-skill original evidence. Cloud is deferred; actual
 merge/completed closure, deployed-base metadata and source PR-contract admin gates
 remain pending separate authorization. See [wider review](../../../docs/validation/wider-boundary-review.md).
-
