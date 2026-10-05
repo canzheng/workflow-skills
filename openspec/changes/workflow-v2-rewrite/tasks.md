@@ -607,4 +607,3 @@ optional real global-host use unperformed; Ubuntu26 historical intermittent sour
 suite cause remains unresolved. Next: current-head Actions/semantic review with an
 active-session five-minute timer, then archive/final checks only after acceptance.
 No merge/completed closure/admin/global/auth/release/remote-deletion action.
-
