@@ -6,6 +6,11 @@ files/anchors. `--pr-json SNAPSHOT` validates matching repository, nonempty Assi
 Changes, Evidence, Documentation and Remaining sections, and local links.
 Plain saved snapshot: {"repository":"owner/name","body":"Markdown"}.
 GitHub event snapshots use repository.full_name and pull_request body/base/head.sha.
+Event repository/pull_request/base/base.repo/head fields must be objects; both
+repository identities must match configuration and head SHA must be a full string.
+Event body accepts string or null (null/absent yields missing-section findings).
+Malformed shapes and wrong identities return structured invalid-input diagnostics
+before fetching head objects, preserving the snapshot and index without a traceback.
 A trusted checker reads head files through Git blobs, fetching the exact SHA if
 needed; it never checks out/executes head content in the metadata job.
 `--metadata-only` requires a PR snapshot and limits work to that contract.

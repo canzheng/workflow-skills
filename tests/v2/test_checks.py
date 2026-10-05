@@ -1,6 +1,7 @@
 import json
 import os
 import pathlib
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -188,6 +189,62 @@ class CheckTests(unittest.TestCase):
         c['contract'] = '../outside.md'
         cp.write_text(json.dumps(c))
         run('check', '--repo', self.target, expect=2)
+
+    def test_pr_event_shapes_reject_before_fetch_without_tracebacks_or_writes(self):
+        snapshot = self.root / 'event.json'
+        fetched = self.root / 'MUST_NOT_FETCH'
+        wrapper = self.root / 'isolated-bin/git'
+        wrapper.parent.mkdir()
+        wrapper.write_text('#!' + sys.executable + '\nimport pathlib, subprocess, sys\n'
+                           'if "fetch" in sys.argv[1:]:\n'
+                           '    pathlib.Path(' + repr(str(fetched)) + ').touch()\n'
+                           '    sys.exit(69)\n'
+                           'sys.exit(subprocess.call([' + repr(shutil.which('git')) + ', *sys.argv[1:]]))\n')
+        wrapper.chmod(0o755)
+        env = dict(os.environ, PATH=str(wrapper.parent) + os.pathsep + os.environ['PATH'])
+        event = dict(repository={'full_name': 'fixture/consumer'}, pull_request=dict(
+            base={'repo': {'full_name': 'fixture/consumer'}}, head={'sha': 'f' * 40}, body=BODY))
+        index = (self.target / '.git/index').read_bytes()
+        malformed = [(('repository',), value) for value in (None, [], '', 1, True)]
+        malformed += [(('repository', 'full_name'), value) for value in (None, [], {}, True, 'other/repo')]
+        for path in (('pull_request',), ('pull_request', 'base'),
+                     ('pull_request', 'base', 'repo'), ('pull_request', 'head')):
+            malformed += [(path, value) for value in (None, [], '', 1, True)]
+        malformed += [(('pull_request', 'head', 'sha'), value) for value in (None, [], {}, 1, True, 'garbage')]
+        malformed += [(('pull_request', 'body'), value) for value in ([], {}, 0, False, {'text': BODY})]
+        for path, value in malformed:
+            with self.subTest(path=path, value=value):
+                fetched.unlink(missing_ok=True)
+                item = json.loads(json.dumps(event))
+                parent = item
+                for key in path[:-1]:
+                    parent = parent[key]
+                parent[path[-1]] = value
+                snapshot.write_text(json.dumps(item))
+                original = snapshot.read_bytes()
+                r = subprocess.run([sys.executable, str(self.target / '.agents/tools/workflow/workflow.py'),
+                                    'check', '--repo', str(self.target), '--pr-json', str(snapshot),
+                                    '--metadata-only', '--json'], env=env, capture_output=True, text=True)
+                self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
+                self.assertEqual(json.loads(r.stdout)['findings'][0]['code'], 'invalid')
+                self.assertEqual(r.stderr, '')
+                self.assertFalse(fetched.exists())
+                self.assertEqual(snapshot.read_bytes(), original)
+                self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        event['pull_request']['head']['sha'] = subprocess.check_output(
+            ['git', '-C', str(self.target), 'rev-parse', 'HEAD'], text=True).strip()
+        for body, expected in ((BODY, 0), (None, 1), ('', 1)):
+            with self.subTest(valid_body=body):
+                fetched.unlink(missing_ok=True)
+                event['pull_request']['body'] = body
+                snapshot.write_text(json.dumps(event))
+                r = subprocess.run([sys.executable, str(self.target / '.agents/tools/workflow/workflow.py'),
+                                    'check', '--repo', str(self.target), '--pr-json', str(snapshot),
+                                    '--metadata-only', '--json'], env=env, capture_output=True, text=True)
+                self.assertEqual(r.returncode, expected, r.stdout + r.stderr)
+                self.assertEqual(r.stderr, '')
+                self.assertFalse(fetched.exists())
+                self.assertEqual((self.target / '.git/index').read_bytes(), index)
 
     def test_issue_closure_audit_distinguishes_mechanical_and_semantic_limits(self):
         p = self.root / 'issues.json'

@@ -73,11 +73,25 @@ def pr_contract(root, snapshot):
     reader = None
     if 'pull_request' in snapshot:
         pr = snapshot['pull_request']
-        repo = snapshot.get('repository', {}).get('full_name')
-        if pr.get('base', {}).get('repo', {}).get('full_name') != c['repository']:
+        repository = snapshot.get('repository')
+        if not isinstance(pr, dict) or not isinstance(repository, dict):
+            raise Invalid('PR event pull_request and repository must be objects')
+        base, head = pr.get('base', {}), pr.get('head', {})
+        if not isinstance(base, dict) or not isinstance(head, dict):
+            raise Invalid('PR event base and head must be objects')
+        base_repo = base.get('repo', {})
+        if not isinstance(base_repo, dict):
+            raise Invalid('PR event base.repo must be an object')
+        repo = repository.get('full_name')
+        if repo != c['repository'] or base_repo.get('full_name') != c['repository']:
             raise Invalid('PR base repository differs from configured repository')
-        sha = pr.get('head', {}).get('sha', '')
-        if not re.fullmatch(r'[0-9a-f]{40}', sha):
+        body = pr.get('body')
+        if body is None:
+            body = ''
+        if not isinstance(body, str):
+            raise Invalid('PR event body must be a string or null')
+        sha = head.get('sha', '')
+        if not isinstance(sha, str) or not re.fullmatch(r'[0-9a-f]{40}', sha):
             raise Invalid('PR head must be a full commit SHA')
         # Read untrusted head content as Git blobs, never check out or execute it.
         if subprocess.run(['git', '-C', str(root), 'cat-file', '-e', sha + '^{commit}'], capture_output=True, check=False).returncode:
@@ -87,7 +101,6 @@ def pr_contract(root, snapshot):
             if r.returncode:
                 raise FileNotFoundError(name)
             return r.stdout
-        body = pr.get('body') or ''
     else:
         repo, body = snapshot.get('repository'), snapshot.get('body')
     if repo != c['repository'] or not isinstance(body, str):
