@@ -1,5 +1,29 @@
 # F14 real consumer pilot
 
+## Current staged-snapshot repair and reproduced Cloud blocker — 2026-10-05
+
+Consumer `pilot/shared-skill-bootstrap` now `f6394326cd410b82567b8fea76bfd5c44fa9261a`,
+source `a4eb9f1303d80cc18f83b5bbd734063cac03b9c3`, reused Issue7/ReadyPR8. Actual
+update preserved project config/AGENTS/ignores/project skill/raw index; app-published
+reviewed tree4e5d8ecbbddbd182080972fc2a9d30197726312d matches local2a3f2c3, no force.
+Fresh actual runtime/Ubuntu clones match20 hashes, repeat check/doctor/read-only
+bootstrap without mutation, and reject missing/untracked/corrupt-staged/partial
+manifest paths without repair. Actual push37272954548/PR37272958814/metadata37272957270
+pass. Consumer finding4181129303 independently reproduced on old installed CLIs
+before the existing source staged-validation repair was accepted; tests now also
+cover partial provenance updates and intent-to-add. Current semantic review pending.
+
+The user's recreated-environment report again observes old main5d055649/source139e66d5,
+intact/unignored shared files, initial/workspace cwd/workspace and no workflow names
+in exposed catalogs. Complete repo catalog/root unavailable; automatic discovery
+remains blocked/unverified. Recreating environments did not resolve it; no further
+installation or merge is inferred to fix it. See [current acceptance](v2-acceptance.md#recreated-cloud-comparison-and-current-consumer-repair--2026-10-05)
+and [supplied report](f14-published-cloud-run.md#recreated-environment-reproduced-catalog-absence--2026-10-05).
+Support/debugging needs actual host root/catalog/checkout ordering. Manual repo-skill
+reading/use remains a fallback, not automatic discovery acceptance. Earlier exact
+revisions/evidence remain below; no merge/closure/admin/global change.
+
+
 ## Public consumer enforcement and tracking review checkpoint — 2026-10-05
 
 The user changed canzheng/workflow-skills-test to public. Read-only GitHub confirmation:

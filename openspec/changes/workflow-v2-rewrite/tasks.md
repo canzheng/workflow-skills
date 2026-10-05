@@ -380,3 +380,22 @@ while the user compares a newly published environment. Next: collect that report
 then explicitly repin current consumer to verified repair, run actual CI/current
 semantic review, and preserve any host routing/branch-selector limitations. Source
 docs/specs/evidence updated; F14 active/unarchived. No merge/closure/admin/global change.
+
+Recreated-environment supplied report SHA256d58e8524af55f6c08daf7e1dbedb857918b4a9eaba398de7e0be001a46a94d40
+reproduces old-main5d055649/source139e66d5/workspace root/55-plugin/no-workflow catalog
+absence with intact tracked/unignored skills, integrity pass/expected-pilot failure
+and unchanged25 files/index. Different environment identity, same observation; full
+repo discovery catalog/project root unavailable. No more env recreation/install
+redesign recommended without host root/catalog/checkout evidence. F14 host gate blocked.
+Consumer4181129303 independently reproduced on old installed CLIs: real owned source
+doc update/staged-new-manifest only passed check/doctor/bootstrap; fixed CLI fails
+the same snapshot and complete staging passes. Added partial-manifest and intent-to-add
+regressions; focused20 tests pass, full enlarged suite pending.
+After diagnostic completion, actual consumer updated to f6394326cd410b82567b8fea76bfd5c44fa9261a,
+sourcea4eb9f1303d80cc18f83b5bbd734063cac03b9c3, identical local2a3f2c3/server tree4e5d8ec,
+guarded non-force publication; project config/AGENTS/ignores/skills/raw index preserved
+before caller staging. Actual fresh runtime/Ubuntu clones match20 hashes, repeat
+verification/read-only bootstrap and reject missing/untracked/corrupt-staged/partial
+provenance without validator writes. Actual push37272954548/PR37272958814/metadata37272957270
+pass. Documentation/handoff/evidence updated; current semantic review and host routing
+support remain pending, separate merge/completion/admin authorization unchanged.

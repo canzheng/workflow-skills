@@ -201,6 +201,47 @@ class DependencyBootstrapTests(unittest.TestCase):
                 finally:
                     git(self.target, 'restore', '--staged', '--', name)
 
+    def test_staging_new_manifest_without_updated_asset_cannot_certify_commit(self):
+        self.adopt()
+        name = 'docs/workflow/README.md'
+        (self.source / name).write_text('# Updated fixture guidance\n')
+        revision = commit(self.source)
+        args = self.args.copy()
+        args[args.index('--revision') + 1] = revision
+        run(*args, '--apply')
+        git(self.target, 'add', '--', '.workflow/install-manifest.json')
+        before = self.snapshot()
+        for command in ['check', 'doctor', 'bootstrap']:
+            r = run(command, '--repo', self.target, expect=1)
+            self.assertIn('Staged workflow', json.dumps(r))
+            self.assertEqual(self.snapshot(), before)
+        git(self.target, 'add', '--', name)
+        for command in ['check', 'doctor', 'bootstrap']:
+            run(command, '--repo', self.target)
+
+    def test_intent_to_add_asset_cannot_certify_staged_update(self):
+        self.adopt()
+        name = '.agents/skills/workflow-risk-review/references/additional.md'
+        (self.source / name).write_text('# Additional fixture guidance\n')
+        p = self.source / '.workflow/bundle.json'
+        bundle = json.loads(p.read_text())
+        bundle['assets'][name] = name
+        p.write_text(json.dumps(bundle))
+        revision = commit(self.source)
+        args = self.args.copy()
+        args[args.index('--revision') + 1] = revision
+        run(*args, '--apply')
+        git(self.target, 'add', '--', '.workflow/install-manifest.json')
+        git(self.target, 'add', '-N', '--', name)
+        before = self.snapshot()
+        for command in ['check', 'doctor', 'bootstrap']:
+            r = run(command, '--repo', self.target, expect=1)
+            self.assertIn('Staged workflow', json.dumps(r))
+            self.assertEqual(self.snapshot(), before)
+        git(self.target, 'add', '--', name)
+        for command in ['check', 'doctor', 'bootstrap']:
+            run(command, '--repo', self.target)
+
     def test_ignored_provenance_policy_or_runtime_fails_preflight_without_writes(self):
         for name in ['.workflow/install-manifest.json', '.workflow/config.json', 'AGENTS.md',
                      'tools/workflow/core.py', 'docs/workflow/contract.md',

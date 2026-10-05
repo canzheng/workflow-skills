@@ -1,5 +1,46 @@
 # F14 published Cloud run: recovery passed, discovery pending
 
+## Recreated environment reproduced catalog absence — 2026-10-05
+
+The user supplied a second fresh-environment `Pasted text.txt`, 16,163 bytes,
+SHA256 `d58e8524af55f6c08daf7e1dbedb857918b4a9eaba398de7e0be001a46a94d40`.
+The reported environment/source configuration identity differs from the preceding
+18,076-byte report, supporting the user's recreated-environment comparison.
+This is supplied transcript evidence, not live inspection of that task.
+
+Before manual skill reading, the exposed host/cloud catalog again listed55 plugin
+skills with none of the workflow names; executor catalog was empty. Initial host
+cwd/workspace and shell cwd were `/workspace`; a separate host project root and
+broader repository-discovery catalog were unavailable. The complete host discovery
+implementation/result therefore remains unresolved; absence is reproduced in the
+exposed catalogs, not asserted for an inaccessible catalog.
+
+Actual checkout again used branch `work`, consumer
+`5d05564919c55f1d4d0c2e1e020ad914252a2979`, schema1/source
+`139e66d5b43cfbd3821fe098c0119b93aaad4928`, versus requested0e3fbc53/aceba714.
+All4 committed shared files exist, match manifest/working hashes, and are unignored.
+Check/doctor exited0/ok:true; expected-pilot revision doctor exited1/target.mismatch.
+All25 tracked files and HEAD remained unchanged, index2,947 bytes was byte-identical
+before/after, SHA256 `9ae17eb265cc819c8440e9041b0f1891a920e82641136d91a47c1bc2c591fcb1`.
+No install/bootstrap/repair/switch/fetch/Start/authentication/GitHub write ran.
+
+Network policy was reported restricted/enforced with package-managers preset and no
+additional hosts. This run required no workflow-source fetch: the tracked skill
+bytes were already available. It does not establish a credential/network explanation
+for catalog absence. Recreating the environment did not resolve that absence or
+change the initial old-main checkout. No further recreation/reinstallation is
+recommended as a fix without new host evidence.
+
+Record F14 discovery as blocked/unverified, independently of verified runtime/CI
+and public required-check enforcement. The next host action is a support/debugging
+handoff asking which repository/project root is used for repo-skill discovery in
+the current published-environment flow, which catalog exposes it, whether checkout
+selection precedes discovery, and whether an unmerged revision can be selected.
+Do not assume undocumented controls, move skills to a parent/global directory,
+redesign distribution or merge as an inferred remedy. Explicit repo-file reading/use
+remains possible and must be reported as manual fallback, not automatic discovery.
+
+
 ## Latest submitted tracked-skill diagnostic — 2026-10-05
 
 The user supplied `Pasted text.txt`, 18,076 bytes, SHA256

@@ -1,5 +1,55 @@
 # v2 rewrite acceptance evidence
 
+## Recreated Cloud comparison and current consumer repair — 2026-10-05
+
+The user's second fresh-environment report (16,163 bytes, SHA256
+`d58e8524af55f6c08daf7e1dbedb857918b4a9eaba398de7e0be001a46a94d40`) again records
+old main5d055649/source139e66d5, initial host/workspace cwd/workspace,55 plugin skills
+without workflow entries, empty executor catalog, and unavailable separate project
+root/full repo catalog. All4 tracked shared files match hashes and are unignored;
+integrity passes, expected-pilot revision fails,25 files/raw index unchanged. The
+environment identity changed but the result did not. This is supplied evidence, not
+live chat inspection. [Detailed comparison](f14-published-cloud-run.md#recreated-environment-reproduced-catalog-absence--2026-10-05)
+keeps discovery blocked/unverified; no further environment recreation or installer
+redesign is recommended without new host information. Support/debugging should
+establish current-flow repo/root binding, discovery catalog and checkout ordering.
+
+After the diagnostic completed, consumer Issue7/ReadyPR8 was updated explicitly:
+`pilot/shared-skill-bootstrap`, `f6394326cd410b82567b8fea76bfd5c44fa9261a`, source
+`a4eb9f1303d80cc18f83b5bbd734063cac03b9c3`. Setup changed4 owned files and preserved
+project config/AGENTS/ignores/pantry-project/raw index; caller updated README then
+staged/committed. Local2a3f2c3501a710a4ed34ea8acc317fed8e9bf621 and app serverf6394326
+have identical tree4e5d8ecbbddbd182080972fc2a9d30197726312d and parent0e3fbc53.
+Guarded non-force publication/local metadata alignment preserves user content and
+original local commit in reflog; no reset of the rewrite baseline or auth change.
+
+Consumer finding4181129303 was validated before acceptance with old installed CLIs:
+a real owned exact-source doc update with only new provenance staged returned
+ok:true for check/doctor/bootstrap; repaired CLI rejects the same unchanged file/index
+snapshot, and complete staging passes. Two new public regression cases cover that
+partial-staging path and intent-to-add entries. Runtime fix already exists at
+a4eb9f1; its87-test source/Ubuntu proof remains accurate; enlarged current test suite
+verification is recorded after it runs, without pretending the old commit has89 tests.
+
+Fresh actual f6394326 clones on managed runtime and Ubuntu24.04.5 have all4 shared
+files and pantry-project tracked before hooks, match all20 hashes, repeat
+check/doctor/read-only bootstrap twice without tracked/index writes. Missing skills,
+five provenance/policy/runtime/CI untracking and corrupt-staged paths, and partial
+provenance/doc staging fail without repair/validator mutation; owned clones restored
+explicitly. Actual consumer
+push[37272954548](https://github.com/canzheng/workflow-skills-test/actions/runs/37272954548),
+PR[37272958814](https://github.com/canzheng/workflow-skills-test/actions/runs/37272958814)
+and metadata[37272957270](https://github.com/canzheng/workflow-skills-test/actions/runs/37272957270)
+pass. This proves current consumer integration of the review repair, not initial
+host discovery. Current semantic review remains pending.
+
+F01–F13 implemented/locally verified; F14 partial/in-progress/blocked and rewrite
+change active/unarchived. Public consumer required-check gate remains configured/
+observed. Initial Cloud and Ubuntu agent-host discovery/use and final semantic
+review remain pending; actual merge→valid Issue completion and further administration/
+release require separate authorization. No merged/delivered claim.
+
+
 ## Staged-candidate review repair — 2026-10-05
 
 Source Ready-PR finding4181125358 was reproduced before acceptance: original code

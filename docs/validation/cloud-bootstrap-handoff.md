@@ -5,22 +5,30 @@
 The user approved tracked shared skills on 2026-10-05 after fresh tasks failed to
 expose injected skills. This changes storage and the F14 experiment, not the workflow
 architecture. The failures do not establish a particular Cloud host root cause.
-Source starting revision: `ead664a722b040e144c44c431bfe4488c36d7c88`, branch
-`rewrite/workflow-skills-v2`. Tested executable/source pin:
-`aceba7143652ba127dbc62c98608e1b9943be31d` (83 tests and strict specs on Cloud/Ubuntu).
+Source tracked-storage starting revision: `ead664a722b040e144c44c431bfe4488c36d7c88`,
+branch `rewrite/workflow-skills-v2`; original rewrite baseline remains in Git.
+Tested executable/source pin: `a4eb9f1303d80cc18f83b5bbd734063cac03b9c3`
+(87 tests and strict specs on Cloud/Ubuntu at that code commit).
 Consumer: canzheng/workflow-skills-test, `pilot/shared-skill-bootstrap`,
-`0e3fbc530f21c4981230a5ef968eac2a5dda3d5e`, Issue7 and PR8. Schema3, all four shared
-files and pantry-project are tracked. The earlier fd4/b1 ignored-skill model is
-superseded. Consumer is now public with Active required-check ruleset24484016. Actual metadata
-negative/restoration observed blocked/clean at the older6b9eb5d, with no merge.
-Current consumer push/PR/metadata pass; tracking review defects are repaired.
-New source staged-candidate repair `a4eb9f1303d80cc18f83b5bbd734063cac03b9c3` passes87
-tests/strict specs on both runtimes and actual source CI. This live consumer remains
-frozen at0e3fbc53/sourceaceba714 during the user's fresh-environment diagnostic; it
-does not yet include that repair. Consumer repin/CI/review follow after the diagnostic,
-as recorded in the [acceptance checkpoint](v2-acceptance.md#staged-candidate-review-repair--2026-10-05).
-No merge is authorized. Exact schema-3 acceptance needs this consumer revision
-selected before discovery; initial discovery on older main does not test that update.
+`f6394326cd410b82567b8fea76bfd5c44fa9261a`, Issue7/ReadyPR8. Schema3, all4 shared
+files and pantry-project tracked; all20 hashes match before hooks. Explicit update
+preserved config/AGENTS/ignores/project skill/raw index before caller commit.
+Current actual push37272954548/PR37272958814/metadata37272957270 pass. Fresh actual
+runtime/Ubuntu clones repeat check/doctor/read-only bootstrap without writes and
+reject missing/untracked/corrupt-staged files or partial provenance staging without
+repair. Source review repair now validates the independent staged commit candidate;
+consumer finding4181129303 was reproduced with old installed CLI before acceptance.
+Two additional regression cases cover partial provenance staging and intent-to-add;
+full enlarged source suite/current-head semantic review are being recorded separately.
+
+Consumer is public with Active required-check ruleset24484016. Historical actual
+metadata negative/restoration at6b9eb5d demonstrated blocked/clean with no merge.
+No merge is authorized. Exact schema-3 acceptance needs the intended consumer
+revision before discovery; initial discovery on older main does not test the update.
+User's completed fresh-environment diagnostic preserved old main5d055649/source139e66d5,
+again exposing no workflow entries despite intact tracked skills. Recreating the
+environment did not resolve this. Current consumer/source pins are no longer frozen
+at0e3fbc53/aceba714; this update followed completion of that diagnostic, not during it.
 
 The user reports that current environment creation offers repository selection only.
 The [current Cloud documentation](https://learn.chatgpt.com/docs/environments/cloud-environments)
@@ -45,6 +53,13 @@ No shared skill directory may be ignored. Existing project rules/configuration,
 project skills and the Git index are preserved by setup; the caller stages/commits.
 
 ## Published environment setup command
+
+The user has now recreated the environment and reproduced the same catalog absence
+with intact tracked skills on old main. Do not ask for further environment recreation
+or installer changes without new host evidence. See the [recreated-environment comparison](f14-published-cloud-run.md#recreated-environment-reproduced-catalog-absence--2026-10-05).
+The next host action is a support/debugging handoff about initial repository/project
+binding, discovery catalogs and checkout ordering. Manual repo-file reading/use is
+available but cannot satisfy automatic discovery acceptance.
 
 For an already adopted, committed consumer, the Cloud **install script** field and
 Ubuntu setup can run the same read-only command. Checkout must select the approved
@@ -79,8 +94,8 @@ environment creation merely to seek an undocumented branch selector.
 
 ```text
 Validate tracked workflow-skills preparation in canzheng/workflow-skills-test.
-Expected consumer HEAD: 0e3fbc530f21c4981230a5ef968eac2a5dda3d5e.
-Expected workflow source pin: aceba7143652ba127dbc62c98608e1b9943be31d.
+Expected consumer HEAD: f6394326cd410b82567b8fea76bfd5c44fa9261a.
+Expected workflow source pin: a4eb9f1303d80cc18f83b5bbd734063cac03b9c3.
 
 Do not install, bootstrap, repair, switch branches, fetch workflow sources, run Start
 manually, edit files, change authentication, or perform GitHub writes. Preserve
@@ -99,7 +114,7 @@ ignore rules with git check-ignore --no-index; no shared skill should be exclude
 Read AGENTS.md, docs/workflow/contract.md and docs/workflow/README.md, then run:
 python3 tools/workflow/workflow.py check --repo . --run-local --json
 python3 tools/workflow/workflow.py doctor --repo . --json
-python3 tools/workflow/workflow.py doctor --repo . --expect-revision 0e3fbc530f21c4981230a5ef968eac2a5dda3d5e --json
+python3 tools/workflow/workflow.py doctor --repo . --expect-revision f6394326cd410b82567b8fea76bfd5c44fa9261a --json
 Record outputs/exit statuses. Compare HEAD, tracked bytes and raw index before/after.
 
 After initial catalog capture, read relevant committed skills and explain which
