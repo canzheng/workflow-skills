@@ -409,6 +409,76 @@ class SetupTests(unittest.TestCase):
         self.assertEqual(retained.read_bytes(), original)
         self.assertEqual(retained.parent.stat().st_mode & 0o777, 0o700)
 
+    def test_private_storage_is_not_removed_by_a_checked_basename(self):
+        actual = installer.os.rmdir
+        index = (self.target / '.git/index').read_bytes()
+        replacements = []
+        def remove(path, **kwargs):
+            resolved = operation_path(path, kwargs.get('dir_fd'))
+            if resolved.name.startswith('.wf2-private-'):
+                saved = resolved.with_name(resolved.name + '-saved')
+                mode = resolved.stat().st_mode
+                resolved.rename(saved)
+                resolved.mkdir()
+                resolved.chmod(mode)
+                replacements.append(resolved)
+            return actual(path, **kwargs)
+        with patch.object(installer.os, 'rmdir', remove):
+            installer.transaction(self.target, {'AGENTS.md': b'Installer content'})
+        self.assertEqual(replacements, [])
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        self.assertEqual((self.target / 'AGENTS.md').read_bytes(), b'Installer content')
+        retained = set((self.target / '.git').glob('.wf2-private-*'))
+        self.assertTrue(retained)
+        installer.transaction(self.target, {})
+        self.assertEqual(set((self.target / '.git').glob('.wf2-private-*')), retained)
+
+    def test_created_directory_publication_cannot_claim_concurrent_inode(self):
+        binding, attribute = (installer, 'publish_directory') if hasattr(installer, 'publish_directory') else (installer.os, 'mkdir')
+        actual = getattr(binding, attribute)
+        actual_mkdir = installer.os.mkdir
+        directory = self.target / 'published-directory-race'
+        index = (self.target / '.git/index').read_bytes()
+        injected = []
+        def publish(path, *args, **kwargs):
+            resolved = operation_path(path, kwargs.get('dir_fd'))
+            if resolved != directory or injected:
+                return actual(path, *args, **kwargs)
+            if attribute == 'mkdir':
+                actual(path, *args, **kwargs)
+                directory.rename(directory.with_name('saved-published-directory'))
+            actual_mkdir(directory)
+            injected.append(directory.stat())
+            if attribute != 'mkdir':
+                return actual(path, *args, **kwargs)
+        with patch.object(binding, attribute, publish), self.assertRaisesRegex(installer.Conflict, 'Rollback residuals:') as raised:
+            installer.transaction(self.target, {'published-directory-race/file.md': b'Installer content'}, fail_after=1)
+        self.assertEqual(len(injected), 1)
+        self.assertEqual(directory.stat().st_ino, injected[0].st_ino)
+        self.assertEqual(list(directory.iterdir()), [])
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
+        self.addCleanup(installer.shutil.rmtree, recovery)
+        self.assertTrue((recovery / 'recovery-index.json').is_file())
+
+    def test_cross_device_capture_storage_rejects_before_project_writes(self):
+        actual = installer.os.fstat
+        original = (self.target / 'AGENTS.md').read_bytes()
+        index = (self.target / '.git/index').read_bytes()
+        storage_before = set((self.target / '.git').iterdir())
+        def metadata(fd):
+            result = actual(fd)
+            if pathlib.Path(installer.os.readlink('/proc/self/fd/' + str(fd))) == self.target / '.git':
+                values = list(result)
+                values[2] += 1
+                return installer.os.stat_result(values)
+            return result
+        with patch.object(installer.os, 'fstat', metadata), self.assertRaisesRegex(installer.Conflict, 'share the target filesystem'):
+            installer.transaction(self.target, {'AGENTS.md': b'Installer content'})
+        self.assertEqual((self.target / 'AGENTS.md').read_bytes(), original)
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        self.assertEqual(set((self.target / '.git').iterdir()), storage_before)
+
     def test_atomic_replacement_unavailable_never_falls_back_to_overwrite(self):
         victim = self.target / 'AGENTS.md'
         original = victim.read_bytes()
@@ -428,7 +498,7 @@ class SetupTests(unittest.TestCase):
         injected = []
         def unlink(path, **kwargs):
             resolved = operation_path(path, kwargs.get('dir_fd'))
-            if resolved.name == victim.name + '.wf2-staged' and not injected:
+            if resolved.name.endswith(victim.name + '.wf2-staged') and not injected:
                 resolved.write_bytes(b'Late concurrent staging content')
                 injected.append(True)
             return actual(path, **kwargs)

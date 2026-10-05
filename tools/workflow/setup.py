@@ -98,42 +98,62 @@ def remove_entry(basename, *, dir_fd):
 
 
 @contextlib.contextmanager
-def capture_entry(basename, *, dir_fd, record=None):
-    """Move a public entry into an exclusive private directory on the same filesystem."""
-    private = '.wf2-private-' + secrets.token_hex(16)
-    os.mkdir(private, mode=0o700, dir_fd=dir_fd)
-    if record:
-        record(private, basename)
+def private_storage(root, names):
+    # Git-private storage keeps retained capture directories out of project state.
+    # Explicit shared-only installation uses TMPDIR instead of adopting a project.
     try:
-        fd = os.open(private, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=dir_fd)
-    except OSError as exc:
-        raise Conflict('Private quarantine open failed; retained directory: ' + private) from exc
-    identity = os.fstat(fd)
+        base = pathlib.Path(git(root, 'rev-parse', '--absolute-git-dir').decode().strip())
+    except (Invalid, Conflict):
+        base = pathlib.Path(tempfile.gettempdir())
+    base_fd = os.open(base, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    fd = None
+    try:
+        device = os.fstat(base_fd).st_dev
+        for name in names:
+            parent = (root / name).parent
+            while not parent.exists():
+                parent = parent.parent
+            if parent.stat().st_dev != device:
+                raise Conflict('Private capture storage must share the target filesystem; choose a same-filesystem TMPDIR for shared-only installation')
+        private = '.wf2-private-' + secrets.token_hex(16)
+        os.mkdir(private, mode=0o700, dir_fd=base_fd)
+        fd = os.open(private, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=base_fd)
+        yield fd, base / private
+    finally:
+        if fd is not None:
+            os.close(fd)
+        os.close(base_fd)
+        # Linux has no conditional rmdir for an opened directory. Retain storage
+        # rather than deleting whichever inode now occupies its public basename.
+
+
+def publish_directory(basename, *, dir_fd, source_fd, source_name):
+    atomic_rename(source_name, basename, src_dir_fd=source_fd, dst_dir_fd=dir_fd, exchange=False)
+
+
+@contextlib.contextmanager
+def capture_entry(basename, *, dir_fd, storage_fd, storage_path, record=None):
+    """Capture the actual entry in retained same-filesystem transaction storage."""
+    captured = secrets.token_hex(16) + '-' + basename
+    if record:
+        record(str(storage_path), captured)
     moved = False
     try:
-        atomic_rename(basename, basename, src_dir_fd=dir_fd, dst_dir_fd=fd, exchange=False)
+        atomic_rename(basename, captured, src_dir_fd=dir_fd, dst_dir_fd=storage_fd, exchange=False)
         moved = True
-        yield fd, basename, private
+        yield storage_fd, captured, str(storage_path)
     except Exception:
         if moved:
             try:
-                os.stat(basename, dir_fd=fd, follow_symlinks=False)
+                os.stat(captured, dir_fd=storage_fd, follow_symlinks=False)
             except FileNotFoundError:
                 pass
             else:
                 try:
-                    atomic_rename(basename, basename, src_dir_fd=fd, dst_dir_fd=dir_fd, exchange=False)
+                    atomic_rename(captured, basename, src_dir_fd=storage_fd, dst_dir_fd=dir_fd, exchange=False)
                 except (OSError, Conflict) as exc:
-                    raise Conflict('Quarantine residual: ' + private + '/' + basename) from exc
+                    raise Conflict('Quarantine residual: ' + str(storage_path / captured)) from exc
         raise
-    finally:
-        empty = not os.listdir(fd)
-        os.close(fd)
-        if empty:
-            current = os.stat(private, dir_fd=dir_fd, follow_symlinks=False)
-            if (current.st_dev, current.st_ino, current.st_mode) != (identity.st_dev, identity.st_ino, identity.st_mode):
-                raise Conflict('Private quarantine directory changed: ' + private)
-            os.rmdir(private, dir_fd=dir_fd)
 
 
 def transaction(root, changes, fail_after=None):
@@ -156,7 +176,7 @@ def transaction(root, changes, fail_after=None):
             if part.is_symlink():
                 raise Invalid('Symlink directory during rollback: ' + str(part))
         return path.lstat()
-    with tempfile.TemporaryDirectory(prefix='wf2-stage-') as td:
+    with private_storage(root, changes) as (storage_fd, storage_path), tempfile.TemporaryDirectory(prefix='wf2-stage-') as td:
         stage = pathlib.Path(td)
         for i, (name, data) in enumerate(changes.items()):
             p = safe(root, name)
@@ -242,7 +262,7 @@ def transaction(root, changes, fail_after=None):
                         raise Conflict('Concurrent staging edit: ' + name)
                     def record_capture(private, captured):
                         recovery_index[name]['quarantine'] = (pathlib.Path(name).parent / private / captured).as_posix()
-                    with capture_entry(basename, dir_fd=parent_fd, record=record_capture) as (private_fd, captured, private):
+                    with capture_entry(basename, dir_fd=parent_fd, storage_fd=storage_fd, storage_path=storage_path, record=record_capture) as (private_fd, captured, private):
                         if file_state(private_fd, captured) != expected:
                             raise Conflict('Concurrent staging edit: ' + name)
                         if file_state(parent_fd, basename) is not None:
@@ -392,15 +412,25 @@ def transaction(root, changes, fail_after=None):
                 for parent in reversed(parents):
                     directory_metadata(parent.parent)
                     with bound_parent(name, parent) as parent_fd:
-                        os.mkdir(parent.name, dir_fd=parent_fd)
-                        metadata = os.stat(parent.name, dir_fd=parent_fd, follow_symlinks=False)
-                    created_owners[parent] = name
-                    created_dirs[parent] = (metadata.st_mode, metadata.st_dev, metadata.st_ino)
+                        staging_name = 'directory-' + secrets.token_hex(16)
+                        os.mkdir(staging_name, dir_fd=storage_fd)
+                        child_fd = os.open(staging_name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=storage_fd)
+                        try:
+                            metadata = os.fstat(child_fd)
+                            created_owners[parent] = name
+                            created_dirs[parent] = (metadata.st_mode, metadata.st_dev, metadata.st_ino)
+                            recovery_index[directory_name(parent)] = {
+                                'kind': 'directory', 'backup': None, 'mode': None,
+                                'created_mode': metadata.st_mode, 'created_device': metadata.st_dev,
+                                'created_inode': metadata.st_ino,
+                                'creation_staging': str(storage_path / staging_name)}
+                            publish_directory(parent.name, dir_fd=parent_fd, source_fd=storage_fd, source_name=staging_name)
+                            actual = os.stat(parent.name, dir_fd=parent_fd, follow_symlinks=False)
+                            if (actual.st_mode, actual.st_dev, actual.st_ino) != created_dirs[parent]:
+                                raise Conflict('Concurrent directory publication change: ' + directory_name(parent))
+                        finally:
+                            os.close(child_fd)
                     parent_chains[name][parent] = (metadata.st_dev, metadata.st_ino)
-                    recovery_index[directory_name(parent)] = {
-                        'kind': 'directory', 'backup': None, 'mode': None,
-                        'created_mode': metadata.st_mode, 'created_device': metadata.st_dev,
-                        'created_inode': metadata.st_ino}
                 for parent in p.parents:
                     if parent in created_dirs:
                         parent_chains[name].setdefault(parent, created_dirs[parent][1:])
@@ -453,7 +483,7 @@ def transaction(root, changes, fail_after=None):
                             raise Conflict('Concurrent directory change during rollback: ' + name)
                         def record_capture(private, captured):
                             recovery_index[name]['quarantine'] = directory_name(p.parent / private / captured)
-                        with capture_entry(p.name, dir_fd=parent_fd, record=record_capture) as (private_fd, captured, private):
+                        with capture_entry(p.name, dir_fd=parent_fd, storage_fd=storage_fd, storage_path=storage_path, record=record_capture) as (private_fd, captured, private):
                             actual = os.stat(captured, dir_fd=private_fd, follow_symlinks=False)
                             if not stat.S_ISDIR(actual.st_mode) or (actual.st_mode, actual.st_dev, actual.st_ino) != created_dirs[p]:
                                 raise Conflict('Concurrent directory replacement during rollback: ' + name)
@@ -463,7 +493,12 @@ def transaction(root, changes, fail_after=None):
                                 pass
                             else:
                                 raise Conflict('Concurrent directory recreation during rollback: ' + name)
-                            os.rmdir(captured, dir_fd=private_fd)
+                            captured_fd = os.open(captured, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=private_fd)
+                            try:
+                                if os.listdir(captured_fd):
+                                    raise Conflict('Concurrent directory content during rollback: ' + name)
+                            finally:
+                                os.close(captured_fd)
                             try:
                                 os.stat(p.name, dir_fd=parent_fd, follow_symlinks=False)
                             except FileNotFoundError:

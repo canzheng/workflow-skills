@@ -104,3 +104,9 @@ Cleanup first captures public staging entries and created directory names in
 exclusive private same-filesystem storage, then validates the actual captured inode
 before removal. Restore collisions preserve both entries and record the quarantine
 location; this is transient recovery storage, not workflow or task state.
+
+Directory creation binds an opened privately staged inode before no-replace
+publication. Private capture storage and empty captured directories remain retained:
+there is no Linux conditional rmdir-by-opened-inode primitive. Repository storage
+lives under .git; explicit shared-only installation uses a same-filesystem TMPDIR.
+No project ignore rules, task state or index writes are introduced.

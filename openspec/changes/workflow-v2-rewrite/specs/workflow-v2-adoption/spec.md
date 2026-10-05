@@ -226,6 +226,21 @@ provenance, not task state or its own content hash.
 - **WHEN** a public entry is recreated after private capture and prevents no-replace restoration
 - **THEN** both public and captured entries remain intact, with the quarantine path in recovery metadata
 
+#### Scenario: Private directory cleanup has no conditional removal primitive
+- **WHEN** a transaction finishes using private capture storage
+- **THEN** private storage and captured empty directories are retained rather than removed by a checked basename
+- **AND** repository storage resides under Git-private storage without project/index/ignore changes
+- **AND** identical no-op reruns create no additional storage
+
+#### Scenario: Directory creation is privately bound before publication
+- **WHEN** a new directory must be published but a concurrent directory already occupies its public path
+- **THEN** no-replace publication preserves the competing directory and reports recoverable ownership metadata
+- **AND** installer ownership derives from the privately opened staged inode instead of a public post-mkdir lookup
+
+#### Scenario: Capture storage has another filesystem
+- **WHEN** Git-private storage or explicit shared-only TMPDIR differs from the destination filesystem
+- **THEN** apply fails before project writes without an unsafe copy/delete fallback
+
 ### Requirement: Bounded uninstall and diagnostics
 Uninstall SHALL remove only unmodified managed assets/block, retain configuration
 and user modifications, and report residuals. Doctor SHALL be read-only and distinguish

@@ -3,7 +3,10 @@
 Runtime: Python >=3.10 and Git. Installation mutations require Linux libc/kernel
 and filesystem support for renameat2 exchange/no-replace, accessed through the
 standard-library ctypes module; unsupported operations fail without an unsafe
-overwrite fallback. No additional Python package is required.
+overwrite fallback. No additional Python package is required. Private capture storage must share the
+target filesystem (repository Git directory, or same-filesystem TMPDIR for explicit
+shared-only installs). Empty private directories are retained; see operations for
+recovery and manual-cleanup guidance.
  Tested: Python 3.12.14 on Debian 13 and Python 3.12.3 on Ubuntu 24.04. No Conda,
 Node, global AGENTS/skills or GitHub token is needed for offline verification.
 The required runner uses Python's standard library. The optional pytest runner
