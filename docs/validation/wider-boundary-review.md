@@ -546,3 +546,57 @@ doctor/offline repeat and fresh/literal exact-pin verification. Observe new-head
 consumer push/PR/body Actions, remediate review findings and obtain semantic review.
 Archive only after required premerge acceptance. Await separate merge/completion
 or administration authorization; never substitute a simulated merge/closure.
+
+## Python3.14 catalog-resolution checkpoint — 2026-10-05
+
+Source implementation `687552bf15e4c128deb584f8727fce23722d8b74` on rewrite/workflow-skills-v2 repairs
+review4189081517 at49553356: supported Python3.14 non-strict Path.resolve can leave
+cycles unresolved and Path.exists can return false, silently hiding bad catalogs.
+The review reports an actual Python3.14.4 full182 run with four cycle assertions
+failing. Code inspection confirms the default non-strict dependency; local process
+creation remains blocked, so this session has NOT independently executed that old
+Python3.14 reproduction.
+
+Doctor now uses strict resolution. Self/mutual/ancestor cycles and dangling catalog
+components warn and permit subsequent catalog/tool checks; genuinely absent
+optional roots stay silent. A new public regression models changed non-strict
+resolution/exists behavior even on older Python, retains the healthy duplicate,
+and checks warnings plus index/symlink preservation. Expected183 tests are authored
+but not yet run at this implementation. Source CI now verifies real Python3.12
+and3.14 sequentially with strict OpenSpec checks under the stable v2 verification
+job name. Consumer generic CI remains Python3.12; no ruleset/admin change occurred.
+
+Earlier bound-reader/OpenSpec repairs passed182/no skips and strict specs on
+Ubuntu24.04.5/Python3.12.14 at49553356, push37375800804 and PR37375806693. The four
+fault regressions passed on both. This is separate from new183/current3.14 acceptance.
+Review6003275783 completed2026-10-05T21:35:57.786803Z with this new P2; the
+five-minute monitor observed completion and disarmed. New repaired-head review
+and current push/PR checks remain required; no issue/thread completion is inferred.
+
+Consumer75ed97dd1030b64e806300686c86dc1ab3101304 still pins41df6a04ab04f436f5d5519bc7cc218c8fad6d17.
+Its actual push37372307833, PR37372314273 attempt2 and metadata37372310276,
+37372768469,37375906782 passed. The PR first attempt canceled before steps; one
+bounded retry succeeded, with no inferred cancellation cause. Consumer review at
+75ed is clear6002831610. None of these verify the two newer source implementations;
+no consumer repin has been performed while local setup cannot execute.
+
+F01–F13 remain implemented with prior revision-bound evidence. F14 remains partial,
+with new183/real3.14 source verification, current semantic review, actual new-pin
+consumer setup/installed60/fresh/literal verification and archive still pending.
+Initial native Ubuntu catalog/actual three-skill use are retained with unchanged
+shared hashes. Cloud is deferred; global-host use is unperformed. Existing
+enforcement readbacks/negative proof remain distinct from new deployment/admin
+gates. No merge, completed closure, ruleset/protection/global/auth mutation, release
+or remote deletion occurred.
+
+Next on a fresh healthy Ubuntu task: fetch the published rewrite head and read
+AGENTS/approved v2 docs/Issue15/PR16's latest checkpoint. Preserve unpublished local
+c1361214b6ec4608fc7ba1db1a348b34ea9be8f8 and any pending edits; do not reset. Observe
+and diagnose current dual-Python183/specs CI and repaired-head review. Once source
+repair is verified, use its exact implementation pin with the actual source-owned
+setup to preview/update consumer75ed, prove project config/skill/index preservation,
+commit only owned changes, then test actual installed runtime (expected60 affected
+tests with the retained runner), public check/run-local/doctor/offline repeat and
+fresh/literal exact-pin paths. Publish consumer changes and observe actual
+push/PR/body events and semantic review. Archive only after required premerge
+acceptance; await separate real merge/valid closure and administrative authorization.
