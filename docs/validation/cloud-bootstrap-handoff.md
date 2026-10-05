@@ -118,9 +118,12 @@ fetch/revision mismatches block safe selection, emit WF2_START_BLOCKED with the
 specific reason and preserve the checkout. If HEAD already matches, no switch is
 needed; a host-created branch name such as work is acceptable.
 
-Read the selected consumer AGENTS.md and its tracked manifest. Expected source:
+Read the selected consumer AGENTS.md and its tracked manifest. Expected source URL:
+https://github.com/canzheng/workflow-skills.git
+Expected full source revision:
 b1fe9e0242753db54cc16dfc8768502eb74cb3ea
-Resolve its source URL/full revision; report a pin mismatch rather than upgrading.
+Require the selected manifest to contain that source URL and full revision; report
+a missing field or mismatch rather than inferring a source, upgrading or proceeding.
 Fetch that exact workflow-skills source, read README.md and linked development and
 operations guidance at the same revision, and follow the documented source-owned
 setup procedure. Use the resolved pin when adapting examples, not a different
@@ -151,6 +154,12 @@ branches. Both launches were on older main, so that definition could not initial
 the intended pilot from their observed state. The rewrite author supplied that
 contradictory instruction and corrected it here. This establishes an instruction
 conflict, not proof that automatic Start executed or a diagnosis of catalog behavior.
+The subsequent startup-only diagnostic reports remaining on older main without
+confirmed initialization. Inspection of that commit's schema1 manifest confirms
+it has no source_url; the current pilot schema2 manifest contains the exact URL
+above. The pilot instruction now states both expected URL and revision explicitly,
+then verifies them after safe checkout selection. This removes a source-resolution
+ambiguity; it does not establish automatic invocation or a network failure.
 
 The consumer skill loads setup behavior from the pinned source documentation rather
 than depending on a separately supplied shell block or copying installer logic.
