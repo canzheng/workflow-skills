@@ -101,3 +101,25 @@ install globally as a side effect; global installation SHALL NOT claim project a
 - **WHEN** repo-local and global shared names are both visible
 - **THEN** report duplicate discovery and choose one active location explicitly
 - **AND** global skill instructions resolve contract/docs from the selected project rather than a global docs tree
+
+## MODIFIED Requirements
+
+### Requirement: Pinned bounded repository setup
+Setup SHALL require an explicit Git root and full source commit, preview by default,
+preflight all assets/ownership/markers, and preserve user-owned configuration.
+Source bytes SHALL match the pinned commit. The manifest SHALL describe installation
+provenance, not task state or its own content hash.
+
+#### Scenario: Modified file or unsafe target
+- **WHEN** a managed file has local changes or the target uses a symlink or missing Git root
+- **THEN** update fails without silently overwriting files or selecting another checkout
+
+#### Scenario: Apply is interrupted
+- **WHEN** a replacement fails during apply
+- **THEN** original bytes/modes are restored or exact recoverable residuals reported
+
+#### Scenario: Concurrent edit during rollback
+- **WHEN** another process changes an applied file or recreates a deleted destination before rollback
+- **THEN** rollback preserves that changed content, including mode changes and symlink replacements
+- **AND** reports the exact residual path and recoverable original bytes/mode without following unsafe paths
+- **AND** unchanged installer writes can still be restored; no multi-process lock or atomic multi-file transaction is promised

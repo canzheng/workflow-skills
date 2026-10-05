@@ -26,6 +26,12 @@ provenance, not task state or its own content hash.
 - **WHEN** a replacement fails during apply
 - **THEN** original bytes/modes are restored or exact recoverable residuals reported
 
+#### Scenario: Concurrent edit during rollback
+- **WHEN** another process changes an applied file or recreates a deleted destination before rollback
+- **THEN** rollback preserves that changed content, including mode changes and symlink replacements
+- **AND** reports the exact residual path and recoverable original bytes/mode without following unsafe paths
+- **AND** unchanged installer writes can still be restored; no multi-process lock or atomic multi-file transaction is promised
+
 ### Requirement: Bounded uninstall and diagnostics
 Uninstall SHALL remove only unmodified managed assets/block, retain configuration
 and user modifications, and report residuals. Doctor SHALL be read-only and distinguish

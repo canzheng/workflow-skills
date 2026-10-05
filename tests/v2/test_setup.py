@@ -298,6 +298,106 @@ class SetupTests(unittest.TestCase):
         self.assertFalse((self.target / '.workflow').exists())
         run(*self.args, '--apply')
 
+    def test_public_update_rollback_preserves_concurrent_edits(self):
+        run(*self.args, '--apply')
+        commit(self.target)
+        names = ['docs/workflow/contract.md', 'docs/workflow/operations.md']
+        originals = {name: (self.target / name).read_bytes() for name in names}
+        for name in names:
+            (self.source / name).write_bytes(originals[name] + b'Updated source.\n')
+        sha = commit(self.source)
+        args = [str(x) for x in self.args]
+        args[args.index('--revision') + 1] = sha
+        index_before = (self.target / '.git/index').read_bytes()
+        external = self.base / 'external'
+        external.mkdir()
+        external_file = external / 'contract.md'
+        external_file.write_bytes(b'External user content.\n')
+        p = self.target / names[0]
+        actual = installer.os.replace
+        for edit in ('bytes', 'mode', 'deleted', 'symlink', 'parent-symlink'):
+            with self.subTest(edit=edit):
+                calls = 0
+                def replace(src, dst):
+                    nonlocal calls
+                    calls += 1
+                    if calls == 2:
+                        raise OSError('later replacement failed')
+                    actual(src, dst)
+                    if edit == 'bytes':
+                        p.write_bytes(b'Concurrent user edit.\n')
+                    elif edit == 'mode':
+                        p.chmod(0o600)
+                    elif edit == 'deleted':
+                        p.unlink()
+                    elif edit == 'symlink':
+                        p.unlink()
+                        p.symlink_to(external_file)
+                    else:
+                        p.parent.rename(p.parent.with_name('saved-workflow'))
+                        p.parent.symlink_to(external, target_is_directory=True)
+                with patch.object(installer.os, 'replace', side_effect=replace), contextlib.redirect_stdout(io.StringIO()) as out:
+                    code = workflow.main(args + ['--apply', '--json'])
+                self.assertEqual(code, 1)
+                report = json.loads(out.getvalue())
+                message = report['findings'][0]['message']
+                self.assertIn('Rollback residuals: ' + names[0], message)
+                self.assertNotIn('original files restored', message)
+                recovery = pathlib.Path(message.split('recoverable originals: ', 1)[1])
+                self.addCleanup(__import__('shutil').rmtree, recovery)
+                recovery_index = json.loads((recovery / 'recovery-index.json').read_text())
+                self.assertEqual((recovery / recovery_index[names[0]]['backup']).read_bytes(), originals[names[0]])
+                self.assertEqual(external_file.read_bytes(), b'External user content.\n')
+                self.assertEqual((self.target / '.git/index').read_bytes(), index_before)
+                if edit == 'bytes':
+                    self.assertEqual(p.read_bytes(), b'Concurrent user edit.\n')
+                elif edit == 'mode':
+                    self.assertEqual(p.stat().st_mode & 0o777, 0o600)
+                    self.assertEqual(p.read_bytes(), originals[names[0]] + b'Updated source.\n')
+                elif edit == 'deleted':
+                    self.assertFalse(p.exists())
+                elif edit == 'symlink':
+                    self.assertTrue(p.is_symlink())
+                    p.unlink()
+                else:
+                    self.assertTrue(p.parent.is_symlink())
+                    p.parent.unlink()
+                    p.parent.with_name('saved-workflow').rename(p.parent)
+                p.write_bytes(originals[names[0]])
+                p.chmod(0o644)
+                self.assertEqual((self.target / names[1]).read_bytes(), originals[names[1]])
+        run(*args, '--apply')  # explicit fixture recovery permits a normal retry
+
+    def test_rollback_preserves_recreated_deletions_and_edited_new_files(self):
+        p = self.target / 'AGENTS.md'
+        actual_unlink = pathlib.Path.unlink
+        def unlink(path, *args, **kwargs):
+            result = actual_unlink(path, *args, **kwargs)
+            if path == p:
+                p.write_bytes(b'Concurrent recreation.\n')
+            return result
+        for changes in [{'AGENTS.md': None}, {'new.md': b'Installed content.\n'}]:
+            name = next(iter(changes))
+            path = self.target / name
+            patcher = patch.object(pathlib.Path, 'unlink', unlink)
+            if name == 'new.md':
+                actual_replace = installer.os.replace
+                def replace(src, dst):
+                    actual_replace(src, dst)
+                    path.write_bytes(b'Concurrent new-file edit.\n')
+                patcher = patch.object(installer.os, 'replace', replace)
+            with patcher, self.assertRaisesRegex(installer.Conflict, 'Rollback residuals: ' + name) as raised:
+                installer.transaction(self.target, changes, fail_after=1)
+            expected = b'Concurrent recreation.\n' if name == 'AGENTS.md' else b'Concurrent new-file edit.\n'
+            self.assertEqual(path.read_bytes(), expected)
+            recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
+            self.addCleanup(__import__('shutil').rmtree, recovery)
+            data = json.loads((recovery / 'recovery-index.json').read_text())[name]
+            if name == 'AGENTS.md':
+                self.assertEqual((recovery / data['backup']).read_bytes(), b'User rule: preserve data.\n')
+            else:
+                self.assertIsNone(data['backup'])
+
     def test_doctor_duplicate_names_and_malformed_config(self):
         run(*self.args, '--apply')
         duplicate = self.base / 'other-skills'
