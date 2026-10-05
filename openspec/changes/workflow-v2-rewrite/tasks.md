@@ -330,3 +330,14 @@ Ignore preflight includes all required paths and ancestor rules. Four regression
 all23 paths, ignored/nested policy/runtime/docs/CI, unstaged ignored provenance and
 partial staging, preserving files/raw index. Current verification/repin pending here;
 F14 stays active/unarchived, fresh host discovery/merge-completion remain pending.
+
+Validated review checkpoint: executableaceba7143652ba127dbc62c98608e1b9943be31d passes all83/no skips and strict
+specs on Cloud/Ubuntu; source push37269711408/PR37269717386 pass. Consumer0e3fbc530f21c4981230a5ef968eac2a5dda3d5e
+pins it, preserves project/index, fresh clones on both runtimes pass all20 hashes,
+repeat/no-repair and provenance/config/AGENTS/runtime/CI untracking negatives.
+Consumer push37269841401/PR37269845466/metadata37269843410 pass. Both source4180988644
+and consumer4180982685 findings validated before repair, replied/resolved. F14.6
+consumer enforcement configured/observed via user-public visibility and Active24484016,
+actual missing-doc failure37269275157/blocked then exact-restored37269365402/clean.
+No merge/closure/administration by this task. Fresh host/current final review/merge
+completion remain pending; next exact diagnostic uses consumer0e3fbc530f21c4981230a5ef968eac2a5dda3d5e/sourceaceba7143652ba127dbc62c98608e1b9943be31d.

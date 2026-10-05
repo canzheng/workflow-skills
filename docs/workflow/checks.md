@@ -45,7 +45,8 @@ appropriate for a solo maintainer with independent semantic review. Codex COMMEN
 reviews do not count as GitHub APPROVED reviews, and an author cannot approve their
 own PR. Do not silently introduce a new mandatory reviewer requirement.
 
-Require the observed GitHub Actions contexts `v2 verification` and `v2 PR contract`,
+Enable Require status checks to pass before merging, then Add checks. Enter the
+observed GitHub Actions contexts `v2 verification` and `v2 PR contract`,
 and require branches to be up to date if that is the chosen integration policy.
 Verify the contexts on the actual PR/head and select their GitHub Actions provider.
 For initial source adoption, the trusted-base metadata workflow may not exist on

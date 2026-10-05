@@ -1,5 +1,77 @@
 # v2 rewrite acceptance evidence
 
+## Public consumer enforcement and tracking review checkpoint — 2026-10-05
+
+The user changed canzheng/workflow-skills-test to public. Read-only GitHub confirmation:
+visibility public; Protect-main24484016 is Active on refs/heads/main, requiring
+v2 verification and v2 PR contract from GitHub Actions integration15368. No bypass
+actors; current_user_can_bypass never; strict:false. The rule has no PR-only,
+conversation-resolution, deletion or force-push requirements. This task did not change
+repository visibility or administration. The earlier private-plan blocker is resolved.
+
+Required-check enforcement is **configured and observed**: Ready PR8 at
+6b9eb5d9fb8d2787544f962483e20e63c52f7231 was initially clean; temporarily omitting its
+Documentation section caused metadata run[37269275157](https://github.com/canzheng/workflow-skills-test/actions/runs/37269275157)
+/job111632600944 to fail with Missing or empty Documentation section/exit1. The latest
+v2 PR contract check was failure and GitHub mergeable_state was blocked. Exact body
+restoration triggered[37269365402](https://github.com/canzheng/workflow-skills-test/actions/runs/37269365402),
+which passed; mergeable_state returned clean. HEAD/main were unchanged, no merge or
+completed Issue closure occurred. This was a real check failure/block/restoration,
+not simulated merge or YAML inspection. It proves the configured gate, not absent rules.
+
+Independent source review4180988644 and consumer4180982685 were validated before
+acceptance. Original implementation passed19 non-skill/policy index-removal cases;
+tracking/ignore/partial-stage regressions had26 before-fix failures, and an additional
+initial ignored-manifest regression failed on an owned original-source copy. Repair
+requires every manifest asset, provenance/config/AGENTS indexed after any managed
+asset is indexed/committed, using HEAD even if provenance leaves the index. Initial
+unstaged review only allows trackable complete adoption. All required ignore paths
+and ancestor rules are checked before writes; no manifest-only/shared-only bypass.
+Four new public regressions cover all23 files, ignored/nested provenance/policy/
+runtime/docs/CI, initial ignored manifest and partial staging, preserving files/index.
+Both reviewer threads were replied to and resolved after actual remediation evidence.
+
+Tested executable/source pin `aceba7143652ba127dbc62c98608e1b9943be31d`, rewrite/workflow-skills-v2: all83 tests/no
+skips and strict current/delta OpenSpec checks pass on managed Cloud runtime and
+fresh Ubuntu24.04.5 (Python3.12.14/3.12.3, Git2.52/2.43, Node24.19.0). Actual source
+push[37269711408](https://github.com/canzheng/workflow-skills/actions/runs/37269711408)
+and PR[37269717386](https://github.com/canzheng/workflow-skills/actions/runs/37269717386) pass.
+
+Current consumer `pilot/shared-skill-bootstrap`, `0e3fbc530f21c4981230a5ef968eac2a5dda3d5e`, Issue7/ReadyPR8,
+pins that source. Explicit update preserved project config, pantry-project and raw
+index before caller commit. Localf19368f9ee69d993dd46608fb62acf6ea004048f and app-published
+0e3fbc530f21c4981230a5ef968eac2a5dda3d5e have identical tree9388953945dcdb1ffaa904b120fc6e864ac3c17a; guarded non-force
+publication and local alignment preserved user content and original commit in reflog.
+Actual fresh Cloud-runtime/Ubuntu clones contain all4 committed shared files and
+match20 hashes before any hook. Check/doctor/read-only bootstrap pass twice with
+tracked/raw-index bytes unchanged; missing skills and provenance/config/AGENTS/
+runtime/CI untracking fail without repair or mutation. Project skill remains tracked.
+Actual current push[37269841401](https://github.com/canzheng/workflow-skills-test/actions/runs/37269841401),
+PR[37269845466](https://github.com/canzheng/workflow-skills-test/actions/runs/37269845466)
+and metadata[37269843410](https://github.com/canzheng/workflow-skills-test/actions/runs/37269843410) pass.
+New current-head semantic review outcome is still pending; resolved findings alone
+are not a final review pass. Earlier results retain their original revisions below.
+
+F03/S34 tracking obligations and F14.6 consumer required-check enforcement have actual
+positive/negative evidence above. F14.1 fresh Cloud catalog/discovery/use and Ubuntu
+agent-host discovery remain unperformed; runtime clones cannot certify them. Source
+repository currently emits only verification and lacks required-check/PR rules; its
+metadata adoption/enforcement is separate from the tested consumer gate.
+F01–F13 remain implemented/locally verified; F14 partial/in-progress/blocked. Rewrite
+OpenSpec stays active/unarchived. Pending authorization remains real merge to intended
+main followed by valid Issue-completion observation, additional administration and
+release publication. No merge, completed closure, release/global change or delivered claim.
+
+Current docs/specs reassessed: contract, operations/consumer operations, architecture,
+approved F03 clarification, adoption spec/current delta, scenario corpus, checks
+runbook, this evidence, OpenSpec tasks and [fresh Cloud handoff](cloud-bootstrap-handoff.md).
+Exact next task: select consumer `0e3fbc530f21c4981230a5ef968eac2a5dda3d5e` before discovery, then use the updated
+[read-only mini diagnostic](cloud-bootstrap-handoff.md#mini-diagnostic-task-prompt),
+source pin `aceba7143652ba127dbc62c98608e1b9943be31d`. No install/recovery/switch in that diagnostic.
+
+## Previous tracked-model checkpoint — superseded revisions and enforcement state
+
+
 ## Tracked-skill refinement — 2026-10-05
 
 The user authorized committing shared skills instead of injecting ignored dependencies.

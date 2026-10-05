@@ -7,11 +7,14 @@ expose injected skills. This changes storage and the F14 experiment, not the wor
 architecture. The failures do not establish a particular Cloud host root cause.
 Source starting revision: `ead664a722b040e144c44c431bfe4488c36d7c88`, branch
 `rewrite/workflow-skills-v2`. Tested executable/source pin:
-`5615fc3f488edc41079dd60085440f0f265146f9` (79 tests and strict specs on Cloud/Ubuntu).
+`aceba7143652ba127dbc62c98608e1b9943be31d` (83 tests and strict specs on Cloud/Ubuntu).
 Consumer: canzheng/workflow-skills-test, `pilot/shared-skill-bootstrap`,
-`6b9eb5d9fb8d2787544f962483e20e63c52f7231`, Issue7 and PR8. Schema3, all four shared
+`0e3fbc530f21c4981230a5ef968eac2a5dda3d5e`, Issue7 and PR8. Schema3, all four shared
 files and pantry-project are tracked. The earlier fd4/b1 ignored-skill model is
-superseded. No merge is authorized. Select this consumer revision at task creation;
+superseded. Consumer is now public with Active required-check ruleset24484016. Actual metadata
+negative/restoration observed blocked/clean at the older6b9eb5d, with no merge.
+Current consumer push/PR/metadata pass; tracking review defects are repaired.
+No merge is authorized. Select this consumer revision at task creation;
 initial discovery on older main does not test this change.
 
 One-time initial adoption or explicit update uses the pinned source-owned entrypoint
@@ -53,8 +56,8 @@ The full pins below identify the verified consumer commit and executable source.
 
 ```text
 Validate tracked workflow-skills preparation in canzheng/workflow-skills-test.
-Expected consumer HEAD: 6b9eb5d9fb8d2787544f962483e20e63c52f7231.
-Expected workflow source pin: 5615fc3f488edc41079dd60085440f0f265146f9.
+Expected consumer HEAD: 0e3fbc530f21c4981230a5ef968eac2a5dda3d5e.
+Expected workflow source pin: aceba7143652ba127dbc62c98608e1b9943be31d.
 
 Do not install, bootstrap, repair, switch branches, fetch workflow sources, run Start
 manually, edit files, change authentication, or perform GitHub writes. Preserve
@@ -73,7 +76,7 @@ ignore rules with git check-ignore --no-index; no shared skill should be exclude
 Read AGENTS.md, docs/workflow/contract.md and docs/workflow/README.md, then run:
 python3 tools/workflow/workflow.py check --repo . --run-local --json
 python3 tools/workflow/workflow.py doctor --repo . --json
-python3 tools/workflow/workflow.py doctor --repo . --expect-revision 6b9eb5d9fb8d2787544f962483e20e63c52f7231 --json
+python3 tools/workflow/workflow.py doctor --repo . --expect-revision 0e3fbc530f21c4981230a5ef968eac2a5dda3d5e --json
 Record outputs/exit statuses. Compare HEAD, tracked bytes and raw index before/after.
 
 After initial catalog capture, read relevant committed skills and explain which
