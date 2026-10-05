@@ -1,5 +1,45 @@
 # F14 real consumer pilot
 
+## Created-directory rollback repair and host continuation design — 2026-10-05
+
+While checking review completion, consumer Codex5993154072 reported no major issues
+at1995bffe69; source4183335258 identified discarded directory permission changes.
+Independently reproduced with public setup and separate replacement/nonempty controls.
+Candidate c444a49 also failed two existing global-target tests; the final runtime
+`b36fab26859ba6b497fa926e766d948b8981b113` restores absent-target creation/recovery,
+with an additional isolated global-root regression. No assertion was weakened and
+no real global home was changed. Newly created directories record inode/device/mode;
+cleanup removes only unchanged empty directories, preserving/reporting changed or
+nonempty paths and their creation metadata. Source/consumer operations and current/
+delta adoption specs now explain those recovery semantics.
+
+Source `381e51c4bc8c5086dd7b23c35d2dd480a5ecca81` passes118/no skips and strict
+specs on managed runtime and Ubuntu24.04.5; installed bytes match the b36fab2 pin.
+Consumer `7a74c9714774a4dd1533dd3e68ba80aabae1e5ea` pins it; reviewed tree
+639f8a233ecf3d62c9a47dda4235b9629761160e matches own local2e44317f483a7ee368e8da0cb1146c6d31ce4524
+with parent1995bffe retained and guarded non-force publication. Project/index/shared
+hashes remain unchanged during source-owned update; source/consumer trees are clean.
+Fresh actual remote clones on both runtimes bootstrap4 files/match20 hashes, pass
+check/doctor/repeat offline/no-op and preserve project/index bytes. Actual installed
+public setup proves changed-directory and concurrent-file recovery; retained force-
+tracking/index-only nested-policy negatives still reject without mutation.
+Consumer push37303704039/PR37303709363/metadata37303707010 pass. Source
+push37303695349/PR37303702844 results are recorded in the latest PR/Issue checkpoint.
+Final current-head reviews remain required; older consumer approval is not new-head
+approval. User Ubuntu initial discovery/actual3-skill use remains at unchanged bytes;
+Cloud deferred, intermittent Ubuntu26 source-suite cause still unresolved.
+
+The user requested automatic review continuation. The optional
+[host integration design](../workflow/review-continuation.md) specifies scoped
+wake-ups, current-head completion evidence (including comments/reactions), duplicate/
+concurrency controls, authorized remediation and the merge boundary. This chat exposes
+notification scheduling but no Codex wake-up/event-subscription tool, so no monitor
+is enabled or automatic coding continuation claimed. This adds no mandatory workflow
+engine, database, installation requirement or acceptance gate. Next: inspect final
+review outcomes, remediate valid findings, then archive/check after required premerge
+acceptance; host integration requires an actual supported wake-up acceptance proof.
+No merge/completed closure/admin/global/auth/release/remote-deletion action.
+
 ## Concurrent-edit rollback review repair — 2026-10-05
 
 Source ReadyPR16 review4183164337 at e42e865 identified rollback overwriting an
