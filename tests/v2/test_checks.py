@@ -654,6 +654,86 @@ class CheckTests(unittest.TestCase):
                     self.assertEqual({p.relative_to(self.target): p.read_bytes() for p in self.target.rglob('*')
                                       if p.is_file() and '.git' not in p.relative_to(self.target).parts}, contents)
 
+    def test_doctor_discovery_root_failures_continue_without_global_writes(self):
+        import test_setup
+        module = test_setup.workflow
+        loop = self.root / 'catalog-loop'
+        loop.symlink_to(loop.name)
+        first, second = self.root / 'catalog-a', self.root / 'catalog-b'
+        first.symlink_to(second.name)
+        second.symlink_to(first.name)
+        home = self.root / 'isolated-home'
+        (home / '.agents').mkdir(parents=True)
+        global_loop = home / '.agents/skills'
+        global_loop.symlink_to('skills')
+        good = self.root / 'healthy-catalog/duplicate/SKILL.md'
+        good.parent.mkdir(parents=True)
+        good.write_text('---\nname: workflow-deliver-issue\ndescription: duplicate\n---\n')
+        unavailable = self.root / 'inaccessible-catalog'
+        unavailable.mkdir()
+        root_file = self.root / 'catalog-file'
+        root_file.write_bytes(b'Human catalog-path content.')
+        index = (self.target / '.git/index').read_bytes()
+        contents = {p.relative_to(self.target): p.read_bytes() for p in self.target.rglob('*')
+                    if p.is_file() and '.git' not in p.relative_to(self.target).parts}
+        actual_resolve, actual_exists = pathlib.Path.resolve, pathlib.Path.exists
+        actual_listdir, actual_scandir = os.listdir, os.scandir
+        for case in ('self-cycle', 'mutual-cycle', 'default-cycle', 'resolve-denied',
+                     'stat-denied', 'scan-denied', 'root-file'):
+            with self.subTest(case=case):
+                selected = {'self-cycle': loop, 'mutual-cycle': first,
+                            'default-cycle': global_loop, 'root-file': root_file}.get(case, unavailable)
+                args = ['doctor', '--repo', str(self.target), '--json', '--skill-root', str(good.parent.parent)]
+                if case != 'default-cycle':
+                    # Visit the failed extra root before the healthy extra catalog.
+                    args[args.index('--skill-root'):args.index('--skill-root')] = ['--skill-root', str(selected)]
+                def resolve(path, *args, **kwargs):
+                    if path == unavailable and case == 'resolve-denied':
+                        raise PermissionError('TEST_PRIVATE_RESOLUTION_ERROR')
+                    return actual_resolve(path, *args, **kwargs)
+                def exists(path):
+                    if path == unavailable and case == 'stat-denied':
+                        raise PermissionError('TEST_PRIVATE_STAT_ERROR')
+                    return actual_exists(path)
+                def listdir(path):
+                    if not isinstance(path, int) and pathlib.Path(os.fsdecode(path)) == unavailable and case == 'scan-denied':
+                        raise PermissionError('TEST_PRIVATE_SCAN_ERROR')
+                    return actual_listdir(path)
+                def scandir(path):
+                    if not isinstance(path, int) and pathlib.Path(os.fsdecode(path)) == unavailable and case == 'scan-denied':
+                        raise PermissionError('TEST_PRIVATE_SCAN_ERROR')
+                    return actual_scandir(path)
+                with patch.object(pathlib.Path, 'home', return_value=home if case == 'default-cycle' else self.root / 'empty-home'), \
+                        patch.object(pathlib.Path, 'resolve', resolve), \
+                        patch.object(pathlib.Path, 'exists', exists), \
+                        patch.object(os, 'listdir', listdir), patch.object(os, 'scandir', scandir), \
+                        contextlib.redirect_stdout(io.StringIO()) as output:
+                    try:
+                        status = module.main(args)
+                    except RuntimeError:
+                        self.fail('Public doctor leaked cyclic catalog resolution instead of continuing')
+                self.assertEqual(status, 1, output.getvalue())  # The healthy duplicate still fails.
+                report = json.loads(output.getvalue())
+                self.assertTrue(any(x['code'] == 'discovery.inaccessible' and x['path'] == str(selected)
+                                    and x['severity'] == 'warning' for x in report['findings']))
+                self.assertTrue(any(x['code'] == 'discovery.duplicate' for x in report['findings']))
+                self.assertIn('tools', report)  # Later tool diagnostics still execute.
+                self.assertNotIn('TEST_PRIVATE', output.getvalue())
+                self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                self.assertEqual({p.relative_to(self.target): p.read_bytes() for p in self.target.rglob('*')
+                                  if p.is_file() and '.git' not in p.relative_to(self.target).parts}, contents)
+                self.assertEqual(loop.readlink(), pathlib.Path(loop.name))
+                self.assertEqual(first.readlink(), pathlib.Path(second.name))
+                self.assertEqual(second.readlink(), pathlib.Path(first.name))
+                self.assertEqual(global_loop.readlink(), pathlib.Path('skills'))
+                self.assertEqual(root_file.read_bytes(), b'Human catalog-path content.')
+        good.unlink()
+        report = run('doctor', '--repo', self.target, '--skill-root', loop)
+        self.assertTrue(report['ok'])  # A bad optional catalog alone is a warning.
+        self.assertTrue(any(x['code'] == 'discovery.inaccessible' and x['path'] == str(loop)
+                            for x in report['findings']))
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+
     def test_doctor_continues_after_an_undecodable_discovery_file(self):
         folder = self.root / 'isolated-discovery'
         bad = folder / 'a-unrelated/SKILL.md'

@@ -47,13 +47,20 @@ def doctor(root, skill_roots=()):
     roots = [root / '.agents/skills', pathlib.Path.home() / '.agents/skills', pathlib.Path.home() / '.codex/skills', *map(pathlib.Path, skill_roots)]
     seen = set()
     for folder in roots:
-        if folder.resolve() in seen:
-            continue
-        seen.add(folder.resolve())
-        if not folder.exists():
-            continue
         try:
-            for p in folder.glob('*/SKILL.md'):
+            resolved = folder.resolve()
+            if resolved in seen:
+                continue
+            seen.add(resolved)
+            if not folder.exists():
+                continue
+            if not folder.is_dir():
+                raise NotADirectoryError('Discovery root is not a directory')
+            # glob suppresses directory read failures on supported Python versions.
+            # Enumerate the root explicitly so an unreadable catalog is reported.
+            paths = (p for child in folder.iterdir() if child.is_dir()
+                     for p in child.glob('SKILL.md'))
+            for p in paths:
                 try:
                     text = p.read_text(encoding='utf-8')
                 except UnicodeError:
@@ -68,7 +75,7 @@ def doctor(root, skill_roots=()):
                 match = re.search(r'^name:\s*(.+)$', text, re.M)
                 name = match.group(1).strip(' \"\'') if match else p.parent.name
                 discovered.setdefault(name, []).append(str(p))
-        except OSError:
+        except (OSError, RuntimeError):
             findings.append(finding('discovery.inaccessible', folder, 'Cannot inspect skills location', 'Inspect in the actual host', 'warning'))
     for s in SKILLS:
         if not safe(root, '.agents/skills/' + s + '/SKILL.md').is_file():
