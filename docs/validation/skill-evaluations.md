@@ -1,5 +1,20 @@
 # Skill evaluation evidence
 
+## Current host evidence
+
+The primary-author fixture exercises below retain their original execution scope;
+they are not independent model evaluations. The later
+[Ubuntu workstation session](ubuntu-workstation-session.md) separately proves the
+native initial three-skill catalog, actual delivery/risk/backlog use, no-chat
+continuation and design identity/dependency reconciliation at recorded source/consumer
+pins. Shared skill hashes remain unchanged through the runtime repairs. Independent
+Ready-PR Codex review identified real setup/index/filesystem defects; the author
+reproduced them before repair and retained discriminating public-path controls.
+Do not infer that those observations establish universal prompt/model reliability
+or that optional real global-host use or deferred Cloud discovery passed.
+
+## Historical primary-author exercises
+
 These are primary-author, in-turn exercises using explicitly read repository skill
 files. They do not count as independent review or fresh Cloud discovery. The
 execution environment is the /workspace checkout, Python 3.12.14, Codex host.

@@ -44,6 +44,22 @@ tracked consumers need an explicit reviewed source setup/update and caller-owned
 untracking of only the three directories; startup never changes storage/index.
 See [operations](docs/operations.md) for preview/apply, migration and recovery.
 
+### Repository workflow routing
+
+Adoption creates `AGENTS.md` if absent or appends an owned section between
+`<!-- workflow-v2:start -->` and `<!-- workflow-v2:end -->`. It instructs agents
+to use repo-local workflow-skills v2 in `.agents/skills/`, read the installed
+contract/document index, and avoid obsolete workflow wrappers. Existing project
+instructions remain intact; repeating setup does not duplicate the section.
+
+Globally discoverable v1 skills such as `start-task`, `complete-task` and
+`audit-workflow` do not select this repository's workflow. Do not invoke them for
+v2 delivery or delete global files during adoption. Higher-level host policies
+still apply; report an actual conflict rather than claiming this section overrides
+them. Active repository-local v1 routing requires the documented bounded migration
+before setup; the installer refuses to silently append conflicting instructions.
+Commit the generated `AGENTS.md` with the other project-owned adoption files.
+
 ## Repeatable Ubuntu bootstrap
 
 Before starting Codex, from the selected consumer root:

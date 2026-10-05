@@ -61,6 +61,17 @@ Stay quiet for unchanged/pending review state. Notify only about material progre
 completion, a failure or a required user action. Stop or pause the monitor at its
 authorized completion boundary rather than repeatedly notifying about the same gate.
 
+## Active-session timer
+
+An active Codex turn can use a five-minute awaited timer and yield in short waits,
+then inspect review evidence and continue authorized fixes. Disarm the completed
+review's timer; rearm only pending reviews or a newly requested review. This is an
+explicitly user-requested session behavior, not a consumer installation dependency.
+It lasts only while that execution remains alive and does not provide a persistent
+wake-up after the turn ends. The first actual timer check in this rewrite found
+consumer PR8 complete at7a74c97147 and source PR16 still pending, and rearmed only
+source monitoring. This does not satisfy the separate persistent-host wake-up gate.
+
 ## Host acceptance
 
 Before calling this integration operational, demonstrate one real completed review

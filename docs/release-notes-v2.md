@@ -1,7 +1,8 @@
 # v2 candidate release and migration notes
 
 This rewrite branch implements the approved v2 system and is available for review.
-It has not merged or released. Required Ubuntu agent-use and final semantic review acceptance remain open.
+It has not merged or released. Required Ubuntu discovery/actual-use acceptance is verified in the independent
+workstation session; final current-head review and archive checks remain open.
 Cloud is deferred by the user-approved 2026-10-05 scope change; see [actual evidence](validation/v2-acceptance.md).
 
 V2 selects one short repository contract and three repository-scoped skills:
@@ -15,7 +16,7 @@ metadata and isolated unresolved decisions. One batch readiness approval does no
 start execution. Reruns reuse identities and preserve human edits. The
 [actual consumer pilot](validation/f14-consumer-pilot.md) exercises this entry point,
 installed generic CI, the Ready-PR boundary and independently reviewed fixes;
-required Ubuntu host use and final merge obligations remain explicit. Consumer
+verified Ubuntu host use and pending final merge obligations remain explicit. Consumer
 required-check enforcement has actual configured/observed evidence.
 
 Use the pinned source setup/doctor/check utilities in [operations](operations.md).
@@ -48,5 +49,5 @@ Tracked schema-3 consumers migrate explicitly; setup never untracks or stages.
 Optional explicit global skills-only installation into ~/.agents/skills is supported,
 without installing global project policy or changing authentication. No real global
 installation was performed by this rewrite task; tests use isolated targets.
-Required Ubuntu discovery/use, final review and authorized merge remain pending;
+Ubuntu discovery/use is verified; final review/archive and authorized merge remain pending;
 Cloud is deferred. This is not a published release.

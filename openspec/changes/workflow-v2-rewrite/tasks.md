@@ -566,3 +566,45 @@ engine, database, installation requirement or acceptance gate. Next: inspect fin
 review outcomes, remediate valid findings, then archive/check after required premerge
 acceptance; host integration requires an actual supported wake-up acceptance proof.
 No merge/completed closure/admin/global/auth/release/remote-deletion action.
+
+## NUL-path review repair and active-session monitoring — 2026-10-05
+
+The requested five-minute active-session timer observed completed consumer review
+5993740628 at7a74c97147 (no major issues), then source review5413992766 atc5d18b1
+with P2 comment4183600564. Completed targets were disarmed. This is an awaited
+current-turn timer, not a persistent host wake-up or scheduled workflow engine.
+
+The new path finding was independently reproduced before acceptance: an otherwise
+complete committed bundle containing a NUL source key or destination caused an
+unhandled filesystem ValueError or accepted an invalid unused destination. All eight
+preview/apply cases through setup and isolated install-skills failed the new regression
+before the fix. Runtime08346d2f0f29a1f7c3706578424ddad5d986b820 rejects NULs in
+shared relative-path validation and prevalidates every source/destination before
+filesystem access. Both installers return exit2/ok:false structured invalid JSON,
+preserve consumer files/raw index and do not create the isolated global target.
+This restores the existing documented invalid-configuration/preflight contract;
+no behavior scope or skill content changed.
+
+All119 tests/no skips pass at08346d2 on managed Python3.12.14 (69.371s) and
+Ubuntu24.04.5/Python3.12.3 (55.222s); strict specs/check pass. Consumer
+adaad276a1b2f41f135026de1f7781fc49cf24d7 pins08346d2. Treef9d75284a426253920aff8c837dd240e4c22d500
+matches own local9ea8e5414c06fddd4a627e9b70957cf82481640d with parent7a74c9714;
+publication was guarded/non-force. Only two runtime files/provenance changed;
+project policy/shared skills/raw index were preserved during update. Fresh actual
+remote clones on managed runtime and Ubuntu materialize4 exact files/match20 hashes,
+pass check/doctor/repeat offline/no-op, preserve project/index bytes and exercise
+installed public NUL rejection plus retained file/directory rollback and indexed-policy
+negatives. An initial clone tried the source before publication and a separate
+container proof used an incorrect CA path; corrected reruns passed without TLS bypass.
+Initial consumer CI also ran before source publication and failed at fetch; affected
+jobs are rerun and their actual results remain recorded separately in the PR checkpoint.
+
+README now explicitly documents the existing managed AGENTS routing section,
+preservation/idempotence, globally discoverable v1 wrappers and higher-level policies.
+No installer routing change was necessary. Original independent Ubuntu discovery/
+actual three-skill use remains verified at unchanged shared bytes. Cloud is deferred;
+optional real global-host use unperformed; Ubuntu26 historical intermittent source
+suite cause remains unresolved. Next: current-head Actions/semantic review with an
+active-session five-minute timer, then archive/final checks only after acceptance.
+No merge/completed closure/admin/global/auth/release/remote-deletion action.
+
