@@ -117,6 +117,36 @@ class SetupTests(unittest.TestCase):
                     self.assertEqual((self.target / '.git/index').read_bytes(), index)
                     self.assertFalse(global_target.exists())
 
+    def test_nul_bundle_paths_return_json_without_writes(self):
+        bundle = self.source / '.workflow/bundle.json'
+        original = json.loads(bundle.read_text())
+        extra = self.source / 'tools/workflow/extra.py'
+        extra.write_text('Extra fixture asset.\n')
+        before = {p.relative_to(self.target): p.read_bytes() for p in self.target.rglob('*')
+                  if p.is_file() and '.git' not in p.relative_to(self.target).parts}
+        index = (self.target / '.git/index').read_bytes()
+        global_target = self.base / 'isolated global skills'
+        for source, destination in [('tools/workflow/extra\0.py', 'tools/workflow/extra.py'),
+                                    ('tools/workflow/extra.py', 'tools/workflow/extra\0.py')]:
+            with self.subTest(source=source, destination=destination):
+                spec = json.loads(json.dumps(original))
+                spec['assets'][source] = destination
+                bundle.write_text(json.dumps(spec))
+                sha = commit(self.source)
+                for command in [('setup', '--target', self.target, '--repository', 'fixture/consumer'),
+                                ('install-skills', '--target', global_target)]:
+                    for apply in [(), ('--apply',)]:
+                        with self.subTest(command=command[0], apply=bool(apply)):
+                            report = run(*command, '--source', self.source, '--revision', sha,
+                                         *apply, expect=2)
+                            self.assertFalse(report['ok'])
+                            self.assertEqual(report['findings'][0]['code'], 'invalid')
+                            self.assertEqual({p.relative_to(self.target): p.read_bytes()
+                                              for p in self.target.rglob('*') if p.is_file()
+                                              and '.git' not in p.relative_to(self.target).parts}, before)
+                            self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                            self.assertFalse(global_target.exists())
+
     def test_annotated_tag_object_is_not_accepted_as_a_commit_pin(self):
         subprocess.run(['git', '-C', str(self.source), '-c', 'tag.gpgSign=false', 'tag', '-a', 'wf2-fixture', '-m', 'Immutable tag object'], check=True)
         tag = subprocess.check_output(['git', '-C', str(self.source), 'rev-parse', 'wf2-fixture'], text=True).strip()
