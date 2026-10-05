@@ -17,6 +17,7 @@ reachable through the recorded baseline in Git, not copied into the source head.
 - [Specifications](workflow/openspec.md): pinned validation, single-plan and archive ownership.
 - [Skill usage](workflow/usage.md) and [evaluation evidence](validation/skill-evaluations.md).
 - [Handoff and evidence](workflow/handoff.md): exact targets and same-content continuation.
+- [Optional review continuation design](workflow/review-continuation.md): proposed host wake-ups, completion evidence and authorization boundary; not an enabled monitor.
 - [Current architecture](architecture.md) and [checks/enforcement](workflow/checks.md).
 
 - [Acceptance evidence and continuation](validation/v2-acceptance.md): tested revisions,
