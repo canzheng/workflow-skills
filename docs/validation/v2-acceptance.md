@@ -2,6 +2,32 @@
 
 ## Current source-owned setup checkpoint
 
+Latest source repair `b1fe9e0242753db54cc16dfc8768502eb74cb3ea` passes 81 tests
+without skips and strict specs on Cloud and fresh Ubuntu24.04.5; source push/PR
+Actions37251965903/37251969459 pass. The c504 source review's Git replacement-ref
+finding was reproduced before repair; canonical-object reads and a separate-clone
+rematerialization regression now preserve the full-SHA identity. Current code-head Codex review5986640964 reports no major issues. Consumer
+`pilot/shared-skill-bootstrap` now advances to `fd4bf175e7b2ea22439511fdfef872ce8bc7c743`,
+pinning that repaired source. Its local check/doctor/no-op and fresh Ubuntu actual
+README fetch/run twice pass with tracked bytes/index and hashes preserved; push
+37252506795/PR37252510994/metadata37252507928 pass. Consumer current-head review5986706572 reports no major issues. Earlier uploaded f31/ef24 reports retain their original
+revision identities. The outer entrypoint example uses the repaired source;
+an adopted consumer still obeys its own tracked pin.
+
+The second fresh task supplied report/snapshots/actual Actions logs. Those logs
+confirm exact-head/test-merge execution, bootstrap ordering, metadata negative and
+restoration, and resolved semantic review at both consumer/application heads. The
+report also records successful normal source fetch/entrypoint execution during
+recovery. Automatic Start definition/execution was unavailable to that task; empty
+catalogs persisted after recovery. The user subsequently supplied the Start text:
+it required the unmerged pilot revision but forbade selecting it from the observed
+older main. The author corrected that pilot-only routing in the handoff, with
+explicit safe selection and execution markers. This is not proof of automatic Start
+or discovery; generic consumer startup remains branch-agnostic. Main's limited
+branch summary reports protection disabled, while authoritative admin reads remain
+denied and actual required-check enforcement unverified. See the published-run
+record for attachment identities and precise evidence boundaries.
+
 The source-owned `tools/workflow/environment-setup.sh` is excluded from the consumer
 bundle. The source README documents the pinned fetch-and-run command for the Cloud
 **install script** field and local/Ubuntu Bash. Consumer policy/configuration,
@@ -49,8 +75,8 @@ Next action: obtain actual published install/maintenance logs and selected-check
 ordering before another fresh task. Use [the current handoff](cloud-bootstrap-handoff.md)
 with the frozen consumer SHA/source pin above. Preparation must materialize before
 host discovery; inspect absent catalog exposure separately if files are present.
-Cloud and Ubuntu agent-host discovery remain unverified, and final source semantic
-re-review must be observed. Enforcement reads remain access-limited; green Actions
+Cloud and Ubuntu agent-host discovery remain unverified; source code-head review
+passed, while final documentation-head/consumer review outcomes remain separate. Enforcement reads remain access-limited; green Actions
 and workflow YAML do not prove required checks. Actual merge→valid completed Issue
 observation and administration mutations require separate authorization. F14 stays
 integration pending and OpenSpec active; F01–F13 are implemented/locally verified

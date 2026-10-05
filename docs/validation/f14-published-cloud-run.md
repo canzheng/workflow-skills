@@ -80,6 +80,46 @@ Do not require a branch in generic adoption; this unmerged pilot's revision is a
 specific test prerequisite. A normal initialized consumer uses its selected checkout
 and tracked pin. Neither another recovery nor a simulated merge closes these gates.
 
+## Subsequent repair and current consumer
+
+The rewrite task reproduced the independent source review's replacement-ref finding
+before accepting it, then fixed canonical object reads at source
+`b1fe9e0242753db54cc16dfc8768502eb74cb3ea`. All 81 tests/no skips and strict specs
+passed on Cloud and fresh Ubuntu24.04.5; source Actions37251965903/37251969459 passed.
+Source Codex comment5986640964 reports no major issues at that code head.
+
+Consumer branch `pilot/shared-skill-bootstrap` then advanced to
+`fd4bf175e7b2ea22439511fdfef872ce8bc7c743`, with tracked source pin `b1fe9e0...`.
+Only the runtime setup file, manifest pin/hash and README pin changed; the three
+skills/four shared hashes remain identical. Connected Git-data publication's tree
+`1155ae30e50c47031a83b066db55ed1c67748eec` matched the locally verified tree, used the
+actual f31 parent and a guarded non-force ref update. The actual commit was fetched;
+local metadata commit was preserved on a separate local branch, not reset away.
+
+Actual consumer Cloud check/doctor and matching bootstrap no-op passed. Fresh Ubuntu
+cloned real main, safely selected the authorized current pilot SHA, and executed the
+actual README full-SHA fetch/run twice. All asset hashes, tracked bytes/index, project
+skill and clean Git were preserved. This validates the proposed mechanical startup
+sequence, not execution of the user-configured automatic Start skill. Current-head
+push37252506795/PR37252510994/metadata37252507928 passed; current-head Codex
+review5986706572 reports no major issues.
+
+The changed README entrypoint was also executed twice on a fresh unborn Git root
+on Ubuntu, adopting source b1 and preserving files/index on repeat. This task's
+separate outer-Cloud temporary Git fetch returned an authentication error, while
+its already-available source-owned entrypoint/checks passed. That host-specific
+failure is not reassigned to the uploaded task, which reports successful normal
+source fetch. No credential rebinding or implicit alternate revision was used.
+
+The supplied consumer Start text required the pilot commit while forbidding branch
+selection before proceeding. It could not initialize the intended pilot from either
+reported initial older-main checkout. The author corrected those instructions in
+[the current handoff](cloud-bootstrap-handoff.md#start-skill-entrypoint), explicitly
+authorizing safe pilot-only selection and begin/end/failure markers. Generic startup
+remains branch-agnostic. Whether the published Start actually ran is still unverified.
+Use the handoff's current SHAs for continuation; retain both uploaded runs at their
+original f31/ef24 identities. No merge, completion or administrative mutation occurred.
+
 ## Initial preparation and discovery
 
 The requested consumer was `canzheng/workflow-skills-test`, branch

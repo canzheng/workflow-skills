@@ -221,18 +221,22 @@ unchecked: actual fresh published Cloud pre-agent discovery/use, Ubuntu agent di
 remaining required scenarios/final semantic acceptance and actual enforcement evidence
 remain distinct gates. Merge→valid completion/admin mutation need separate authorization.
 
-Current checkpoint: executable source ef24d36f47dbbcdbb204375b53db055122c28269
-passes 80 tests/no skips and strict specs on Cloud/fresh Ubuntu; source Actions pass.
-Frozen consumer pilot/shared-skill-bootstrap at
-f31debf9810c8b989c924bc534add4848fffd6f3 pins that source. Source-owned environment
-entrypoint/README command, repeatability, four hashes, all20 completeness, unborn-root
-and canonical commit-object pin behavior have meaningful runtime/negative proof.
-Consumer actual push/PR/metadata checks and current-head Codex review pass; six
-threads resolved. See docs/validation/f14-published-cloud-run.md: the fresh published
-Cloud task started on old main with no local skill catalog exposure. Recovery,
-manual skill use, safe shaping rerun and targeted negatives passed, but cannot
-certify pre-agent discovery. Obtain actual published install/maintenance logs and
-selected-checkout ordering before another task; use the frozen pins in the handoff.
-Fresh Cloud/Ubuntu agent-host discovery, final source review and enforcement remain
-separate gates. F14 stays unchecked and change active. Real merge→valid completed
-Issue observation and administrative mutations require separate authorization.
+Current checkpoint: executable source b1fe9e0242753db54cc16dfc8768502eb74cb3ea
+passes81 tests/no skips and strict specs on Cloud/fresh Ubuntu24.04.5; source push
+37251965903/PR37251969459 pass. Git replacement-ref finding was independently
+reproduced/fixed; public canonical-object setup/separate-clone bootstrap preserve
+instructions/index/local refs. Source Code Review5986640964 reports no major issues.
+Consumer pilot/shared-skill-bootstrap now at fd4bf175e7b2ea22439511fdfef872ce8bc7c743
+pins that same source. Local check/doctor/no-op, fresh Ubuntu actual README fetch/run
+twice, hashes/index/tracked-byte preservation and push37252506795/PR37252510994/
+metadata37252507928 pass. Consumer current-head review5986706572 reports no major issues.
+Uploaded reports retain their historical f31/ef24 identities. They strengthen
+runtime/CI proof but do not expose automatic consumer Start/discovery. User-supplied
+Start text required pilot HEAD while forbidding selection from initial older main;
+author corrected pilot-only safe routing/markers in the handoff. Generic consumer
+startup stays branch-agnostic and uses its tracked pin. Need actual automatic-run
+output and host discovery ordering; this Start definition conflict does not prove
+it ran. Limited main summary reports protection disabled; authoritative admin reads
+denied, enforcement not proven. F14 stays unchecked/change active. Cloud/Ubuntu
+agent-host acceptance and real merge→valid Issue completion/admin mutation remain
+distinct; merges/closure/admin changes require separate authorization.

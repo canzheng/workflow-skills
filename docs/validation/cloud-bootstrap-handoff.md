@@ -2,9 +2,9 @@
 
 Use existing repository canzheng/workflow-skills-test, branch
 `pilot/shared-skill-bootstrap`, exact tested consumer SHA
-`f31debf9810c8b989c924bc534add4848fffd6f3` (PR8, Issue7).
+`fd4bf175e7b2ea22439511fdfef872ce8bc7c743` (PR8, Issue7).
 The tracked manifest pins workflow source
-`ef24d36f47dbbcdbb204375b53db055122c28269`. Main has the older tracked-skill model;
+`b1fe9e0242753db54cc16dfc8768502eb74cb3ea`. Main has the older tracked-skill model;
 no merge is authorized. Select this branch for preparation and the fresh task.
 Do not discard user changes or silently substitute main.
 
@@ -21,7 +21,7 @@ revision. Always fetch an explicit full SHA; never main/latest. The source
 
 ```sh
 set -eu
-WF2_SOURCE_SHA=ef24d36f47dbbcdbb204375b53db055122c28269
+WF2_SOURCE_SHA=b1fe9e0242753db54cc16dfc8768502eb74cb3ea
 WF2_CONSUMER_ROOT=/workspace/workflow-skills-test
 WF2_CONSUMER_REPOSITORY=canzheng/workflow-skills-test
 WF2_SOURCE_DIR=$(mktemp -d)
@@ -97,51 +97,74 @@ the existing isolated checkout, project files and the index. In the pilot, verif
 the full expected consumer SHA and manifest pin first. Report a mismatch before
 initialization; do not silently reset, migrate old main or substitute its source pin.
 
-Suggested instruction for the Start skill:
+Suggested **pilot-only** instruction for the consumer Start skill:
 
 ```text
-Use the existing /workspace/workflow-skills-test checkout. Preserve host instructions
-and user changes; do not create another worktree or install global skills.
-Before initialization, record the actual consumer branch/SHA and tracked manifest
-pin, plus any skill catalog already exposed. This pilot expects
-pilot/shared-skill-bootstrap at f31debf9810c8b989c924bc534add4848fffd6f3, with source
-ef24d36f47dbbcdbb204375b53db055122c28269. Report mismatches before proceeding.
+Initialize workflow-skills for /workspace/workflow-skills-test. Preserve host
+instructions and user changes; do not create another consumer worktree or install
+global skills. At your first executed step, emit WF2_START_BEGIN and record the
+initial branch/full HEAD, working-tree status, manifest pin and exposed skills.
+Capture ordinary initialization command output and exit status, without credentials
+or shell tracing. These markers are execution evidence, not automatic discovery proof.
 
-Read https://github.com/canzheng/workflow-skills/blob/ef24d36f47dbbcdbb204375b53db055122c28269/README.md
-and its linked docs/development.md and docs/operations.md at that same exact source
-revision. Follow their documented consumer setup procedure, using the tracked
-manifest's source URL/full revision. Use that resolved SHA in executable examples,
-even if an example contains a different seed SHA; never fetch main/latest implicitly.
-Fetch the pinned workflow-skills source and run its source-owned setup entrypoint
-for this consumer, using the existing platform Git authentication unchanged. Capture
-ordinary command output and exit status, without shell tracing or credential dumps.
-The fetched workflow-skills entrypoint must materialize the tracked dependency pin
-before check --run-local and doctor. Require exit0 and ok:true. Repeat bootstrap and
-require changes:[] with no tracked/index changes. Keep project-specific skills tracked.
+This disposable F14 pilot explicitly authorizes selecting its unmerged consumer
+revision before initialization. Expected HEAD:
+fd4bf175e7b2ea22439511fdfef872ce8bc7c743
+If HEAD differs, require a clean working tree/index, fetch origin
+pilot/shared-skill-bootstrap and verify FETCH_HEAD equals that exact SHA before
+switching this existing checkout to it. A detached checkout is acceptable. Do not
+reset, discard changes, force checkout or select another revision. If changes or
+fetch/revision mismatches block safe selection, emit WF2_START_BLOCKED with the
+specific reason and preserve the checkout. If HEAD already matches, no switch is
+needed; a host-created branch name such as work is acceptable.
 
-After initialization, read the current repo instructions and use the three shared
-skills where relevant. Record whether discovery was automatic, refreshed by a
-supported host operation, or explicit file reading. Initialization executed after
-the agent began cannot establish pre-agent discovery. Do not claim F14 complete
-from bootstrap/check/doctor alone. No merge, completed Issue closure, protections,
-release, branch deletion or global configuration changes.
+Read the selected consumer AGENTS.md and its tracked manifest. Expected source:
+b1fe9e0242753db54cc16dfc8768502eb74cb3ea
+Resolve its source URL/full revision; report a pin mismatch rather than upgrading.
+Fetch that exact workflow-skills source, read README.md and linked development and
+operations guidance at the same revision, and follow the documented source-owned
+setup procedure. Use the resolved pin when adapting examples, not a different
+sample seed. Do not assume consumer tools exist, fetch main/latest, copy installer
+logic into this skill, change authentication or migrate older main during startup.
+
+Require bootstrap/check --run-local/doctor exit0 and ok:true. Repeat bootstrap and
+require changes:[] with tracked bytes/index preserved. Only the three shared skill
+namespaces are ignored; project-specific skills remain trackable. Emit WF2_START_END
+with the actual consumer/source revisions and verification results, or emit
+WF2_START_FAILED with the failed command/exit result.
+
+Record when skills became available and whether the host discovered/refreshed them
+or you explicitly read their files. Do not infer discovery from these markers or
+filesystem presence. No application execution, merge, completed Issue closure,
+protection/ruleset change, release, branch deletion or global configuration changes.
 ```
+
+The **normal consumer Start skill is branch-agnostic**: use the task-selected
+checkout and its tracked dependency pin; first adoption needs an explicitly approved
+full source revision. Do not add this pilot's branch/SHA to generic setup or the
+workflow-skills installer. Its safe selection belongs only to the authorized pilot
+startup routing while the test implementation remains unmerged.
+
+The user supplied the current published Start definition after the second run. It
+required the pilot HEAD but said to report mismatches before proceeding and not change
+branches. Both launches were on older main, so that definition could not initialize
+the intended pilot from their observed state. The rewrite author supplied that
+contradictory instruction and corrected it here. This establishes an instruction
+conflict, not proof that automatic Start executed or a diagnosis of catalog behavior.
 
 The consumer skill loads setup behavior from the pinned source documentation rather
 than depending on a separately supplied shell block or copying installer logic.
 A new consumer need not contain any workflow tools beforehand. Its project-owned
 Start skill remains separate from the three ignored shared workflow dependencies.
-Capture the actual run before deciding the published script failed. If Start runs
-only after initial agent discovery, this path can establish startup/materialization
-and explicit use, but does not silently change S34/F14's fresh-discovery contract.
-Establish the host's supported discovery ordering or report that gate unverified.
+If Start runs only after initial agent discovery, initialization/explicit use cannot
+silently change S34/F14's fresh-discovery contract. Establish actual host timing.
 
 ## Fresh task prompt
 
 ```text
 Use the existing isolated checkout /workspace/workflow-skills-test. Do not create
 another worktree. Verify pilot/shared-skill-bootstrap at
-f31debf9810c8b989c924bc534add4848fffd6f3; preserve local changes and report mismatches.
+fd4bf175e7b2ea22439511fdfef872ce8bc7c743; preserve local changes and report mismatches.
 Read AGENTS.md, docs/workflow/contract.md, docs/workflow/README.md and docs/design.md.
 Continue F14 validation for Issue7/Ready PR8, not application implementation.
 
