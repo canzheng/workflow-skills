@@ -25,3 +25,7 @@ SHALL be reported only after actual configuration/readback/observation.
 - **WHEN** structure/link checks pass but docs contradict code defaults
 - **THEN** semantic review still reports unfinished documentation
 
+#### Scenario: Enumerated Markdown is a symlink
+- **WHEN** a document selected for local link checking is a symlink, including a dangling or cyclic link
+- **THEN** check reports an unsafe repository-relative document path before reading the target
+- **AND** external content is not disclosed, document/link/index bytes remain unchanged, and regular local link diagnostics still run

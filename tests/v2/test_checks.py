@@ -654,6 +654,112 @@ class CheckTests(unittest.TestCase):
                     self.assertEqual({p.relative_to(self.target): p.read_bytes() for p in self.target.rglob('*')
                                       if p.is_file() and '.git' not in p.relative_to(self.target).parts}, contents)
 
+    def test_public_commands_do_not_require_a_resolvable_home(self):
+        import test_setup
+        cli = test_setup.TOOLS / 'workflow.py'
+        prefix = ('import pathlib,runpy,sys; '
+                  'pathlib.Path.home=classmethod(lambda cls: '
+                  '(_ for _ in ()).throw(RuntimeError("TEST_PRIVATE_HOME_LOOKUP"))); ')
+        index = (self.target / '.git/index').read_bytes()
+        contents = {p.relative_to(self.target): p.read_bytes() for p in self.target.rglob('*')
+                    if p.is_file() and '.git' not in p.relative_to(self.target).parts}
+        custom = self.root / 'explicit-global-target'
+        cases = [(['check', '--repo', str(self.target)], 0),
+                 (['bootstrap', '--repo', str(self.target), '--apply'], 0),
+                 (['migrate', 'inspect', '--repo', str(self.target)], 0),
+                 (['setup', '--source', str(self.source), '--revision', self.sha,
+                   '--target', str(self.target), '--repository', 'fixture/consumer'], 0),
+                 (['doctor', '--repo', str(self.target)], 0),
+                 (['install-skills', '--source', str(self.source), '--revision', self.sha,
+                   '--target', str(custom)], 0),
+                 (['install-skills', '--source', str(self.source), '--revision', self.sha], 2)]
+        for args, expected in cases:
+            with self.subTest(command=args[0], explicit_target='--target' in args):
+                code = prefix + 'sys.argv=' + repr([str(cli), *args, '--json']) + '; runpy.run_path(' + repr(str(cli)) + ',run_name="__main__")'
+                result = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True,
+                                        env={**os.environ, 'PYTHONPATH': str(cli.parent)})
+                self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+                report = json.loads(result.stdout)
+                self.assertEqual(report['ok'], expected == 0)
+                self.assertNotIn('TEST_PRIVATE_HOME_LOOKUP', result.stdout + result.stderr)
+                self.assertNotIn('Traceback', result.stderr)
+                if args[0] == 'doctor':
+                    self.assertTrue(any(x['code'] == 'discovery.inaccessible' and x['severity'] == 'warning'
+                                        for x in report['findings']))
+                    self.assertIn('tools', report)
+                if expected == 2:
+                    self.assertIn('--target', report['findings'][0]['remediation'] + report['findings'][0]['message'])
+                self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                self.assertEqual({p.relative_to(self.target): p.read_bytes() for p in self.target.rglob('*')
+                                  if p.is_file() and '.git' not in p.relative_to(self.target).parts}, contents)
+                self.assertFalse(custom.exists())  # Preview must not create a global target.
+        # A resolvable default still selects only that isolated home, never the real host.
+        home = self.root / 'isolated-default-home'
+        with patch.object(pathlib.Path, 'home', return_value=home), contextlib.redirect_stdout(io.StringIO()) as output:
+            status = test_setup.workflow.main(['install-skills', '--source', str(self.source),
+                                               '--revision', self.sha, '--apply', '--json'])
+        self.assertEqual(status, 0, output.getvalue())
+        self.assertTrue((home / '.agents/skills/workflow-deliver-issue/SKILL.md').is_file())
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+
+    def test_document_symlinks_never_read_or_disclose_external_content(self):
+        import test_setup
+        external = self.root / 'private-external.md'
+        secret = 'TEST_PRIVATE_DOCUMENT_CONTENT'
+        external.write_text('[private](https://[' + secret + ')\n')
+        original = external.read_bytes()
+        index = (self.target / '.git/index').read_bytes()
+        for name in ('README.md', 'CLAUDE.md', 'docs/private.md',
+                     'openspec/specs/private/spec.md',
+                     'openspec/changes/workflow-v2-rewrite/private.md'):
+            with self.subTest(path=name):
+                p = self.target / name
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.symlink_to(external)
+                try:
+                    report = run('check', '--repo', self.target, expect=1)
+                    self.assertNotIn(secret, json.dumps(report))
+                    self.assertTrue(any(x['code'] == 'docs.unsafe' and x['path'] == name for x in report['findings']), report)
+                    self.assertEqual(p.readlink(), external)
+                    self.assertEqual(external.read_bytes(), original)
+                    self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                    reads = []
+                    actual_read = pathlib.Path.read_text
+                    def read(path, *args, **kwargs):
+                        if path == p or path == external:
+                            reads.append(path)
+                        return actual_read(path, *args, **kwargs)
+                    with patch.object(pathlib.Path, 'read_text', read), contextlib.redirect_stdout(io.StringIO()) as output:
+                        status = test_setup.workflow.main(['check', '--repo', str(self.target), '--json'])
+                    self.assertEqual(status, 1, output.getvalue())
+                    self.assertEqual(reads, [])
+                    self.assertNotIn(secret, output.getvalue())
+                finally:
+                    p.unlink()
+        # Also reject dangling/cyclic links and safe-looking in-repository targets.
+        for name, target in (('docs/loop.md', self.root / 'absent.md'),
+                             ('docs/loop.md', self.target / 'docs/loop.md'),
+                             ('docs/loop.md', self.target / 'docs/workflow/README.md'),
+                             ('README.md', self.root / 'absent.md'),
+                             ('README.md', self.target / 'README.md')):
+            with self.subTest(path=name, target=str(target)):
+                p = self.target / name
+                p.symlink_to(target)
+                try:
+                    report = run('check', '--repo', self.target, expect=1)
+                    self.assertTrue(any(x['code'] == 'docs.unsafe' for x in report['findings']), report)
+                    self.assertEqual(p.readlink(), target)
+                    self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                finally:
+                    p.unlink()
+        # Rejection must not suppress ordinary repository-local URL diagnostics.
+        regular = self.target / 'docs/regular.md'
+        regular.write_bytes(original)
+        report = run('check', '--repo', self.target, expect=1)
+        self.assertTrue(any(x['code'] == 'links.url' and secret in x['message'] for x in report['findings']), report)
+        self.assertEqual(regular.read_bytes(), original)
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+
     def test_doctor_discovery_root_failures_continue_without_global_writes(self):
         import test_setup
         module = test_setup.workflow

@@ -44,7 +44,15 @@ def doctor(root, skill_roots=()):
         if not b or digest(b.encode()) != m['agents_block_hash']:
             findings.append(finding('instructions.modified', 'AGENTS.md', 'Managed block differs', 'Resolve ownership before setup'))
     discovered = {}
-    roots = [root / '.agents/skills', pathlib.Path.home() / '.agents/skills', pathlib.Path.home() / '.codex/skills', *map(pathlib.Path, skill_roots)]
+    roots = [root / '.agents/skills']
+    try:
+        home = pathlib.Path.home()
+        roots.extend((home / '.agents/skills', home / '.codex/skills'))
+    except (OSError, RuntimeError):
+        findings.append(finding('discovery.inaccessible', 'home skills catalogs',
+                                'Cannot resolve home skills locations',
+                                'Inspect home configuration; repository and explicit catalogs still run', 'warning'))
+    roots.extend(map(pathlib.Path, skill_roots))
     seen = set()
     for folder in roots:
         try:
@@ -138,7 +146,7 @@ def main(argv=None):
     s.add_argument('--uninstall', action='store_true')
     s.add_argument('--json', action='store_true')
     g = sub.add_parser('install-skills', help='Explicit shared-skills-only global/custom-root installation')
-    g.add_argument('--target', default=str(pathlib.Path.home() / '.agents/skills'))
+    g.add_argument('--target', help='Defaults to ~/.agents/skills only when this command is selected')
     g.add_argument('--source')
     g.add_argument('--revision')
     g.add_argument('--source-url', default=SOURCE_URL)
@@ -176,6 +184,11 @@ def main(argv=None):
     try:
         if args.command in ('setup', 'install-skills'):
             if args.command == 'install-skills':
+                if args.target is None:
+                    try:
+                        args.target = str(pathlib.Path.home() / '.agents/skills')
+                    except (OSError, RuntimeError) as exc:
+                        raise Invalid('Cannot resolve default global skills target; provide --target') from exc
                 from setup import install_skills
                 changes, residuals = install_skills(args)
             else:

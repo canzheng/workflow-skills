@@ -4,6 +4,10 @@
 source or installed bundle consistency, canonical skill headers and local Markdown
 files/anchors. `--pr-json SNAPSHOT` validates matching repository, nonempty Assignment,
 Changes, Evidence, Documentation and Remaining sections, and local links.
+Enumerated Markdown paths are checked for repository safety before reading. Symlinks,
+including dangling/cyclic links, produce docs.unsafe errors without scanning their
+targets or copying external content into diagnostics. Normal local URL/link findings
+remain supported. These read-only checks do not require a home directory.
 Plain saved snapshot: {"repository":"owner/name","body":"Markdown"}.
 GitHub event snapshots use repository.full_name and pull_request body/base/head.sha.
 Event repository/pull_request/base/base.repo/head fields must be objects; both

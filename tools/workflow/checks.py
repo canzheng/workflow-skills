@@ -172,13 +172,20 @@ def check(root, args):
             findings.append(finding('skill.missing', p, 'Required skill is absent', 'Restore canonical source'))
         elif not re.match(r'\A---\nname: ' + re.escape(s) + r'\ndescription: .+\n---\n', p.read_text()):
             findings.append(finding('skill.header', p, 'Invalid skill frontmatter', 'Provide canonical name and focused description'))
-    docs = [root / x for x in ('README.md', 'AGENTS.md', 'CLAUDE.md') if (root / x).is_file()]
+    docs = [root / x for x in ('README.md', 'AGENTS.md', 'CLAUDE.md')
+            if (root / x).is_file() or (root / x).is_symlink()]
     docs += list((root / 'docs').rglob('*.md')) + list((root / '.agents/skills').rglob('*.md'))
     docs += list((root / 'openspec/specs').rglob('*.md'))
     docs += list((root / 'openspec/changes/workflow-v2-rewrite').rglob('*.md'))
     for p in docs:
         name = p.relative_to(root).as_posix()
         if name.startswith(('docs/planning/', 'docs/lessons/', 'docs/history/')):
+            continue
+        try:
+            p = safe(root, name)
+        except Invalid:
+            findings.append(finding('docs.unsafe', name, 'Unsafe document path; symlinks are not scanned',
+                                    'Use a regular repository-local document'))
             continue
         findings.extend(links(root, p.read_text(), name))
     if args.issues_json:

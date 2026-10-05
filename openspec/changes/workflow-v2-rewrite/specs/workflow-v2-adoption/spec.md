@@ -276,3 +276,9 @@ source authoring from installed consumers and authentication from unprobed write
 - **WHEN** a discovered tool version or authentication probe times out, cannot execute, or produces invalid version output, including an empty or whitespace-only first line
 - **THEN** doctor reports that result unavailable and continues other diagnostics with structured output
 - **AND** captured probe/authentication failure output is suppressed and repository files, index and credentials remain unchanged
+
+#### Scenario: Home directory is unavailable
+- **WHEN** the host cannot resolve the current account's home directory
+- **THEN** repository commands and explicit-target global installation still run without eager home lookup
+- **AND** doctor warns and continues repository/explicit catalog and tool diagnostics
+- **AND** global installation without a target returns structured invalid input requesting --target without writes or exception-detail disclosure

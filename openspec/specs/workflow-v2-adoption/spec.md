@@ -145,6 +145,12 @@ source authoring from installed consumers and authentication from unprobed write
 - **THEN** doctor reports that result unavailable and continues other diagnostics with structured output
 - **AND** captured probe/authentication failure output is suppressed and repository files, index and credentials remain unchanged
 
+#### Scenario: Home directory is unavailable
+- **WHEN** the host cannot resolve the current account's home directory
+- **THEN** repository commands and explicit-target global installation still run without eager home lookup
+- **AND** doctor warns and continues repository/explicit catalog and tool diagnostics
+- **AND** global installation without a target returns structured invalid input requesting --target without writes or exception-detail disclosure
+
 ### Requirement: Consumer CI adoption
 The pinned consumer bundle SHALL include read-only generic verification and
 trusted-base PR metadata workflows. Verification SHALL bootstrap the exact shared dependency pin, verify tracked project assets and consume reviewed local argv
