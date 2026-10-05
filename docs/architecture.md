@@ -82,3 +82,9 @@ Transaction recovery binds file restoration to the recorded parent/ancestor inod
 chain, not only destination bytes or absence. Replaced parent directories are
 preserved with recovery metadata. Issue audit entry/label/state shapes are checked
 inside the shared snapshot helper before dereferencing or phase classification.
+
+Transaction mutations use directory-relative descriptors opened component by
+component with no-follow and recorded inode checks. Parent-path checks detect
+namespace changes; descriptor binding preserves replacement-directory human files
+even when a swap occurs inside unlink/open/replace/restore/cleanup. Recovery remains
+best-effort, without a multi-process lock or atomic multi-file promise.

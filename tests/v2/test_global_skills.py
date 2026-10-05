@@ -99,12 +99,12 @@ class GlobalSkillsTests(unittest.TestCase):
         actual_replace = installer.os.replace
         calls = 0
         changed_mode = None
-        def replace(src, dst):
+        def replace(src, dst, **kwargs):
             nonlocal calls, changed_mode
             calls += 1
             if calls == 2:
                 raise OSError('later failure')
-            actual_replace(src, dst)
+            actual_replace(src, dst, **kwargs)
             changed_mode = 0o700 if root.stat().st_mode & 0o777 != 0o700 else 0o750
             root.chmod(changed_mode)
         index = (self.target / '.git/index').read_bytes()

@@ -48,6 +48,12 @@ provenance, not task state or its own content hash.
 - **AND** reports recoverable original bytes/mode and the expected parent identity chain
 - **AND** a replaced parent discovered before another write prevents that write rather than repurposing the new directory
 
+#### Scenario: Parent swap inside a mutation
+- **WHEN** an existing parent or ancestor is replaced after validation but inside deletion, staging, replacement, restoration or cleanup
+- **THEN** the operation remains bound to its verified parent directory descriptor without following the replacement pathname
+- **AND** replacement-directory human files and staging names remain unchanged, the raw Git index is preserved and original bytes/mode stay recoverable
+- **AND** the namespace change is reported as a residual rather than successful restoration
+
 ### Requirement: Bounded uninstall and diagnostics
 Uninstall SHALL remove only unmodified managed assets/block, retain configuration
 and user modifications, and report residuals. Doctor SHALL be read-only and distinguish

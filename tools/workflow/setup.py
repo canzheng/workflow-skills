@@ -1,4 +1,5 @@
 """Repository-scoped install/update/uninstall with preflight and rollback."""
+import contextlib
 import json
 import os
 import pathlib
@@ -72,6 +73,7 @@ def transaction(root, changes, fail_after=None):
         return
     preflight_destinations(root, changes)
     created_dirs = {}
+    created_owners = {}
     originals = {}
     parent_chains = {}
     parent_residuals = set()
@@ -104,10 +106,12 @@ def transaction(root, changes, fail_after=None):
                                  'mode': originals[name][1] if originals[name] is not None else None}
                           for i, name in enumerate(changes)}
         (stage / 'recovery-index.json').write_text(json.dumps(recovery_index, indent=2))
-        def validate_parents(name):
+        def validate_parents(name, path=None):
             # File absence/inode alone cannot certify a concurrently replaced
             # parent or ancestor. Preserve that directory and our original backup.
             for parent, expected in parent_chains[name].items():
+                if path is not None and parent not in path.parents:
+                    continue
                 try:
                     metadata = directory_metadata(parent)
                     if not stat.S_ISDIR(metadata.st_mode) or (metadata.st_dev, metadata.st_ino) != expected:
@@ -119,6 +123,38 @@ def transaction(root, changes, fail_after=None):
                         recovery_index[directory] = {'kind': 'parent-directory', 'backup': None,
                                                      'expected_device': expected[0], 'expected_inode': expected[1]}
                     raise
+        @contextlib.contextmanager
+        def bound_parent(name, path):
+            # Walk one component at a time with O_NOFOLLOW. A final-parent
+            # O_NOFOLLOW alone would still resolve a swapped ancestor symlink.
+            validate_parents(name, path)
+            fd = os.open(path.anchor, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+            try:
+                current = pathlib.Path(path.anchor)
+                for component in path.parent.parts[1:]:
+                    child = os.open(component, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd)
+                    os.close(fd)
+                    fd = child
+                    current /= component
+                    metadata = os.fstat(fd)
+                    if (metadata.st_dev, metadata.st_ino) != parent_chains[name].get(current):
+                        raise Conflict('Concurrent parent directory replacement: ' + str(current))
+                validate_parents(name, path)
+                yield fd
+            finally:
+                os.close(fd)
+
+        def file_state(parent_fd, basename):
+            try:
+                fd = os.open(basename, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=parent_fd)
+            except FileNotFoundError:
+                return None
+            with os.fdopen(fd, 'rb') as stream:
+                metadata = os.fstat(stream.fileno())
+                if not stat.S_ISREG(metadata.st_mode):
+                    raise Conflict('Destination is not a regular file: ' + basename)
+                return (stream.read(), metadata.st_mode, metadata.st_dev, metadata.st_ino)
+
         def record_parents(name):
             recovery_index[name]['parent_directories'] = {
                 directory_name(parent): {'device': identity[0], 'inode': identity[1]}
@@ -145,9 +181,12 @@ def transaction(root, changes, fail_after=None):
                     parents.append(parent)
                 for parent in reversed(parents):
                     directory_metadata(parent.parent)
-                    parent.mkdir()
-                    metadata = directory_metadata(parent)
+                    with bound_parent(name, parent) as parent_fd:
+                        os.mkdir(parent.name, dir_fd=parent_fd)
+                        metadata = os.stat(parent.name, dir_fd=parent_fd, follow_symlinks=False)
+                    created_owners[parent] = name
                     created_dirs[parent] = (metadata.st_mode, metadata.st_dev, metadata.st_ino)
+                    parent_chains[name][parent] = (metadata.st_dev, metadata.st_ino)
                     recovery_index[directory_name(parent)] = {
                         'kind': 'directory', 'backup': None, 'mode': None,
                         'created_mode': metadata.st_mode, 'created_device': metadata.st_dev,
@@ -157,91 +196,97 @@ def transaction(root, changes, fail_after=None):
                         parent_chains[name].setdefault(parent, created_dirs[parent][1:])
                 record_parents(name)
                 validate_parents(name)
-                if data is None:
-                    p.unlink(missing_ok=True)
-                    applied[name] = None
-                else:
-                    # Per-file replacement is atomic; the multi-file operation is not.
-                    tmp = p.with_name(p.name + '.wf2-staged')
-                    if tmp.exists() or tmp.is_symlink():
-                        raise Conflict('Staging collision: ' + str(tmp))
-                    tmp_name = name + '.wf2-staged'
-                    tmp_state = None
-                    try:
-                        # Exclusive creation rejects a symlink/file introduced
-                        # after preflight. Keep writes/chmod bound to that fd.
-                        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL |
-                                     getattr(os, 'O_NOFOLLOW', 0), 0o666)
-                        with os.fdopen(fd, 'wb') as output:
-                            installed = os.fstat(output.fileno())
-                            tmp_state = (b'', installed.st_mode, installed.st_dev, installed.st_ino)
-                            recovery_index[tmp_name] = {
-                                'kind': 'staging', 'backup': None, 'mode': None,
-                                'created_mode': installed.st_mode, 'created_device': installed.st_dev,
-                                'created_inode': installed.st_ino}
-                            if originals[name]:
-                                os.fchmod(output.fileno(), originals[name][1])
+                with bound_parent(name, p) as parent_fd:
+                    current = file_state(parent_fd, p.name)
+                    if (current[:2] if current else None) != originals[name]:
+                        raise Conflict('Concurrent local edit detected: ' + name)
+                    if data is None:
+                        if current is not None:
+                            os.unlink(p.name, dir_fd=parent_fd)
+                        applied[name] = None
+                    else:
+                        # Bind staging, replacement and cleanup to the same verified
+                        # directory inode, even if its pathname is replaced mid-call.
+                        tmp_name = name + '.wf2-staged'
+                        basename = p.name + '.wf2-staged'
+                        tmp_state = None
+                        try:
+                            fd = os.open(basename, os.O_WRONLY | os.O_CREAT | os.O_EXCL |
+                                         os.O_NOFOLLOW, 0o666, dir_fd=parent_fd)
+                            with os.fdopen(fd, 'wb') as output:
                                 installed = os.fstat(output.fileno())
                                 tmp_state = (b'', installed.st_mode, installed.st_dev, installed.st_ino)
-                            output.write(data)
-                            output.flush()
-                            installed = os.fstat(output.fileno())
-                            tmp_state = (data, installed.st_mode, installed.st_dev, installed.st_ino)
-                        staged_path = safe(root, tmp_name)
-                        metadata = staged_path.lstat()
-                        if not stat.S_ISREG(metadata.st_mode) or \
-                                (staged_path.read_bytes(), metadata.st_mode, metadata.st_dev, metadata.st_ino) != tmp_state:
-                            raise Conflict('Concurrent staging edit: ' + tmp_name)
-                        validate_parents(name)
-                        os.replace(tmp, p)
-                        # Capture our staged inode before replacement, rather than
-                        # accepting another process's subsequent edit as ours.
-                        applied[name] = (data, installed.st_mode, installed.st_dev, installed.st_ino)
-                    finally:
-                        if tmp_state is not None:
-                            try:
-                                staged_path = safe(root, tmp_name)
-                                if staged_path.exists():
-                                    metadata = staged_path.lstat()
-                                    if not stat.S_ISREG(metadata.st_mode) or \
-                                            (staged_path.read_bytes(), metadata.st_mode, metadata.st_dev, metadata.st_ino) != tmp_state:
-                                        raise Conflict('Concurrent staging edit: ' + tmp_name)
-                                    staged_path.unlink()
-                            except (OSError, Invalid, Conflict) as cleanup_error:
-                                staging_residuals.append(tmp_name)
-                                raise Conflict('Staging cleanup residual: ' + tmp_name) from cleanup_error
+                                recovery_index[tmp_name] = {
+                                    'kind': 'staging', 'backup': None, 'mode': None,
+                                    'created_mode': installed.st_mode, 'created_device': installed.st_dev,
+                                    'created_inode': installed.st_ino}
+                                if originals[name]:
+                                    os.fchmod(output.fileno(), originals[name][1])
+                                    installed = os.fstat(output.fileno())
+                                    tmp_state = (b'', installed.st_mode, installed.st_dev, installed.st_ino)
+                                output.write(data)
+                                output.flush()
+                                installed = os.fstat(output.fileno())
+                                tmp_state = (data, installed.st_mode, installed.st_dev, installed.st_ino)
+                            if file_state(parent_fd, basename) != tmp_state:
+                                raise Conflict('Concurrent staging edit: ' + tmp_name)
+                            validate_parents(name)
+                            os.replace(basename, p.name, src_dir_fd=parent_fd, dst_dir_fd=parent_fd)
+                            applied[name] = (data, installed.st_mode, installed.st_dev, installed.st_ino)
+                        finally:
+                            if tmp_state is not None:
+                                try:
+                                    staged = file_state(parent_fd, basename)
+                                    if staged is not None:
+                                        if staged != tmp_state:
+                                            raise Conflict('Concurrent staging edit: ' + tmp_name)
+                                        os.unlink(basename, dir_fd=parent_fd)
+                                except (OSError, Invalid, Conflict) as cleanup_error:
+                                    staging_residuals.append(tmp_name)
+                                    raise Conflict('Staging cleanup residual: ' + tmp_name) from cleanup_error
+                            validate_parents(name)
+                validate_parents(name)
                 if fail_after is not None and len(applied) == fail_after:
                     raise OSError('Injected apply failure')
         except Exception as exc:
             residuals = list(staging_residuals)
             for name in reversed(applied):
                 try:
+                    p = root / name
+                    with bound_parent(name, p) as parent_fd:
+                        current = file_state(parent_fd, p.name)
+                        if current != applied[name]:
+                            raise Conflict('Concurrent edit during rollback: ' + name)
+                        original = originals[name]
+                        if original is None:
+                            if current is not None:
+                                os.unlink(p.name, dir_fd=parent_fd)
+                        else:
+                            flags = os.O_WRONLY | os.O_NOFOLLOW | os.O_NONBLOCK
+                            if current is None:
+                                flags |= os.O_CREAT | os.O_EXCL
+                            fd = os.open(p.name, flags, original[1] & 0o7777, dir_fd=parent_fd)
+                            with os.fdopen(fd, 'wb') as output:
+                                metadata = os.fstat(output.fileno())
+                                if not stat.S_ISREG(metadata.st_mode) or (current is not None and
+                                        (metadata.st_mode, metadata.st_dev, metadata.st_ino) != current[1:]):
+                                    raise Conflict('Concurrent edit during rollback: ' + name)
+                                os.ftruncate(output.fileno(), 0)
+                                output.write(original[0])
+                                output.flush()
+                                os.fchmod(output.fileno(), original[1])
                     validate_parents(name)
-                    p = safe(root, name)
-                    current = None
-                    if p.exists():
-                        metadata = p.lstat()
-                        if not stat.S_ISREG(metadata.st_mode):
-                            raise Conflict('Rollback destination is not a regular file: ' + name)
-                        current = (p.read_bytes(), metadata.st_mode, metadata.st_dev, metadata.st_ino)
-                    if current != applied[name]:
-                        raise Conflict('Concurrent edit during rollback: ' + name)
-                    original = originals[name]
-                    if original is None:
-                        p.unlink(missing_ok=True)
-                    else:
-                        p.write_bytes(original[0])
-                        os.chmod(p, original[1])
                 except (OSError, Invalid, Conflict):
                     residuals.append(name)
             residuals.extend(sorted(parent_residuals))
             for p in sorted(created_dirs, key=lambda p: len(p.parts), reverse=True):
                 name = directory_name(p)
                 try:
-                    metadata = directory_metadata(p)
-                    if not stat.S_ISDIR(metadata.st_mode) or (metadata.st_mode, metadata.st_dev, metadata.st_ino) != created_dirs[p]:
-                        raise Conflict('Concurrent directory change during rollback: ' + name)
-                    p.rmdir()
+                    with bound_parent(created_owners[p], p) as parent_fd:
+                        metadata = os.stat(p.name, dir_fd=parent_fd, follow_symlinks=False)
+                        if not stat.S_ISDIR(metadata.st_mode) or (metadata.st_mode, metadata.st_dev, metadata.st_ino) != created_dirs[p]:
+                            raise Conflict('Concurrent directory change during rollback: ' + name)
+                        os.rmdir(p.name, dir_fd=parent_fd)
                 except FileNotFoundError:
                     pass  # already absent; never recreate a concurrent deletion
                 except (OSError, Invalid, Conflict):

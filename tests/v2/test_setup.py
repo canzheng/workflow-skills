@@ -26,6 +26,11 @@ def run(*args, expect=0):
         raise AssertionError(('CLI returned invalid JSON', command, r.returncode, r.stdout, r.stderr)) from exc
 
 
+def operation_path(path, dir_fd=None):
+    """Resolve Linux test injection paths without changing production routing."""
+    return pathlib.Path(path) if dir_fd is None else pathlib.Path(installer.os.readlink('/proc/self/fd/' + str(dir_fd))) / path
+
+
 def init(root):
     root.mkdir(parents=True)
     subprocess.run(['git', 'init', '-q', str(root)], check=True)
@@ -173,7 +178,7 @@ class SetupTests(unittest.TestCase):
             return actual_copy(src, dst, *args, **kwargs)
 
         def open_file(path, *args, **kwargs):
-            race(path)
+            race(operation_path(path, kwargs.get("dir_fd")))
             return actual_open(path, *args, **kwargs)
 
         with patch.object(installer.shutil, 'copyfile', copy), patch.object(installer.os, 'open', open_file), \
@@ -204,8 +209,8 @@ class SetupTests(unittest.TestCase):
         index = (self.target / '.git/index').read_bytes()
         for case in ('unchanged', 'bytes', 'mode', 'replacement', 'symlink'):
             with self.subTest(case=case):
-                def replace(src, dst):
-                    self.assertEqual(pathlib.Path(src), staged)
+                def replace(src, dst, **kwargs):
+                    self.assertEqual(operation_path(src, kwargs.get("src_dir_fd")), staged)
                     if case == 'bytes':
                         staged.write_bytes(b'Concurrent staging content.')
                     elif case == 'mode':
@@ -417,12 +422,12 @@ class SetupTests(unittest.TestCase):
         original = (self.target / 'AGENTS.md').read_bytes()
         actual = installer.os.replace
         calls = 0
-        def fail(src, dst):
+        def fail(src, dst, **kwargs):
             nonlocal calls
             calls += 1
             if calls == 4:
                 raise OSError('simulated disk failure')
-            return actual(src, dst)
+            return actual(src, dst, **kwargs)
         argv = [str(x) for x in self.args] + ['--apply', '--json']
         with patch.object(installer.os, 'replace', side_effect=fail), contextlib.redirect_stdout(io.StringIO()) as out:
             code = workflow.main(argv)
@@ -452,12 +457,12 @@ class SetupTests(unittest.TestCase):
         for edit in ('bytes', 'mode', 'deleted', 'symlink', 'parent-symlink'):
             with self.subTest(edit=edit):
                 calls = 0
-                def replace(src, dst):
+                def replace(src, dst, **kwargs):
                     nonlocal calls
                     calls += 1
                     if calls == 2:
                         raise OSError('later replacement failed')
-                    actual(src, dst)
+                    actual(src, dst, **kwargs)
                     if edit == 'bytes':
                         p.write_bytes(b'Concurrent user edit.\n')
                     elif edit == 'mode':
@@ -508,13 +513,13 @@ class SetupTests(unittest.TestCase):
         calls = 0
         created = None
         changed_mode = None
-        def replace(src, dst):
+        def replace(src, dst, **kwargs):
             nonlocal calls, created, changed_mode
             calls += 1
             if calls == 2:
                 raise OSError('later replacement failure')
-            actual(src, dst)
-            created = pathlib.Path(dst).parent
+            actual(src, dst, **kwargs)
+            created = operation_path(dst, kwargs.get("dst_dir_fd")).parent
             changed_mode = 0o700 if created.stat().st_mode & 0o777 != 0o700 else 0o750
             created.chmod(changed_mode)
         args = [str(x) for x in self.args] + ['--apply', '--json']
@@ -540,8 +545,8 @@ class SetupTests(unittest.TestCase):
                 name = 'new-' + edit + '/file.md'
                 directory = (self.target / name).parent
                 actual = installer.os.replace
-                def replace(src, dst):
-                    actual(src, dst)
+                def replace(src, dst, **kwargs):
+                    actual(src, dst, **kwargs)
                     if edit == 'replacement':
                         mode = directory.stat().st_mode
                         directory.rename(directory.with_name(directory.name + '-moved'))
@@ -562,6 +567,96 @@ class SetupTests(unittest.TestCase):
                 recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
                 self.addCleanup(__import__('shutil').rmtree, recovery)
 
+    def test_parent_swap_at_unlink_never_deletes_replacement_directory_content(self):
+        directory = self.target / 'existing-parent'
+        directory.mkdir()
+        victim = directory / 'owned.md'
+        victim.write_bytes(b'Original owned content.\n')
+        saved = directory.with_name('saved-parent')
+        actual_path_unlink = pathlib.Path.unlink
+        actual_fd_unlink = installer.os.unlink
+        injected = False
+        def swap():
+            nonlocal injected
+            if not injected:
+                directory.rename(saved)
+                directory.mkdir()
+                victim.write_bytes(b'Concurrent human content.\n')
+                injected = True
+        def path_unlink(path, *args, **kwargs):
+            if path == victim:
+                swap()
+            return actual_path_unlink(path, *args, **kwargs)
+        def fd_unlink(path, *args, **kwargs):
+            if pathlib.Path(path).name == victim.name:
+                swap()
+            return actual_fd_unlink(path, *args, **kwargs)
+        index = (self.target / '.git/index').read_bytes()
+        with patch.object(pathlib.Path, 'unlink', path_unlink), \
+             patch.object(installer.os, 'unlink', fd_unlink), \
+             self.assertRaisesRegex(installer.Conflict, 'Rollback residuals:') as raised:
+            installer.transaction(self.target, {'existing-parent/owned.md': None}, fail_after=1)
+        self.assertTrue(injected)
+        self.assertTrue(victim.exists(), 'The replacement directory lost its human file')
+        self.assertEqual(victim.read_bytes(), b'Concurrent human content.\n')
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
+        self.addCleanup(__import__('shutil').rmtree, recovery)
+        record = json.loads((recovery / 'recovery-index.json').read_text())['existing-parent/owned.md']
+        self.assertEqual((recovery / record['backup']).read_bytes(), b'Original owned content.\n')
+
+    def test_parent_swaps_at_mutation_boundaries_preserve_human_files(self):
+        import shutil
+        for boundary in ('stage-open', 'replace', 'restore', 'stage-cleanup'):
+            for depth in ('parent', 'ancestor'):
+                with self.subTest(boundary=boundary, depth=depth):
+                    name = boundary + '-' + depth + '/child/owned.md'
+                    victim = self.target / name
+                    victim.parent.mkdir(parents=True)
+                    victim.write_bytes(b'Original owned content.\n')
+                    directory = victim.parent if depth == 'parent' else victim.parent.parent
+                    saved = directory.with_name(directory.name + '-saved')
+                    index = (self.target / '.git/index').read_bytes()
+                    actual_open, actual_replace, actual_unlink = installer.os.open, installer.os.replace, installer.os.unlink
+                    injected = False
+                    def swap():
+                        nonlocal injected
+                        if not injected:
+                            directory.rename(saved)
+                            victim.parent.mkdir(parents=True)
+                            victim.write_bytes(b'Concurrent human content.\n')
+                            victim.with_name(victim.name + '.wf2-staged').write_bytes(b'Human staging file.\n')
+                            injected = True
+                    def open_file(path, *args, **kwargs):
+                        if boundary == 'stage-open' and pathlib.Path(path).name.endswith('.wf2-staged') and args[0] & installer.os.O_CREAT:
+                            swap()
+                        if boundary == 'restore' and pathlib.Path(path).name == victim.name and args[0] & installer.os.O_WRONLY:
+                            swap()
+                        return actual_open(path, *args, **kwargs)
+                    def replace(src, dst, **kwargs):
+                        if boundary == 'stage-cleanup':
+                            raise OSError('Injected replace failure')
+                        if boundary == 'replace':
+                            swap()
+                        return actual_replace(src, dst, **kwargs)
+                    def unlink(path, *args, **kwargs):
+                        if boundary == 'stage-cleanup' and pathlib.Path(path).name.endswith('.wf2-staged'):
+                            swap()
+                        return actual_unlink(path, *args, **kwargs)
+                    with patch.object(installer.os, 'open', open_file), patch.object(installer.os, 'replace', replace), \
+                         patch.object(installer.os, 'unlink', unlink), \
+                         self.assertRaisesRegex(installer.Conflict, 'Rollback residuals:') as raised:
+                        installer.transaction(self.target, {name: b'Installer replacement.\n'}, fail_after=1)
+                    self.assertTrue(injected, boundary)
+                    self.assertEqual(victim.read_bytes(), b'Concurrent human content.\n')
+                    self.assertEqual(victim.with_name(victim.name + '.wf2-staged').read_bytes(), b'Human staging file.\n')
+                    self.assertFalse((saved / ('owned.md.wf2-staged' if depth == 'parent' else 'child/owned.md.wf2-staged')).exists())
+                    self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                    recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
+                    self.addCleanup(shutil.rmtree, recovery)
+                    record = json.loads((recovery / 'recovery-index.json').read_text())[name]
+                    self.assertEqual((recovery / record['backup']).read_bytes(), b'Original owned content.\n')
+
     def test_forward_apply_preserves_replaced_existing_parent_before_second_write(self):
         import shutil
         name = 'existing-parent/owned.md'
@@ -572,10 +667,10 @@ class SetupTests(unittest.TestCase):
         index = (self.target / '.git/index').read_bytes()
         actual = installer.os.replace
         calls = 0
-        def replace(src, dst):
+        def replace(src, dst, **kwargs):
             nonlocal calls
             calls += 1
-            actual(src, dst)
+            actual(src, dst, **kwargs)
             if calls == 1:
                 saved = second.parent.with_name('saved-parent')
                 second.parent.rename(saved)
@@ -627,10 +722,11 @@ class SetupTests(unittest.TestCase):
                     directory = deleted.parent if depth == 'parent' else deleted.parent.parent
                     saved = directory.with_name(directory.name + '-saved')
                     external = self.base / ('external-' + depth + '-' + edit)
-                    actual_unlink = pathlib.Path.unlink
+                    actual_unlink = installer.os.unlink
                     def unlink(path, *a, **kw):
+                        resolved = operation_path(path, kw.get("dir_fd"))
                         result = actual_unlink(path, *a, **kw)
-                        if path == deleted:
+                        if resolved == deleted:
                             directory.rename(saved)
                             if edit == 'same-content':
                                 shutil.copytree(saved, directory)
@@ -642,7 +738,7 @@ class SetupTests(unittest.TestCase):
                                 directory.mkdir()
                                 (directory / 'human.md').write_bytes(b'Concurrent human content.\n')
                         return result
-                    with patch.object(pathlib.Path, 'unlink', unlink), \
+                    with patch.object(installer.os, 'unlink', unlink), \
                          patch.object(installer.os, 'replace', side_effect=OSError('later apply failure')), \
                          contextlib.redirect_stdout(io.StringIO()) as out:
                         status = workflow.main(args + ['--apply', '--json'])
@@ -667,20 +763,21 @@ class SetupTests(unittest.TestCase):
 
     def test_rollback_preserves_recreated_deletions_and_edited_new_files(self):
         p = self.target / 'AGENTS.md'
-        actual_unlink = pathlib.Path.unlink
+        actual_unlink = installer.os.unlink
         def unlink(path, *args, **kwargs):
+            resolved = operation_path(path, kwargs.get("dir_fd"))
             result = actual_unlink(path, *args, **kwargs)
-            if path == p:
+            if resolved == p:
                 p.write_bytes(b'Concurrent recreation.\n')
             return result
         for changes in [{'AGENTS.md': None}, {'new.md': b'Installed content.\n'}]:
             name = next(iter(changes))
             path = self.target / name
-            patcher = patch.object(pathlib.Path, 'unlink', unlink)
+            patcher = patch.object(installer.os, 'unlink', unlink)
             if name == 'new.md':
                 actual_replace = installer.os.replace
-                def replace(src, dst):
-                    actual_replace(src, dst)
+                def replace(src, dst, **kwargs):
+                    actual_replace(src, dst, **kwargs)
                     path.write_bytes(b'Concurrent new-file edit.\n')
                 patcher = patch.object(installer.os, 'replace', replace)
             with patcher, self.assertRaisesRegex(installer.Conflict, 'Rollback residuals: ' + name) as raised:
@@ -746,12 +843,12 @@ class SetupTests(unittest.TestCase):
         self.assertFalse((self.target / '.workflow').exists())
         p = self.target / 'AGENTS.md'
         original = p.read_bytes()
-        actual = pathlib.Path.write_bytes
-        def fail_restore(path, data):
-            if path == p:
+        actual = installer.os.open
+        def fail_restore(path, *args, **kwargs):
+            if operation_path(path, kwargs.get('dir_fd')) == p and args[0] & installer.os.O_WRONLY:
                 raise OSError('restoration denied')
-            return actual(path, data)
-        with patch.object(pathlib.Path, 'write_bytes', fail_restore):
+            return actual(path, *args, **kwargs)
+        with patch.object(installer.os, 'open', fail_restore):
             with self.assertRaisesRegex(installer.Conflict, 'Rollback residuals: AGENTS.md') as raised:
                 installer.transaction(self.target, {'AGENTS.md': b'replacement'}, fail_after=1)
         recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])

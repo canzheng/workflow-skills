@@ -200,7 +200,9 @@ class CheckTests(unittest.TestCase):
         index = (self.target / '.git/index').read_bytes()
         malformed = [None, [], 'issue', 1, True, {'labels': None}, {'labels': {}},
                      {'labels': [None]}, {'labels': [{}]}, {'labels': [{'name': []}]},
-                     {'labels': [42]}, {'labels': [['wf:ready']]}, {'state': None}, {'state': []}]
+                     {'labels': [42]}, {'labels': [['wf:ready']]}, {'state': None}, {'state': []},
+                     {'state': 'garbage', 'labels': ['wf:ready']}, {'state': '', 'labels': ['wf:ready']},
+                     {'state': 'completed', 'labels': ['wf:ready']}]
         for item in malformed:
             with self.subTest(item=item):
                 snapshot.write_text(json.dumps(dict(repository='fixture/consumer', issues=[item])))
@@ -217,7 +219,8 @@ class CheckTests(unittest.TestCase):
                 self.assertEqual((self.target / '.git/index').read_bytes(), index)
         snapshot.write_text(json.dumps(dict(repository='fixture/consumer', issues=[
             dict(number=1, state='open', labels=['wf:ready']),
-            dict(number=2, state='open', labels=[{'name': 'wf:review'}, {'name': 'security'}])
+            dict(number=2, state='OPEN', labels=[{'name': 'wf:review'}, {'name': 'security'}]),
+            dict(number=3, state='CLOSED', labels=[])
         ])))
         run('check', '--repo', self.target, '--issues-json', snapshot)
 

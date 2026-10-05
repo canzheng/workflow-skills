@@ -50,8 +50,11 @@ def issue_findings(item):
     state = item.get('state', 'open')
     if not isinstance(state, str):
         raise Invalid('Issue snapshot state must be a string')
+    state = state.lower()
+    if state not in ('open', 'closed'):
+        raise Invalid('Issue snapshot state must be open or closed')
     problems = []
-    if state.lower() == 'closed':
+    if state == 'closed':
         if labels & (PHASES | MODIFIERS):
             problems.append('Closed Issue has stale workflow labels')
         if item.get('state_reason') == 'completed' and not item.get('delivery_evidence'):
