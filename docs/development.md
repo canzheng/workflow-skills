@@ -84,3 +84,8 @@ materialization. Project files/index/pin remain unchanged; dependency edits conf
 [Operations](operations.md) covers explicit tracked-to-ignored migration and optional
 global shared-only installation. Required Ubuntu discovery/use is a fresh-session
 gate independent of hashes and CI. Cloud is deferred. Source authoring uses bundle.json.
+
+Source bundle verification uses the same layout-aware required inventory as setup.
+Complete legacy tracked compatibility bundles remain verifiable; missing runtime
+modules and mixed legacy/new inventories are rejected. This does not permit legacy
+runtime layouts for ignored schema-5 installations.

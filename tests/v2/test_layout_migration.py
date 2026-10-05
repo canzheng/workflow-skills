@@ -182,6 +182,13 @@ class LayoutMigrationTests(unittest.TestCase):
         spec['assets'][extra] = 'tools/workflow/core.py'
         bundle.write_text(json.dumps(spec))
         self.sha = commit(self.source)
+        (self.source / '.workflow/config.json').write_text(json.dumps(dict(
+            schema_version=1, workflow='github-v2', repository='fixture/consumer',
+            docs_index='docs/workflow/README.md', contract='docs/workflow/contract.md',
+            openspec='on-demand', verification=dict(
+                local=[['python3', 'tools/workflow/workflow.py', 'check', '--repo', '.']], integration=[]))))
+        report = run('check', '--repo', self.source, expect=2)
+        self.assertIn('Mixed legacy/new', json.dumps(report))
         before = self.snapshot(self.target)
         for command in ['setup', 'install-skills']:
             target = self.target if command == 'setup' else self.base / 'isolated-skills'

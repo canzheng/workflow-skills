@@ -7,7 +7,7 @@ import shutil
 import subprocess
 from urllib.parse import unquote, urlsplit
 
-from core import (Conflict, Invalid, SKILLS, CI_ASSETS, REQUIRED_ASSETS, required_assets, START, block, config, dependency_policy, digest, finding, git, load,
+from core import (Conflict, Invalid, SKILLS, CI_ASSETS, required_assets, START, block, config, dependency_policy, digest, finding, git, load,
                   manifest, owned, relative, safe, valid_bundle_version)
 from records import issue_findings
 
@@ -146,8 +146,9 @@ def check(root, args):
             destinations.add(dest)
             if not safe(root, source).is_file():
                 findings.append(finding('bundle.missing', source, 'Production asset missing', 'Assemble complete bundle before installation'))
-        if not REQUIRED_ASSETS <= destinations:
-            findings.append(finding('bundle.incomplete', '.workflow/bundle.json', 'Required consumer assets omitted: ' + ', '.join(sorted(REQUIRED_ASSETS - destinations)), 'Include every mandatory consumer asset'))
+        required = required_assets(destinations)
+        if not required <= destinations:
+            findings.append(finding('bundle.incomplete', '.workflow/bundle.json', 'Required consumer assets omitted: ' + ', '.join(sorted(required - destinations)), 'Include every mandatory consumer asset'))
     for s in SKILLS:
         p = safe(root, '.agents/skills/' + s + '/SKILL.md')
         if not p.is_file():

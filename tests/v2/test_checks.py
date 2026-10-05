@@ -7,6 +7,7 @@ import tempfile
 import unittest
 
 from test_setup import ROOT, init, fixture_source, commit, run
+from core import LEGACY_RUNTIME_PREFIX, RUNTIME_PREFIX
 
 BODY = '''## Assignment
 Approved bounded source.
@@ -46,18 +47,47 @@ class CheckTests(unittest.TestCase):
         r = subprocess.run(['python3', str(installed), 'check', '--repo', str(self.target)], capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
 
+    def test_source_and_installed_checks_agree_for_supported_tracked_layouts(self):
+        (self.source / '.workflow/config.json').write_bytes((self.target / '.workflow/config.json').read_bytes())
+        bundle = self.source / '.workflow/bundle.json'
+        original = json.loads(bundle.read_text())
+        for i, prefix in enumerate((RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX)):
+            with self.subTest(layout=prefix):
+                spec = json.loads(json.dumps(original))
+                spec['assets'] = {src: dest.replace(RUNTIME_PREFIX, prefix, 1)
+                                  for src, dest in spec['assets'].items()}
+                bundle.write_text(json.dumps(spec))
+                sha = commit(self.source)
+                target = self.root / ('tracked-layout-' + str(i))
+                init(target)
+                run('setup', '--source', self.source, '--revision', sha, '--target', target,
+                    '--repository', 'fixture/consumer', '--dependency-storage', 'tracked', '--apply')
+                commit(target)
+                installed = target / prefix / 'workflow.py'
+                result = subprocess.run([sys.executable, str(installed), 'check', '--repo', str(target),
+                                         '--run-local', '--json'], capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertTrue(json.loads(result.stdout)['ok'])
+                index = (self.source / '.git/index').read_bytes()
+                run('check', '--repo', self.source)
+                self.assertEqual((self.source / '.git/index').read_bytes(), index)
+
     def test_source_check_rejects_omitted_installed_runtime_mapping(self):
         (self.source / '.workflow/config.json').write_bytes((self.target / '.workflow/config.json').read_bytes())
         run('check', '--repo', self.source)
         p = self.source / '.workflow/bundle.json'
         original = json.loads(p.read_text())
-        for module in ('workflow.py', 'core.py', 'setup.py', 'bootstrap.py', 'checks.py', 'records.py', 'migration.py'):
-            with self.subTest(module=module):
-                spec = json.loads(json.dumps(original))
-                del spec['assets']['tools/workflow/' + module]
-                p.write_text(json.dumps(spec))
-                result = run('check', '--repo', self.source, expect=1)
-                self.assertTrue(any(x['code'] == 'bundle.incomplete' for x in result['findings']))
+        for prefix in (RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX):
+            for module in ('workflow.py', 'core.py', 'setup.py', 'bootstrap.py', 'checks.py', 'records.py', 'migration.py'):
+                with self.subTest(layout=prefix, module=module):
+                    spec = json.loads(json.dumps(original))
+                    spec['assets'] = {src: dest.replace(RUNTIME_PREFIX, prefix, 1)
+                                      for src, dest in spec['assets'].items()}
+                    del spec['assets']['tools/workflow/' + module]
+                    p.write_text(json.dumps(spec))
+                    result = run('check', '--repo', self.source, expect=1)
+                    missing = next(x for x in result['findings'] if x['code'] == 'bundle.incomplete')
+                    self.assertIn(prefix + module, missing['message'])
 
     def test_source_check_and_setup_reject_invalid_bundle_versions(self):
         (self.source / '.workflow/config.json').write_bytes((self.target / '.workflow/config.json').read_bytes())

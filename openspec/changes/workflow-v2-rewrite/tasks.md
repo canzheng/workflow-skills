@@ -813,3 +813,18 @@ JSON error unexplained. Consumer two checks and source verification enforcement
 were read-only confirmed; source PR-contract administrative configuration remains
 pending. No merge/closure/admin/global/auth/release/remote deletion. Next: current
 Ready-head review; archive only after premerge acceptance, then final checks/review.
+
+
+## Source-check compatibility review repair — 2026-10-05
+
+Review5416098884 at151476c735e274012d9bb597653908c9ae5fe96b returned
+P2 comment4185120389. Independent public CLI reproduction confirms source check
+rejects a complete legacy tracked bundle after setup and its installed checker
+succeed. Wider control shows mixed source inventories accepted despite setup
+rejecting them. Shared layout-aware requirements now govern source checking.
+Before controls: three focused tests, two discriminating failures, no errors;
+after: all three pass (2.275s), including missing-module negatives in both layouts.
+Existing assertions remain intact. Development guidance records source/installer
+agreement; compatibility specs already describe it, so no behavior-contract change
+is needed. Full source/Ubuntu suites, consumer repin/proof, CI and new semantic
+review are next; archive and real merge/completed closure remain pending.
