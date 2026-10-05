@@ -464,6 +464,8 @@ def validate_manifest(root, m):
         if not owned(name) or not isinstance(h, str) or not re.fullmatch(r'[0-9a-f]{64}', h):
             raise Invalid('Unsafe manifest path/hash: ' + name)
         safe(root, name)
+    if m['schema_version'] == 5 and runtime_prefix(m['files']) != RUNTIME_PREFIX:
+        raise Invalid('Schema-5 dependency runtime layout must be .agents/tools/workflow/')
     runtime_prefix(m['files'])
     if not re.fullmatch(r'[0-9a-f]{64}', str(m.get('agents_block_hash', ''))):
         raise Invalid('Invalid managed instruction hash')

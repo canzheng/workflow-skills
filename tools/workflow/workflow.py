@@ -18,7 +18,7 @@ def doctor(root, skill_roots=()):
     c = config(root)
     findings = []
     m = manifest(root)
-    source = safe(root, '.workflow/bundle.json').exists()
+    source = not m and safe(root, '.workflow/bundle.json').exists()
     if not m and not source:
         findings.append(finding('provenance.missing', '.workflow', 'Neither source bundle nor consumer manifest exists', 'Use pinned setup'))
     text = safe(root, 'AGENTS.md').read_text() if safe(root, 'AGENTS.md').exists() else ''

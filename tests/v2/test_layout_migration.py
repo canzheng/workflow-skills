@@ -227,3 +227,32 @@ class LayoutMigrationTests(unittest.TestCase):
                     git(self.target, 'update-index', '--force-remove', '--', name)
         run('check', '--repo', self.target, '--run-local')
         self.assertEqual(run('bootstrap', '--repo', self.target, '--apply')['changes'], [])
+
+    def test_ignored_setup_refuses_legacy_runtime_bundle_before_writes(self):
+        self.old_adoption(3, 'legacy-for-layout-proof')
+        bundle = self.source / '.workflow/bundle.json'
+        spec = json.loads(bundle.read_text())
+        spec['assets'] = {src: dest.replace(RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX, 1)
+                          for src, dest in spec['assets'].items()}
+        bundle.write_text(json.dumps(spec))
+        self.sha = commit(self.source)
+        before = self.snapshot(self.target)
+        for flags in ([], ['--apply']):
+            with self.subTest(flags=flags):
+                report = run(*self.args_for(self.target), *flags, expect=1)
+                self.assertIn('runtime layout', json.dumps(report).lower())
+                self.assertEqual(self.snapshot(self.target), before)
+
+    def test_schema_five_legacy_manifest_cannot_certify_installation(self):
+        run(*self.args_for(self.target), '--apply')
+        commit(self.target)
+        pin = self.target / '.workflow/install-manifest.json'
+        m = json.loads(pin.read_text())
+        m['files'] = {n.replace(RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX, 1): h for n, h in m['files'].items()}
+        pin.write_text(json.dumps(m))
+        before = self.snapshot(self.target)
+        for command in ['check', 'doctor', 'bootstrap']:
+            with self.subTest(command=command):
+                report = run(command, '--repo', self.target, expect=2)
+                self.assertIn('runtime layout', json.dumps(report).lower())
+                self.assertEqual(self.snapshot(self.target), before)

@@ -265,6 +265,8 @@ def setup(args):
             raise Invalid('setup requires --source and --revision')
         version, assets = source_bundle(args.source, args.revision)
         url = source_url(getattr(args, 'source_url', SOURCE_URL))
+        if args.skill_storage == 'ignored' and runtime_prefix(assets) != RUNTIME_PREFIX:
+            raise Conflict('Ignored dependency runtime layout requires .agents/tools/workflow/; keep legacy runtime tracked or update the source bundle')
         if args.skill_storage == 'ignored' and (not old or old['schema_version'] in (4, 5)):
             untracked_shared_policy(root, runtime=runtime_prefix(assets))
         # An indexed/HEAD-owned file or gitlink can be an absent destination

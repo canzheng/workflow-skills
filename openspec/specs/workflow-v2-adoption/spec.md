@@ -189,6 +189,15 @@ skills SHALL remain tracked. Required Ubuntu discovery/use SHALL be tested separ
 - **AND** they preserve dependency bytes, project files and the raw index
 - **AND** an explicitly staged coherent migration remains valid without requiring the old HEAD to be merged
 
+
+#### Scenario: Schema-five layout and consumer provenance win
+- **WHEN** ignored setup is requested from a legacy runtime-layout bundle or schema-five provenance names that old layout
+- **THEN** setup and installed diagnostics reject before dependency writes
+- **AND** existing schema-three/four installations remain verifiable without automatic migration
+- **WHEN** an adopted consumer also contains an unrelated workflow bundle marker
+- **THEN** CI chooses its installation provenance and exact source pin before the marker
+- **AND** verification invokes the manifest runtime and PR metadata chooses only the trusted base pin
+
 ### Requirement: Explicit optional global shared skills
 An explicit install-skills command SHALL preview by default and install only the
 three shared skills/references plus provenance at ~/.agents/skills or an explicit
