@@ -38,7 +38,9 @@ original fixture/assertion strength unless an approved behavior change requires 
 
 ### Requirement: Native Issue audit input
 Issue audits SHALL validate native state and optional state_reason values before
-classifying snapshots, without treating mechanical validity as semantic delivery.
+classifying snapshots, including their relationship. Optional delivery evidence
+SHALL be a string or null, and only a nonblank reference may suppress the
+missing-evidence finding, without treating mechanical validity as semantic delivery.
 
 #### Scenario: Malformed closure reason
 - **WHEN** state_reason is an unknown string or a non-string/non-null value
@@ -48,3 +50,14 @@ classifying snapshots, without treating mechanical validity as semantic delivery
 - **WHEN** a closed Issue supplies COMPLETED without delivery evidence
 - **THEN** the same missing-evidence finding applies as for completed
 - **AND** null, not_planned, duplicate and reopened reasons remain supported without asserting completed delivery
+
+#### Scenario: Contradictory native state and reason
+- **WHEN** an open Issue supplies completed, not_planned or duplicate, or a closed Issue supplies reopened
+- **THEN** public check rejects the snapshot as structured invalid input before classifying workflow state
+- **AND** null reasons and case-insensitive compatible state/reason pairs remain supported
+
+#### Scenario: Malformed or blank delivery annotation
+- **WHEN** delivery_evidence is a non-string/non-null value in any Issue snapshot
+- **THEN** public check returns structured invalid-input JSON without changing the snapshot or index
+- **AND** absent, null, empty or whitespace-only references leave completed claims missing evidence
+- **AND** a nonblank reference still requires manual semantic acceptance and merge review

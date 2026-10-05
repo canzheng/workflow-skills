@@ -58,11 +58,16 @@ def issue_findings(item):
         if not isinstance(reason, str) or reason.lower() not in ('completed', 'not_planned', 'duplicate', 'reopened'):
             raise Invalid('Issue snapshot state_reason must be null, completed, not_planned, duplicate or reopened')
         reason = reason.lower()
+        if (state == 'open') != (reason == 'reopened'):
+            raise Invalid('Issue snapshot state_reason contradicts state')
+    evidence = item.get('delivery_evidence')
+    if evidence is not None and not isinstance(evidence, str):
+        raise Invalid('Issue snapshot delivery_evidence must be a string or null')
     problems = []
     if state == 'closed':
         if labels & (PHASES | MODIFIERS):
             problems.append('Closed Issue has stale workflow labels')
-        if reason == 'completed' and not item.get('delivery_evidence'):
+        if reason == 'completed' and not (evidence and evidence.strip()):
             problems.append('Completed claim has no indexed delivery evidence; inspect acceptance and merge manually')
     else:
         if len(labels & PHASES) != 1:

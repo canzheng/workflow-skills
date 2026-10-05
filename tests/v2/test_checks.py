@@ -257,6 +257,58 @@ class CheckTests(unittest.TestCase):
         run('check', '--repo', self.target, '--issues-json', snapshot)
         self.assertEqual((self.target / '.git/index').read_bytes(), index)
 
+    def test_issue_snapshot_state_reason_pairs_validate_before_classification(self):
+        snapshot = self.root / 'issues.json'
+        index = (self.target / '.git/index').read_bytes()
+        for state in ('open', 'OPEN', 'closed', 'CLOSED'):
+            for reason in (None, 'completed', 'COMPLETED', 'not_planned', 'NOT_PLANNED',
+                           'duplicate', 'DUPLICATE', 'reopened', 'REOPENED'):
+                valid = reason is None or ((state.lower() == 'open') == (reason.lower() == 'reopened'))
+                with self.subTest(state=state, reason=reason):
+                    item = dict(state=state, state_reason=reason,
+                                labels=['wf:ready'] if state.lower() == 'open' else [],
+                                delivery_evidence='PR reference; verify acceptance manually')
+                    snapshot.write_text(json.dumps(dict(repository='fixture/consumer', issues=[item])))
+                    original = snapshot.read_bytes()
+                    result = subprocess.run([sys.executable, str(self.target / '.agents/tools/workflow/workflow.py'),
+                                             'check', '--repo', str(self.target), '--issues-json', str(snapshot), '--json'],
+                                            capture_output=True, text=True)
+                    self.assertEqual(result.returncode, 0 if valid else 2, result.stdout + result.stderr)
+                    report = json.loads(result.stdout)
+                    self.assertEqual(report['ok'], valid)
+                    if not valid:
+                        self.assertEqual(report['findings'][0]['code'], 'invalid')
+                    self.assertEqual(result.stderr, '')
+                    self.assertEqual(snapshot.read_bytes(), original)
+                    self.assertEqual((self.target / '.git/index').read_bytes(), index)
+
+    def test_issue_snapshot_delivery_evidence_is_an_optional_nonblank_reference(self):
+        snapshot = self.root / 'issues.json'
+        index = (self.target / '.git/index').read_bytes()
+        for state, reason, labels in [('closed', 'completed', []), ('closed', 'duplicate', []),
+                                     ('open', 'reopened', ['wf:ready'])]:
+            for evidence in (None, '', ' ', '\n\t', 'PR #17; inspect manually', 0, 1, False, True, [],
+                             ['PR #17'], {}, {'bogus': True}):
+                malformed = evidence is not None and not isinstance(evidence, str)
+                missing = state == 'closed' and reason == 'completed' and not (
+                    isinstance(evidence, str) and evidence.strip())
+                expected = 2 if malformed else 1 if missing else 0
+                with self.subTest(state=state, reason=reason, evidence=evidence):
+                    item = dict(state=state, state_reason=reason, labels=labels, delivery_evidence=evidence)
+                    snapshot.write_text(json.dumps(dict(repository='fixture/consumer', issues=[item])))
+                    original = snapshot.read_bytes()
+                    result = subprocess.run([sys.executable, str(self.target / '.agents/tools/workflow/workflow.py'),
+                                             'check', '--repo', str(self.target), '--issues-json', str(snapshot), '--json'],
+                                            capture_output=True, text=True)
+                    self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+                    report = json.loads(result.stdout)
+                    self.assertEqual(report['ok'], expected == 0)
+                    if expected:
+                        self.assertEqual(report['findings'][0]['code'], 'invalid' if malformed else 'issue.inconsistent')
+                    self.assertEqual(result.stderr, '')
+                    self.assertEqual(snapshot.read_bytes(), original)
+                    self.assertEqual((self.target / '.git/index').read_bytes(), index)
+
     def test_ci_event_and_trust_boundaries_are_explicit(self):
         metadata = (ROOT / '.github/workflows/pr-metadata.yml').read_text()
         code = (ROOT / '.github/workflows/verify.yml').read_text()

@@ -16,8 +16,8 @@ the final source tree.
 
 `--issues-json SNAPSHOT` is an on-demand read-only inconsistency audit of native
 Issue snapshots: repository + issues array with number/state/state_reason/labels.
-A trusted adapter may supply delivery_evidence as an indexed reference; its truth
-still requires review. Stale closed labels, missing evidence and multiple open
+A trusted adapter may supply delivery_evidence as a nonblank string indexed reference;
+its truth still requires review. Stale closed labels, missing evidence and multiple open
 phases produce findings. This cannot prevent manual Issue closure.
 
 Source CI head/push events run v2 tests and checks with read-only permissions.
@@ -99,6 +99,13 @@ strings or objects with nonempty name strings; provided state must be `open` or
 Optional `state_reason` accepts null or native `completed`, `not_planned`, `duplicate`, `reopened`
 strings, case-insensitive. Unknown/non-string reasons are invalid; uppercase
 `COMPLETED` receives the same missing-delivery-evidence finding as lowercase.
+Non-null reasons must match the state: `reopened` belongs to open Issues;
+`completed`, `not_planned` and `duplicate` belong to closed Issues. Contradictory
+pairs are invalid before classification, even when evidence is supplied.
+Optional `delivery_evidence` accepts string or null; other JSON types are invalid
+for any state. Absent, null, empty or whitespace-only strings do not suppress a
+completed Issue's missing-evidence finding. A nonblank reference is an annotation,
+not proof that acceptance, review or merge passed.
 An evidence annotation still requires manual acceptance/merge inspection.
 Malformed entries return exit2/ok:false/invalid JSON diagnostics without traceback
 or snapshot/index changes. String labels and native GitHub label objects remain
