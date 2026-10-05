@@ -1,5 +1,61 @@
 # Wider local boundary review — 2026-10-05
 
+## Latest source-check compatibility repair — 2026-10-05
+
+This checkpoint supersedes earlier current/default claims below. Source
+`9d5489ffa11cf8bbde3f4c569c17a526e5d86c98`, rewrite/workflow-skills-v2:143 tests/no skips
+pass on managed Python3.12.14 (148.826s) and Ubuntu24.04.5/Python3.12.3
+(124.375s). Public check, strict OpenSpec all5 items and diff hygiene pass.
+Consumer `255371e48f46549b4099182d66c598d767235277`, pilot/shared-skill-bootstrap,
+Ready PR8/Issue7, pins this source. Published tree6de3c30739d5664bc1709129d62ca248ce7f4b96
+matches reviewed local2116f1ca tree, parent66913db, guarded non-force publication.
+Update changes only ignored checks.py and tracked manifest; configuration/all
+skill bytes/raw index3124b4a010d9d81d8c0eaeb19f7d66d5fbf3991c91c48814a272151f95a12be7
+remain unchanged during setup, before caller staging. Consumer review5996447243
+was clear at66913db; it is not approval of the repinned head.
+
+Source review5416098884 at151476c returned P2 comment4185120389: a complete
+legacy tracked bundle installs and its installed checker passes, but source check
+reports seven nonexistent new-layout destinations as missing. The finding was
+independently reproduced with public CLI calls. Wider author review additionally
+finds mixed source inventories accepted despite setup rejecting them. Shared
+required_assets now governs source checks as well as setup/provenance/bootstrap.
+Both new and legacy tracked source/installed layouts pass. Each of seven missing
+runtime mappings is rejected in each layout, and mixed inventories fail with
+structured invalid-input status. Schema5 remains new-layout only. No existing
+acceptance/assertions were weakened. Before control:3 tests/2 failures/no errors;
+after focused tests3 pass (2.275s). An intermediate added fixture lacked a local
+verification command; its harness error was corrected, not counted as a defect.
+Development guidance is updated; existing compatibility specifications already
+state this behavior, so no behavior-contract delta is needed.
+
+Actual managed/Ubuntu fresh remote clones start without runtime/skills. Source-first
+initialization materializes11 exact dependencies/matches20 managed hashes; installed
+check/run-local/doctor/offline no-op, four narrow ignores, tracked project skill,
+tracked-file and raw-index preservation pass. Installed rollback/concurrency,
+force-tracked setup, index-only policy, native-input/discovery/rendering and28
+namespace controls retain their original assertions. Actual installed fourteen-test
+layout/CI/source-check suite passes both hosts (52.824s/46.296s). The literal pinned
+GitHub fetch-and-run installer and repeat pass on fresh Ubuntu without an index.
+
+Consumer current push[37330126608](https://github.com/canzheng/workflow-skills-test/actions/runs/37330126608),
+PR[37330146379](https://github.com/canzheng/workflow-skills-test/actions/runs/37330146379)
+and existing-main metadata[37330140351](https://github.com/canzheng/workflow-skills-test/actions/runs/37330140351)
+pass. Source PR37330017724 passes; source push37330000692 and documentation-head
+CI are tracked in the live checkpoint. New metadata executes locally against its
+trusted base pin; actual main deployment/events await authorized adoption merge.
+
+F01–F13 implemented/verified/review-ready; F14 partial pending repaired-head semantic
+review, archive/final specs/docs checks, then separately authorized real merge and
+valid completed Issue observation. Native Ubuntu catalog/actual use stays bound to
+original9bd23d72/a75c3f2 with unchanged skill hashes. Cloud deferred, real global-host
+use unperformed, historical Ubuntu26 invalid-JSON cause unexplained. Read-only
+consumer two-check/source verification enforcement remains observed; source
+PR-contract administration/base deployment pending. No merge/closure/admin/global/
+auth/release/remote deletion. Next: current-head review; archive only after required
+premerge acceptance. Five-minute review monitor is armed on each new request and
+disarmed on completion; no persistent wake-up after this active turn is claimed.
+
 ## Latest runtime-layout and CI-provenance repair — 2026-10-05
 
 This checkpoint supersedes earlier current/default statements below. Source

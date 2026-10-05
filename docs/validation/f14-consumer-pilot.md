@@ -1,5 +1,22 @@
 # F14 real consumer pilot
 
+## Latest source-check compatibility checkpoint — 2026-10-05
+
+Source `9d5489ffa11cf8bbde3f4c569c17a526e5d86c98` passes143/no skips on managed Python3.12.14
+(148.826s) and Ubuntu24.04.5/Python3.12.3 (124.375s), plus strict specs.
+Consumer `255371e48f46549b4099182d66c598d767235277`, Ready PR8/Issue7, pins it.
+Fresh remote clones and the actual installed fourteen-test layout/CI/check suite
+pass both hosts (52.824s/46.296s); Ubuntu literal pinned installation/repeat pass.
+Review5416098884 at151476c returned P24185120389, independently reproduced and
+repaired with layout-aware source requirements. Both supported tracked layouts
+pass, all seven omitted-module cases in each layout fail, and mixed inventories
+are rejected consistently. Consumer push37330126608/PR37330146379/existing-main
+metadata37330140351 pass; current source CI is recorded in the PR checkpoint.
+Current repaired-head semantic review and archive remain pending. Native Ubuntu
+catalog/use retains unchanged-skill original evidence. Cloud is deferred; actual
+merge/completed closure, deployed-base metadata and source PR-contract admin gates
+remain pending separate authorization. See [wider review](wider-boundary-review.md).
+
 ## Latest layout/provenance checkpoint — 2026-10-05
 
 Source4449a1e6d03b6e055446735b89c4630b0c8b9d85 passes142/no skips locally
