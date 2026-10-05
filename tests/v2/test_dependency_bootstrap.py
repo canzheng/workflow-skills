@@ -117,6 +117,90 @@ class DependencyBootstrapTests(unittest.TestCase):
                     git(self.target, 'restore', '--staged', '--', name)
         run('check', '--repo', self.target)
 
+    def test_broken_staged_bytes_cannot_hide_behind_good_working_tree(self):
+        self.adopt()
+        m = json.loads((self.target / '.workflow/install-manifest.json').read_text())
+        required = set(m['files']) | {'.workflow/install-manifest.json', '.workflow/config.json', 'AGENTS.md'}
+        for name in sorted(required):
+            with self.subTest(path=name):
+                p = self.target / name
+                original = p.read_bytes()
+                p.write_bytes(b'Broken staged content.\n')
+                git(self.target, 'add', '--', name)
+                p.write_bytes(original)
+                before = self.snapshot()
+                try:
+                    for command in ['check', 'doctor', 'bootstrap']:
+                        r = run(command, '--repo', self.target, expect=1)
+                        self.assertIn('Staged workflow', json.dumps(r))
+                        self.assertEqual(self.snapshot(), before)
+                finally:
+                    git(self.target, 'restore', '--staged', '--', name)
+        run('check', '--repo', self.target)
+
+    def test_staged_symlinks_and_unmerged_assets_fail_without_mutation(self):
+        self.adopt()
+        for name in ['tools/workflow/core.py', '.workflow/install-manifest.json',
+                     '.workflow/config.json', 'AGENTS.md']:
+            with self.subTest(path=name):
+                # Index-only replacement leaves the real regular file untouched.
+                blob = git(self.target, 'rev-parse', 'HEAD:' + name).decode().strip()
+                git(self.target, 'update-index', '--cacheinfo', '120000,' + blob + ',' + name)
+                before = self.snapshot()
+                try:
+                    for command in ['check', 'doctor', 'bootstrap']:
+                        r = run(command, '--repo', self.target, expect=1)
+                        self.assertIn('Staged workflow', json.dumps(r))
+                        self.assertEqual(self.snapshot(), before)
+                finally:
+                    git(self.target, 'restore', '--staged', '--', name)
+        name = 'tools/workflow/core.py'
+        blob = git(self.target, 'rev-parse', 'HEAD:' + name).decode().strip()
+        subprocess.run(['git', '-C', str(self.target), 'update-index', '--index-info'],
+                       input=('0 ' + '0' * 40 + '\t' + name + '\n100644 ' + blob + ' 1\t' + name + '\n').encode(), check=True)
+        before = self.snapshot()
+        for command in ['check', 'doctor', 'bootstrap']:
+            r = run(command, '--repo', self.target, expect=1)
+            self.assertIn('Staged workflow', json.dumps(r))
+            self.assertEqual(self.snapshot(), before)
+
+    def test_valid_project_policy_changes_remain_independently_verifiable(self):
+        self.adopt()
+        p = self.target / '.workflow/config.json'
+        staged = json.loads(p.read_text())
+        staged['openspec'] = 'disabled'
+        p.write_text(json.dumps(staged))
+        git(self.target, 'add', '--', '.workflow/config.json')
+        staged['openspec'] = 'on-demand'
+        p.write_text(json.dumps(staged))
+        before = self.snapshot()
+        for command in ['check', 'doctor', 'bootstrap']:
+            run(command, '--repo', self.target)
+            self.assertEqual(self.snapshot(), before)
+
+    def test_staged_policy_schema_and_document_references_are_validated(self):
+        self.adopt()
+        for name, field, value in [('.workflow/install-manifest.json', 'schema_version', 99),
+                                   ('.workflow/install-manifest.json', 'source_revision', 'main'),
+                                   ('.workflow/config.json', 'verification', {'local': [], 'integration': []}),
+                                   ('.workflow/config.json', 'contract', 'docs/missing-staged-contract.md')]:
+            with self.subTest(path=name, field=field):
+                p = self.target / name
+                original = p.read_bytes()
+                staged = json.loads(original)
+                staged[field] = value
+                p.write_text(json.dumps(staged))
+                git(self.target, 'add', '--', name)
+                p.write_bytes(original)
+                before = self.snapshot()
+                try:
+                    for command in ['check', 'doctor', 'bootstrap']:
+                        r = run(command, '--repo', self.target, expect=1)
+                        self.assertIn('Staged workflow', json.dumps(r))
+                        self.assertEqual(self.snapshot(), before)
+                finally:
+                    git(self.target, 'restore', '--staged', '--', name)
+
     def test_ignored_provenance_policy_or_runtime_fails_preflight_without_writes(self):
         for name in ['.workflow/install-manifest.json', '.workflow/config.json', 'AGENTS.md',
                      'tools/workflow/core.py', 'docs/workflow/contract.md',

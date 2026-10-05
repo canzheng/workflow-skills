@@ -17,7 +17,7 @@ must be committed before that test; uncommitted bundle bytes correctly conflict.
 | OpenSpec receipt fixture (S15/S24) | Partial work active; final actual archive and validated current spec | Early archive or duplicate plan | test_openspec with pinned CLI |
 | v1 inventories (S04/S25/S32) | Done retained as history; active dispositions and findings | Recreate Done Issues or guess missing records | test_migration added with F12 |
 | fresh Cloud / Ubuntu (S02/S17/S29/S31) | Actual discovery, same-SHA portability and observed settings | Count local directory/fixtures as environment acceptance | F14 procedure; record pending until actually run |
-| pinned dependency clones (S34) | All installed assets/provenance/policy tracked; fresh clone needs no materialization; read-only repeat preserves index | Ignored/untracked provenance or assets, partial-staging bypass, fetch latest, repair tracked edits | test_dependency_bootstrap; real CI/Cloud/Ubuntu proof recorded separately |
+| pinned dependency clones (S34) | All installed assets/provenance/policy tracked; coherent staged blobs/modes as well as working files; fresh clone needs no materialization; read-only repeat preserves index | Ignored/untracked provenance or assets, partial-staging or broken-index bypass, fetch latest, repair tracked edits | test_dependency_bootstrap; real CI/Cloud/Ubuntu proof recorded separately |
 
 Host/manual evaluation procedure: start a fresh authorized session, provide fixture
 prompt and skill path, inspect actual outputs against expected and prohibited results,

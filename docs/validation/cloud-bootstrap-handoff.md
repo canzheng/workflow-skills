@@ -14,8 +14,16 @@ files and pantry-project are tracked. The earlier fd4/b1 ignored-skill model is
 superseded. Consumer is now public with Active required-check ruleset24484016. Actual metadata
 negative/restoration observed blocked/clean at the older6b9eb5d, with no merge.
 Current consumer push/PR/metadata pass; tracking review defects are repaired.
-No merge is authorized. Select this consumer revision at task creation;
-initial discovery on older main does not test this change.
+No merge is authorized. Exact schema-3 acceptance needs this consumer revision
+selected before discovery; initial discovery on older main does not test that update.
+
+The user reports that current environment creation offers repository selection only.
+The [current Cloud documentation](https://learn.chatgpt.com/docs/environments/cloud-environments)
+documents repository selection and starting tasks from a published environment,
+but does not document a branch selector for that flow. Do not direct users to an
+assumed control. If their launcher cannot select this unmerged revision, report
+that constraint. A fresh task on main can still probe discovery of the identical
+shared skill blobs; it cannot certify the current schema-3 installation/runtime pin.
 
 Latest submitted diagnostic still starts at old main5d055649 on branch `work`, with
 configured cwd `/workspace` and no matching consumer project exposed. Shared skills
@@ -51,8 +59,8 @@ git --no-optional-locks status --short --untracked-files=all
 Require exit0 and ok:true. A setup pass establishes integrity, not initial host
 discovery. No Install receipt or cache-persistence claim is needed for tracked skills.
 If checkout is older/mismatched, report it rather than trying agent-side recovery in
-the diagnostic. An environment may be repository-bound while the task selects its
-branch; use the task's supported branch selection. Do not mutate default branch or
+the diagnostic. Use branch selection only if the actual task launcher supports it;
+the current published-environment flow has no documented branch selector. Do not mutate default branch or
 merge the pilot to work around host routing. If the UI cannot select the unmerged
 revision before discovery, record that limitation and the exact pending action.
 
@@ -60,6 +68,9 @@ revision before discovery, record that limitation and the exact pending action.
 
 Use a genuinely fresh task outside onboarding after the tracked pilot is published.
 The full pins below identify the verified consumer commit and executable source.
+If the UI offers only environment/repository selection, a run from main is a discovery
+baseline with an expected current-pilot mismatch. Record that result; do not repeat
+environment creation merely to seek an undocumented branch selector.
 
 ```text
 Validate tracked workflow-skills preparation in canzheng/workflow-skills-test.

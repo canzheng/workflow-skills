@@ -355,3 +355,16 @@ routing before another diagnostic; no installer/global copy/merge workaround.
 F14 current-revision discovery/use stays unverified; current runtime/CI/enforcement
 evidence is unaffected. Updated published-run record, handoff and acceptance docs;
 source707bc410 at start, managed executable pinaceba714/consumer0e3fbc53 unchanged.
+
+Source Ready-PR review follow-up: reproduced staged-index bypass before accepting it
+(28 new focused failures on original code). Added canonical blob/mode validation of
+staged provenance/config/document paths/managed hashes/AGENTS independently from
+working files, without index writes. Valid project policy differences and a coherent
+schema-1 snapshot during explicit update remain supported. Four regressions cover23
+corrupt staged paths, symlinks/unmerged stages, invalid schemas/document references
+and valid policy edits. Focused18 tests pass; full source/Ubuntu/CI verification pending
+before final claims. Current consumer0e3fbc/sourceaceba714 stays frozen while the user
+runs fresh-environment discovery; consumer repin/integration remains separate.
+User confirmed repo-only environment selection; official current Cloud docs do not
+document a branch selector in the published-environment flow. Handoff now distinguishes
+main discovery baseline from exact current schema-3 acceptance without an assumed UI.

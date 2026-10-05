@@ -49,3 +49,8 @@ not only shared skills. Indexed or committed managed assets identify adoption ev
 when the manifest is removed from the index. Initial unstaged review remains separate;
 all required files must be trackable. Ignore previews preserve ancestor, global and
 repository-info rules for every required destination before writes.
+core.py also validates the staged installation independently using canonical index
+blobs and modes: staged provenance/config, configured documents, every managed hash
+and the AGENTS block must form a coherent regular-file snapshot. A good working tree
+does not mask broken staged content. This is read-only commit-candidate validation,
+not a requirement for unrelated project edits to match HEAD or the working tree.

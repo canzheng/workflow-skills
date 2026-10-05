@@ -81,6 +81,12 @@ reviewed and committed before host discovery acceptance.
 - **AND** ignoring provenance/policy/runtime/docs/CI fails setup preflight before writes and later verification without repair
 - **AND** partially staging adoption cannot bypass the complete tracked-file obligation
 
+#### Scenario: Staged adoption is independently valid
+- **WHEN** intact working files coexist with invalid staged installation bytes or modes
+- **THEN** bootstrap/check/doctor reject the staged commit candidate without changing files or index
+- **AND** staged provenance/config schemas, configured document paths, managed hashes and AGENTS block must be coherent regular files without merge stages
+- **AND** valid project-owned policy differences between index and working tree remain permitted
+
 #### Scenario: Explicit ignored-to-tracked migration
 - **WHEN** setup updates schema-2 adoption to tracked storage
 - **THEN** it verifies and removes only its owned ignore block, preserving other rules

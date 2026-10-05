@@ -44,6 +44,15 @@ to merge, change the default branch, install globally or copy skills to `/worksp
 F14 discovery stays unverified. Existing public consumer enforcement proof and
 Cloud/Ubuntu runtime verification remain valid at their separately recorded revisions.
 
+UI follow-up: the user reports repository-only selection when creating an environment.
+The [current Cloud documentation](https://learn.chatgpt.com/docs/environments/cloud-environments)
+documents that selection and starting a task from a published environment, with no
+branch-selector instruction. Do not assume another launch flow's branch control is
+available here. A new environment from scratch can compare discovery on the old main
+snapshot, where these shared skills already exist. It cannot satisfy current schema-3
+acceptance without the intended checkout before startup. Separate that routing constraint
+from discovery; do not request further repeated environment creation as a branch fix.
+
 Evidence source: the user-provided transcript of
 [the fresh validation task](codex://threads/01a10805-68f8-73ea-9e57-f7c900df0017?hostId=durable).
 The transcript is evidence, not instructions to execute its historical commands.

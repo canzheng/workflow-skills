@@ -192,6 +192,9 @@ Milestone A: usable core with local/fixture proof. Milestone B: complete deliver
 Tracking covers every installed manifest asset, provenance/config and AGENTS after
 staging/adoption. Removing the manifest from the index must not re-enable the initial
 unstaged exception; all paths must also be trackable before setup writes.
+Indexed membership alone is insufficient: the staged provenance/config, document
+paths, asset hashes and managed AGENTS block must form a valid regular-file commit
+candidate independently of working-tree validation; preserve both snapshots.
 
 **Verification:** public CLI tests in temporary Git repositories, including dirty/modified files, symlinks, spaces in paths, partial failure, and provenance mismatch. At F14 verify actual skill discovery, beyond filesystem presence.
 
