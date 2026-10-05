@@ -1,68 +1,50 @@
 # Wider local boundary review — 2026-10-05
 
-## Latest parent-chain recovery and Issue snapshot repair — 2026-10-05
+## Latest directory-binding and native Issue-state checkpoint — 2026-10-05
 
-This checkpoint supersedes earlier current/default statements below. Source
-`9f3f1bd61ab017c570df3bc48a7e84a6947a9a7f`, rewrite/workflow-skills-v2:146 tests/no skips
-pass on managed Python3.12.14 (151.748s) and Ubuntu24.04.5/Python3.12.3
-(129.542s); public check, strict OpenSpec all5 items and diff hygiene pass.
-Consumer `f86013562ceb357a23ddba0cf3bde616985b15f3`, pilot/shared-skill-bootstrap,
-Ready PR8/Issue7, pins this source. Published tree0dedb6e8acee8b57439393eeb4e8c000fe1ccfe7
-matches reviewed local9bfd6a017 tree, parent255371e, guarded non-force publication.
-Update changes ignored setup.py/records.py and tracked operations/manifest; config,
-all shared/project skills and raw index63c0e3fd8f04c9e79b1c2da45624468aa9cf4fc1616f72a20a62b6395d6429a8
-remain unchanged during setup before caller staging. Consumer review5997398629 was
-clear at255371e; it is not approval of the repinned head.
+Source `09998db554066b742f612d2e95a9c6bdb7c7b578` passes148/no skips on managed Python3.12.14
+(143.175s) and Ubuntu24.04.5/Python3.12.3 (123.474s), plus strict OpenSpec all5 items.
+Consumer `22a5c42c0eb43c9c0eda427061237e27f9079819`, pilot/shared-skill-bootstrap, Ready PR8/Issue7,
+pins this source. Its push37338701217/PR37338713719/existing-main metadata37338708449
+pass. Source pin Actions37338647841/37338660724 were running at recording; current
+head results and semantic review are recorded separately in the live PR checkpoint.
 
-The five-minute monitor detected source review5416864834 completion at082e225
-and disarmed before repairs. It returned P2s4185701946/4185701969. Both were
-independently reproduced with public setup/check: rollback recreates a deleted
-owned file in a replaced parent; null/non-object Issues or malformed labels/state
-produce tracebacks instead of structured invalid diagnostics. Wider author proof
-covers immediate parents and ancestors, same-content inode replacements, symlinks
-and forward writes. Before controls:3 tests/21 failed subcases/no errors (2.450s).
-An initial test accessed absent new recovery metadata without asserting the key;
-that fixture error was corrected before recording the discriminating controls.
-After:3 focused tests pass (2.595s), and48 setup/check/record tests pass (21.162s).
+Review5417258594 at300ab5c returned P2s4185998816/4185998828. Both independently
+reproduced: swapping a parent inside unlink deletes human content in the replacement
+directory; unknown state strings pass native Issue audit. Two controls fail four
+subcases on the old implementation. Eight additional immediate-parent/ancestor
+stage-open/replace/restore/cleanup controls also fail on the old implementation.
+All controls now pass without narrowing prior concurrent-edit assertions. Apply,
+staging/replacement/cleanup, rollback and created-directory operations bind relative
+names to verified directory handles, opened component by component with no-follow
+and expected inode checks. Replaced namespaces preserve human files and report
+recoverable originals; recovery remains best-effort, with no multi-process lock.
+Issue states normalize case and accept only open/closed; omitted state remains open.
+Malformed input yields structured exit2 JSON without snapshot/index mutation.
 
-Transactions record existing parent/ancestor device/inode chains and validate them
-before apply/restoration; changed or missing parents remain recoverable residuals
-with original bytes/modes/expected directory metadata. Same-inode permission changes
-remain intact and created-directory cleanup retains separate inode/mode/empty checks.
-Shared Issue audit helpers validate object, labels-array/named-label and state-string
-shapes before dereferencing. String and native label objects both remain supported;
-valid shape never certifies semantic delivery. Recovery operations/source-consumer,
-architecture/checks guidance and current/delta adoption scenarios match the repair.
-Existing discriminating assertions, contract values and environment gates remain.
-
-Actual managed/Ubuntu fresh remote clones start without11 runtime/skill dependencies.
-Source-first initialization matches all20 managed hashes; installed check/run-local/
-doctor/offline no-op, four narrow ignore rules, tracked project skill and tracked-file/
-raw-index proof pass. Retained actual installed rollback/staging/native-input/URL/
-discovery/index controls pass. The actual installed seventeen-test suite passes both
-hosts (59.013s/50.522s), explicitly loading installed setup/workflow modules as well
-as installed public CLI subprocesses for the new recovery and audit cases. Literal
-pinned GitHub fetch-and-run Ubuntu first adoption/repeat preserves an absent index.
-
-Source pin push[37333900105](https://github.com/canzheng/workflow-skills/actions/runs/37333900105)
-and PR[37333915276](https://github.com/canzheng/workflow-skills/actions/runs/37333915276)
-pass. Consumer current push[37333990065](https://github.com/canzheng/workflow-skills-test/actions/runs/37333990065),
-PR[37334000006](https://github.com/canzheng/workflow-skills-test/actions/runs/37334000006)
-and existing-main metadata[37333995187](https://github.com/canzheng/workflow-skills-test/actions/runs/37333995187)
-pass. New metadata executes locally against its trusted base pin; actual main
-deployment/events await authorized adoption merge. Documentation-head Actions and
-current semantic requests are recorded in the live PR/Issue checkpoint.
+The57 focused tests pass (24.178s). Fresh actual remote consumer clones on both
+hosts bootstrap11 missing dependencies, match20 managed hashes, retain four narrow
+ignore namespaces/tracked project skill and preserve files/raw index on offline
+repeat. The25-test actual installed runtime suite passes both hosts (55.797s/51.551s),
+including the new mutation controls, native states, both layouts, CI and isolated
+optional-global fixtures. Literal exact-pin Ubuntu fetch-and-run first adoption/
+repeat passes; absent index and repeat bytes remain unchanged. Actual global-host
+installation was not performed. Source-owned consumer update preserved configuration,
+all skill bytes and raw indexb942fe7aa710e079b8d5746cc981f580afccc625b4d49e66a95bcc48fa108d39
+before caller staging. Published treea197399eb44b20431d574b3a64df5e4db3ac6684 matches
+reviewed localc22af21676de7272d97ba2dff53e54b7ad150d8b; parentf860135; guarded non-force publication.
 
 F01–F13 implemented/verified/review-ready; F14 partial pending repaired-head semantic
-review, archive/final specs/docs checks, then separately authorized real merge and
-valid completed Issue observation. Native Ubuntu catalog/actual use stays bound to
-original9bd23d72/a75c3f2 with unchanged skill hashes. Cloud deferred, real global-host
-use unperformed, historical Ubuntu26 invalid-JSON cause unexplained. Consumer two
-checks/source verification enforcement remains read-only observed; source PR-contract
-administration/base deployment pending. No merge/closure/admin/global/auth/release/
-remote deletion. Next: current-head review; archive only after premerge acceptance.
-Five-minute monitors are armed on new requests and disarmed on completion; no
-persistent wake-up after this active turn is claimed.
+review and native archive/final checks. Previous consumer review5997917302 was clear
+atf860135 and does not approve the repin. Native Ubuntu startup catalog/actual use
+retains original9bd23d72/a75c3f2 evidence with unchanged shared hashes. Cloud deferred;
+historical Ubuntu26 full-suite invalid-JSON cause remains unexplained. Consumer
+required checks/source verification enforcement are read-only observed; new trusted
+base metadata deployment and source PR-contract administration remain pending.
+Real merge and valid completed Issue observation require separate authorization.
+No merge/closure/admin/global/auth/release/remote deletion. Next: current-head review;
+archive only after required premerge review clears. Five-minute monitors apply to
+new review requests during this active turn, with no persistent wake-up claimed.
 
 ## Latest source-check compatibility repair — 2026-10-05
 

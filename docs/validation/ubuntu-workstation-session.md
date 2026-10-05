@@ -1,22 +1,50 @@
 # User Ubuntu Codex session evidence — 2026-10-05
 
-## Latest parent-chain recovery and Issue snapshot checkpoint — 2026-10-05
+## Latest directory-binding and native Issue-state checkpoint — 2026-10-05
 
-Source `9f3f1bd61ab017c570df3bc48a7e84a6947a9a7f` passes146/no skips on managed Python3.12.14
-(151.748s) and Ubuntu24.04.5/Python3.12.3 (129.542s), plus strict specs.
-Consumer `f86013562ceb357a23ddba0cf3bde616985b15f3`, Ready PR8/Issue7, pins it.
-Fresh remote clones and the actual installed seventeen-test layout/CI/check/recovery
-suite pass both hosts (59.013s/50.522s); literal Ubuntu installation/repeat passes.
-Review5416864834 at082e225 returned P2s4185701946/4185701969, independently
-reproduced and repaired. Parent inode chains gate writes/restoration and preserve
-changed directories with backups/identity evidence. Malformed Issue/label/state
-shapes return structured exit2 without traceback or snapshot/index writes.
-Current consumer push37333990065/PR37334000006/existing-main metadata37333995187
-and source pin push37333900105/PR37333915276 pass. Repaired-head semantic review
-and archive remain pending. Native Ubuntu catalog/use retains unchanged-skill
-original evidence; Cloud deferred. Actual merge/completed closure/base deployment/
-source PR-contract admin gates remain pending separate authorization.
-See [wider review](wider-boundary-review.md) for exact proof and limitations.
+Source `09998db554066b742f612d2e95a9c6bdb7c7b578` passes148/no skips on managed Python3.12.14
+(143.175s) and Ubuntu24.04.5/Python3.12.3 (123.474s), plus strict OpenSpec all5 items.
+Consumer `22a5c42c0eb43c9c0eda427061237e27f9079819`, pilot/shared-skill-bootstrap, Ready PR8/Issue7,
+pins this source. Its push37338701217/PR37338713719/existing-main metadata37338708449
+pass. Source pin Actions37338647841/37338660724 were running at recording; current
+head results and semantic review are recorded separately in the live PR checkpoint.
+
+Review5417258594 at300ab5c returned P2s4185998816/4185998828. Both independently
+reproduced: swapping a parent inside unlink deletes human content in the replacement
+directory; unknown state strings pass native Issue audit. Two controls fail four
+subcases on the old implementation. Eight additional immediate-parent/ancestor
+stage-open/replace/restore/cleanup controls also fail on the old implementation.
+All controls now pass without narrowing prior concurrent-edit assertions. Apply,
+staging/replacement/cleanup, rollback and created-directory operations bind relative
+names to verified directory handles, opened component by component with no-follow
+and expected inode checks. Replaced namespaces preserve human files and report
+recoverable originals; recovery remains best-effort, with no multi-process lock.
+Issue states normalize case and accept only open/closed; omitted state remains open.
+Malformed input yields structured exit2 JSON without snapshot/index mutation.
+
+The57 focused tests pass (24.178s). Fresh actual remote consumer clones on both
+hosts bootstrap11 missing dependencies, match20 managed hashes, retain four narrow
+ignore namespaces/tracked project skill and preserve files/raw index on offline
+repeat. The25-test actual installed runtime suite passes both hosts (55.797s/51.551s),
+including the new mutation controls, native states, both layouts, CI and isolated
+optional-global fixtures. Literal exact-pin Ubuntu fetch-and-run first adoption/
+repeat passes; absent index and repeat bytes remain unchanged. Actual global-host
+installation was not performed. Source-owned consumer update preserved configuration,
+all skill bytes and raw indexb942fe7aa710e079b8d5746cc981f580afccc625b4d49e66a95bcc48fa108d39
+before caller staging. Published treea197399eb44b20431d574b3a64df5e4db3ac6684 matches
+reviewed localc22af21676de7272d97ba2dff53e54b7ad150d8b; parentf860135; guarded non-force publication.
+
+F01–F13 implemented/verified/review-ready; F14 partial pending repaired-head semantic
+review and native archive/final checks. Previous consumer review5997917302 was clear
+atf860135 and does not approve the repin. Native Ubuntu startup catalog/actual use
+retains original9bd23d72/a75c3f2 evidence with unchanged shared hashes. Cloud deferred;
+historical Ubuntu26 full-suite invalid-JSON cause remains unexplained. Consumer
+required checks/source verification enforcement are read-only observed; new trusted
+base metadata deployment and source PR-contract administration remain pending.
+Real merge and valid completed Issue observation require separate authorization.
+No merge/closure/admin/global/auth/release/remote deletion. Next: current-head review;
+archive only after required premerge review clears. Five-minute monitors apply to
+new review requests during this active turn, with no persistent wake-up claimed.
 
 ## Latest source-check compatibility checkpoint — 2026-10-05
 
