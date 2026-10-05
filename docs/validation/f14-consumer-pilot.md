@@ -1,65 +1,76 @@
 # F14 real consumer pilot
 
-## Latest private-cleanup checkpoint — 2026-10-05
+## Latest retained-capture checkpoint — 2026-10-05
 
-Tested source `7262627c3ff99d8f4e7ead714f264278630c1ef8`,
-rewrite/workflow-skills-v2/Ready PR16, passes162/no skips on managed
-Python3.12.14 (166.352s) and Ubuntu24.04.5/Python3.12.3 (144.640s), plus
-strict OpenSpec all5/public checks. Consumer `32b0c0b699bc9b530cd3fdf851ba72683e44efb9`,
+Tested source `3c41e6028467b3e9c03226fadec1876e4f891d19`,
+rewrite/workflow-skills-v2/Ready PR16, passes167/no skips on managed
+Python3.12.14 (171.561s) and Ubuntu24.04.5/Python3.12.3 (152.159s), plus
+strict OpenSpec all5/public checks. Consumer `406c41716bda8933b1e9eb73d902d7eed522b150`,
 pilot/shared-skill-bootstrap/Ready PR8/Issue7, pins that source. Current Actions
 and repaired-head semantic reviews are recorded separately in the PR checkpoint.
-Source push37355342099 and consumer push37355461469/PR37355471904/existing-main
-metadata37355466862 pass; source PR37355350465 is pending at recording time.
-New trusted-base deployment/events still await authorized adoption merge.
+Consumer push37358071302/PR37358079109/existing-main metadata37358076770 pass;
+source push37357950942/PR37357959408 are pending at recording time.
+New trusted-base schema5 deployment/events still await authorized adoption merge.
 
-The five-minute monitor observed source review5418785129 completed atf6b5479 and
-consumer comment6000382283 clear at9c51df9, then disarmed both targets. Source P2s
-4187260995/4187261007 independently reproduce: two old-code tests fail seven
-subcases/no errors (six inode/symlink staging/removal replacements and one created-
-directory replacement). Cleanup now atomically captures the actual public entry
-into exclusive mode-0700 private storage on the same filesystem, then validates
-its bytes/mode/inode before unlink/rmdir. Mismatches restore with no-replace;
-recreated public paths preserve both entries and their quarantine location in
-recovery-index.json. In-place edits through held captured descriptors still get
-concurrent_backup recovery. Missing libc support preflights before staging.
+The five-minute monitor observed source review5418932428 completed atc665e46 and
+consumer comment6000611766 clear at32b0c0b, then disarmed both targets. Source P2s
+4187386901/4187386913 independently reproduce: one old-code private-storage removal
+control loses a replacement empty directory; another records a concurrent public
+mkdir replacement as owned and removes it on rollback. Both fail without harness
+errors. Repair8975590 creates/opens directories privately and publishes with atomic
+no-replace, preserving a competing public inode and recording recovery ownership.
+Private directories remain retained because Linux has no conditional rmdir by an
+opened inode. Full165/no skips passed managed (170.419s)/Ubuntu (148.484s), actual
+installed42 passed both (76.456s/71.065s), before the wider file-finalization repair.
 
-Focused36 setup tests plus one quarantine-collision control and six global tests
-pass. Existing destination/rollback/removal, parent-chain, bytes/mode/inode/symlink,
-raw-index and backup assertions remain discriminating. No cleanup-storage rules
-are added to .gitignore; only the same four dependency namespaces are ignored.
-Private capture/recovery changes are documented in source/consumer operations,
-architecture and current/active adoption scenarios. The earlier atomic mutation,
-malformed native-input and PR-body-anchor repairs remain covered; detailed prior
-proof is immutable at https://github.com/canzheng/workflow-skills/blob/f6b54794ea80d00bd18d40f2ed0ced1d084502ad/docs/validation/wider-boundary-review.md .
-Recovery remains best-effort, without a process lock or multi-file atomic promise.
+Wider author review reproduced the same loss at private-file unlink. Two further
+old-code controls fail without errors: a replacement captured file is discarded,
+and successful replacement retains no displaced file. Repair3c41e60 eliminates
+installer pathname unlink/rmdir entirely. Captured files and empty directories
+stay in exclusive mode-0700 same-filesystem storage; replacements/deletions remove
+the public managed namespace while retaining actual displaced bytes/modes.
+Observed captured-file changes get concurrent_backup recovery, and successful
+no-replace mismatch restoration records restored_to rather than a stale quarantine
+location. Existing parent/inode/mode/symlink/bytes/index assertions remain; cleanup
+fault hooks now target retention rather than retired unlink calls.
 
-Actual installed39 tests pass managed (73.973s) and Ubuntu
-(69.032s), including the new capture and restoration-collision cases.
-Fresh managed local clone of the native-API-verified remote commit and fresh Ubuntu
-remote clone materialize11 missing ignored dependencies, match20 managed hashes,
-preserve four narrow ignores/project skill/files/raw index and repeat offline as
-no-op. Retained force-tracking, index-only nested policy, layout, concurrency,
-discovery and rendering negatives pass. Literal exact-pin Ubuntu GitHub fetch-and-run
-first adoption/repeat exits0 without creating an index.
+Repository storage uses .git/.wf2-private-* without project/index/ignore changes.
+Explicit shared-only installation uses TMPDIR; its filesystem must match the
+destination. A cross-device control fails before project/storage/index writes;
+identical no-op reruns allocate no new storage. Retained recovery artifacts can
+accumulate; the installer does not automatically delete them. Operations guidance
+covers recovery/manual cleanup and retained uninstall copies. This storage is
+filesystem recovery, with no Issue/task-state authority or new ignore namespace.
+Current/active adoption scenarios, architecture and development match that behavior.
+Focused42 setup/six global tests and the new controls pass.
 
-Native remote tree057265bacdf778b311a1b56b082005a97d8bcfed matches reviewed
-local721f5e97eee8a499732217027cad783536cf6e3b, parent9c51df9. Exact native commit
-bytes hash to its published SHA; guarded non-force publication and same-tree local
-ref reconciliation preserve clean files/index. Source-owned update preserves config,
-all skill bytes and raw index33540a322bb2a14b4f6c1687d031c9cd303bb922115cc6e2e1b3454ed9446d76
-before caller staging. No shared skill files changed, so native Ubuntu startup catalog
-and actual three-skill use remain revision-bound at9bd23d72/a75c3f2 with identical hashes.
+Actual installed44 tests pass managed (76.075s) and Ubuntu
+(71.799s). Fresh managed local clone of the native-API-verified remote
+commit and fresh Ubuntu remote clone materialize11 missing ignored dependencies,
+match20 managed hashes, preserve four narrow ignores/project skill/files/raw index,
+and repeat offline as no-op. Existing force-tracking, index-only nested policy,
+layout, concurrency, discovery and rendering negatives remain. Literal exact-pin
+Ubuntu GitHub fetch-and-run first adoption/repeat exits0 without creating an index.
+
+Native remote tree816597003b748a2c3e9db3580138dd163415f52b matches reviewed
+localbfef0e025e451406843b8557487d78279ba21db1, parent0f04f88. Exact native commit
+bytes independently hash to its published SHA; guarded non-force publication and
+same-tree local ref reconciliation preserve clean files/index. Source-owned update
+preserves config/all skill bytes/raw index078c3a82d029eef355c889484b84f325153b21e1c441a17460ff93b4a5b89c64
+before caller staging. Native Ubuntu startup catalog/actual three-skill use remains
+revision-bound at9bd23d72/a75c3f2 with unchanged shared hashes.
 
 F01–F13 implemented/verified/review-ready; F14 partial pending repaired-head semantic
-review and native archive/final checks. Earlier consumer clear at9c51df9 predates this
-repin. Five-minute active-turn monitoring follows each new review request and stops
-on completion; it is not a persistent post-turn wakeup. Cloud remains deferred;
-historical Ubuntu26 full-suite invalid-JSON cause remains unexplained. Actual global-
-host installation/discovery is unperformed. Required-check enforcement was observed
-read-only; new schema5 trusted-base metadata deployment/source PR-contract administration,
-real merge and valid completed-Issue observation remain pending authorization.
-No merge/closure/admin/global/auth/release/remote deletion. Next: repaired-head review,
-then native archive/final checks; obtain separate authorization for real delivery.
+review and native archive/final checks. Earlier consumer clear at32b0c0b predates this
+repin. Five-minute active-turn monitors follow new reviews and stop on completion;
+no persistent post-turn wakeup is claimed. Cloud deferred; historical Ubuntu26
+full-suite invalid-JSON cause remains unexplained. Actual global-host installation/
+discovery is unperformed. Read-only ruleset inspection2026-10-05T18:27:07Z confirms
+active main/no-bypass source24457981 requires verification and consumer24484016
+requires both v2 checks. New schema5 trusted-base metadata deployment/source PR-contract
+administration, real merge and valid completed-Issue observation remain pending
+authorization. No merge/closure/admin/global/auth/release/remote deletion.
+Next: repaired-head review, then native archive/final checks and separate real-delivery authorization.
 
 
 ## Latest source-check compatibility checkpoint — 2026-10-05
