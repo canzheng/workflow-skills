@@ -56,7 +56,16 @@ def doctor(root, skill_roots=()):
     seen = set()
     for folder in roots:
         try:
-            resolved = folder.resolve()
+            try:
+                # Python 3.14 non-strict resolution can silently retain cycles.
+                resolved = folder.resolve(strict=True)
+            except FileNotFoundError:
+                # Missing optional catalogs are normal; dangling path components
+                # are invalid catalogs and must reach the per-root warning.
+                if any(part.is_symlink() and not part.exists()
+                       for part in (folder, *folder.parents)):
+                    raise
+                continue
             if resolved in seen:
                 continue
             seen.add(resolved)

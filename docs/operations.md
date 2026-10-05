@@ -268,3 +268,10 @@ After replacement, the destination bytes/mode/device/inode must match the staged
 file identity. A swapped staging entry or a changed/missing destination is a
 recoverable conflict, not successful setup. Foreign destination content is retained
 and original bytes/mode are backed up for explicit recovery.
+
+Doctor resolves present skill catalogs strictly across supported Python versions.
+Self, mutual and ancestor symlink cycles or dangling catalog components produce
+per-root warnings and do not block other catalogs/tools. Genuinely absent optional
+roots remain silent. This explicitly handles Python3.14's changed non-strict
+resolution behavior. Source CI verifies Python3.12 and3.14 sequentially under the
+same required-check name; generic consumer CI retains its declared Python3.12 runtime.

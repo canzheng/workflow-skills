@@ -730,6 +730,72 @@ class CheckTests(unittest.TestCase):
                     path.unlink()
                     parent.rmdir()
 
+
+    def test_doctor_strict_resolution_handles_python314_cycles_and_absent_roots(self):
+        import test_setup
+        module = test_setup.workflow
+        home = self.root / 'catalog-home'
+        (home / '.agents').mkdir(parents=True)
+        default = home / '.agents/skills'
+        default.symlink_to('skills')
+        self_cycle = self.root / 'self-cycle'
+        self_cycle.symlink_to(self_cycle.name)
+        first, second = self.root / 'mutual-a', self.root / 'mutual-b'
+        first.symlink_to(second.name)
+        second.symlink_to(first.name)
+        ancestor = self.root / 'ancestor-cycle'
+        ancestor.symlink_to(ancestor.name)
+        nested = ancestor / 'skills'
+        broken = self.root / 'dangling-catalog'
+        broken.symlink_to(self.root / 'missing-target')
+        missing = self.root / 'genuinely-absent/skills'
+        healthy = self.root / 'healthy-catalog/duplicate/SKILL.md'
+        healthy.parent.mkdir(parents=True)
+        healthy.write_text('---\nname: workflow-deliver-issue\ndescription: duplicate\n---\n')
+        cycles = {default, self_cycle, first, nested}
+        index = (self.target / '.git/index').read_bytes()
+        actual_resolve, actual_exists = pathlib.Path.resolve, pathlib.Path.exists
+        calls = []
+        def resolve(path, *args, **kwargs):
+            strict = kwargs.get('strict', args[0] if args else False)
+            if path in cycles:
+                calls.append((path, strict))
+                # Model Python 3.14's non-strict behavior even on older CI Python.
+                if not strict:
+                    return path.absolute()
+            return actual_resolve(path, *args, **kwargs)
+        def exists(path):
+            if path in cycles:
+                return False  # Python 3.14 treats an unresolved cycle as absent.
+            return actual_exists(path)
+        args = ['doctor', '--repo', str(self.target), '--json']
+        for catalog in (self_cycle, first, nested, broken, missing, healthy.parent.parent):
+            args.extend(('--skill-root', str(catalog)))
+        with patch.object(pathlib.Path, 'home', return_value=home), \
+                patch.object(pathlib.Path, 'resolve', resolve), \
+                patch.object(pathlib.Path, 'exists', exists), \
+                contextlib.redirect_stdout(io.StringIO()) as output:
+            status = module.main(args)
+        self.assertEqual(status, 1, output.getvalue())  # Healthy duplicate is retained.
+        report = json.loads(output.getvalue())
+        warnings = {x['path'] for x in report['findings']
+                    if x['code'] == 'discovery.inaccessible' and x['severity'] == 'warning'}
+        for catalog in (*cycles, broken):
+            self.assertIn(str(catalog), warnings, report)
+        self.assertNotIn(str(missing), warnings, report)
+        self.assertTrue(all(strict for _, strict in calls), calls)
+        self.assertEqual({p for p, _ in calls}, cycles)
+        self.assertTrue(any(x['code'] == 'discovery.duplicate' for x in report['findings']))
+        self.assertIn('tools', report)
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        for path, target in ((default, pathlib.Path('skills')),
+                             (self_cycle, pathlib.Path(self_cycle.name)),
+                             (first, pathlib.Path(second.name)), (second, pathlib.Path(first.name)),
+                             (ancestor, pathlib.Path(ancestor.name)),
+                             (broken, self.root / 'missing-target')):
+            self.assertEqual(path.readlink(), target)
+        self.assertFalse(missing.exists())
+
     def test_doctor_nonregular_entries_warn_and_continue(self):
         import stat
         import test_setup

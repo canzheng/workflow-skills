@@ -137,6 +137,8 @@ source authoring from installed consumers and authentication from unprobed write
 
 #### Scenario: Cyclic or inaccessible discovery root
 - **WHEN** a default or explicit discovery root cannot resolve or be inspected
+- **AND** resolution includes self/mutual/ancestor cycles under Python3.14 non-strict behavior
+- **AND** genuinely absent optional roots are distinct from cycles or dangling components
 - **THEN** doctor reports a per-root discovery warning and continues other catalogs and tool diagnostics
 - **AND** inaccessible roots and symlinks, repository bytes and index remain unchanged
 

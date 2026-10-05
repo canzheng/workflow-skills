@@ -24,9 +24,18 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: python3 tools/workflow/verify.py
       - run: python3 tools/workflow/workflow.py check --repo . --specs --json > verification.json
+      # Keep the required check name stable while exercising newer supported Python.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - run: python3 -m pip install -r requirements.txt
+      - run: python3 tools/workflow/verify.py
+      - run: python3 tools/workflow/workflow.py check --repo . --specs --json > verification-python314.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: v2-checks
-          path: verification.json
+          path: |
+            verification.json
+            verification-python314.json
           retention-days: 14
