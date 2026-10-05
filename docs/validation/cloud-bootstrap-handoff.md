@@ -17,6 +17,13 @@ Current consumer push/PR/metadata pass; tracking review defects are repaired.
 No merge is authorized. Select this consumer revision at task creation;
 initial discovery on older main does not test this change.
 
+Latest submitted diagnostic still starts at old main5d055649 on branch `work`, with
+configured cwd `/workspace` and no matching consumer project exposed. Shared skills
+already exist in that main commit with the same blobs as the pilot; merging solely
+to place them on main cannot address this observation. Resolve initial task/project
+routing and checkout selection before repeating the diagnostic. A prompt or later
+shell `cd` does not establish pre-agent host binding. See the [submitted run evidence](f14-published-cloud-run.md#latest-submitted-tracked-skill-diagnostic--2026-10-05).
+
 One-time initial adoption or explicit update uses the pinned source-owned entrypoint
 as documented in [README](../../README.md) and [operations](../operations.md).
 Review and commit all shared skills, project files and schema-3 provenance. A fresh

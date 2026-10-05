@@ -1,5 +1,18 @@
 # v2 rewrite acceptance evidence
 
+## Latest submitted Cloud diagnostic — routing unresolved, 2026-10-05
+
+The user's [submitted tracked-skill report](f14-published-cloud-run.md#latest-submitted-tracked-skill-diagnostic--2026-10-05)
+again observes old consumer main5d055649/source139e66d5, not requested0e3fbc53/aceba714.
+Old-checkout integrity passes, expected-revision check fails, tracked files/index
+remain unchanged. Configured initial cwd `/workspace`, no matching consumer project
+exposed and plugin/executor catalog observations leave complete repository discovery
+unavailable. All4 shared files already exist in main, matching pilot shared blobs;
+default-branch absence is not supported as an explanation. Resolve host task/project
+routing and pre-agent checkout selection; do not repeat installation or merge as an
+assumed fix. F14.1 current-revision discovery/use remains unverified. This does not
+invalidate separately recorded runtime/CI/enforcement evidence below.
+
 ## Public consumer enforcement and tracking review checkpoint — 2026-10-05
 
 The user changed canzheng/workflow-skills-test to public. Read-only GitHub confirmation:

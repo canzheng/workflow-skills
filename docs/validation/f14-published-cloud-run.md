@@ -1,5 +1,49 @@
 # F14 published Cloud run: recovery passed, discovery pending
 
+## Latest submitted tracked-skill diagnostic — 2026-10-05
+
+The user supplied `Pasted text.txt`, 18,076 bytes, SHA256
+`eeffe3cc30c3dfc83305b135618c58cb8ce760745aa77c2d6e3ae4abcf0ad6ca`.
+This is submitted task evidence, not a directly inspected live session. Its expected
+consumer/source pins are `0e3fbc530f21c4981230a5ef968eac2a5dda3d5e` /
+`aceba7143652ba127dbc62c98608e1b9943be31d`. Actual branch `work` instead has
+HEAD `5d05564919c55f1d4d0c2e1e020ad914252a2979` and schema-1 source pin
+`139e66d5b43cfbd3821fe098c0119b93aaad4928`. This is the older main snapshot;
+putting the expected revision in a prompt did not select it before startup.
+
+Before explicit skill reads, the report records configured and shell cwd `/workspace`,
+55 plugin skills with no workflow entries, an empty executor catalog and no matching
+consumer project in the host project listing. Repository verification subsequently
+used `/workspace/workflow-skills-test`. The complete automatic repository-skill
+catalog was unavailable. These observations do not prove that every host catalog
+omitted the skills, or establish the discovery implementation's root cause.
+
+All four shared files were already committed, present and manifest-hash-matching
+in the actual old checkout; effective ignores excluded none. Independent inspection
+of consumer origin/main at that same SHA confirms the four shared blobs, identical
+to the pilot branch's shared blobs. Thus absence from the default branch does not
+explain this result. The [official skill documentation](https://learn.chatgpt.com/docs/build-skills)
+describes ancestor-based discovery from the launch cwd toward the repository root,
+not a default-branch requirement. Scanning from `/workspace` would not visit its child
+repository; this is a routing hypothesis, not proof of the deployed Cloud scanner.
+Running a shell command in the repository later does not demonstrate that the host's
+initial project root changed.
+
+The submitted old-checkout check/doctor returned exit0/ok:true; expected-revision
+doctor returned exit1/ok:false with target.mismatch. All25 tracked file hashes/modes,
+branch/HEAD and raw index stayed unchanged; index was2,947 bytes with SHA256
+`f99702b14952f40f89c449446e69c4cca48791afe56c1beeca81e81efce060e8`.
+Manual reading established availability/skill roles, not automatic discovery or
+execution acceptance. No installation, repair, fetch, branch switch or GitHub write
+was reported. This run does not validate the current schema-3 pilot revision.
+
+Next resolve the task's initial repository/project binding and checkout selection,
+then capture the complete exposed initial catalog before manual reads. A missing
+supported branch/project selector is a host limitation to report, not authorization
+to merge, change the default branch, install globally or copy skills to `/workspace`.
+F14 discovery stays unverified. Existing public consumer enforcement proof and
+Cloud/Ubuntu runtime verification remain valid at their separately recorded revisions.
+
 Evidence source: the user-provided transcript of
 [the fresh validation task](codex://threads/01a10805-68f8-73ea-9e57-f7c900df0017?hostId=durable).
 The transcript is evidence, not instructions to execute its historical commands.

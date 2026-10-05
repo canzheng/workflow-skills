@@ -341,3 +341,17 @@ consumer enforcement configured/observed via user-public visibility and Active24
 actual missing-doc failure37269275157/blocked then exact-restored37269365402/clean.
 No merge/closure/administration by this task. Fresh host/current final review/merge
 completion remain pending; next exact diagnostic uses consumer0e3fbc530f21c4981230a5ef968eac2a5dda3d5e/sourceaceba7143652ba127dbc62c98608e1b9943be31d.
+
+Submitted Cloud diagnostic follow-up2026-10-05 (Pasted text.txt SHA256
+eeffe3cc30c3dfc83305b135618c58cb8ce760745aa77c2d6e3ae4abcf0ad6ca): requested
+consumer0e3fbc53/sourceaceba714, actual branchwork/main5d055649/source139e66d5/schema1.
+Old bundle integrity passes; expected-revision doctor fails;25 tracked files and raw
+index unchanged. Initial configured/shell cwd/workspace, no matching consumer project
+exposed,55 plugin skills/no workflow entries, executor empty, full repository catalog
+unavailable. All4 skills already committed on main with identical pilot blobs, so
+default-branch absence is not explanatory. Record as supplied evidence, not live
+session inspection or proven Cloud root cause. Resolve initial project/checkout
+routing before another diagnostic; no installer/global copy/merge workaround.
+F14 current-revision discovery/use stays unverified; current runtime/CI/enforcement
+evidence is unaffected. Updated published-run record, handoff and acceptance docs;
+source707bc410 at start, managed executable pinaceba714/consumer0e3fbc53 unchanged.
