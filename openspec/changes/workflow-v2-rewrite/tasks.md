@@ -411,3 +411,14 @@ authorized remaining checks using repo-local skills, reporting manual fallback
 separately. For automatic discovery, host support/debugging must establish root,
 repo catalog and pre-agent checkout controls; do not reinstall/recreate/merge as
 an inferred fix. F14 stays blocked/active; no merge/closure/admin/global changes.
+
+Additional native-host subset: existing Codex CLI0.159.0-alpha.3 app-server initialize
+and skills/list (explicit cwds/forceReload) recognize3 workflows+pantry with repo
+scope/enabled/no parser errors at consumerf639 Git root on managed runtime/Ubuntu24.04.5;
+parent-root controls find none. Real fresh old-main5d clone recognizes its3 identical
+workflow files at repo root; parent none. No model/thread, manual file read by probe,
+workflow global install or config/index/tracked mutation. Existing CLI binary mounted
+read-only in disposable Ubuntu container. Evidence stored in published-run/acceptance/
+handoff. Ubuntu native CLI catalog subset verified; Ubuntu skill execution and
+Cloud initial catalog/use still pending. This strengthens host root lead but does
+not prove current Cloud implementation/root. No reinstall/main merge inferred fix.

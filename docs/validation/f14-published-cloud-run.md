@@ -1,5 +1,46 @@
 # F14 published Cloud run: recovery passed, discovery pending
 
+## Native Codex catalog root comparison — 2026-10-05
+
+Existing `codex-cli 0.159.0-alpha.3` app-server was queried with only `initialize`
+and `skills/list` (`cwds` explicit, `forceReload: true`). No thread/model execution,
+network authentication change or manual SKILL.md read by the probe occurred. The
+server's real skill scanner parsed the repository files; source/index/config were
+asserted unchanged. The process was terminated after the catalog request. This is
+actual CLI catalog discovery, not the published Cloud task's initial catalog.
+
+| Host / checkout | Catalog cwd | Workflow result |
+| --- | --- | --- |
+| Managed runtime, consumerf6394326/sourcea4eb9f1 | `/workspace` | No repo workflow skills; no parser errors |
+| Same runtime/process/files | `/workspace/workflow-skills-test` | All3 workflow skills plus pantry-project, scope repo/enabled, no repo parser errors |
+| Ubuntu24.04.5, real fresh clone of consumerf6394326 | `/` | No repo workflow skills; no parser errors |
+| Same Ubuntu process/files | `/consumer` | All3 workflow skills plus pantry-project, scope repo/enabled, no repo parser errors |
+| Managed runtime, real fresh old main5d055649/source139e66d5 clone | Temporary parent folder | No repo workflow skills; no parser errors |
+| Same old-main clone | Its consumer Git root | All3 workflow skills, scope repo/enabled, no repo parser errors |
+
+The existing static CLI binary was mounted read-only into the disposable Ubuntu
+container; shared skills stayed in the repo. No global workflow-skill installation
+or global configuration edit was performed. Tracked files/raw index/global config
+were unchanged. Local outputs are `/tmp/wf2-cli-skill-catalog.json`,
+`/tmp/wf2-main-cli-skill-catalog.json` and
+`/tmp/wf2-ubuntu-cli-skill-catalog.log`; the comparison above preserves the relevant
+evidence without treating temporary log paths as durable host artifacts.
+
+This establishes that the current skill package and the identical old-main skill
+files are discoverable by the tested native CLI at the correct repository root.
+It also demonstrates a parent-root negative in that implementation, strengthening
+the Cloud cwd/root lead. It does not prove that the deployed published-environment
+Cloud host uses this exact binary/scanner or which root it passes. A shell `cd`
+or a successful explicit catalog query does not establish initial Cloud discovery.
+
+F14 Ubuntu native CLI catalog discovery now has positive/negative evidence as a
+bounded subset. Ubuntu agent skill invocation/end-to-end use and fresh Cloud initial
+catalog/use remain pending. Main already contains discoverable skills; installing
+them there again is not an evidenced remedy. Next host action: identify the Cloud
+repo/root binding and catalog API through support/debugging, preserving manual
+repo-file loading as a separately reported fallback.
+
+
 ## Recreated environment reproduced catalog absence — 2026-10-05
 
 The user supplied a second fresh-environment `Pasted text.txt`, 16,163 bytes,

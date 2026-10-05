@@ -65,6 +65,13 @@ The next host action is a support/debugging handoff about initial repository/pro
 binding, discovery catalogs and checkout ordering. Manual repo-file reading/use is
 available but cannot satisfy automatic discovery acceptance.
 
+Native Codex CLI0.159.0-alpha.3 catalog now recognizes all3 workflow skills at the
+consumer Git root on managed runtime and Ubuntu, while a parent-root query returns
+none. A real old-main clone also has all3 recognized at its repo root. See the
+[controlled catalog comparison](f14-published-cloud-run.md#native-codex-catalog-root-comparison--2026-10-05).
+This validates package discoverability and strengthens the root-binding lead;
+it does not establish the published Cloud scanner/root or initial agent catalog.
+
 For an already adopted, committed consumer, the Cloud **install script** field and
 Ubuntu setup can run the same read-only command. Checkout must select the approved
 consumer revision before host skill discovery. This command does not select a branch,

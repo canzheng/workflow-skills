@@ -1,5 +1,20 @@
 # v2 rewrite acceptance evidence
 
+## Native CLI discovery subset verified — 2026-10-05
+
+Existing Codex CLI0.159.0-alpha.3 app-server initialize/skills-list query recognizes
+all3 workflow skills plus pantry-project with repo scope/enabled/no repo errors at
+consumerf6394326 Git root on managed runtime and Ubuntu24.04.5. Parent-root controls
+return no repo workflow skills. A real fresh old-main5d055649 clone recognizes its
+identical3 skills at the repo root; parent control returns none. Tracked/index/global
+config bytes unchanged; no workflow globals or agent/model/thread execution.
+[Actual root/catalog comparison](f14-published-cloud-run.md#native-codex-catalog-root-comparison--2026-10-05)
+validates native CLI package discovery and a root negative, not published Cloud
+initial discovery or proof of its deployed implementation. Ubuntu CLI catalog subset
+is verified; Ubuntu agent invocation/end-to-end use and Cloud initial catalog/use
+remain pending. Host root binding is a supported lead, not a proven Cloud cause.
+
+
 ## Recreated Cloud comparison and current consumer repair — 2026-10-05
 
 Final enlarged-suite checkpoint: source `b0323c903901bc33fb16a144aec413f3b31ff087`
