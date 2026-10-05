@@ -148,3 +148,10 @@ project config before adoption or bootstrap, rejecting mismatches without writes
 
 An adopted repository missing its project configuration fails before dependency writes.
 Source and installed provenance share the same v2 bundle-version validation.
+
+Pinned source validation reads canonical Git objects with replacement refs disabled
+for revision and blob checks. Local `git replace` mappings cannot change installed
+bytes under an unchanged dependency SHA; mismatching worktree bytes conflict before
+writes. Canonical worktree bytes remain usable without deleting those local refs,
+and a separate source checkout can reproduce the same pin. This changes no Git
+configuration or authentication binding.

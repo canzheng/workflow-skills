@@ -103,6 +103,49 @@ class SetupTests(unittest.TestCase):
         run(*self.args, '--apply')
         self.assertEqual(json.loads((self.target / '.workflow/install-manifest.json').read_text())['source_revision'], self.sha)
 
+    def test_replacement_refs_cannot_change_pinned_source_bytes(self):
+        name = '.agents/skills/workflow-design-to-backlog/SKILL.md'
+        path = self.source / name
+        original = path.read_bytes()
+        replacement_bytes = original + b'Local replacement content.\n'
+        path.write_bytes(replacement_bytes)
+        replacement = commit(self.source)
+        subprocess.run(['git', '-C', str(self.source), 'replace', self.sha, replacement], check=True)
+        # Git normally serves the replacement bytes under the original commit ID.
+        self.assertEqual(subprocess.check_output(['git', '-C', str(self.source), 'show', self.sha + ':' + name]), replacement_bytes)
+        before = subprocess.check_output(['git', '-C', str(self.target), 'ls-files', '--stage'])
+        result = run(*self.args, '--apply', expect=1)
+        self.assertIn('Source bytes differ from pinned revision', json.dumps(result))
+        self.assertFalse((self.target / '.workflow/install-manifest.json').exists())
+        self.assertEqual((self.target / 'AGENTS.md').read_text(), 'User rule: preserve data.\n')
+        self.assertEqual(subprocess.check_output(['git', '-C', str(self.target), 'ls-files', '--stage']), before)
+
+        # Canonical worktree bytes can still install without deleting local refs.
+        path.write_bytes(original)
+        run(*self.args, '--apply')
+        self.assertEqual((self.target / name).read_bytes(), original)
+        pin = json.loads((self.target / '.workflow/install-manifest.json').read_text())
+        self.assertEqual(pin['source_revision'], self.sha)
+        self.assertEqual(subprocess.check_output(['git', '-C', str(self.source), 'rev-parse', 'refs/replace/' + self.sha], text=True).strip(), replacement)
+        commit(self.target)
+        tracked = {p: (self.target / p).read_bytes() for p in subprocess.check_output(['git', '-C', str(self.target), 'ls-files'], text=True).splitlines()}
+        before = subprocess.check_output(['git', '-C', str(self.target), 'ls-files', '--stage'])
+        missing = [p for p in pin['files'] if installer.shared(p)]
+        for p in missing:
+            (self.target / p).unlink()
+
+        # A separate source clone without local replacements reproduces that pin.
+        clone = self.base / 'canonical-source'
+        subprocess.run(['git', 'clone', '--quiet', '--no-local', str(self.source), str(clone)], check=True)
+        subprocess.run(['git', '-C', str(clone), 'checkout', '--detach', '--quiet', self.sha], check=True)
+        self.assertEqual(subprocess.check_output(['git', '-C', str(clone), 'for-each-ref', 'refs/replace']), b'')
+        restored = run('bootstrap', '--repo', self.target, '--source', clone, '--apply')
+        self.assertEqual(set(restored['changes']), set(missing))
+        self.assertEqual((self.target / name).read_bytes(), original)
+        self.assertEqual({p: (self.target / p).read_bytes() for p in tracked}, tracked)
+        self.assertEqual(subprocess.check_output(['git', '-C', str(self.target), 'ls-files', '--stage']), before)
+        self.assertEqual(run('bootstrap', '--repo', self.target, '--source', clone, '--apply')['changes'], [])
+
     def test_omitted_public_runtime_module_fails_before_install(self):
         bundle = self.source / '.workflow/bundle.json'
         original = json.loads(bundle.read_text())

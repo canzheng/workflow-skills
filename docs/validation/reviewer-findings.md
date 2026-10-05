@@ -30,3 +30,17 @@ are recorded in Issue15/PR16. Newly adopted consumer live CI, real fresh Cloud
 and Ubuntu agent discovery, PR semantic review and authorized merge/closure remain
 integration pending. The source draft PR and per-feature review labels are the
 explicit cumulative bootstrap exception, never a consumer example to copy.
+
+## Canonical Git objects in pinned setup
+
+Independent source PR review of `c5045c1` found that local `git replace` mappings
+could substitute bytes while setup recorded the original source SHA. This was
+reproduced before accepting the finding: a real replacement commit changed a shared
+skill, and the public setup command incorrectly returned success under the old pin.
+Validation now disables replacement objects for commit resolution and asset reads.
+The public regression rejects substituted worktree bytes before writes, preserves
+the consumer's instructions/index and the source's replacement ref, then installs
+canonical bytes and rematerializes them from a separate clone without replacements.
+The current adoption spec and active delta record that identity requirement.
+New exact-revision aggregate/Ubuntu/CI results belong in Issue15/PR16; the uploaded
+consumer task remains bound to `f31debf981...` / `ef24d36...`, not this later repair.

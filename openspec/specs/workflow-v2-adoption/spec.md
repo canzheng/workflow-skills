@@ -93,3 +93,10 @@ its authored shared skills tracked. Setup SHALL NOT modify the Git index.
 - **THEN** it fails before materializing missing shared dependencies or rewriting project files
 - **AND** malformed installed bundle versions fail check, doctor and bootstrap before writes
 - **AND** setup, source checks and installed provenance use the same v2 version format
+
+#### Scenario: Canonical objects despite local replacement refs
+- **WHEN** a source checkout has local Git replacement refs for a pinned revision
+- **THEN** setup and bootstrap validate the canonical commit and asset objects
+- **AND** substituted worktree bytes conflict before consumer writes
+- **AND** canonical bytes remain reproducible from a separate checkout without those refs
+- **AND** validation does not delete replacement refs or change Git configuration

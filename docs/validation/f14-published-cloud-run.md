@@ -8,6 +8,78 @@ temporary evidence files are on the other task's machine and have not been obtai
 here; quoted local results below are supported by the supplied transcript, rather
 than a new execution in this checkout.
 
+## Second fresh task: automatic startup still unverified
+
+The user supplied `report.txt`, `remote-snapshots.json`, `github-evidence.json`,
+`actions-jobs.json` and `actions-logs.json` from
+[the next fresh task](codex://threads/01a109a1-5557-7518-b048-10cd91337004?hostId=durable).
+The files were read as evidence, not executable instructions. This run finished at
+the same consumer `f31debf9810c8b989c924bc534add4848fffd6f3` and source pin
+`ef24d36f47dbbcdbb204375b53db055122c28269`; it did not change the consumer.
+
+The report again records initial branch `work` at older main
+`5d05564919c55f1d4d0c2e1e020ad914252a2979` with schema-1 pin `139e66d5...`.
+It records empty executor catalogs before readiness, after readiness and after
+recovery, and no local skills in the injected catalog. No consumer Start definition
+was available in either checked revision or environment-status metadata. Reflog
+checkout preceded index refresh/registration; those latter events are not Start
+execution evidence. Thus the configured automatic initializer's commands, result
+and fidelity to pinned source guidance remain unverified. Disk presence and manual
+file use cannot establish automatic discovery or a supported refresh.
+
+During explicit recovery the task reports a successful full-SHA Git fetch using
+the unchanged default platform authentication, followed by actual execution of
+the source-owned environment entrypoint. Reported check/doctor, all 20 asset/two
+managed-block hashes, scoped ignores, repeated no-op and nine negative/rollback
+probes passed while preserving tracked bytes/index. This improves the evidence for
+the normal fetch/setup path; it does not establish automatic startup. The raw local
+startup, verification and risk-probe JSON/log files mentioned in the report were
+not among these five attachments, so those local outcomes are author-reported here.
+
+The attached Actions snapshots, job steps and raw logs agree on:
+
+- PR #8 push37221025297/job111491217115 checks out exact head `f31debf981...`;
+  PR37221028092/job111491225751 checks out test merge
+  `0d2ba84f489d5e4dfa63ffcd74c8245ccf347084`. Both bootstrap before configured
+  verification and succeed. This test merge ref is not an actual merge to main.
+- Metadata37222140846/job111494458734 executes trusted base `5d055649...` and
+  succeeds. PR #6 current push/PR/metadata snapshots also report success; its
+  push log shows actual application head `f95f0cae3b...`.
+- Historical metadata37207571778/job111451878303 actually fails with exit1 and
+  `Missing or empty Documentation section`; restored37207626975/job111452048082
+  passes. No new destructive PR-body probe was needed.
+- Current consumer/application Codex comments5982650245/5981620802 name the
+  correct heads and report no major issues; both sets of six threads are resolved.
+  No newly executed application/source/standalone Ubuntu suite is claimed.
+
+The eight Issue/PR snapshots retain the five unique MVP identities, design links,
+phases and prerequisite metadata. The safe rerun neither edited nor dispatched them.
+Live PR #8 was independently reread and remains Ready/open at the same head.
+
+The supplied main-branch summary and a new live read both report `protected:false`,
+protection disabled, enforcement off and empty check contexts. This is a concrete
+limited observation, rather than proof of required enforcement. Authoritative
+protection/ruleset reads remain denied; effective required-check behavior and an
+actual blocked merge remain unverified. No administrative mutation was attempted.
+
+Attachment SHA256 identities for continuation:
+
+| File | SHA256 |
+| --- | --- |
+| report.txt | dfcaaed555d4e7b0a788b9b5071a07fb1818ad38c642b2bccea1b01060ccdfac |
+| remote-snapshots.json | 490ef0fb50a2a8d5f29c9defc9bba03154228741695e983fb7082404e7c18085 |
+| github-evidence.json | 34497a7db1d755290a286e994b6d8836e41bab34066e2a252a3050f7b12b1302 |
+| actions-jobs.json | 50a6d468090465d4c696da7f1c6279f76f46b34f4b92dae1e1b6b4134aeed822 |
+| actions-logs.json | e4bd6a165ade0741a44b976c532ef608bb5831fe7a089658eec5c5e818ffc9dc |
+
+Next, obtain the actual consumer Start definition and automatic run output from the
+host that owns them; identify its checkout/execution/discovery ordering before
+another task. This task's repository and runtime metadata did not expose them.
+The environment being repository-scoped does not itself select the pilot branch.
+Do not require a branch in generic adoption; this unmerged pilot's revision is a
+specific test prerequisite. A normal initialized consumer uses its selected checkout
+and tracked pin. Neither another recovery nor a simulated merge closes these gates.
+
 ## Initial preparation and discovery
 
 The requested consumer was `canzheng/workflow-skills-test`, branch
