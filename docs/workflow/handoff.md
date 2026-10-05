@@ -6,8 +6,8 @@ checks, environment, prerequisites/blockers and exact next action. No second pla
 When remote writes fail, append evidence to the existing rewrite tasks checkpoint.
 Use full revision and actual content; doctor reports revision/branch/dirty/content
 SHA-256 digest for tracked/nonignored files without exposing file content or secrets.
-For schema-2 consumers it also hashes materialized ignored dependency bytes and
-reports dependency modification, so an ignored edit invalidates evidence even with
+For consumers it also verifies shared skill provenance and reports dependency
+modification, so an altered shared asset invalidates evidence even with
 a clean Git status. Record both consumer SHA and pinned source SHA across environments.
 Compare `--expect-branch`, `--expect-revision` and, for dirty tested content,
 `--expect-content`. Missing or mismatched targets fail explicitly. Commit tested

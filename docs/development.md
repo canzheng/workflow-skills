@@ -58,18 +58,19 @@ are in [acceptance evidence](validation/v2-acceptance.md).
 
 ## Consumer preparation versus source authoring
 
-This source repository authors and tracks the shared skills. Consumers track project
-policy/config/utilities/CI/docs and a dependency pin, and materialize only three ignored
-shared-skill namespaces. Their repeatable environment command is:
+Both source and consumer repositories track shared skills. Consumers also track
+project policy/config/utilities/CI/docs and schema-3 source provenance. One-time
+pinned setup writes reviewable adoption files; commit them before Cloud/Ubuntu
+agent startup. Repeat environment preparation verifies the committed snapshot:
 
 ```sh
-python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
+python3 tools/workflow/workflow.py check --repo . --run-local --json
+python3 tools/workflow/workflow.py doctor --repo . --json
 ```
 
-Run it after checkout and before agent discovery in the actual host preparation hook,
-then the consumer's declared check/doctor commands. Repeat for branch/pin changes;
-the source-owned setup entrypoint may have its own pinned fetch revision, but it
-must never override an adopted consumer dependency pin. See the README for the
-complete Cloud install-script/local fetch-and-run command. See [operations](operations.md)
-for initial adoption, explicit untracking of old shared skills and conflict recovery.
-Source contributors do not run consumer bootstrap here: there is no consumer pin.
+No workflow-source fetch or ignored-file persistence is required after adoption.
+`bootstrap --apply` remains accepted as verification-only, not a repair command.
+See [operations](operations.md) for explicit update and ignored-to-tracked migration,
+and the source README for pinned first adoption. Actual host discovery remains a
+fresh-task gate, independent of file/hash checks and CI. Source contributors use
+.workflow/bundle.json and do not need a consumer manifest.

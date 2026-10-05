@@ -38,10 +38,11 @@ separate capabilities. Deterministic checks cannot certify semantic documentatio
 Issue closure or merge protection; adoption of trusted-base checks and protection
 configuration need their own observed evidence and authorization.
 
-The candidate consumer setup now separates one-time adoption/update from repeatable
-`bootstrap`. Project-owned files and a full-SHA dependency manifest remain tracked;
-only the three shared skill directories are materialized locally and ignored.
-Project-specific skills stay trackable. Bootstrap is idempotent, verifies the tracked
-pin and preserves project files/index. Existing tracked shared skills require reviewed
-untracking. Consumer CI bootstraps before checking. Fresh Cloud discovery and the
-new-model real pilot remain acceptance gates; this is not a published release.
+The consumer setup separates one-time adoption/update from read-only environment
+verification. Shared skills are committed alongside project policy, configuration,
+helpers, CI/templates and a full-SHA schema-3 provenance manifest. Setup never stages
+or commits; review the adoption diff and commit it before a fresh Cloud task. Explicit
+migration removes only the verified owned schema-2 ignore block. Repeat setup never
+fetches or repairs missing skills, and consumer CI verifies the checked-out files.
+Project-specific skills remain tracked. Fresh Cloud discovery and real merge/enforcement
+remain acceptance gates; this is not a published release.

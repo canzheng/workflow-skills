@@ -341,3 +341,12 @@ none of these errors establishes that protection is absent. Actual merge followe
 by valid Issue completion, and any protection/ruleset mutation, remain pending
 separate authorization. No merge/closure simulation is substituted. F14 and its
 OpenSpec change remain incomplete/active; no work is described as delivered.
+
+## Tracked-model follow-up — 2026-10-05
+
+The user requested tracked shared workflow skill files after observing failed discovery
+of injected dependencies. Prior diagnostics remain accurate observations but do not
+prove the host's failure mechanism. The replacement experiment requires files in the
+consumer commit before any hook/agent, initial fresh-task catalog capture and matching
+pins/hashes. No manual install/recovery can substitute for discovery acceptance. See
+[current tracked handoff](cloud-bootstrap-handoff.md); old receipt commands are historical.

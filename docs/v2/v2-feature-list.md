@@ -184,9 +184,10 @@ Milestone A: usable core with local/fixture proof. Milestone B: complete deliver
 5. Uninstall removes only unmodified managed assets and the managed instruction block, retaining user-owned documents/configuration as documented.
 6. Doctor reports malformed config, active legacy routing, supported tool availability, and discoverable duplicate skills. It never deletes global skills or claims to inspect inaccessible host locations.
 7. Incomplete production bundle assembly is a reported failure, not a falsely successful install of missing skills.
-8. Adoption tracks project-owned files and the exact dependency pin, ignores only the three shared skill directories, and never alters the Git index. Project-specific skills remain trackable; old tracked shared files require reviewed untracking.
-9. Bootstrap materializes/verifies the tracked full-SHA dependency without rewriting project policy/config/docs or using latest/global installation. Repetition is a no-op; missing/modified/extra/symlinked assets, denied fetch and pin mismatches have meaningful negative coverage (S34).
-10. Cloud/local environment setup fetches a pinned source-owned entrypoint without copying it into the target; a fresh Git root needs no tools or first commit. Existing adoption retains its tracked pin on repeated runs. Source README documents Cloud install-script and local setup. Cloud/Ubuntu preparation and consumer CI run bootstrap before discovery/verification. Actual host discovery and same-pin environments are established separately in F14.
+8. Adoption produces trackable shared skills, project-owned files and schema-3 exact-source provenance without changing the index. Review and commit all three shared skill directories and risk references; no shared-skill ignores are added.
+9. Repeat verification uses committed skills without fetch, repairs or writes. Missing/modified/extra/symlinked/ignored/untracked assets and invalid pins fail meaningfully (S34). Explicit update removes only a verified old schema-2 ignore block, preserves user files/config/index and safely restores on failure.
+10. Source-owned first adoption works from an exact source commit without tools/first commit; the entrypoint is not copied into the target. Source README distinguishes one-time adoption/update from Cloud/local read-only verification. Fresh clone and CI verify tracked skills directly; actual initial Cloud/Ubuntu discovery/use remains a separate F14 requirement.
+
 
 **Verification:** public CLI tests in temporary Git repositories, including dirty/modified files, symlinks, spaces in paths, partial failure, and provenance mismatch. At F14 verify actual skill discovery, beyond filesystem presence.
 

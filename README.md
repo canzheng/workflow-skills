@@ -20,25 +20,23 @@ are pinned in requirements.txt. `npm ci --ignore-scripts` installs pinned OpenSp
 1.14.0 when relevant; `python3 tools/workflow/workflow.py check --repo . --specs`
 runs actual strict validation. See [development](docs/development.md).
 
-## Cloud and local environment setup
+## One-time adoption and explicit updates
 
-The environment entrypoint lives in this repository, not in the consumer. Fetch an
-explicit full workflow-skills commit, then run its source-owned
-[environment-setup.sh](tools/workflow/environment-setup.sh) with the consumer Git root
-and GitHub identity. Python >=3.10, Bash, Git and HTTPS read access are required.
-The target must already be a Git checkout; it may have no tools or first commit.
+Shared workflow skills are installed repo-locally **and committed in the consumer**.
+Track all three `.agents/skills/` directories, risk references, project policy/config,
+helpers, CI/templates, docs and schema-3 source provenance. Project skills stay tracked.
+Fresh Cloud/Ubuntu tasks get the reviewed skills from Git, not environment injection.
 
-For Codex Cloud, paste the following into the environment **install script** field
-(and maintenance hook when available). Set the exact source SHA, checkout path and
-owner/name for your project. For local/Ubuntu setup, run the same command in Bash
-with your local absolute checkout path. No global installation is involved.
-The Install script is the primary dependency preparation path. An optional consumer
-Start skill verifies the prepared checkout and starts required runtime services.
-The workflow-only pilot needs no Start skill or running services.
+The adoption entrypoint lives in workflow-skills, not the consumer. Fetch an explicit
+full source commit and run [environment-setup.sh](tools/workflow/environment-setup.sh)
+with the exact consumer Git root and owner/name. Python >=3.10, Bash and Git are
+required; first fetch needs Git HTTPS access. A new target needs no existing tools
+or first commit. Set WF2_SOURCE_SHA to the tested full source SHA in the
+[current handoff](docs/validation/cloud-bootstrap-handoff.md), then run in Bash:
 
 ```sh
 set -eu
-WF2_SOURCE_SHA=b1fe9e0242753db54cc16dfc8768502eb74cb3ea
+: "${WF2_SOURCE_SHA:?Set the tested full source commit from the handoff}"
 WF2_CONSUMER_ROOT=/workspace/workflow-skills-test
 WF2_CONSUMER_REPOSITORY=canzheng/workflow-skills-test
 WF2_SOURCE_DIR=$(mktemp -d)
@@ -49,44 +47,40 @@ git -C "$WF2_SOURCE_DIR" checkout --detach --quiet "$WF2_SOURCE_SHA"
 bash "$WF2_SOURCE_DIR/tools/workflow/environment-setup.sh" "$WF2_CONSUMER_ROOT" "$WF2_CONSUMER_REPOSITORY"
 ```
 
-Use a tested full SHA from the [current pilot handoff](docs/validation/cloud-bootstrap-handoff.md);
-never substitute main/latest. Initial adoption previews and applies bounded project
-policy/configuration, utilities, CI/templates, docs, dependency pin and three scoped
-ignore entries, then bootstraps and verifies. Review and commit those project-owned
-files. The setup script is not copied into the target; project skills remain trackable.
+Review and commit generated files before publishing an agent environment. Setup
+never stages, commits, pushes, merges or changes protection/global configuration.
+For existing schema-1/2 adoption, use the new source's explicit setup preview/apply
+[procedure](docs/operations.md); repeat startup does not silently migrate it.
+Schema-2 migration removes only the verified owned shared-skill ignore block.
+Modified files or other conflicting ignore rules are preserved and reported.
 
-On an adopted repository, the **tracked dependency pin wins** over the fetched
-entrypoint revision. Repeated setup only bootstraps that exact pin and runs
-check/doctor, without rewriting project-owned files or changing the Git index.
-Matching skills need no bootstrap fetch. The outer command fetches its pinned
-entrypoint each time; denied source reads fail clearly rather than choosing latest.
-An old tracked-skill adoption needs the explicit reviewed [migration](docs/operations.md).
-Modified files conflict; unrelated instructions remain. Setup never commits, pushes,
-merges or configures protections. Require successful exits and `ok: true` diagnostics.
+## Cloud install field and local repeat verification
 
-Publish/apply Cloud configuration and select the intended consumer branch. The host
-must check out the repo before the install hook and discover skills afterward;
-maintenance may be needed after branch/pin changes. A successful shell run does not
-prove host discovery or setup persistence: verify both in a fresh Cloud task.
-See [operations](docs/operations.md) for offline preview/update/uninstall and
-[migration/rollback](docs/migration-v1-v2.md). Source authoring uses .workflow/bundle.json;
-consumer provenance contains the durable dependency pin, not task state.
+For an adopted repo, the environment Install field needs only the following,
+with the actual consumer path. Run the same commands locally/on Ubuntu:
 
-When a project uses a **Start skill**, it verifies its selected checkout, tracked dependency
-pin and materialized skills before check/doctor. It starts services only when the
-project requires them; the workflow-only pilot has none. Missing dependencies,
-modified files or a revision mismatch must be reported, not silently overwritten
-or upgraded. Explicit recovery may read this README and linked setup guidance at
-the approved full source revision and follow the same source-owned procedure.
-Use the resolved pin in examples, never main/latest. Keep installation logic in
-workflow-skills, rather than duplicating it in the consumer skill.
+```sh
+set -eu
+cd /workspace/workflow-skills-test
+python3 tools/workflow/workflow.py check --repo . --run-local --json
+python3 tools/workflow/workflow.py doctor --repo . --json
+git --no-optional-locks status --short --untracked-files=all
+```
 
-Capture actual Install output/exit status, selected checkout/source pin and initial
-skill availability in a fresh task. A published environment filesystem is a derived
-cache; the tracked pin remains the version authority. Verify ignored-file persistence
-and checkout/refresh ordering on the actual host. Do not assume a field executed
-automatically, that repository refresh reran preparation, or that explicit Start
-use proves pre-agent discovery. See [the pilot handoff](docs/validation/cloud-bootstrap-handoff.md).
+No workflow repository fetch, global skills, ignored-file cache or Start skill is
+needed for this CLI-only pilot. Repeating the source-owned entrypoint also preserves
+project files/index/pin and only verifies an adopted schema-3 repository. Existing
+`bootstrap --apply` callers perform read-only verification; they never fetch/repair
+missing skills. Restore the reviewed Git checkout or perform an explicit update.
+The installed pin wins over a newer source entrypoint; updates are separate changes.
+
+Publish/apply the environment and launch a fresh task on the reviewed consumer
+revision. Record the initial host skill catalog before explicit skill reads; verify
+all shared files are committed, hashes/pin match and Git remains clean. Capture host
+cwd/project-root routing separately from shell cwd. Presence and manual use alone
+are not discovery proof. The [F14 handoff](docs/validation/cloud-bootstrap-handoff.md)
+contains the current revisions, diagnostic and remaining boundaries. Earlier
+ignored-file/receipt experiments are historical evidence, not the acceptance path.
 
 ## Acceptance boundary
 

@@ -1,5 +1,24 @@
 # v2 rewrite acceptance evidence
 
+## Tracked-skill refinement — 2026-10-05
+
+The user authorized committing shared skills instead of injecting ignored dependencies.
+The current change starts at source `ead664a722b040e144c44c431bfe4488c36d7c88`.
+Schema-3 adoption/update installs trackable shared files with exact source provenance;
+repeat startup verifies the checkout without fetch, repair or index changes. Migration
+removes only the verified owned schema-2 ignore block. Consumer CI checks Git content
+directly. New model verification and consumer migration are in progress; no pass is
+claimed yet. F14 remains integration pending until a genuinely fresh Cloud task
+proves initial discovery of committed skills. Ubuntu runtime is separate from Ubuntu
+agent-host discovery. Real merge/Issue completion and enforcement mutation still
+require authorization. See [current handoff](cloud-bootstrap-handoff.md).
+
+## Historical checkpoints — superseded storage model
+
+The following records describe earlier revisions and retain their original evidence.
+Ignored-skill materialization/receipt procedures are not current setup instructions.
+
+
 ## Current source-owned setup checkpoint
 
 Latest source repair `b1fe9e0242753db54cc16dfc8768502eb74cb3ea` passes 81 tests

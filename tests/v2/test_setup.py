@@ -139,12 +139,15 @@ class SetupTests(unittest.TestCase):
         subprocess.run(['git', 'clone', '--quiet', '--no-local', str(self.source), str(clone)], check=True)
         subprocess.run(['git', '-C', str(clone), 'checkout', '--detach', '--quiet', self.sha], check=True)
         self.assertEqual(subprocess.check_output(['git', '-C', str(clone), 'for-each-ref', 'refs/replace']), b'')
-        restored = run('bootstrap', '--repo', self.target, '--source', clone, '--apply')
-        self.assertEqual(set(restored['changes']), set(missing))
+        run('bootstrap', '--repo', self.target, '--source', clone, '--apply', expect=1)
+        self.assertTrue(all(not (self.target / p).exists() for p in missing))
+        # Restore the committed canonical consumer bytes, then verify against a
+        # separate source clone: startup never fetches/recreates tracked assets.
+        subprocess.run(['git', '-C', str(self.target), 'restore', '--', *missing], check=True)
+        self.assertEqual(run('bootstrap', '--repo', self.target, '--source', clone, '--apply')['changes'], [])
         self.assertEqual((self.target / name).read_bytes(), original)
         self.assertEqual({p: (self.target / p).read_bytes() for p in tracked}, tracked)
         self.assertEqual(subprocess.check_output(['git', '-C', str(self.target), 'ls-files', '--stage']), before)
-        self.assertEqual(run('bootstrap', '--repo', self.target, '--source', clone, '--apply')['changes'], [])
 
     def test_omitted_public_runtime_module_fails_before_install(self):
         bundle = self.source / '.workflow/bundle.json'

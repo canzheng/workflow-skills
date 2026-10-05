@@ -280,3 +280,13 @@ actual consumer clones pass receipt identity/hash, all20 assets, repeat/no-op an
 expected/old-HEAD dirty and ignored-file refusals preserving bytes/raw index/HEAD.
 First read-only bind failed Git ownership; disposable owned copy resolved it without
 global trust changes. Publication persistence/discovery remain separate pending gates.
+
+### User-approved tracked skills refinement — 2026-10-05
+
+Starting source commit ead664a722b040e144c44c431bfe4488c36d7c88. Shared skills now
+belong to committed consumer snapshots with schema-3 exact source provenance. Setup
+performs explicit adoption/update; migration removes only its verified owned ignore
+block. Bootstrap is read-only compatibility verification; CI verifies checkout files.
+Current specs, approved F03/S34 and F14 instructions follow the new model. Earlier
+ignored dependency/receipt checkpoints are historical. Verification/pilot migration
+are pending at this checkpoint; F14 remains unchecked, no merge/archive/closure.

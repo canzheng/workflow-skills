@@ -141,7 +141,17 @@ openspec/specs/
 openspec/changes/
 ```
 
-The `.agents/skills/` directories are the only authored, tracked copies of the three shared v2 skills in the source repository. Reusable risk references live with the risk skill. In consumers, project policy/configuration, utilities, CI/templates, docs/specs and project-specific skills remain tracked. The three shared skill directories are dependencies materialized repo-locally and individually gitignored. The tracked `.workflow/install-manifest.json` pins their full source commit, credential-free source URL and asset hashes; it is provenance, never task state, and never includes its own content hash. Cloud and Ubuntu consume that same pin, without fetching main/latest or installing globally. Doctor distinguishes authoring from installed consumers; source authoring needs no install manifest.
+The `.agents/skills/` directories are the canonical authored copies in the source;
+consumer setup copies their pinned bytes into tracked repo-local skill files.
+Project policy/configuration, utilities, CI/templates, docs/specs, project-specific
+skills and all three shared directories are committed. Schema-3 provenance records
+tracked storage, full source commit, credential-free source URL and asset hashes;
+it never includes its own hash or task state. Fresh Cloud/Ubuntu checkouts supply
+the same committed skills, without global installation or fetching main/latest.
+User-approved refinement (2026-10-05): replace environment-injected ignored skills
+with committed skill snapshots. Failed initial-discovery reports motivated the
+change but do not independently establish a host root cause. F14 still tests actual
+discovery/use separately from file presence, Git tracking and local checks.
 
 ### 4.3 Repository-scoped setup
 
@@ -157,9 +167,19 @@ Required behavior:
 - On update, replace an owned file only if its previous hash still matches. Report local modifications as conflicts; preserve them. Do not silently overwrite or assume the source repository's `HEAD` identifies uncommitted bundle bytes.
 - Repeating setup with unchanged inputs is a no-op. Uninstall removes only unmodified managed files and its instruction block, retaining user documents and modifications.
 - Consumer configuration is user-owned after creation. New defaults do not overwrite it.
-- Adoption adds an owned `.gitignore` block for only the three canonical shared skill directories and records a schema-2 dependency pin. Existing tracked shared files require explicit reviewed untracking; setup never changes the Git index.
-- Repeatable `bootstrap` reads that pin and installs/verifies only the ignored shared skills. It preserves project-owned files and the index, supports no-op reruns, and rejects modified dependencies, unsafe paths or mismatched pins before writes. Environment preparation runs it before agent skill discovery; filesystem presence alone is not host discovery evidence.
-- Cloud/local environment setup fetches an explicit source commit and runs the source-owned entrypoint; it is not copied into the consumer. It adopts a new Git root once and otherwise preserves the existing tracked dependency pin. The source README owns Cloud install-script and local setup instructions.
+- Adoption produces commit-ready shared skills and schema-3 provenance. It adds no
+  shared-skill ignores and never changes the index. Review and commit adoption.
+- Explicit update from schema 2 removes only its verified owned ignore block;
+  unrelated rules and modified files remain preserved. Other rules hiding shared
+  or project skills conflict. Schema-1 tracked snapshots update without untracking.
+- Repeatable `bootstrap` is verification-only for existing callers: no fetch,
+  missing-file repair, project rewrites or index changes. `check`/`doctor` reject
+  ignored/untracked adopted assets, missing/modified files and invalid provenance.
+- Cloud/local first adoption fetches an explicit source commit and runs the
+  source-owned entrypoint, which is not copied into the consumer. Later environment
+  setup verifies committed files and the installed pin; it does not inject skills.
+  Source README documents one-time adoption and Cloud/local repeat verification.
+
 
 Repo-local skills are the default on Cloud and Ubuntu. Diagnose discoverable legacy/global duplicates; do not assume one same-named skill overrides another. Do not delete or edit global skills automatically. A user deliberately retaining v1 for other projects may keep them, provided explicit repository guidance prevents v1 execution here. Identical v2 names in more than one active discovery location are a setup conflict to resolve.
 
@@ -189,7 +209,7 @@ Public utility surface for the first release:
 | Command family | Minimum contract |
 | --- | --- |
 | `setup` | Dry-run/apply install, update, and uninstall using explicit paths and provenance |
-| `bootstrap` | Dry-run/apply repo-local shared-skill materialization from the tracked exact dependency pin; no project-file or index rewrites |
+| `bootstrap` | Read-only verification of tracked shared skills/provenance; no downloads, repairs or index rewrites |
 | `doctor` | Read-only report of config, tool versions, instructions, duplicate skills, and available integration capabilities |
 | `check` | Check owned bundle consistency, schemas, local documentation links, selected spec validation, and declared PR contract structure |
 | `migrate inspect` | Read-only inventory and proposed v1 dispositions; no automatic state migration |
