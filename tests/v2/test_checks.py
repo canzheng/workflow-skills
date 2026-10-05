@@ -1,4 +1,5 @@
 import json
+import os
 import pathlib
 import subprocess
 import sys
@@ -238,6 +239,30 @@ class CheckTests(unittest.TestCase):
                 self.assertEqual((self.target / '.git/index').read_bytes(), index)
         p.write_text('[valid](https://example.invalid/path#anchor)')
         run('check', '--repo', self.target)
+
+    def test_plain_text_findings_escape_unencodable_metadata(self):
+        from test_setup import TOOLS
+        index = (self.target / '.git/index').read_bytes()
+        for target, code in [('https://[bad\ud800', 'links.url'),
+                             ('missing\ud800.md', 'links.path'),
+                             ('missing-\u2603.md', 'links.path')]:
+            snapshot = self.snapshot(BODY + '[bad](' + target + ')')
+            before = snapshot.read_bytes()
+            for encoding in ('utf-8:strict', 'ascii:strict'):
+                with self.subTest(url=ascii(target), encoding=encoding):
+                    r = subprocess.run([sys.executable, str(TOOLS / 'workflow.py'),
+                                        'check', '--repo', str(self.target), '--pr-json', str(snapshot),
+                                        '--metadata-only'], capture_output=True,
+                                       env=dict(os.environ, PYTHONIOENCODING=encoding))
+                    self.assertEqual(r.returncode, 1, (r.stdout, r.stderr))
+                    self.assertIn(code.encode(), r.stdout)
+                    self.assertIn(b'FAILED', r.stdout)
+                    self.assertEqual(r.stderr, b'')
+                    self.assertEqual(snapshot.read_bytes(), before)
+                    self.assertEqual((self.target / '.git/index').read_bytes(), index)
+            report = run('check', '--repo', self.target, '--pr-json', snapshot,
+                         '--metadata-only', expect=1)
+            self.assertTrue(any(x['code'] == code for x in report['findings']))
 
     def test_doctor_continues_after_an_undecodable_discovery_file(self):
         folder = self.root / 'isolated-discovery'

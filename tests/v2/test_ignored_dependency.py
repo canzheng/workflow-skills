@@ -151,6 +151,37 @@ class IgnoredDependencyTests(unittest.TestCase):
     def test_setup_update_rejects_tracked_ignored_dependency_before_writes(self):
         self.assert_rejected_setup_update(committed=False)
 
+    def test_fresh_setup_rejects_deleted_indexed_shared_paths_before_writes(self):
+        args = self.args[:-2]
+        paths = ['.agents/skills/' + skill + '/SKILL.md' for skill in SKILLS]
+        paths += ['.agents/skills/workflow-risk-review/references/human.md',
+                  '.agents/skills/workflow-deliver-issue']
+        for i, name in enumerate(paths):
+            for committed in (False, True):
+                with self.subTest(path=name, committed=committed):
+                    self.target = self.base / ('indexed-shared-' + str(i) + '-' + str(committed))
+                    test_setup.init(self.target)
+                    args = self.args[:-2]
+                    args[args.index('--target') + 1] = self.target
+                    p = self.target / name
+                    p.parent.mkdir(parents=True, exist_ok=True)
+                    p.write_bytes(b'Indexed human content\n')
+                    git(self.target, 'add', '--', name)
+                    if committed:
+                        git(self.target, 'commit', '-qm', 'Fixture existing shared path')
+                    p.unlink()
+                    before = self.snapshot()
+                    for flags in ([], ['--apply']):
+                        with self.subTest(flags=flags):
+                            report = run(*args, *flags, expect=1)
+                            self.assertIn('remains tracked', json.dumps(report))
+                            self.assertEqual(self.snapshot(), before)
+                    git(self.target, 'rm', '--cached', '--', name)
+        before = self.snapshot()
+        run(*args, '--apply')
+        self.assertEqual((self.target / '.git/index').read_bytes(), before[1])
+        self.assertTrue(all((self.target / name).is_file() for name in paths[:3]))
+
     def test_setup_update_rejects_committed_ignored_dependency_before_writes(self):
         self.assert_rejected_setup_update(committed=True)
 

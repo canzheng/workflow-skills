@@ -39,6 +39,11 @@ skills SHALL remain tracked. Required Ubuntu discovery/use SHALL be tested separ
 - **THEN** preview and apply reject the index conflict before changing shared bytes, project assets or provenance
 - **AND** files and raw index remain unchanged until the caller explicitly resolves the conflict
 
+#### Scenario: Fresh ignored adoption refuses indexed shared paths
+- **WHEN** initial ignored adoption encounters a shared namespace path in the index, including a deleted working copy
+- **THEN** preview and apply reject before writing shared or project assets and preserve the raw index
+- **AND** explicit reviewed tracked-to-ignored migration remains a separate operation
+
 #### Scenario: Nested staged ignore policy
 - **WHEN** a nested ignore policy or new project-specific skill exists in the index with a different or absent working copy
 - **THEN** staged validation uses indexed policies and indexed project paths from one canonical snapshot
