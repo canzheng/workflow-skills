@@ -628,3 +628,37 @@ review4183725905: the stated source pin and immutable setup URL now match the
 7be9f15 manifest. Original Ubuntu evidence links retain original revisions.
 Full runtime121/no-skips and live source7be9f15/consumere1d59ab46 CI passed; latest
 Ready-head reviews and documentation-head Actions remain separately required.
+
+## Latest staging, discovery and adoption/output repairs — 2026-10-05
+
+Required semantic review returned staging-symlink, invalid-discovery-text,
+fresh-adoption index and plain-text output findings. Each was reproduced before
+repair. The staging and discovery repair at cb6638ef6b3b43a942bb6a8b97f46f4281b8b64a
+passed125/no skips on both runtimes and actual consumer e852af83ea086ae796e38ef69dc5f448a8bd04cb
+fresh-clone/installed negative probes; its source/consumer Actions all succeeded.
+The latest runtime is `9af59a503bc9d51f1570bb0d3c9385eaba7f528d`, with all127/no skips on managed Python3.12.14
+(76.716s) and Ubuntu24.04.5/Python3.12.3 (67.470s), strict specs/check and diff hygiene.
+
+Consumer `a0401b89702eca70a7956ce043e8b545364f78fb` pins that exact source. Its tree
+a09356149c18e294768e3e94f22c334459223c69 matches own local
+4b71e34134ebd26afa942db6c8f4cd0ce0d659b1, parent e852af83 preserved by guarded
+non-force publication. Explicit update changes only core/setup/workflow, operations
+and provenance; project policy, shared hashes and raw index remain unchanged before
+caller staging. README now resolves source/setup links from the tracked manifest,
+avoiding duplicated pin prose. Actual remote fresh clones on managed runtime and
+Ubuntu materialize4 exact files/match20 hashes, pass check/run-local/doctor/offline
+repeat, preserve project/index bytes and exercise installed negative paths: existing
+force-tracking, three indexed-only nested policies, concurrent file/directory/staging
+recovery, NUL/native argv/URL rejection, invalid discovery continuation,20 fresh
+indexed-path preview/apply cases and default UTF8/ASCII diagnostics without traceback.
+
+Current runtime source push37309308964/PR37309317868 and consumer
+push37309447682/PR37309456606/metadata37309452510 succeed. These are exact-revision
+implementation/integration results. Final current-head semantic review and archive
+remain pending; older reviews do not approve this new content. The original independent
+Ubuntu startup catalog/actual three-skill use remains valid at unchanged shared hashes.
+No extra user workstation discovery session is required for these runtime-only repairs.
+Cloud is deferred; real global installation unperformed; Ubuntu26 historical source
+JSON error remains unexplained. Source required-check administration and real merge →
+completed Issue observation remain pending separate authorization, not simulated.
+See [wider boundary review](../../../docs/validation/wider-boundary-review.md) for discriminating controls and documentation impact.

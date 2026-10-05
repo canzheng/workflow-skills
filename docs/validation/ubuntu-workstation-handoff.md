@@ -16,13 +16,13 @@ do not repeat the original diagnostic merely because doctor says unprobed.
 ## Pinned targets
 
 Source: canzheng/workflow-skills, rewrite/workflow-skills-v2, tested implementation
-`7be9f1538b96d7dd98247e7e5eadffa042350496`. All121 tests/no skips and strict specs pass on Ubuntu24.04.5
-and managed runtime; full suite tested at7be9f15; latest source Actions are recorded in the PR checkpoint.
+`9af59a503bc9d51f1570bb0d3c9385eaba7f528d`. All127 tests/no skips and strict specs pass on Ubuntu24.04.5
+and managed runtime; full suite tested at9af59a5; latest source Actions are recorded in the PR checkpoint.
 Consumer: canzheng/workflow-skills-test, pilot/shared-skill-bootstrap, existing
 [Issue7](https://github.com/canzheng/workflow-skills-test/issues/7) and
 [Ready PR8](https://github.com/canzheng/workflow-skills-test/pull/8). Its explicit
-schema-4 reviewed repair is published at `0ec3e90d3fe5726f4a06a8b2c897d38b82473839`,
-pinning source `7be9f1538b96d7dd98247e7e5eadffa042350496`. Current consumer/source Actions and exact-head reviews are recorded in the PR checkpoint.
+schema-4 reviewed repair is published at `a0401b89702eca70a7956ce043e8b545364f78fb`,
+pinning source `9af59a503bc9d51f1570bb0d3c9385eaba7f528d`. Current consumer/source Actions and exact-head reviews are recorded in the PR checkpoint.
 Prior consumeradaad276 attempt1 fetch failures and successful attempt2 are retained
 as earlier revision-bound evidence; do not carry their approval to this new repair. Initial native discovery/use at
 previous consumer9bd23d72/sourcea75c3f2 remains verified; all shared hashes are unchanged. Existing main
@@ -43,10 +43,10 @@ set +e
   test ! -e "$WF2_CONSUMER_ROOT"
   git clone --branch pilot/shared-skill-bootstrap https://github.com/canzheng/workflow-skills-test.git "$WF2_CONSUMER_ROOT"
   cd "$WF2_CONSUMER_ROOT"
-  test "$(git rev-parse HEAD)" = "0ec3e90d3fe5726f4a06a8b2c897d38b82473839"
+  test "$(git rev-parse HEAD)" = "a0401b89702eca70a7956ce043e8b545364f78fb"
   python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
   python3 tools/workflow/workflow.py check --repo . --run-local --json
-  python3 tools/workflow/workflow.py doctor --repo . --expect-revision 0ec3e90d3fe5726f4a06a8b2c897d38b82473839 --json
+  python3 tools/workflow/workflow.py doctor --repo . --expect-revision a0401b89702eca70a7956ce043e8b545364f78fb --json
 )
 printf 'Validation exit status: %s\n' "$?"
 ```
@@ -54,7 +54,7 @@ printf 'Validation exit status: %s\n' "$?"
 The exact source pin for first adoption/global install is:
 
 ```sh
-WF2_SOURCE_SHA=7be9f1538b96d7dd98247e7e5eadffa042350496
+WF2_SOURCE_SHA=9af59a503bc9d51f1570bb0d3c9385eaba7f528d
 ```
 
 Fetch it using the source README command. Global installation uses that checked-out

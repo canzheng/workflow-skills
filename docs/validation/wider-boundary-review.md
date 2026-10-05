@@ -4,10 +4,69 @@ This is a targeted primary-author review requested by the user after serial PR P
 findings. It is not independent semantic approval or a new mandatory pre-PR stage.
 The resolved GitHub NUL-path finding motivated inspection of core validation,
 source setup/global setup, bootstrap, staged policy, mechanical checks, subprocess
-execution and transaction/recovery ownership. Three related local defects were
-reproduced before repair; existing rollback controls were inspected and rerun.
+execution and transaction/recovery ownership. The initial sweep reproduced three related local defects before repair; existing rollback controls were inspected and rerun.
 
-## Patterns and actual results
+## Latest review-driven boundary expansion
+
+Staging review4183777792 and discovery review4183777800 were valid. cb6638ef fixes
+exclusive/no-follow staging creation and fd-bound writes/chmod; cleanup retains changed
+staging bytes/mode/device/inode or symlinks with recovery metadata. Invalid unrelated
+UTF-8 discovery entries warn per file and scanning continues, including later duplicate
+detection. Ten malformed project-text public invocations produce structured invalid2
+without writes. The old transaction fails five ownership controls;125/no skips and
+actual installed runtime/Ubuntu probes pass. Source push37308178339/PR37308184377 and
+consumer e852af83 push37308357249/PR37308363528/metadata37308360632 succeeded.
+
+The five-minute review timer then returned source4183853772 at bfee51c and
+consumer4183885108 at0ec3e90. Both still reproduced on cb6638ef:
+
+| Boundary | Reproduced failure | Latest repair/control |
+| --- | --- | --- |
+| Fresh adoption vs index | A deleted but indexed shared file is missed by worktree collision checks; setup writes then check rejects | Inspect the cached index before fresh ignored adoption;20 preview/apply cases cover3 canonical skills, an extra reference and a namespace-root file, staged or committed/deleted; files/provenance/raw index must remain unchanged |
+| Diagnostic output | JSON-escaped lone-surrogate URL reaches a raw finding; default output crashes while encoding it | Central text output escapes characters unsupported by stdout encoding; malformed URL, unsafe local path and valid Unicode path use UTF8/ASCII subprocess output, preserving failure findings and files/index; JSON behavior retained |
+
+Negative control using exact cb6638ef public runtime returns25 assertion failures
+and no errors. Its fixture cleanup alone uses forced cached removal because the old
+installer changes indexed working bytes; acceptance assertions/production regressions
+remain unchanged. The repaired127-test suite passes at 9af59a503bc9d51f1570bb0d3c9385eaba7f528d on both runtimes.
+Two early full-suite runs against dirty source assets correctly failed two canonical
+pin checks; committed reruns passed without weakening those checks.
+
+## Latest staging, discovery and adoption/output repairs — 2026-10-05
+
+Required semantic review returned staging-symlink, invalid-discovery-text,
+fresh-adoption index and plain-text output findings. Each was reproduced before
+repair. The staging and discovery repair at cb6638ef6b3b43a942bb6a8b97f46f4281b8b64a
+passed125/no skips on both runtimes and actual consumer e852af83ea086ae796e38ef69dc5f448a8bd04cb
+fresh-clone/installed negative probes; its source/consumer Actions all succeeded.
+The latest runtime is `9af59a503bc9d51f1570bb0d3c9385eaba7f528d`, with all127/no skips on managed Python3.12.14
+(76.716s) and Ubuntu24.04.5/Python3.12.3 (67.470s), strict specs/check and diff hygiene.
+
+Consumer `a0401b89702eca70a7956ce043e8b545364f78fb` pins that exact source. Its tree
+a09356149c18e294768e3e94f22c334459223c69 matches own local
+4b71e34134ebd26afa942db6c8f4cd0ce0d659b1, parent e852af83 preserved by guarded
+non-force publication. Explicit update changes only core/setup/workflow, operations
+and provenance; project policy, shared hashes and raw index remain unchanged before
+caller staging. README now resolves source/setup links from the tracked manifest,
+avoiding duplicated pin prose. Actual remote fresh clones on managed runtime and
+Ubuntu materialize4 exact files/match20 hashes, pass check/run-local/doctor/offline
+repeat, preserve project/index bytes and exercise installed negative paths: existing
+force-tracking, three indexed-only nested policies, concurrent file/directory/staging
+recovery, NUL/native argv/URL rejection, invalid discovery continuation,20 fresh
+indexed-path preview/apply cases and default UTF8/ASCII diagnostics without traceback.
+
+Current runtime source push37309308964/PR37309317868 and consumer
+push37309447682/PR37309456606/metadata37309452510 succeed. These are exact-revision
+implementation/integration results. Final current-head semantic review and archive
+remain pending; older reviews do not approve this new content. The original independent
+Ubuntu startup catalog/actual three-skill use remains valid at unchanged shared hashes.
+No extra user workstation discovery session is required for these runtime-only repairs.
+Cloud is deferred; real global installation unperformed; Ubuntu26 historical source
+JSON error remains unexplained. Source required-check administration and real merge →
+completed Issue observation remain pending separate authorization, not simulated.
+See [wider boundary review](wider-boundary-review.md) for discriminating controls and documentation impact.
+
+## Earlier patterns and actual results
 
 | Boundary | Reproduced failure | Repair and discriminating evidence |
 | --- | --- | --- |
