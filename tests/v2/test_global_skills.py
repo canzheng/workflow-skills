@@ -89,3 +89,33 @@ class GlobalSkillsTests(unittest.TestCase):
         run(*self.arguments(), '--apply')
         self.assertEqual(before, ((self.target / 'AGENTS.md').read_bytes(), (self.target / '.git/index').read_bytes()))
         self.assertEqual(git(self.target, 'status', '--porcelain'), b'')
+
+    def test_new_target_rollback_restores_absence_or_preserves_changed_root(self):
+        args = self.arguments(); root = args[-1]
+        actual = installer.transaction
+        with patch.object(installer, 'transaction', side_effect=lambda r, c: actual(r, c, fail_after=1)), contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(workflow.main(list(map(str, args)) + ['--apply', '--json']), 1)
+        self.assertFalse((self.base / 'user').exists())
+        actual_replace = installer.os.replace
+        calls = 0
+        changed_mode = None
+        def replace(src, dst):
+            nonlocal calls, changed_mode
+            calls += 1
+            if calls == 2:
+                raise OSError('later failure')
+            actual_replace(src, dst)
+            changed_mode = 0o700 if root.stat().st_mode & 0o777 != 0o700 else 0o750
+            root.chmod(changed_mode)
+        index = (self.target / '.git/index').read_bytes()
+        with patch.object(installer.os, 'replace', replace), contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(workflow.main(list(map(str, args)) + ['--apply', '--json']), 1)
+        message = json.loads(out.getvalue())['findings'][0]['message']
+        self.assertIn('Rollback residuals:', message)
+        self.assertTrue(root.is_dir())
+        self.assertEqual(root.stat().st_mode & 0o777, changed_mode)
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        import pathlib, shutil
+        recovery = pathlib.Path(message.split('recoverable originals: ', 1)[1])
+        self.addCleanup(shutil.rmtree, recovery)
+        self.assertEqual(json.loads((recovery / 'recovery-index.json').read_text())[str(root)]['kind'], 'directory')
