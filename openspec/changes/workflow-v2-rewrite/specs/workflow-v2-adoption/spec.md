@@ -19,6 +19,15 @@ reviewed and committed before host discovery acceptance.
 - **THEN** bootstrap/check/doctor fail without recreating files or overwriting edits
 - **AND** recovery requires restoring Git or an explicit reviewed setup/update
 
+#### Scenario: Complete tracked adoption and initial review
+- **WHEN** any managed asset is indexed or present in HEAD
+- **THEN** every manifest asset, provenance manifest, project config and managed AGENTS file must remain indexed
+- **AND** removing provenance or a runtime/documentation/CI asset from the index fails verification even if working files remain intact
+- **WHEN** initial adoption is completely unstaged with no managed assets in HEAD
+- **THEN** it may be verified as reviewable, but all required assets must be trackable
+- **AND** ignoring provenance/policy/runtime/docs/CI fails setup preflight before writes and later verification without repair
+- **AND** partially staging adoption cannot bypass the complete tracked-file obligation
+
 #### Scenario: Explicit ignored-to-tracked migration
 - **WHEN** setup updates schema-2 adoption to tracked storage
 - **THEN** it verifies and removes only its owned ignore block, preserving other rules
@@ -33,7 +42,7 @@ reviewed and committed before host discovery acceptance.
 - **AND** local files or green CI do not establish host discovery or enforcement
 
 #### Scenario: Effective ignore conflicts
-- **WHEN** root, nested, global or info excludes hide shared or project-specific skills
+- **WHEN** root, nested, global or info excludes hide required installed assets, policy/provenance or project-specific skills
 - **THEN** setup detects the policy conflict before writes
 - **AND** startup checks report the conflict without altering unrelated rules
 

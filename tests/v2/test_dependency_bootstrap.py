@@ -100,6 +100,72 @@ class DependencyBootstrapTests(unittest.TestCase):
             self.assertIn('not tracked', json.dumps(r))
             self.assertEqual(self.snapshot(), before)
 
+    def test_every_installed_asset_and_project_policy_must_remain_tracked(self):
+        self.adopt()
+        m = json.loads((self.target / '.workflow/install-manifest.json').read_text())
+        required = set(m['files']) | {'.workflow/install-manifest.json', '.workflow/config.json', 'AGENTS.md'}
+        for name in sorted(required):
+            with self.subTest(path=name):
+                git(self.target, 'rm', '--cached', '--', name)
+                before = self.snapshot()
+                try:
+                    for command in ['check', 'doctor', 'bootstrap']:
+                        r = run(command, '--repo', self.target, expect=1)
+                        self.assertIn('not tracked', json.dumps(r))
+                        self.assertEqual(self.snapshot(), before)
+                finally:
+                    git(self.target, 'restore', '--staged', '--', name)
+        run('check', '--repo', self.target)
+
+    def test_ignored_provenance_policy_or_runtime_fails_preflight_without_writes(self):
+        for name in ['.workflow/install-manifest.json', '.workflow/config.json', 'AGENTS.md',
+                     'tools/workflow/core.py', 'docs/workflow/contract.md',
+                     '.github/workflows/workflow-v2-verify.yml']:
+            with self.subTest(path=name):
+                (self.target / '.gitignore').write_text('/' + name + '\n')
+                before = self.snapshot()
+                for extra in [[], ['--apply']]:
+                    r = run(*self.args, *extra, expect=1)
+                    self.assertIn('path is ignored', json.dumps(r))
+                    self.assertEqual(self.snapshot(), before)
+                self.assertFalse((self.target / '.workflow').exists())
+
+        (self.target / '.gitignore').unlink()
+        for folder, rule in [('.workflow', 'install-manifest.json'),
+                             ('tools/workflow', 'core.py'), ('docs/workflow', 'contract.md')]:
+            with self.subTest(nested=folder):
+                p = self.target / folder / '.gitignore'
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text(rule + '\n')
+                before = self.snapshot()
+                try:
+                    for extra in [[], ['--apply']]:
+                        r = run(*self.args, *extra, expect=1)
+                        self.assertIn('path is ignored', json.dumps(r))
+                        self.assertEqual(self.snapshot(), before)
+                finally:
+                    p.unlink()
+
+    def test_initial_unstaged_adoption_cannot_hide_its_provenance(self):
+        run(*self.args, '--apply')
+        (self.target / '.gitignore').write_text('/.workflow/install-manifest.json\n')
+        before = self.snapshot()
+        for command in ['check', 'doctor', 'bootstrap']:
+            r = run(command, '--repo', self.target, expect=1)
+            self.assertIn('path is ignored', json.dumps(r))
+            self.assertEqual(self.snapshot(), before)
+
+    def test_partial_staging_cannot_bypass_provenance_or_initial_review_exception(self):
+        run(*self.args, '--apply')
+        run('check', '--repo', self.target)  # Complete unstaged adoption is reviewable.
+        git(self.target, 'add', '--', 'tools/workflow/core.py')
+        before = self.snapshot()
+        for command in ['check', 'doctor', 'bootstrap']:
+            run(command, '--repo', self.target, expect=1)
+            self.assertEqual(self.snapshot(), before)
+        commit(self.target)
+        run('check', '--repo', self.target)
+
     def test_modified_extra_or_symlinked_skills_are_preserved_on_failure(self):
         self.adopt()
         p = self.target / '.agents/skills/workflow-risk-review/SKILL.md'

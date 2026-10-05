@@ -310,3 +310,23 @@ trusted-base adoption, so runbook stages that requirement after actual execution
 No settings changed. Final3a3b6d3 tests/strict specs pass on both runtimes, source
 push37267764301/PR37267770064 and consumer6b9eb5d push37267653526/PR37267656824/
 metadata37267655273 pass. Independent new review acknowledged but still pending.
+
+### Public consumer enforcement and validated tracking reviews — 2026-10-05
+
+Starting sourceebcdc8ff3df909c08108b0651fccc526891b6e4d; consumer6b9eb5d unchanged.
+User made consumer public. Read-back Active ruleset24484016 targets main and requires
+v2 verification/v2 PR contract from GitHub Actions15368, no bypass, strict:false,
+other PR/conversation/deletion/force-push rules absent. Actual metadata-negative
+37269275157 fails missing Documentation/exit1; PR8 reports blocked. Exact body restore
+37269365402 passes and PR reports clean. No merge/closure/admin mutation by this task.
+
+New source4180988644 and consumer4180982685 reviews were independently reproduced:
+19 non-skill/policy tracking cases, ignored required paths and partial staging bypass
+passed before repair (26 focused failing assertions); an additional initial ignored
+manifest public check regression failed on a disposable original-source copy. Repair
+requires all manifest assets/provenance/config/AGENTS indexed once any managed asset
+is indexed/committed; initial unstaged review only allows trackable complete adoption.
+Ignore preflight includes all required paths and ancestor rules. Four regressions cover
+all23 paths, ignored/nested policy/runtime/docs/CI, unstaged ignored provenance and
+partial staging, preserving files/raw index. Current verification/repin pending here;
+F14 stays active/unarchived, fresh host discovery/merge-completion remain pending.

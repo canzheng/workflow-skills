@@ -43,3 +43,9 @@ metadata/head-data handling, content invalidation and numerical/consumer negativ
 controls. Skill exercises are primary-author artifact/evidence records, not proof
 of fresh Cloud discovery or independent review. Actual Ubuntu portability evidence
 is recorded separately in docs/validation/v2-acceptance.md.
+
+Tracking validation covers every installed manifest asset and provenance/config/AGENTS,
+not only shared skills. Indexed or committed managed assets identify adoption even
+when the manifest is removed from the index. Initial unstaged review remains separate;
+all required files must be trackable. Ignore previews preserve ancestor, global and
+repository-info rules for every required destination before writes.

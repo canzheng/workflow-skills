@@ -189,6 +189,10 @@ Milestone A: usable core with local/fixture proof. Milestone B: complete deliver
 10. Source-owned first adoption works from an exact source commit without tools/first commit; the entrypoint is not copied into the target. Source README distinguishes one-time adoption/update from Cloud/local read-only verification. Fresh clone and CI verify tracked skills directly; actual initial Cloud/Ubuntu discovery/use remains a separate F14 requirement.
 
 
+Tracking covers every installed manifest asset, provenance/config and AGENTS after
+staging/adoption. Removing the manifest from the index must not re-enable the initial
+unstaged exception; all paths must also be trackable before setup writes.
+
 **Verification:** public CLI tests in temporary Git repositories, including dirty/modified files, symlinks, spaces in paths, partial failure, and provenance mismatch. At F14 verify actual skill discovery, beyond filesystem presence.
 
 **Documentation with this feature:** setup/update/uninstall procedure and ownership/conflict policy. **Not included:** global installer compatibility, automatic repository discovery, or general plugin distribution.

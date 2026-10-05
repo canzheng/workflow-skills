@@ -54,12 +54,19 @@ after reviewed base adoption and an actual subsequent PR emits it. Requiring an
 absent check can block the bootstrap PR indefinitely. This does not authorize merge.
 
 At the 2026-10-05 tracked-model pilot, workflow-skills-test emits both contexts;
-workflow-skills emits only `v2 verification`. Source ruleset Protect-main (24457981)
-is Active on refs/heads/main with deletion/non-fast-forward rules and no bypass actors;
-it currently has no PR or required-status-check rule. Consumer main's limited summary
-reports protected:false. Authoritative protection reads return integration403; consumer
-rulesets return a private-repository plan restriction (Pro/public). Use a supported
-plan if needed; this runbook does not authorize changing repository visibility.
+workflow-skills emits only `v2 verification`. Source Protect-main (24457981) is Active
+on main with deletion/non-fast-forward rules only. The consumer initially hit a
+private-repository plan restriction; the user changed it to public. Consumer
+Protect-main (24484016) is now Active on main, requiring both contexts from GitHub
+Actions app15368, with no bypass actors. Strict/up-to-date is false. No PR-only,
+conversation, deletion or force-push rule is currently configured on the consumer.
+
+Actual consumer PR8 at6b9eb5d changed from clean to blocked when a temporary missing
+Documentation section failed metadata run37269275157 (exit1), then back to clean after
+exact body restoration and successful run37269365402. No merge was attempted, HEAD
+and main stayed unchanged. This proves the configured check gate, not other absent
+rules. Current required-check configuration is observed separately from complete
+workflow acceptance, initial host discovery and final merge/Issue completion.
 
 Only an authorized administrator changes these settings. After saving, read back
 rulesets/branch protection with native settings or
