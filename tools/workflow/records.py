@@ -36,9 +36,22 @@ def managed_update(expected, fresh, replacement, start, end):
 
 
 def issue_findings(item):
-    labels = {x['name'] if isinstance(x, dict) else x for x in item.get('labels', [])}
+    if not isinstance(item, dict):
+        raise Invalid('Each Issue snapshot entry must be an object')
+    raw_labels = item.get('labels', [])
+    if not isinstance(raw_labels, list):
+        raise Invalid('Issue snapshot labels must be an array')
+    labels = set()
+    for label in raw_labels:
+        name = label.get('name') if isinstance(label, dict) else label
+        if not isinstance(name, str) or not name:
+            raise Invalid('Each Issue label must be a nonempty string or an object with a name string')
+        labels.add(name)
+    state = item.get('state', 'open')
+    if not isinstance(state, str):
+        raise Invalid('Issue snapshot state must be a string')
     problems = []
-    if item.get('state', '').lower() == 'closed':
+    if state.lower() == 'closed':
         if labels & (PHASES | MODIFIERS):
             problems.append('Closed Issue has stale workflow labels')
         if item.get('state_reason') == 'completed' and not item.get('delivery_evidence'):

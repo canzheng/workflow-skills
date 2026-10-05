@@ -195,6 +195,32 @@ class CheckTests(unittest.TestCase):
         r = run('check', '--repo', self.target, '--issues-json', p, expect=1)
         self.assertTrue(any(x['code'] == 'issue.inconsistent' for x in r['findings']))
 
+    def test_issue_snapshot_entries_reject_malformed_shapes_without_tracebacks(self):
+        snapshot = self.root / 'issues.json'
+        index = (self.target / '.git/index').read_bytes()
+        malformed = [None, [], 'issue', 1, True, {'labels': None}, {'labels': {}},
+                     {'labels': [None]}, {'labels': [{}]}, {'labels': [{'name': []}]},
+                     {'labels': [42]}, {'labels': [['wf:ready']]}, {'state': None}, {'state': []}]
+        for item in malformed:
+            with self.subTest(item=item):
+                snapshot.write_text(json.dumps(dict(repository='fixture/consumer', issues=[item])))
+                original = snapshot.read_bytes()
+                result = subprocess.run([sys.executable, str(self.target / '.agents/tools/workflow/workflow.py'),
+                                         'check', '--repo', str(self.target), '--issues-json', str(snapshot), '--json'],
+                                        capture_output=True, text=True)
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                report = json.loads(result.stdout)
+                self.assertFalse(report['ok'])
+                self.assertEqual(report['findings'][0]['code'], 'invalid')
+                self.assertEqual(result.stderr, '')
+                self.assertEqual(snapshot.read_bytes(), original)
+                self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        snapshot.write_text(json.dumps(dict(repository='fixture/consumer', issues=[
+            dict(number=1, state='open', labels=['wf:ready']),
+            dict(number=2, state='open', labels=[{'name': 'wf:review'}, {'name': 'security'}])
+        ])))
+        run('check', '--repo', self.target, '--issues-json', snapshot)
+
     def test_ci_event_and_trust_boundaries_are_explicit(self):
         metadata = (ROOT / '.github/workflows/pr-metadata.yml').read_text()
         code = (ROOT / '.github/workflows/verify.yml').read_text()

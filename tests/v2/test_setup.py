@@ -562,6 +562,109 @@ class SetupTests(unittest.TestCase):
                 recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
                 self.addCleanup(__import__('shutil').rmtree, recovery)
 
+    def test_forward_apply_preserves_replaced_existing_parent_before_second_write(self):
+        import shutil
+        name = 'existing-parent/owned.md'
+        second = self.target / name
+        second.parent.mkdir()
+        second.write_bytes(b'Original second file.\n')
+        original = (self.target / 'AGENTS.md').read_bytes()
+        index = (self.target / '.git/index').read_bytes()
+        actual = installer.os.replace
+        calls = 0
+        def replace(src, dst):
+            nonlocal calls
+            calls += 1
+            actual(src, dst)
+            if calls == 1:
+                saved = second.parent.with_name('saved-parent')
+                second.parent.rename(saved)
+                shutil.copytree(saved, second.parent)
+        with patch.object(installer.os, 'replace', replace), \
+             self.assertRaisesRegex(installer.Conflict, 'Rollback residuals: existing-parent') as raised:
+            installer.transaction(self.target, {'AGENTS.md': b'First replacement.', name: b'Second replacement.'},
+                                  fail_after=2)
+        self.assertEqual(calls, 1)  # Replacement parent is rejected before another write.
+        self.assertEqual(second.read_bytes(), b'Original second file.\n')
+        self.assertEqual((self.target / 'AGENTS.md').read_bytes(), original)
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
+        self.addCleanup(shutil.rmtree, recovery)
+        record = json.loads((recovery / 'recovery-index.json').read_text())
+        self.assertEqual(record['existing-parent']['kind'], 'parent-directory')
+        self.assertEqual((recovery / record[name]['backup']).read_bytes(), b'Original second file.\n')
+
+    def test_public_deleted_file_rollback_preserves_replaced_parent_chain(self):
+        import shutil
+        retired = '.agents/skills/workflow-risk-review/references/retired.md'
+        bundle = self.source / '.workflow/bundle.json'
+        for depth in ('parent', 'ancestor'):
+            for edit in ('replacement', 'same-content', 'symlink'):
+                with self.subTest(depth=depth, edit=edit):
+                    spec = json.loads(bundle.read_text())
+                    spec['assets'][retired] = retired
+                    source_file = self.source / retired
+                    source_file.write_bytes(b'Original retired asset.\n')
+                    bundle.write_text(json.dumps(spec))
+                    sha = commit(self.source)
+                    target = self.base / ('rollback-' + depth + '-' + edit)
+                    init(target)
+                    (target / 'README.md').write_text('Human project.\n')
+                    commit(target)
+                    args = ['setup', '--source', str(self.source), '--revision', sha, '--target', str(target),
+                            '--repository', 'fixture/consumer', '--dependency-storage', 'tracked']
+                    run(*args, '--apply')
+                    commit(target)
+                    index = (target / '.git/index').read_bytes()
+                    spec['assets'].pop(retired)
+                    bundle.write_text(json.dumps(spec))
+                    source_file.unlink()
+                    operations = self.source / 'docs/workflow/operations.md'
+                    operations.write_bytes(operations.read_bytes() + b'Updated operations.\n')
+                    sha = commit(self.source)
+                    args[args.index('--revision') + 1] = sha
+                    deleted = target / retired
+                    directory = deleted.parent if depth == 'parent' else deleted.parent.parent
+                    saved = directory.with_name(directory.name + '-saved')
+                    external = self.base / ('external-' + depth + '-' + edit)
+                    actual_unlink = pathlib.Path.unlink
+                    def unlink(path, *a, **kw):
+                        result = actual_unlink(path, *a, **kw)
+                        if path == deleted:
+                            directory.rename(saved)
+                            if edit == 'same-content':
+                                shutil.copytree(saved, directory)
+                            elif edit == 'symlink':
+                                external.mkdir()
+                                (external / 'human.md').write_bytes(b'External human content.\n')
+                                directory.symlink_to(external, target_is_directory=True)
+                            else:
+                                directory.mkdir()
+                                (directory / 'human.md').write_bytes(b'Concurrent human content.\n')
+                        return result
+                    with patch.object(pathlib.Path, 'unlink', unlink), \
+                         patch.object(installer.os, 'replace', side_effect=OSError('later apply failure')), \
+                         contextlib.redirect_stdout(io.StringIO()) as out:
+                        status = workflow.main(args + ['--apply', '--json'])
+                    self.assertEqual(status, 1)
+                    message = json.loads(out.getvalue())['findings'][0]['message']
+                    self.assertIn('Rollback residuals:', message)
+                    self.assertIn(retired, message)
+                    self.assertNotIn('original files restored', message)
+                    self.assertFalse(deleted.exists())
+                    self.assertEqual((target / '.git/index').read_bytes(), index)
+                    recovery = pathlib.Path(message.split('recoverable originals: ', 1)[1])
+                    self.addCleanup(shutil.rmtree, recovery)
+                    record = json.loads((recovery / 'recovery-index.json').read_text())[retired]
+                    self.assertEqual((recovery / record['backup']).read_bytes(), b'Original retired asset.\n')
+                    self.assertIn('parent_directories', record)
+                    self.assertIn(directory.relative_to(target).as_posix(), record['parent_directories'])
+                    if edit == 'symlink':
+                        self.assertTrue(directory.is_symlink())
+                        self.assertEqual((external / 'human.md').read_bytes(), b'External human content.\n')
+                    elif edit == 'replacement':
+                        self.assertEqual((directory / 'human.md').read_bytes(), b'Concurrent human content.\n')
+
     def test_rollback_preserves_recreated_deletions_and_edited_new_files(self):
         p = self.target / 'AGENTS.md'
         actual_unlink = pathlib.Path.unlink

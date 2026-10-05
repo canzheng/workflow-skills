@@ -92,3 +92,9 @@ is not dumped into diagnostics; inspect the declared command directly for failur
 
 Source bundle schema checks use the installer's v2 version format (2.minor.patch);
 a string with an invalid version cannot certify an installable source bundle.
+
+Issue audit entries must be objects. Provided labels must be arrays of nonempty
+strings or objects with nonempty name strings; provided state must be a string.
+Malformed entries return exit2/ok:false/invalid JSON diagnostics without traceback
+or snapshot/index changes. String labels and native GitHub label objects remain
+supported; structural validity does not prove delivery acceptance.

@@ -77,3 +77,8 @@ schema-3/4 pins remain supported and tracked legacy setup stays explicit. CI
 selects consumer provenance before any unrelated `.workflow/bundle.json`, fetches
 that exact pin, and verification chooses the runtime recorded in its manifest.
 PR metadata makes the same selection from the trusted base checkout only.
+
+Transaction recovery binds file restoration to the recorded parent/ancestor inode
+chain, not only destination bytes or absence. Replaced parent directories are
+preserved with recovery metadata. Issue audit entry/label/state shapes are checked
+inside the shared snapshot helper before dereferencing or phase classification.

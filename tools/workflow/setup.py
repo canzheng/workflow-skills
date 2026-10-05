@@ -73,6 +73,8 @@ def transaction(root, changes, fail_after=None):
     preflight_destinations(root, changes)
     created_dirs = {}
     originals = {}
+    parent_chains = {}
+    parent_residuals = set()
     def directory_name(path):
         return path.relative_to(root).as_posix() if path != root and path.is_relative_to(root) else str(path)
     def directory_metadata(path):
@@ -86,6 +88,13 @@ def transaction(root, changes, fail_after=None):
         stage = pathlib.Path(td)
         for i, (name, data) in enumerate(changes.items()):
             p = safe(root, name)
+            parent_chains[name] = {}
+            for parent in p.parents:
+                if parent.exists():
+                    metadata = directory_metadata(parent)
+                    if not stat.S_ISDIR(metadata.st_mode):
+                        raise Conflict('Destination parent is not a directory: ' + str(parent))
+                    parent_chains[name][parent] = (metadata.st_dev, metadata.st_ino)
             originals[name] = (p.read_bytes(), p.stat().st_mode) if p.exists() else None
             if originals[name] is not None:
                 (stage / ('backup-' + str(i))).write_bytes(originals[name][0])
@@ -95,11 +104,37 @@ def transaction(root, changes, fail_after=None):
                                  'mode': originals[name][1] if originals[name] is not None else None}
                           for i, name in enumerate(changes)}
         (stage / 'recovery-index.json').write_text(json.dumps(recovery_index, indent=2))
+        def validate_parents(name):
+            # File absence/inode alone cannot certify a concurrently replaced
+            # parent or ancestor. Preserve that directory and our original backup.
+            for parent, expected in parent_chains[name].items():
+                try:
+                    metadata = directory_metadata(parent)
+                    if not stat.S_ISDIR(metadata.st_mode) or (metadata.st_dev, metadata.st_ino) != expected:
+                        raise Conflict('Concurrent parent directory replacement: ' + str(parent))
+                except (OSError, Invalid, Conflict):
+                    directory = directory_name(parent)
+                    parent_residuals.add(directory)
+                    if directory not in recovery_index:
+                        recovery_index[directory] = {'kind': 'parent-directory', 'backup': None,
+                                                     'expected_device': expected[0], 'expected_inode': expected[1]}
+                    raise
+        def record_parents(name):
+            recovery_index[name]['parent_directories'] = {
+                directory_name(parent): {'device': identity[0], 'inode': identity[1]}
+                for parent, identity in parent_chains[name].items()}
+        for name in changes:
+            record_parents(name)
         applied = {}
         staging_residuals = []
         try:
             for i, (name, data) in enumerate(changes.items()):
                 p = safe(root, name)
+                for parent in p.parents:
+                    if parent in created_dirs:
+                        parent_chains[name].setdefault(parent, created_dirs[parent][1:])
+                record_parents(name)
+                validate_parents(name)
                 now = (p.read_bytes(), p.stat().st_mode) if p.exists() else None
                 if now != originals[name]:
                     raise Conflict('Concurrent local edit detected: ' + name)
@@ -117,6 +152,11 @@ def transaction(root, changes, fail_after=None):
                         'kind': 'directory', 'backup': None, 'mode': None,
                         'created_mode': metadata.st_mode, 'created_device': metadata.st_dev,
                         'created_inode': metadata.st_ino}
+                for parent in p.parents:
+                    if parent in created_dirs:
+                        parent_chains[name].setdefault(parent, created_dirs[parent][1:])
+                record_parents(name)
+                validate_parents(name)
                 if data is None:
                     p.unlink(missing_ok=True)
                     applied[name] = None
@@ -152,6 +192,7 @@ def transaction(root, changes, fail_after=None):
                         if not stat.S_ISREG(metadata.st_mode) or \
                                 (staged_path.read_bytes(), metadata.st_mode, metadata.st_dev, metadata.st_ino) != tmp_state:
                             raise Conflict('Concurrent staging edit: ' + tmp_name)
+                        validate_parents(name)
                         os.replace(tmp, p)
                         # Capture our staged inode before replacement, rather than
                         # accepting another process's subsequent edit as ours.
@@ -175,6 +216,7 @@ def transaction(root, changes, fail_after=None):
             residuals = list(staging_residuals)
             for name in reversed(applied):
                 try:
+                    validate_parents(name)
                     p = safe(root, name)
                     current = None
                     if p.exists():
@@ -192,6 +234,7 @@ def transaction(root, changes, fail_after=None):
                         os.chmod(p, original[1])
                 except (OSError, Invalid, Conflict):
                     residuals.append(name)
+            residuals.extend(sorted(parent_residuals))
             for p in sorted(created_dirs, key=lambda p: len(p.parts), reverse=True):
                 name = directory_name(p)
                 try:

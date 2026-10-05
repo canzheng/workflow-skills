@@ -846,3 +846,18 @@ Current repaired-head semantic review and archive remain pending. Native Ubuntu
 catalog/use retains unchanged-skill original evidence. Cloud is deferred; actual
 merge/completed closure, deployed-base metadata and source PR-contract admin gates
 remain pending separate authorization. See [wider review](../../../docs/validation/wider-boundary-review.md).
+
+## Parent-chain recovery and Issue snapshot review repairs — 2026-10-05
+
+Source review5416864834 at082e2257e1c8ef100fa128001037e9a8bf2021e9 returned
+P2s4185701946/4185701969. Both reproduced with public setup/check before acceptance.
+Deleted files were restored into replacement parents; malformed Issue entries
+returned tracebacks/empty stdout. Wider author inspection adds ancestor/same-content/
+symlink and forward-write controls. Recorded parent inode chains now gate writes
+and restoration, with original backup/expected parent recovery metadata; shared
+Issue helpers validate entry, label and state shapes before dereferencing.
+All48 existing/focused setup/check/record tests pass (21.162s) and all3 new focused
+tests pass (2.595s). Operations/source-consumer, architecture, checks guidance and
+current/delta adoption scenarios are updated. Full local/Ubuntu suites, actual
+installed proof, consumer repin/Actions, evidence and current semantic reviews are
+next. Reviews are disarmed on completion; no archive/merge/closure/admin change.

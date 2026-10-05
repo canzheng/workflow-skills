@@ -42,6 +42,12 @@ provenance, not task state or its own content hash.
 - **AND** newly created directories are removed only if their inode/mode is unchanged and they are empty; changed directories are retained/reported with creation metadata
 - **AND** unchanged installer writes can still be restored; no multi-process lock or atomic multi-file transaction is promised
 
+#### Scenario: Deleted file parent is replaced
+- **WHEN** an owned file is deleted and its existing parent or ancestor is concurrently replaced before a later apply failure
+- **THEN** rollback leaves the replacement directory and missing destination unchanged
+- **AND** reports recoverable original bytes/mode and the expected parent identity chain
+- **AND** a replaced parent discovered before another write prevents that write rather than repurposing the new directory
+
 ### Requirement: Bounded uninstall and diagnostics
 Uninstall SHALL remove only unmodified managed assets/block, retain configuration
 and user modifications, and report residuals. Doctor SHALL be read-only and distinguish
