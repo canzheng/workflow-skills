@@ -290,3 +290,15 @@ block. Bootstrap is read-only compatibility verification; CI verifies checkout f
 Current specs, approved F03/S34 and F14 instructions follow the new model. Earlier
 ignored dependency/receipt checkpoints are historical. Verification/pilot migration
 are pending at this checkpoint; F14 remains unchecked, no merge/archive/closure.
+
+Tracked-model executable checkpoint 5615fc3f488edc41079dd60085440f0f265146f9: all79 tests/no skips and strict specs
+pass on Cloud/Ubuntu; actual source push37267258851/PR37267263959 pass. Final consumer
+6b9eb5d9fb8d2787544f962483e20e63c52f7231, source pin5615fc3, has all4 shared files committed and all20 hashes matched
+before any hook. Fresh actual clones on both runtimes pass check/doctor/read-only
+bootstrap twice, preserving tracked/index bytes and failing missing assets without
+repair. Consumer Issue7/PR8 reuse actual draft→Ready/wf:review, push/PR/metadata
+83424a5 pass. Final README-only CI/review are being observed. Old receipt latest
+symlink P2 independently reproduced; the writer is removed in the current model and
+thread resolved. Current independent review pending. Fresh host catalog and Ubuntu
+agent-host discovery remain unperformed; required enforcement reads403. F14 stays
+unchecked, change active; merge/completed closure/admin/release require authorization.

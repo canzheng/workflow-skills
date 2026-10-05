@@ -3,15 +3,106 @@
 ## Tracked-skill refinement — 2026-10-05
 
 The user authorized committing shared skills instead of injecting ignored dependencies.
-The current change starts at source `ead664a722b040e144c44c431bfe4488c36d7c88`.
-Schema-3 adoption/update installs trackable shared files with exact source provenance;
-repeat startup verifies the checkout without fetch, repair or index changes. Migration
-removes only the verified owned schema-2 ignore block. Consumer CI checks Git content
-directly. New model verification and consumer migration are in progress; no pass is
-claimed yet. F14 remains integration pending until a genuinely fresh Cloud task
-proves initial discovery of committed skills. Ubuntu runtime is separate from Ubuntu
-agent-host discovery. Real merge/Issue completion and enforcement mutation still
-require authorization. See [current handoff](cloud-bootstrap-handoff.md).
+Source branch `rewrite/workflow-skills-v2`, starting revision
+`ead664a722b040e144c44c431bfe4488c36d7c88`; tested executable pin `5615fc3f488edc41079dd60085440f0f265146f9`.
+Consumer canzheng/workflow-skills-test, `pilot/shared-skill-bootstrap`,
+`6b9eb5d9fb8d2787544f962483e20e63c52f7231`, [Issue7](https://github.com/canzheng/workflow-skills-test/issues/7)
+and [Ready PR8](https://github.com/canzheng/workflow-skills-test/pull/8).
+Schema3 tracks all three shared skill directories and risk references, project skills,
+policy/configuration, helpers, CI/templates and docs. No global installation.
+
+### Verified/completed under current authorization
+
+All79 source tests/no skips and strict current/delta OpenSpec validation pass on managed
+Cloud runtime (Debian13/Python3.12.14/Git2.52/Node24.19.0) and fresh Ubuntu24.04.5
+(Python3.12.3/Git2.43/Node24.19.0), using an owned source copy. Source push
+[37267258851](https://github.com/canzheng/workflow-skills/actions/runs/37267258851)
+and PR[37267263959](https://github.com/canzheng/workflow-skills/actions/runs/37267263959)
+pass at the executable pin. Old ignored-materialization/receipt expectations were
+replaced under the approved storage change with tracked-clone, no-repair, migration,
+effective-exclude and index-preservation obligations. Original code/history is retained.
+
+Actual consumer migration started atfd4bf175e7b2ea22439511fdfef872ce8bc7c743.
+Setup preserved project config, pantry-project, unrelated ignore rules and the index,
+removed only its verified owned block and matched all20 bundle hashes. Before caller
+staging, check/doctor correctly failed because shared files were untracked. After the
+reviewed commit they pass. Shell consumer push authentication failed; the connected
+app published an identical reviewed tree through a guarded non-force ref update.
+Local6738e86810a6366c97da146e48b461ddfb3594a2 and server83424a5469137f9c79f4fb1a869717094d83caa5
+have treebcfb75e9507803a57661f9f7bf755bbc3ef6d14a; final README correction locald102495daac708c61f354e445e4e3d9dafe032d6
+and server6b9eb5d9fb8d2787544f962483e20e63c52f7231 have tree67e2eb7e597576af387be0f16d17ffb7eb2726c6.
+Only metadata differs, and original local commits remain in the reflog. No user
+content or baseline was reset; authentication/global configuration was unchanged.
+
+Actual fresh consumer clones on Cloud runtime and Ubuntu at the final consumer SHA
+contain all four shared files in HEAD before any hook. All20 committed/working hashes
+match provenance. `check --run-local`, `doctor --expect-revision` and compatibility
+`bootstrap --apply` pass twice, with tracked bytes/raw index unchanged and Git clean.
+Effective ignore checks exclude neither shared files nor pantry-project. Deleting a
+committed skill makes check/doctor/bootstrap fail without recreating it or changing
+the index; explicit restoration returns clean. These are runtime tests, not agent-host
+catalog proof. Initial adoption/update remains source-owned; repeat verification
+requires neither workflow-source fetch nor environment-injected dependencies.
+
+The implementation moved existing PR8 to draft/Issue7 in-progress, then Ready/wf:review
+after self-verification and docs assessment. Actual initial tracked-model push
+[37267365154](https://github.com/canzheng/workflow-skills-test/actions/runs/37267365154),
+draft PR[37267369536](https://github.com/canzheng/workflow-skills-test/actions/runs/37267369536),
+Ready PR[37267523005](https://github.com/canzheng/workflow-skills-test/actions/runs/37267523005)
+and trusted-base metadata[37267523398](https://github.com/canzheng/workflow-skills-test/actions/runs/37267523398)
+pass at83424a5. Final README-only head CI/review results are recorded after observation,
+not attributed from the earlier head. Current Ready-boundary semantic reviews requested
+in source5988616827 and consumer5988616946; outcomes not yet observed at this checkpoint.
+
+One outstanding old source review P2 (4180443415) was independently reproduced:
+redirecting the old receipt's `latest` through a symlink overwrites its target.
+The current tracked-model handoff removes the entire receipt/Install writer, resolving
+that operation; the reviewer thread was replied to and resolved. It does not claim
+that the former command was safe. No current unresolved threads were observed.
+
+Read-only consumer main summary reports `protected:false`, SHA5d05564919c55f1d4d0c2e1e020ad914252a2979.
+Authoritative branch protection returns403 `Resource not accessible by integration`;
+rulesets returns403 `Upgrade to GitHub Pro or make this repository public`.
+Actual required-check enforcement remains unverified. No administration was changed.
+
+| Current acceptance | Actual evidence / boundary |
+| --- | --- |
+| F03.8–10; S34 tracked installation, migration, repeatability | Public CLI suite; real fd4→schema3 migration; final consumer clones on both runtimes; all20 hashes and four committed shared files; no repair/index changes |
+| F14.1 fresh Cloud discovery | Pending: initial catalog in a genuinely fresh task at the final consumer SHA; file presence/manual reading does not pass |
+| F14.2 continuation | Exact source/consumer branches/pins, existing Issue/PR and [read-only fresh-task prompt](cloud-bootstrap-handoff.md#mini-diagnostic-task-prompt) recorded |
+| F14.3 Ubuntu | Source79 tests/strict specs and actual consumer clone/runtime verification pass; Ubuntu agent-host discovery remains unprobed |
+| F14.4 live GitHub/CI/review | Real app-published branch, draft→Ready/phase transition, push/PR/metadata pass; current semantic review awaiting result |
+| F14.5–7 scenarios/enforcement/ergonomics | Prior application/design/bug/risk/metadata-negative proofs retain original revisions below; protection403/tier limitation; no mandatory wrappers/plans/subagents |
+| F14.8–9 reporting/archive | F01–F13 implemented/locally verified and ready for review; F14 partial/in-progress/blocked; change active/unarchived; no merged/delivered/released claim |
+
+Documentation assessed and updated: source README, architecture/development/operations,
+contract/handoff, consumer templates and pilot README/AGENTS/docs, candidate release notes,
+approved design/capability map/F03 contract, current adoption spec and active delta,
+OpenSpec tasks, this evidence, published-run history and fresh Cloud handoff. Root Git
+ignores no longer contain the managed dependency block in the consumer. Project skill,
+config and design were preserved. Historical injected-skill reports remain below.
+
+### Pending environment/review gates and authorization
+
+Still unperformed: initial automatic Cloud discovery at the committed consumer revision,
+actual use after that initial capture, Ubuntu agent-host discovery, current final
+semantic review acceptance and authoritative required-check enforcement observation.
+A runtime clone or YAML inspection cannot satisfy these. The task-selection boundary
+must supply this consumer revision before initial skill discovery; do not recover or
+switch branches in the diagnostic and count it as startup proof.
+
+Pending authorization: real merge→valid Issue-completion observation, any protections/
+ruleset configuration, and release publication. No simulated merge/closure substitutes.
+F14 and OpenSpec stay active until required acceptance is satisfied.
+
+Exact next action for a fresh Codex Cloud task: select canzheng/workflow-skills-test at
+`pilot/shared-skill-bootstrap`, `6b9eb5d9fb8d2787544f962483e20e63c52f7231`, publish/apply the read-only environment
+verification command in [handoff](cloud-bootstrap-handoff.md#published-environment-setup-command),
+then use its [mini diagnostic](cloud-bootstrap-handoff.md#mini-diagnostic-task-prompt).
+Capture initial host catalogs/cwd routing before explicit SKILL.md reads; verify
+committed files/hashes/source pin5615fc3f488edc41079dd60085440f0f265146f9 without installing/repairing. If the host
+cannot select that unmerged revision before discovery, report the limitation. No
+merge/default-branch mutation is authorized as a workaround.
 
 ## Historical checkpoints — superseded storage model
 

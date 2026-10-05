@@ -6,11 +6,13 @@ The user approved tracked shared skills on 2026-10-05 after fresh tasks failed t
 expose injected skills. This changes storage and the F14 experiment, not the workflow
 architecture. The failures do not establish a particular Cloud host root cause.
 Source starting revision: `ead664a722b040e144c44c431bfe4488c36d7c88`, branch
-`rewrite/workflow-skills-v2`. Consumer migration and new tested pins are pending
-verification; the older `fd4bf175e7b2ea22439511fdfef872ce8bc7c743` / source
-`b1fe9e0242753db54cc16dfc8768502eb74cb3ea` uses ignored skills and is superseded
-for this experiment. Reuse canzheng/workflow-skills-test,
-`pilot/shared-skill-bootstrap`, Issue7 and Ready PR8. No merge is authorized.
+`rewrite/workflow-skills-v2`. Tested executable/source pin:
+`5615fc3f488edc41079dd60085440f0f265146f9` (79 tests and strict specs on Cloud/Ubuntu).
+Consumer: canzheng/workflow-skills-test, `pilot/shared-skill-bootstrap`,
+`6b9eb5d9fb8d2787544f962483e20e63c52f7231`, Issue7 and PR8. Schema3, all four shared
+files and pantry-project are tracked. The earlier fd4/b1 ignored-skill model is
+superseded. No merge is authorized. Select this consumer revision at task creation;
+initial discovery on older main does not test this change.
 
 One-time initial adoption or explicit update uses the pinned source-owned entrypoint
 as documented in [README](../../README.md) and [operations](../operations.md).
@@ -47,12 +49,12 @@ revision before discovery, record that limitation and the exact pending action.
 ## Mini diagnostic task prompt
 
 Use a genuinely fresh task outside onboarding after the tracked pilot is published.
-Replace the two revision placeholders with the verified full pins recorded below.
+The full pins below identify the verified consumer commit and executable source.
 
 ```text
 Validate tracked workflow-skills preparation in canzheng/workflow-skills-test.
-Expected consumer HEAD: <verified consumer SHA>.
-Expected workflow source pin: <verified source SHA>.
+Expected consumer HEAD: 6b9eb5d9fb8d2787544f962483e20e63c52f7231.
+Expected workflow source pin: 5615fc3f488edc41079dd60085440f0f265146f9.
 
 Do not install, bootstrap, repair, switch branches, fetch workflow sources, run Start
 manually, edit files, change authentication, or perform GitHub writes. Preserve
@@ -71,7 +73,7 @@ ignore rules with git check-ignore --no-index; no shared skill should be exclude
 Read AGENTS.md, docs/workflow/contract.md and docs/workflow/README.md, then run:
 python3 tools/workflow/workflow.py check --repo . --run-local --json
 python3 tools/workflow/workflow.py doctor --repo . --json
-python3 tools/workflow/workflow.py doctor --repo . --expect-head <verified consumer SHA> --json
+python3 tools/workflow/workflow.py doctor --repo . --expect-revision 6b9eb5d9fb8d2787544f962483e20e63c52f7231 --json
 Record outputs/exit statuses. Compare HEAD, tracked bytes and raw index before/after.
 
 After initial catalog capture, read relevant committed skills and explain which

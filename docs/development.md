@@ -19,8 +19,8 @@ git cat-file -e 'd2aaf1904b2ccbe7fbab9733627e9c82fcf12f53^{commit}'
 ```
 
 History preparation needs remote read access. Once present, the standard-library
-suite runs offline. Consumer installation/bootstrap uses its exact pinned source
-fetch and does not run this source retirement suite. Source CI checks out full history.
+suite runs offline. Consumer adoption/update uses an exact pinned source
+fetch; repeat verification needs no fetch or source retirement suite. Source CI checks out full history.
 
 ```sh
 python3 -m venv .venv
