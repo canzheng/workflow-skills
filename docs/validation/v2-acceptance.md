@@ -1,5 +1,18 @@
 # v2 rewrite acceptance evidence
 
+## Latest layout/provenance checkpoint — 2026-10-05
+
+Source4449a1e6d03b6e055446735b89c4630b0c8b9d85 passes142/no skips locally
+and on Ubuntu24.04.5; consumer66913db29472d8277002b068205fc05db62b2bbf
+pins it. Installed twelve-test layout/CI suite and source-first fresh-clone/index
+proof pass on both hosts; literal Ubuntu pinned installation/repeat and consumer
+push/PR/metadata Actions pass. Both source review P2s at946dffe were reproduced
+and fixed; prior consumer review atb33b0d4 was clear. Current-head review/archive
+remain pending. Native catalog/use retains unchanged-skill original evidence;
+Cloud deferred, actual merge/completed closure/base deployment/admin gates pending.
+See [wider review](wider-boundary-review.md) for exact acceptance and limitations.
+
+
 ## Latest implementation checkpoint — 2026-10-05
 
 Source pin0f6b6766da7a86a039108891ec051306963425ae passes138/no skips on managed

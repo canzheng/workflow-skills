@@ -17,13 +17,13 @@ do not repeat the original diagnostic merely because doctor says unprobed.
 ## Pinned targets
 
 Source: canzheng/workflow-skills, rewrite/workflow-skills-v2, tested implementation
-`0f6b6766da7a86a039108891ec051306963425ae`. All138 tests/no skips and strict specs pass on Ubuntu24.04.5
-and managed runtime; complete source suite tested at0f6b676; latest source Actions are recorded in the PR checkpoint.
+`4449a1e6d03b6e055446735b89c4630b0c8b9d85`. All142 tests/no skips and strict specs pass on Ubuntu24.04.5
+and managed runtime; complete source suite tested at4449a1e; latest source Actions are recorded in the PR checkpoint.
 Consumer: canzheng/workflow-skills-test, pilot/shared-skill-bootstrap, existing
 [Issue7](https://github.com/canzheng/workflow-skills-test/issues/7) and
 [Ready PR8](https://github.com/canzheng/workflow-skills-test/pull/8). Its explicit
-schema-5 reviewed shared-runtime migration is published at `b33b0d4a938b2718a3adb686f4899b4689d46b20`,
-pinning source `0f6b6766da7a86a039108891ec051306963425ae`. Current consumer/source Actions and exact-head reviews are recorded in the PR checkpoint.
+schema-5 reviewed shared-runtime migration is published at `66913db29472d8277002b068205fc05db62b2bbf`,
+pinning source `4449a1e6d03b6e055446735b89c4630b0c8b9d85`. Current consumer/source Actions and exact-head reviews are recorded in the PR checkpoint.
 Prior consumeradaad276 attempt1 fetch failures and successful attempt2 are retained
 as earlier revision-bound evidence; do not carry their approval to this new repair. Initial native discovery/use at
 previous consumer9bd23d72/sourcea75c3f2 remains verified; all shared hashes are unchanged. Existing main
@@ -44,15 +44,15 @@ set +e
   test ! -e "$WF2_CONSUMER_ROOT"
   git clone --branch pilot/shared-skill-bootstrap https://github.com/canzheng/workflow-skills-test.git "$WF2_CONSUMER_ROOT"
   cd "$WF2_CONSUMER_ROOT"
-  test "$(git rev-parse HEAD)" = "b33b0d4a938b2718a3adb686f4899b4689d46b20"
+  test "$(git rev-parse HEAD)" = "66913db29472d8277002b068205fc05db62b2bbf"
   WF2_SOURCE_DIR=$(mktemp -d)
   trap 'python3 -c "import shutil, sys; shutil.rmtree(sys.argv[1])" "$WF2_SOURCE_DIR"' EXIT
   git -C "$WF2_SOURCE_DIR" init --quiet
-  git -C "$WF2_SOURCE_DIR" fetch --no-tags --depth=1 https://github.com/canzheng/workflow-skills.git 0f6b6766da7a86a039108891ec051306963425ae
-  git -C "$WF2_SOURCE_DIR" checkout --detach --quiet 0f6b6766da7a86a039108891ec051306963425ae
+  git -C "$WF2_SOURCE_DIR" fetch --no-tags --depth=1 https://github.com/canzheng/workflow-skills.git 4449a1e6d03b6e055446735b89c4630b0c8b9d85
+  git -C "$WF2_SOURCE_DIR" checkout --detach --quiet 4449a1e6d03b6e055446735b89c4630b0c8b9d85
   bash "$WF2_SOURCE_DIR/tools/workflow/environment-setup.sh" "$PWD" canzheng/workflow-skills-test
   python3 .agents/tools/workflow/workflow.py check --repo . --run-local --json
-  python3 .agents/tools/workflow/workflow.py doctor --repo . --expect-revision b33b0d4a938b2718a3adb686f4899b4689d46b20 --json
+  python3 .agents/tools/workflow/workflow.py doctor --repo . --expect-revision 66913db29472d8277002b068205fc05db62b2bbf --json
 )
 printf 'Validation exit status: %s\n' "$?"
 ```
@@ -60,7 +60,7 @@ printf 'Validation exit status: %s\n' "$?"
 The exact source pin for first adoption/global install is:
 
 ```sh
-WF2_SOURCE_SHA=0f6b6766da7a86a039108891ec051306963425ae
+WF2_SOURCE_SHA=4449a1e6d03b6e055446735b89c4630b0c8b9d85
 ```
 
 Fetch it using the source README command. Global installation uses that checked-out

@@ -1,5 +1,64 @@
 # Wider local boundary review — 2026-10-05
 
+## Latest runtime-layout and CI-provenance repair — 2026-10-05
+
+This checkpoint supersedes earlier current/default statements below. Source
+implementation/pin `4449a1e6d03b6e055446735b89c4630b0c8b9d85`,
+rewrite/workflow-skills-v2: all142/no skips pass on managed Python3.12.14
+(137.599s) and Ubuntu24.04.5/Python3.12.3 (116.116s), strict specs and public check.
+Consumer `66913db29472d8277002b068205fc05db62b2bbf`,
+pilot/shared-skill-bootstrap/Ready PR8/Issue7, pins this source. Published
+bf8f8e5c1cba1b0858169a1053ab2991263c7add matches reviewed local740436647 tree,
+parentb33b0d4 and guarded non-force publication. Update preserved config/all skills
+and raw indexb56b1fa2e37bcd6cf57f47f6502fd1082a759be5f5145d281b53d95d4eb92d20.
+
+The prior consumer review completed atb33b0d4 with no major issues (comment5996081813).
+The source review5415759761 at946dffe returned P2s4184890020/4184890034.
+Five-minute monitors detected completion and disarmed before fixes. Both findings
+were independently reproduced before acceptance. Exact old946dffe helpers accept
+legacy-layout ignored schema5 setup/check/run-local/doctor/bootstrap while the
+installed CI command fails2 because the new CLI is absent. Before controls also
+show both installed YAMLs selecting a nonexistent source checker when an unrelated
+tracked bundle marker exists. New structural-layout/CLI controls fail before repair;
+no fixture errors or permissive acceptance changes are counted as proof.
+
+Schema5 now requires .agents/tools/workflow. Ignored setup from a legacy bundle
+rejects before writes; existing schema3/4 verification and explicit tracked legacy
+setup remain supported. Both CI preparations prioritize consumer provenance over
+unrelated bundle markers. Verification chooses the installed runtime from the
+manifest; PR metadata still uses only the trusted base pin. Doctor avoids probing
+an unrelated source marker once consumer provenance exists. Regressions execute
+both actual YAML preparations/commands, preserve unrelated marker bytes/raw index,
+and prove legacy tracked verification succeeds at its real runtime path.
+Current/delta adoption specs, source/consumer operations and architecture match.
+
+Actual managed/Ubuntu fresh remote clones start with no helper/skills; source-first
+initialization materializes11 exact files/matches20 managed hashes. Installed
+check/run-local/doctor/offline repeat and raw-index/tracked-file proof pass; prior
+rollback/native-input/index controls remain intact. The actual installed twelve-test
+layout/CI suite passes on managed runtime (46.812s) and Ubuntu (42.605s). Literal
+pinned GitHub fetch-and-run first adoption and repeat both pass on fresh Ubuntu
+without an index or pre-existing helper. Four narrow ignore rules only; project
+skills/tools and AGENTS/config/CI/docs/pin remain tracked.
+
+Consumer current push[37322931564](https://github.com/canzheng/workflow-skills-test/actions/runs/37322931564),
+PR[37322942245](https://github.com/canzheng/workflow-skills-test/actions/runs/37322942245)
+and existing-main metadata[37322935924](https://github.com/canzheng/workflow-skills-test/actions/runs/37322935924)
+pass. Source pin push37322805393/PR37322816322 and documentation-head CI are
+recorded in the live PR checkpoint. New trusted-base metadata YAML is executed
+locally; its actual deployment/events on main await authorized adoption merge.
+
+Native Ubuntu catalog/use stays revision-bound to original9bd23d72/a75c3f2 and
+unchanged skill hashes. F01–F13 implemented/verified/review-ready. F14 partial:
+current semantic reviews, archive and final specs/docs checks remain, then real
+merge→valid Issue completion and deployed-base observation require separate
+permission. Cloud deferred, real global-host use unperformed, historical Ubuntu26
+JSON error unexplained. Consumer two checks and source verification enforcement
+were read-only confirmed; source PR-contract administrative configuration remains
+pending. No merge/closure/admin/global/auth/release/remote deletion. Next: current
+Ready-head review; archive only after premerge acceptance, then final checks/review.
+
+
 ## Current ancestor/index checkpoint — 2026-10-05
 
 This checkpoint supersedes earlier current/default statements below. Tested source
