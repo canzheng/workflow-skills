@@ -1,5 +1,49 @@
 # v2 rewrite acceptance evidence
 
+## Concurrent-edit rollback review repair — 2026-10-05
+
+Source ReadyPR16 review4183164337 at e42e865 identified rollback overwriting an
+edit made after an installer replacement and before a later failure. Independently
+reproduced through public setup before accepting the finding. Source repair
+`b444021557d1a67f2a2e04deb6bc4d87f2772bd5` records successful applied states from
+staged bytes/mode/inode, revalidates safe paths and restores only unchanged writes.
+Concurrent byte/mode edits, deletions, file/ancestor symlinks, recreated deleted files
+and edited newly created files remain recoverable residuals with original backups.
+Normal restoration and explicit fixture recovery/retry still pass; raw index is untouched.
+Source and consumer operations/current+delta adoption specs document best-effort
+recovery without promising multi-process locking or atomic multi-file transactions.
+
+`python3 tools/workflow/verify.py`: 115 tests/no skips, OK, on managed runtime
+(Python3.12.14) and Ubuntu24.04.5/Python3.12.3. `check --repo . --specs --json`:
+exit0/ok:true on both; focused setup19 passes. The original concurrent-byte path
+failed before repair; the broader before-fix run also exposed mode/deletion/symlink
+cases and one cascading fixture failure, not seven independent production defects.
+
+Consumer `1995bffe694f7f15ee8fe08d65067906a7b65341` pins b444021. Reviewed tree
+193ec5897d6a28acd101c0f08887eb8f1acb9699 matches own localc864172ade5be44565b966f9201289b4f13c27d9,
+parent2a59 preserved, guarded non-force publication; no main/global/admin changes.
+Project policy/config/ignore/project skill/raw index and four shared hashes stayed
+unchanged during update. Actual fresh remote clones on managed runtime and Ubuntu
+materialize4 canonical files, match20 hashes, pass check/doctor/repeat offline/no-op,
+and preserve tracked/index bytes. Installed public setup additionally preserves
+concurrent user bytes, reports exact recovery, and retains force-tracking plus three
+index-only nested-policy negatives. An initial disposable live-proof harness used
+the source's nonexistent consumer operations path; resolving the bundle mapping
+corrected that harness before both clean fresh-clone reruns passed.
+
+Consumer push37299940648/PR37299946461/metadata37299942904 succeeded. Source
+push37299931643/PR37299938408 both succeeded at the tested executable revision;
+final documentation-head CI/review results belong to the latest PR/Issue evidence. Initial independent user Ubuntu startup
+discovery/actual3-skill use remains verified at unchanged shared hashes. Earlier
+Ubuntu26 source-suite intermittent invalid-JSON cause remains unresolved, not
+claimed fixed. Cloud deferred; optional real global-host use unperformed.
+
+F01–F13 remain implemented/verified/ready for review. F14 remains partial pending
+final current-head semantic review and final archive/spec/docs checks. Actual merge
+and valid Issue completion, administration and release require separate authorization.
+Next: observe exact-head Actions, request final semantic review, then archive only
+after the required premerge acceptance passes. Earlier checkpoints retain their pins.
+
 ## Malformed bundle review repair — 2026-10-05
 
 Consumer ReadyPR8 at fd49a238121b0c0bc54754fb79f792f290d880ff received independent
