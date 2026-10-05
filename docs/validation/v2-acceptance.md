@@ -2,6 +2,15 @@
 
 ## Recreated Cloud comparison and current consumer repair — 2026-10-05
 
+Final enlarged-suite checkpoint: source `b0323c903901bc33fb16a144aec413f3b31ff087`
+passes all89 tests/no skips and strict current/delta specs on managed runtime and
+Ubuntu24.04.5. Executable bundle remains a4eb9f1; consumerf6394326 pins that exact
+code/documentation revision. Source push37273309768 passed; PR37273314869 was still
+running when recorded. Consumer's actual three runs passed as listed below.
+Both staged-content review threads are replied/resolved on independently reproduced
+and remediated evidence. Current final review remains pending; previous source
+request5989224524 failed with unknown-error response5989241655, not a semantic pass.
+
 The user's second fresh-environment report (16,163 bytes, SHA256
 `d58e8524af55f6c08daf7e1dbedb857918b4a9eaba398de7e0be001a46a94d40`) again records
 old main5d055649/source139e66d5, initial host/workspace cwd/workspace,55 plugin skills

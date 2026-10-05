@@ -18,8 +18,12 @@ runtime/Ubuntu clones repeat check/doctor/read-only bootstrap without writes and
 reject missing/untracked/corrupt-staged files or partial provenance staging without
 repair. Source review repair now validates the independent staged commit candidate;
 consumer finding4181129303 was reproduced with old installed CLI before acceptance.
-Two additional regression cases cover partial provenance staging and intent-to-add;
-full enlarged source suite/current-head semantic review are being recorded separately.
+Two additional regression cases cover partial provenance staging and intent-to-add.
+At source test/evidence head `b0323c903901bc33fb16a144aec413f3b31ff087`, all89/no skips
+and strict specs pass on managed runtime/Ubuntu; executable bundle remains a4eb9f1.
+Source push37273309768 passes; PR37273314869 was still running when recorded.
+Current-head semantic review is pending: the previous source request returned an
+unknown-error response, which is not a review pass.
 
 Consumer is public with Active required-check ruleset24484016. Historical actual
 metadata negative/restoration at6b9eb5d demonstrated blocked/clean with no merge.
