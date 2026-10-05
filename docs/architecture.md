@@ -110,3 +110,8 @@ publication. Private capture storage and empty captured directories remain retai
 there is no Linux conditional rmdir-by-opened-inode primitive. Repository storage
 lives under .git; explicit shared-only installation uses a same-filesystem TMPDIR.
 No project ignore rules, task state or index writes are introduced.
+
+File finalization also retains captured entries instead of path-based unlink. This
+preserves actual displaced/deleted bytes even if a private basename changes at the
+finalization boundary. Recovery storage is intentionally retained, including after
+successful replacement/uninstall, and is excluded from project/index/ignore state.

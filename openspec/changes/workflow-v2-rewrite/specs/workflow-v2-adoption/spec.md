@@ -241,6 +241,12 @@ provenance, not task state or its own content hash.
 - **WHEN** Git-private storage or explicit shared-only TMPDIR differs from the destination filesystem
 - **THEN** apply fails before project writes without an unsafe copy/delete fallback
 
+#### Scenario: Captured file changes during finalization
+- **WHEN** an actual captured file is edited or replaced during finalization
+- **THEN** no path-based unlink discards either entry and observed changes receive recovery metadata
+- **AND** successful replacement retains displaced bytes/mode in private storage without changing the index
+- **AND** uninstall removes the managed project namespace but retains captured recovery copies
+
 ### Requirement: Bounded uninstall and diagnostics
 Uninstall SHALL remove only unmodified managed assets/block, retain configuration
 and user modifications, and report residuals. Doctor SHALL be read-only and distinguish

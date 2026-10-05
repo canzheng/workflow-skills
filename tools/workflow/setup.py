@@ -131,6 +131,15 @@ def publish_directory(basename, *, dir_fd, source_fd, source_name):
     atomic_rename(source_name, basename, src_dir_fd=source_fd, dst_dir_fd=dir_fd, exchange=False)
 
 
+def retain_entry(basename, *, dir_fd):
+    fd = os.open(basename, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=dir_fd)
+    with os.fdopen(fd, 'rb') as stream:
+        metadata = os.fstat(stream.fileno())
+        if not stat.S_ISREG(metadata.st_mode):
+            raise Conflict('Captured entry is not a regular file: ' + basename)
+        return (stream.read(), metadata.st_mode, metadata.st_dev, metadata.st_ino)
+
+
 @contextlib.contextmanager
 def capture_entry(basename, *, dir_fd, storage_fd, storage_path, record=None):
     """Capture the actual entry in retained same-filesystem transaction storage."""
@@ -151,6 +160,8 @@ def capture_entry(basename, *, dir_fd, storage_fd, storage_path, record=None):
             else:
                 try:
                     atomic_rename(captured, basename, src_dir_fd=storage_fd, dst_dir_fd=dir_fd, exchange=False)
+                    if record:
+                        record(None, basename)
                 except (OSError, Conflict) as exc:
                     raise Conflict('Quarantine residual: ' + str(storage_path / captured)) from exc
         raise
@@ -261,29 +272,25 @@ def transaction(root, changes, fail_after=None):
                     if staged != expected:
                         raise Conflict('Concurrent staging edit: ' + name)
                     def record_capture(private, captured):
-                        recovery_index[name]['quarantine'] = (pathlib.Path(name).parent / private / captured).as_posix()
+                        if private is None:
+                            recovery_index[name].pop('quarantine', None)
+                            recovery_index[name]['restored_to'] = name
+                        else:
+                            recovery_index[name]['quarantine'] = (pathlib.Path(name).parent / private / captured).as_posix()
                     with capture_entry(basename, dir_fd=parent_fd, storage_fd=storage_fd, storage_path=storage_path, record=record_capture) as (private_fd, captured, private):
                         if file_state(private_fd, captured) != expected:
                             raise Conflict('Concurrent staging edit: ' + name)
                         if file_state(parent_fd, basename) is not None:
                             raise Conflict('Concurrent staging recreation: ' + name)
-                        # Hold the captured inode through deletion and retain any
-                        # in-place edit made through an already-open descriptor.
-                        fd = os.open(captured, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=private_fd)
-                        with os.fdopen(fd, 'rb') as stream:
-                            metadata = os.fstat(stream.fileno())
-                            if (stream.read(), metadata.st_mode, metadata.st_dev, metadata.st_ino) != expected:
-                                raise Conflict('Concurrent staging edit: ' + name)
-                            os.unlink(captured, dir_fd=private_fd)
-                            stream.seek(0)
-                            metadata = os.fstat(stream.fileno())
-                            actual = (stream.read(), metadata.st_mode, metadata.st_dev, metadata.st_ino)
-                            if actual != expected:
-                                backup = 'concurrent-' + str(len(recovery_index))
-                                (stage / backup).write_bytes(actual[0])
-                                recovery_index[name]['concurrent_backup'] = backup
-                                recovery_index[name]['concurrent_mode'] = actual[1]
-                                raise Conflict('Concurrent displaced-inode edit: ' + name)
+                        # Conditional unlink-by-inode is unavailable too. Keep
+                        # captured files, rather than deleting a replaced name.
+                        actual = retain_entry(captured, dir_fd=private_fd)
+                        if actual != expected:
+                            backup = 'concurrent-' + str(len(recovery_index))
+                            (stage / backup).write_bytes(actual[0])
+                            recovery_index[name]['concurrent_backup'] = backup
+                            recovery_index[name]['concurrent_mode'] = actual[1]
+                            raise Conflict('Concurrent displaced-inode edit: ' + name)
                         if file_state(parent_fd, basename) is not None:
                             raise Conflict('Concurrent staging recreation: ' + name)
             except (OSError, Invalid, Conflict) as cleanup_error:
@@ -482,7 +489,11 @@ def transaction(root, changes, fail_after=None):
                         if not stat.S_ISDIR(metadata.st_mode) or (metadata.st_mode, metadata.st_dev, metadata.st_ino) != created_dirs[p]:
                             raise Conflict('Concurrent directory change during rollback: ' + name)
                         def record_capture(private, captured):
-                            recovery_index[name]['quarantine'] = directory_name(p.parent / private / captured)
+                            if private is None:
+                                recovery_index[name].pop('quarantine', None)
+                                recovery_index[name]['restored_to'] = name
+                            else:
+                                recovery_index[name]['quarantine'] = directory_name(p.parent / private / captured)
                         with capture_entry(p.name, dir_fd=parent_fd, storage_fd=storage_fd, storage_path=storage_path, record=record_capture) as (private_fd, captured, private):
                             actual = os.stat(captured, dir_fd=private_fd, follow_symlinks=False)
                             if not stat.S_ISDIR(actual.st_mode) or (actual.st_mode, actual.st_dev, actual.st_ino) != created_dirs[p]:
