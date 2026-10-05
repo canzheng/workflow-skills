@@ -65,8 +65,9 @@ git rm --cached -r -- .agents/skills/workflow-design-to-backlog .agents/skills/w
 ```
 
 This is a caller-authorized Git change, not an installer side effect. Stage reviewed
-project/provenance/.gitignore changes and commit. Schema-4 consumers instead review
-the removal of their old tracked tools/workflow runtime, stage those deletions and
+project/provenance/.gitignore changes and commit. Older schema-3/4 consumers with
+the runtime in tools/workflow instead review the installer's removal of those
+owned files, stage those deletions, untrack any remaining shared skills, and
 update only workflow CLI references in project-owned config/docs to the new path.
 Do not delete unrelated project tools. Then commit. Until untracking/staging is complete,
 checks can fail because the working adoption and staged commit are inconsistent.

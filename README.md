@@ -16,7 +16,7 @@ python3 tools/workflow/workflow.py check --repo . --specs --json.
 
 ## Pinned consumer adoption
 
-Shared skills are tracked only in this source repository. Consumers track their
+Canonical shared skills are authored and tracked in this source repository. Consumers track their
 AGENTS/config, CI/templates, docs/specs, project skills and exact source pin;
 the three shared skill directories/references and Python runtime in
 `.agents/tools/workflow/` are materialized repo-locally and ignored together.
@@ -78,14 +78,16 @@ Commit the generated `AGENTS.md` with the other project-owned adoption files.
 Before starting Codex, from the selected consumer root:
 
 ```sh
-python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
-python3 tools/workflow/workflow.py check --repo . --run-local --json
-python3 tools/workflow/workflow.py doctor --repo . --json
+python3 .agents/tools/workflow/workflow.py bootstrap --repo . --apply --json
+python3 .agents/tools/workflow/workflow.py check --repo . --run-local --json
+python3 .agents/tools/workflow/workflow.py doctor --repo . --json
 git --no-optional-locks status --short --untracked-files=all
 codex
 ```
 
-Bootstrap installs only missing ignored skills from the manifest's full commit;
+For a fresh clone, first fetch the tracked pin and run the source-owned setup
+entrypoint above; the installed CLI is initially absent. Bootstrap installs only
+missing ignored skills and runtime files from the manifest's full commit;
 complete matching reruns are offline/no-op. Project files/pin/index remain unchanged;
 modified/extra/symlinked dependencies fail without overwrite. Consumer CI runs the
 same bootstrap before declared verification. Never implicitly fetch main/latest.
