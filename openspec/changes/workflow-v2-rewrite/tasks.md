@@ -302,3 +302,11 @@ symlink P2 independently reproduced; the writer is removed in the current model 
 thread resolved. Current independent review pending. Fresh host catalog and Ubuntu
 agent-host discovery remain unperformed; required enforcement reads403. F14 stays
 unchecked, change active; merge/completed closure/admin/release require authorization.
+
+Read-only enforcement follow-up: source Active Protect-main24457981 targets main,
+blocking deletion/non-fast-forward only, no bypass actors or required-check/PR rule.
+Consumer has both observed v2 contexts; source metadata context is absent until
+trusted-base adoption, so runbook stages that requirement after actual execution.
+No settings changed. Final3a3b6d3 tests/strict specs pass on both runtimes, source
+push37267764301/PR37267770064 and consumer6b9eb5d push37267653526/PR37267656824/
+metadata37267655273 pass. Independent new review acknowledged but still pending.

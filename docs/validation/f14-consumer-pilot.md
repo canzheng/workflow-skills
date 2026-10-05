@@ -63,7 +63,16 @@ that the former command was safe. No current unresolved threads were observed.
 Read-only consumer main summary reports `protected:false`, SHA5d05564919c55f1d4d0c2e1e020ad914252a2979.
 Authoritative branch protection returns403 `Resource not accessible by integration`;
 rulesets returns403 `Upgrade to GitHub Pro or make this repository public`.
-Actual required-check enforcement remains unverified. No administration was changed.
+Actual required-check enforcement remains unverified. Source read-only ruleset details
+now expose Active Protect-main (24457981) on refs/heads/main, deletion/non-fast-forward
+only, with no bypass actors or PR/status-check requirement. Consumer final6b9eb5d emits
+both v2 verification and v2 PR contract; source final3a3b6d3 emits only verification.
+Do not require the missing source metadata context before trusted-base adoption and
+an observed follow-up PR. Source final3a3b6d3 passed79/no-skip tests/strict specs on both
+runtimes plus push37267764301/PR37267770064. Consumer final6b9eb5d passed fresh clones
+on both runtimes and push37267653526/PR37267656824/metadata37267655273. Current final
+semantic requests5988657482/5988657642 are acknowledged with bot eyes reactions,
+not a review pass. No administration was changed.
 
 | Current acceptance | Actual evidence / boundary |
 | --- | --- |

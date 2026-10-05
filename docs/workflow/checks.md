@@ -35,14 +35,39 @@ First adoption requires the trusted checker to exist on the base branch; a draft
 rewrite PR cannot claim the new trusted-base job already runs before that adoption.
 
 ## Required checks runbook (administrative action)
-After Actions produces observed check contexts, an authorized administrator should
-configure the intended default/integration branch ruleset to require `v2 verification`
-and `v2 PR contract`, with the repository's review requirements and bypass policy.
-This rewrite does not authorize changing protections. Read back rulesets/branch
-protection with native GitHub settings or `gh api repos/OWNER/REPO/rulesets` and
-`gh api repos/OWNER/REPO/branches/BRANCH/protection`; observe an invalid PR being
-blocked and an allowed corrected PR eligible without merging. Record revision,
-contexts and observation. A workflow file alone proves no merge enforcement.
+
+In GitHub Settings → Rules → Rulesets, edit the existing main/default-branch ruleset
+or create one if absent. Set enforcement Active and target the intended integration
+branch. Require pull requests, resolve review conversations, block force pushes and
+branch deletion, and keep bypass permissions deliberate. Configure required approvals
+for the actual team: one when another eligible approver is available; zero can be
+appropriate for a solo maintainer with independent semantic review. Codex COMMENTED
+reviews do not count as GitHub APPROVED reviews, and an author cannot approve their
+own PR. Do not silently introduce a new mandatory reviewer requirement.
+
+Require the observed GitHub Actions contexts `v2 verification` and `v2 PR contract`,
+and require branches to be up to date if that is the chosen integration policy.
+Verify the contexts on the actual PR/head and select their GitHub Actions provider.
+For initial source adoption, the trusted-base metadata workflow may not exist on
+main yet. Require the available verification check first; add `v2 PR contract` only
+after reviewed base adoption and an actual subsequent PR emits it. Requiring an
+absent check can block the bootstrap PR indefinitely. This does not authorize merge.
+
+At the 2026-10-05 tracked-model pilot, workflow-skills-test emits both contexts;
+workflow-skills emits only `v2 verification`. Source ruleset Protect-main (24457981)
+is Active on refs/heads/main with deletion/non-fast-forward rules and no bypass actors;
+it currently has no PR or required-status-check rule. Consumer main's limited summary
+reports protected:false. Authoritative protection reads return integration403; consumer
+rulesets return a private-repository plan restriction (Pro/public). Use a supported
+plan if needed; this runbook does not authorize changing repository visibility.
+
+Only an authorized administrator changes these settings. After saving, read back
+rulesets/branch protection with native settings or
+`gh api repos/OWNER/REPO/rulesets` and
+`gh api repos/OWNER/REPO/branches/BRANCH/protection`. Observe an invalid PR blocked and
+a corrected PR eligible without merging. Record revision, exact contexts, conditions,
+review/bypass policy and observation. A workflow file or green check does not prove
+required-check enforcement. Current changes do not configure protection themselves.
 
 Review semantic docs truth, omitted behavior, acceptance scope, skipped/stale evidence,
 archive ownership and meaningful negative tests. A no-impact statement is allowed;
