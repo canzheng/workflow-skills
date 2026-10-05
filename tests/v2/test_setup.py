@@ -368,6 +368,66 @@ class SetupTests(unittest.TestCase):
                 self.assertEqual((self.target / names[1]).read_bytes(), originals[names[1]])
         run(*args, '--apply')  # explicit fixture recovery permits a normal retry
 
+    def test_public_rollback_preserves_changed_created_directory(self):
+        index = (self.target / '.git/index').read_bytes()
+        actual = installer.os.replace
+        calls = 0
+        created = None
+        changed_mode = None
+        def replace(src, dst):
+            nonlocal calls, created, changed_mode
+            calls += 1
+            if calls == 2:
+                raise OSError('later replacement failure')
+            actual(src, dst)
+            created = pathlib.Path(dst).parent
+            changed_mode = 0o700 if created.stat().st_mode & 0o777 != 0o700 else 0o750
+            created.chmod(changed_mode)
+        args = [str(x) for x in self.args] + ['--apply', '--json']
+        with patch.object(installer.os, 'replace', replace), contextlib.redirect_stdout(io.StringIO()) as out:
+            status = workflow.main(args)
+        self.assertEqual(status, 1)
+        message = json.loads(out.getvalue())['findings'][0]['message']
+        self.assertIn('Rollback residuals:', message)
+        self.assertIn(created.relative_to(self.target).as_posix(), message)
+        self.assertTrue(created.is_dir())
+        self.assertEqual(created.stat().st_mode & 0o777, changed_mode)
+        self.assertEqual(list(created.iterdir()), [])  # unchanged file still rolls back
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        recovery = pathlib.Path(message.split('recoverable originals: ', 1)[1])
+        self.addCleanup(__import__('shutil').rmtree, recovery)
+        directory = json.loads((recovery / 'recovery-index.json').read_text())[created.relative_to(self.target).as_posix()]
+        self.assertEqual(directory['kind'], 'directory')
+        self.assertIsNone(directory['backup'])  # no original directory existed
+
+    def test_rollback_preserves_replaced_created_directory_and_new_contents(self):
+        for edit in ('replacement', 'new-content'):
+            with self.subTest(edit=edit):
+                name = 'new-' + edit + '/file.md'
+                directory = (self.target / name).parent
+                actual = installer.os.replace
+                def replace(src, dst):
+                    actual(src, dst)
+                    if edit == 'replacement':
+                        mode = directory.stat().st_mode
+                        directory.rename(directory.with_name(directory.name + '-moved'))
+                        directory.mkdir()
+                        directory.chmod(mode)
+                    else:
+                        (directory / 'human.md').write_bytes(b'Concurrent directory content.\n')
+                with patch.object(installer.os, 'replace', replace), self.assertRaisesRegex(installer.Conflict, 'Rollback residuals:') as raised:
+                    installer.transaction(self.target, {name: b'Installer file.\n'}, fail_after=1)
+                self.assertTrue(directory.is_dir())
+                self.assertIn(directory.relative_to(self.target).as_posix(), str(raised.exception))
+                if edit == 'replacement':
+                    self.assertFalse((self.target / name).exists())
+                    self.assertEqual((directory.with_name(directory.name + '-moved') / 'file.md').read_bytes(), b'Installer file.\n')
+                else:
+                    self.assertEqual((directory / 'human.md').read_bytes(), b'Concurrent directory content.\n')
+                    self.assertFalse((self.target / name).exists())
+                recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
+                self.addCleanup(__import__('shutil').rmtree, recovery)
+
     def test_rollback_preserves_recreated_deletions_and_edited_new_files(self):
         p = self.target / 'AGENTS.md'
         actual_unlink = pathlib.Path.unlink

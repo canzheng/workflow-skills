@@ -30,6 +30,7 @@ provenance, not task state or its own content hash.
 - **WHEN** another process changes an applied file or recreates a deleted destination before rollback
 - **THEN** rollback preserves that changed content, including mode changes and symlink replacements
 - **AND** reports the exact residual path and recoverable original bytes/mode without following unsafe paths
+- **AND** newly created directories are removed only if their inode/mode is unchanged and they are empty; changed directories are retained/reported with creation metadata
 - **AND** unchanged installer writes can still be restored; no multi-process lock or atomic multi-file transaction is promised
 
 ### Requirement: Bounded uninstall and diagnostics
