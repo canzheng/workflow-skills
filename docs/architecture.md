@@ -99,3 +99,8 @@ captures an entry before validating/removing it. This does not make multi-file a
 atomic or provide a process lock. Unsupported primitives fail safely. PR-body
 fragment links resolve against the supplied body; explicit file links still read
 trusted head Git blobs in metadata checks.
+
+Cleanup first captures public staging entries and created directory names in
+exclusive private same-filesystem storage, then validates the actual captured inode
+before removal. Restore collisions preserve both entries and record the quarantine
+location; this is transient recovery storage, not workflow or task state.

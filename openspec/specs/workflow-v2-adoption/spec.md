@@ -81,6 +81,19 @@ provenance, not task state or its own content hash.
 - **WHEN** in-place content changes while cleanup holds the displaced inode open through removal
 - **THEN** changed bytes and mode are retained in recovery metadata and a residual is reported
 
+#### Scenario: Staging basename changes at cleanup boundary
+- **WHEN** a shared staging, restoration or removal basename is replaced immediately before cleanup capture
+- **THEN** cleanup validates the actual captured entry in private same-filesystem storage before deleting anything
+- **AND** the concurrent entry and original backups/index remain preserved as a recoverable conflict
+
+#### Scenario: Created directory changes at removal boundary
+- **WHEN** another process replaces a newly created directory after validation but before cleanup capture
+- **THEN** cleanup preserves the actual competing directory and reports a residual instead of removing it
+
+#### Scenario: Quarantine restoration collides with recreated public name
+- **WHEN** a public entry is recreated after private capture and prevents no-replace restoration
+- **THEN** both public and captured entries remain intact, with the quarantine path in recovery metadata
+
 ### Requirement: Bounded uninstall and diagnostics
 Uninstall SHALL remove only unmodified managed assets/block, retain configuration
 and user modifications, and report residuals. Doctor SHALL be read-only and distinguish

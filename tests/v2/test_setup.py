@@ -317,6 +317,98 @@ class SetupTests(unittest.TestCase):
         record = json.loads((recovery / 'recovery-index.json').read_text())[victim.name]
         self.assertEqual((recovery / record['backup']).read_bytes(), b'Original content')
 
+    def test_cleanup_captures_replaced_staging_entries_before_discard(self):
+        binding, attribute = (installer, 'capture_entry') if hasattr(installer, 'capture_entry') else (installer.os, 'unlink')
+        actual = getattr(binding, attribute)
+        index = (self.target / '.git/index').read_bytes()
+        actual_unlink = installer.os.unlink
+        for suffix in ('.wf2-staged', '.wf2-restore', '.wf2-removed'):
+            for kind in ('inode', 'symlink'):
+                with self.subTest(suffix=suffix, kind=kind):
+                    victim = self.target / ('cleanup' + suffix + '-' + kind)
+                    victim.write_bytes(b'Original content')
+                    staged = victim.with_name(victim.name + suffix)
+                    external = self.base / ('cleanup-external' + suffix + '-' + kind)
+                    external.write_bytes(b'Human content')
+                    injected = []
+                    def capture(path, **kwargs):
+                        if operation_path(path, kwargs.get('dir_fd')) == staged and not injected:
+                            actual_unlink(staged)
+                            if kind == 'symlink':
+                                staged.symlink_to(external)
+                            else:
+                                staged.write_bytes(b'Human content')
+                            injected.append(staged.lstat())
+                        return actual(path, **kwargs)
+                    data = None if suffix == '.wf2-removed' else b'Installer content'
+                    failure = 1 if suffix == '.wf2-restore' else None
+                    with patch.object(binding, attribute, capture), self.assertRaisesRegex(installer.Conflict, 'Rollback residuals:') as raised:
+                        installer.transaction(self.target, {victim.name: data}, fail_after=failure)
+                    self.assertEqual(len(injected), 1)
+                    self.assertEqual(staged.lstat().st_ino, injected[0].st_ino)
+                    self.assertEqual(staged.read_bytes(), b'Human content')
+                    self.assertEqual(staged.is_symlink(), kind == 'symlink')
+                    self.assertEqual(external.read_bytes(), b'Human content')
+                    self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                    recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
+                    self.addCleanup(installer.shutil.rmtree, recovery)
+                    record = json.loads((recovery / 'recovery-index.json').read_text())[victim.name]
+                    self.assertEqual((recovery / record['backup']).read_bytes(), b'Original content')
+
+    def test_created_directory_cleanup_captures_actual_inode(self):
+        binding, attribute = (installer, 'capture_entry') if hasattr(installer, 'capture_entry') else (installer.os, 'rmdir')
+        actual = getattr(binding, attribute)
+        directory = self.target / 'created-directory-race'
+        index = (self.target / '.git/index').read_bytes()
+        injected = []
+        def capture(path, **kwargs):
+            if operation_path(path, kwargs.get('dir_fd')) == directory and not injected:
+                mode = directory.stat().st_mode
+                directory.rename(directory.with_name('saved-created-directory'))
+                directory.mkdir()
+                directory.chmod(mode)
+                injected.append(directory.stat())
+            return actual(path, **kwargs)
+        with patch.object(binding, attribute, capture), self.assertRaisesRegex(installer.Conflict, 'Rollback residuals:') as raised:
+            installer.transaction(self.target, {'created-directory-race/file.md': b'Installer content'}, fail_after=1)
+        self.assertEqual(len(injected), 1)
+        self.assertEqual(directory.stat().st_ino, injected[0].st_ino)
+        self.assertEqual(list(directory.iterdir()), [])
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
+        self.addCleanup(installer.shutil.rmtree, recovery)
+        record = json.loads((recovery / 'recovery-index.json').read_text())[directory.name]
+        self.assertEqual(record['kind'], 'directory')
+        self.assertIsNone(record['backup'])
+
+    def test_quarantine_restore_collision_retains_both_entries(self):
+        actual = installer.capture_entry
+        victim = self.target / 'AGENTS.md'
+        original = victim.read_bytes()
+        staging = victim.with_name(victim.name + '.wf2-staged')
+        index = (self.target / '.git/index').read_bytes()
+        injected = []
+        @contextlib.contextmanager
+        def capture(path, **kwargs):
+            with actual(path, **kwargs) as captured:
+                if operation_path(path, kwargs.get('dir_fd')) == staging and not injected:
+                    self.assertFalse(staging.exists())
+                    staging.write_bytes(b'Concurrent public entry')
+                    injected.append(True)
+                yield captured
+        with patch.object(installer, 'capture_entry', capture), self.assertRaisesRegex(installer.Conflict, 'Rollback residuals:') as raised:
+            installer.transaction(self.target, {'AGENTS.md': b'Installer content'})
+        self.assertEqual(injected, [True])
+        self.assertEqual(staging.read_bytes(), b'Concurrent public entry')
+        self.assertEqual(victim.read_bytes(), original)
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        recovery = pathlib.Path(str(raised.exception).split('recoverable originals: ', 1)[1])
+        self.addCleanup(installer.shutil.rmtree, recovery)
+        record = json.loads((recovery / 'recovery-index.json').read_text())['AGENTS.md.wf2-staged']
+        retained = self.target / record['quarantine']
+        self.assertEqual(retained.read_bytes(), original)
+        self.assertEqual(retained.parent.stat().st_mode & 0o777, 0o700)
+
     def test_atomic_replacement_unavailable_never_falls_back_to_overwrite(self):
         victim = self.target / 'AGENTS.md'
         original = victim.read_bytes()
@@ -336,7 +428,7 @@ class SetupTests(unittest.TestCase):
         injected = []
         def unlink(path, **kwargs):
             resolved = operation_path(path, kwargs.get('dir_fd'))
-            if resolved == victim.with_name(victim.name + '.wf2-staged') and not injected:
+            if resolved.name == victim.name + '.wf2-staged' and not injected:
                 resolved.write_bytes(b'Late concurrent staging content')
                 injected.append(True)
             return actual(path, **kwargs)
