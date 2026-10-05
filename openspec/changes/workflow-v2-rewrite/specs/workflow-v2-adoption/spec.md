@@ -34,6 +34,16 @@ skills SHALL remain tracked. Required Ubuntu discovery/use SHALL be tested separ
 - **AND** staged schemas, configured docs, managed project hashes and AGENTS/ignore blocks must form a coherent regular-file snapshot without merge stages
 - **AND** valid project-owned policy differences remain permitted
 
+#### Scenario: Ignored update refuses tracked dependencies
+- **WHEN** an existing schema-4 consumer has a shared dependency in the index and requests a newer pinned setup update
+- **THEN** preview and apply reject the index conflict before changing shared bytes, project assets or provenance
+- **AND** files and raw index remain unchanged until the caller explicitly resolves the conflict
+
+#### Scenario: Nested staged ignore policy
+- **WHEN** a nested ignore policy or new project-specific skill exists in the index with a different or absent working copy
+- **THEN** staged validation uses indexed policies and indexed project paths from one canonical snapshot
+- **AND** blocking or nonregular indexed policies fail without mutation while valid project-owned policy differences remain allowed
+
 #### Scenario: Explicit tracked-to-ignored migration
 - **WHEN** setup explicitly updates tracked schema-1/3 adoption to schema 4
 - **THEN** it preserves the index and adds only its owned shared-directory ignore block

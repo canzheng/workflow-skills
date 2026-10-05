@@ -7,8 +7,11 @@ explicit global installation is separate from repo-local adoption.
 
 The user's [Ubuntu workstation bootstrap report](ubuntu-workstation-bootstrap.md)
 now passes installation/check/repeatability at the pinned consumer revision on
-Ubuntu26.04/Python3.13.13/codex-cli0.160.0. Fresh agent discovery/use remains pending;
-the next step for that prepared checkout is the fresh-session prompt below.
+Ubuntu26.04/Python3.13.13/codex-cli0.160.0. The subsequent
+[independent session](ubuntu-workstation-session.md) supplies initial native
+discovery, actual three-skill use and no-chat continuation at the recorded pins.
+Review repairs and affected runtime/consumer/CI checks are the remaining work;
+do not repeat the original diagnostic merely because doctor says unprobed.
 
 ## Pinned targets
 

@@ -148,6 +148,91 @@ class IgnoredDependencyTests(unittest.TestCase):
             self.assertIn('remains tracked', json.dumps(report))
             self.assertEqual(self.snapshot(), before)
 
+    def test_setup_update_rejects_tracked_ignored_dependency_before_writes(self):
+        self.assert_rejected_setup_update(committed=False)
+
+    def test_setup_update_rejects_committed_ignored_dependency_before_writes(self):
+        self.assert_rejected_setup_update(committed=True)
+
+    def assert_rejected_setup_update(self, committed):
+        args = self.ignored_adopt()
+        name = '.agents/skills/workflow-risk-review/SKILL.md'
+        git(self.target, 'add', '-f', '--', name)
+        if committed:
+            git(self.target, 'commit', '-qm', 'Fixture invalid tracked dependency')
+        old = (self.target / name).read_bytes()
+        (self.source / name).write_bytes(old + b'New pinned skill content.\n')
+        revision = commit(self.source)
+        args = list(args)
+        args[args.index('--revision') + 1] = revision
+        before = self.snapshot()
+        for flags in [[], ['--apply']]:
+            with self.subTest(flags=flags):
+                report = run(*args, *flags, expect=1)
+                self.assertIn('remains tracked', json.dumps(report))
+                self.assertEqual(self.snapshot(), before)
+        git(self.target, 'rm', '--cached', '--', name)
+        index = (self.target / '.git/index').read_bytes()
+        run(*args, '--apply')
+        self.assertEqual((self.target / name).read_bytes(), old + b'New pinned skill content.\n')
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        commit(self.target)
+        run('check', '--repo', self.target)
+
+    def test_staged_nested_ignores_are_checked_without_working_tree_copies(self):
+        self.ignored_adopt()
+        for name, policy in [('.agents/.gitignore', '/skills/\n'),
+                             ('.agents/skills/.gitignore', '/project-rules/\n'),
+                             ('.agents/skills/project-rules/.gitignore', '*\n'),
+                             ('.github/.gitignore', '/workflows/\n'),
+                             ('docs/workflow/.gitignore', '/README.md\n')]:
+            with self.subTest(path=name):
+                p = self.target / name
+                p.write_text(policy)
+                git(self.target, 'add', '-f', '--', name)
+                p.unlink()
+                before = self.snapshot()
+                try:
+                    for command in ['bootstrap', 'check', 'doctor']:
+                        report = run(command, '--repo', self.target, expect=1)
+                        self.assertIn('Staged workflow', json.dumps(report))
+                        self.assertEqual(self.snapshot(), before)
+                finally:
+                    git(self.target, 'restore', '--staged', '--', name)
+
+    def test_staged_new_project_skill_is_checked_against_index_only_ignore(self):
+        self.ignored_adopt()
+        project = self.target / '.agents/skills/new-project/SKILL.md'
+        project.parent.mkdir()
+        project.write_text('Human project policy.\n')
+        policy = self.target / '.agents/skills/.gitignore'
+        policy.write_text('/new-project/\n')
+        git(self.target, 'add', '-f', '--', str(project.relative_to(self.target)), str(policy.relative_to(self.target)))
+        project.unlink(); project.parent.rmdir(); policy.unlink()
+        before = self.snapshot()
+        for command in ['bootstrap', 'check', 'doctor']:
+            report = run(command, '--repo', self.target, expect=1)
+            self.assertIn('Staged workflow', json.dumps(report))
+            self.assertEqual(self.snapshot(), before)
+
+    def test_staged_nested_policy_modes_and_valid_policy_are_preserved(self):
+        self.ignored_adopt()
+        policy = self.target / '.agents/.gitignore'
+        policy.write_text('# Indexed human rules\n*.local\n')
+        git(self.target, 'add', '--', '.agents/.gitignore')
+        policy.write_text('# Different working policy\n*.tmp\n')
+        before = self.snapshot()
+        for command in ['bootstrap', 'check', 'doctor']:
+            run(command, '--repo', self.target)
+            self.assertEqual(self.snapshot(), before)
+        oid = git(self.target, 'hash-object', '-w', '--stdin').strip().decode()
+        git(self.target, 'update-index', '--cacheinfo', '120000,' + oid + ',.agents/.gitignore')
+        before = self.snapshot()
+        for command in ['bootstrap', 'check', 'doctor']:
+            report = run(command, '--repo', self.target, expect=1)
+            self.assertIn('not a regular file', json.dumps(report))
+            self.assertEqual(self.snapshot(), before)
+
     def test_corrupt_staged_policy_cannot_hide_behind_good_working_tree(self):
         self.ignored_adopt()
         for name in ['.gitignore', '.workflow/install-manifest.json', '.workflow/config.json',

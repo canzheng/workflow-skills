@@ -1,0 +1,114 @@
+# User Ubuntu Codex session evidence — 2026-10-05
+
+The user supplied an independent, read-only WF2-F14 report: the first upload was
+truncated; its full continuation was subsequently supplied in chat. These are
+reported workstation observations, distinct from the rewrite agent's repair/tests.
+
+## Exact target and discovery
+
+Consumer canzheng/workflow-skills-test, pilot/shared-skill-bootstrap,
+`9bd23d72dc24a741d669c1ea92532f8bf337aa42`; source pin
+`a75c3f20e5f4032568b1d1a5cb17d001fc781918`; schema4/ignored storage. Main remained
+`5d05564919c55f1d4d0c2e1e020ad914252a2979`. Ubuntu26.04, codex-cli0.160.0,
+Python3.13.13, Git2.53, gh2.96.0. The session changed no repository/global files,
+Issues/PRs/labels, rulesets, branches or releases.
+
+Before explicit SKILL.md reads, the native startup catalog exposed repo-local root
+r10 mapped to .agents/skills and all three canonical names/paths. Later hashes
+matched provenance:
+
+| Skill/file | SHA-256 |
+| --- | --- |
+| workflow-design-to-backlog/SKILL.md | cbda227a0703d5fb9afd9aa478cae2d82bcb82b4745249838489433ac279b6d1 |
+| workflow-deliver-issue/SKILL.md | 6ca436f267add702443941b45278c9e2cdf5d3800f6c01f9983ebb2830a96554 |
+| workflow-risk-review/SKILL.md | afa7b4ac1fae55dadff2a59a7bd314300604165562a562c4659843d2c82ee1eb |
+| workflow-risk-review/references/methods.md | 0b70392db17ee58810de3bde7178d80c25991584139d4310fbc1af7919c9b8fa |
+
+Actual delivery use produced Issue7/ReadyPR8 acceptance mapping, remote inspection,
+verification, documentation reassessment and remaining work. Risk use produced
+fresh-clone/index proof and independent setup-update defect reproduction. Backlog
+use reconciled the Pantry MVP read-only against docs/design.md, stable identities,
+dependencies and open/closed Issues. pantry-project preserved offline scope, integer
+grams, exclusions and unresolved dietary choice. These semantic artifacts are
+distinct from catalog discovery and explicit reading. The fresh session resumed
+the recorded assignment without the previous chat or reinstalling skills.
+Doctor's host_skill_discovery remained unprobed because it does not query the native
+startup catalog; that does not invalidate the separate catalog observation.
+
+Global v1 wrappers were visible but not invoked. Host instructions requested an
+unavailable gpt-5.4-mini exploration subagent: spawn was rejected before an agent
+started; the session reported the conflict and explored directly without substituting
+a model or changing global configuration. V2 imposes no such subagent requirement.
+
+## Bootstrap and integration
+
+Prepared check/check --run-local/doctor/repeat bootstrap passed; changes:[], diff-index
+exit0, Git clean. Raw index before/after repeat:
+`00905ef955ca03dc63eb6b32eb2fe037850d4e97da17d6fa512672f79390427f`.
+
+Fresh temporary exact-head clone started with zero shared directories, materialized
+four canonical files, passed check/doctor and repeat changes:[]. Shared indexed count0,
+all three anchored ignores matched, pantry-project tracked and final Git clean.
+Raw index before/after:
+`201b1432fd3e0d821b3458a42370e7e65f93e533f8eb4c6f63790e63355cfd36`.
+The workflow-only adoption branch has no application suite.
+
+Issue7 was open/wf:review and PR8 Ready/open/unmerged/clean, with non-closing Refs7
+and no closingIssuesReferences. Push37280700304, PR37280704952 and metadata
+37280702909/37281283283 succeeded. Public Active ruleset24484016 required both v2
+checks/no bypass. It does not require review approval: GitHub clean/mergeable does
+not establish semantic review. Earlier real check failure/block/restoration proof
+remains separate.
+
+## Design-to-backlog reconciliation
+
+All five MVP identities existed exactly once among open Issues; no closed Issues
+or duplicate identities. No application work or additional Issues were dispatched.
+
+| Stable identity/outcome | Issue/phase | Direct prerequisites |
+| --- | --- | --- |
+| pantry-planner:ingredients | 1, review | [] |
+| pantry-planner:recipes | 2, ready | [] |
+| pantry-planner:dietary-policy | 3, backlog/blocked | [] |
+| pantry-planner:meal-plan | 4, backlog/blocked | 1,2,3 |
+| pantry-planner:shopping-list | 5, backlog/blocked | 4 |
+
+Issue7 has the distinct workflow-pilot:shared-skill-bootstrap identity. Later cloud
+sync/accounts/shared access/nutrition analytics/mobile UI remain unmaterialized.
+Allergen enforcement versus explicit user choice remains an owner decision, not an
+invented default. Ingredient ReadyPR6 at f95f0cae was separately clean/green with
+11 application tests passed locally; those are not tests on the adoption branch.
+
+## Review and source-suite limits
+
+The session independently reproduced consumer4181927560: force-track/commit a
+schema4 shared skill, update from a newer source changing it, and setup succeeds
+while changing skill/manifest with the old staged blob. Only subsequent check rejects
+tracking. The rewrite agent also reproduced this via public-command regressions.
+Source4181938333 separately identifies canonical staged validation copying nested
+ignore policies from the working tree. Its regressions likewise failed before repair.
+Final review therefore remained failed/pending despite successful supported setup.
+
+The report identified stale tracked-skill titles, a mutable README handoff link and
+placeholder pins in the original source handoff. Runtime pins and later immutable
+evidence-document revisions are distinct identities; old commits are not rewritten.
+
+The workstation's sourcea75c3f2 full107-test run had one JSONDecodeError and two
+OpenSpec skips; the same tracking test passed alone in40.986s. Missing source-local
+node_modules/.bin/openspec explains the explicitly optional integration skips;
+global OpenSpec is not the pinned runner. Full traceback/subprocess output for the
+JSON error was not supplied: root cause remains unresolved, and no tracking assertion
+may be skipped/weakened. Old Ubuntu24.04.5/no-skips evidence is not a Ubuntu26.04
+pass. Repair verification uses prepared source tooling/full history and Ubuntu24.04.
+
+## Acceptance and next action
+
+F14 initial Ubuntu discovery, actual three-skill use and no-chat continuation now
+have independent supplied evidence at these original pins. Preserve it across
+runtime repairs and compare skill hashes before requiring another discovery run.
+Remaining work: safety regressions, committed source/Ubuntu verification, explicit
+consumer repin/fresh-clone/repeat/index proof, actual CI and final semantic review.
+Cloud is deferred; real global-host installation remains optional/unperformed.
+Merge/completed closure, administration and release need separate authorization.
+F14 stays partial and the rewrite change active until required acceptance/review
+and final archive/specification/document checks finish.
