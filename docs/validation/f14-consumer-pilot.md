@@ -1,5 +1,23 @@
 # F14 real consumer pilot
 
+## Latest parent-chain recovery and Issue snapshot checkpoint — 2026-10-05
+
+Source `9f3f1bd61ab017c570df3bc48a7e84a6947a9a7f` passes146/no skips on managed Python3.12.14
+(151.748s) and Ubuntu24.04.5/Python3.12.3 (129.542s), plus strict specs.
+Consumer `f86013562ceb357a23ddba0cf3bde616985b15f3`, Ready PR8/Issue7, pins it.
+Fresh remote clones and the actual installed seventeen-test layout/CI/check/recovery
+suite pass both hosts (59.013s/50.522s); literal Ubuntu installation/repeat passes.
+Review5416864834 at082e225 returned P2s4185701946/4185701969, independently
+reproduced and repaired. Parent inode chains gate writes/restoration and preserve
+changed directories with backups/identity evidence. Malformed Issue/label/state
+shapes return structured exit2 without traceback or snapshot/index writes.
+Current consumer push37333990065/PR37334000006/existing-main metadata37333995187
+and source pin push37333900105/PR37333915276 pass. Repaired-head semantic review
+and archive remain pending. Native Ubuntu catalog/use retains unchanged-skill
+original evidence; Cloud deferred. Actual merge/completed closure/base deployment/
+source PR-contract admin gates remain pending separate authorization.
+See [wider review](wider-boundary-review.md) for exact proof and limitations.
+
 ## Latest source-check compatibility checkpoint — 2026-10-05
 
 Source `9d5489ffa11cf8bbde3f4c569c17a526e5d86c98` passes143/no skips on managed Python3.12.14
