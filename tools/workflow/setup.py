@@ -165,7 +165,7 @@ def setup(args):
             if digest(current_ignore.encode()) != old['gitignore_block_hash']:
                 residuals.append('.gitignore managed block')
             elif not any(shared(name) for name in remaining):
-                changes['.gitignore'] = ignore_text.replace(current_ignore, '', 1).encode()
+                changes['.gitignore'] = ignore_text.replace(current_ignore + ('\n' if current_ignore + '\n' in ignore_text else ''), '', 1).encode()
         mpath = '.workflow/install-manifest.json'
         if residuals:
             updated = {**old, 'files': remaining}
@@ -216,7 +216,7 @@ def setup(args):
             changes['AGENTS.md'] = new_text.encode()
         # Only the verified schema-2 owned block is removed on explicit update.
         # Other root/nested/global ignores are preserved and checked for conflicts.
-        new_ignore = ignore_text.replace(current_ignore, '', 1) if current_ignore else ignore_text
+        new_ignore = ignore_text.replace(current_ignore + ('\n' if current_ignore + '\n' in ignore_text else ''), '', 1) if current_ignore else ignore_text
         effective_ignore_policy(root, assets, proposed=new_ignore)
         if new_ignore != ignore_text:
             changes['.gitignore'] = new_ignore.encode()

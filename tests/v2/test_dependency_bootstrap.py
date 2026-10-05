@@ -137,7 +137,7 @@ class DependencyBootstrapTests(unittest.TestCase):
         self.assertIn('.gitignore', preview['changes'])
         self.assertIn(block, (self.target / '.gitignore').read_text())
         run(*self.args, '--apply')
-        self.assertEqual((self.target / '.gitignore').read_text(), '# Human ignore\n*.local\n\n')
+        self.assertEqual((self.target / '.gitignore').read_text(), '# Human ignore\n*.local\n')
         self.assertEqual((self.target / '.git/index').read_bytes(), index)
         self.assertEqual(cp.read_bytes(), before_config)
         self.assertEqual(project.read_bytes(), before_project)
