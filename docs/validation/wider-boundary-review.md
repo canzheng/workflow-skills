@@ -2,77 +2,70 @@
 
 ## Latest diagnostic-probe checkpoint — 2026-10-05
 
-Source implementation `510fa9a550a4d0c4ee5d5c195d57b8d13bcd99a0` on
-`rewrite/workflow-skills-v2` repairs cyclic/inaccessible catalog handling. Consumer
-`7b31164de734b2f89574f9a572ac1a2c08cf6f11` on `pilot/shared-skill-bootstrap`
-pins that source. Both Ready PRs remain open. F01–F13 remain implemented/verified;
-F14 remains partial pending current review, consumer CI and the remaining Ubuntu
-consumer checks, followed by native archive/final checks. No delivery is claimed.
+Source implementation `dd0abff37c839bac3cdbcf3debbf344c46f2ec73` on `rewrite/workflow-skills-v2`
+implements four new P2 review repairs. These repairs and four added regression
+tests have NOT executed in this workspace; they are implemented, not locally
+verified or delivered. F01–F13 retain their earlier revision-bound implementation
+and verification evidence; F14 remains partial and blocked on current verification
+and semantic review. Active OpenSpec task4 remains unchecked; no archive occurred.
 
-Source review5419855440 at1b244d7 completed2026-10-05T20:01:38.600965Z with
-P2 finding4188193137; its five-minute monitor disarmed. The finding independently
-reproduces before root scanning. Wider preparation controls expose eight old-code
-failures/no errors: explicit self/mutual cycles, a default global cycle, denied
-resolve/stat/read operations, an existing nondirectory, and a public subprocess
-case with only the bad optional root. Healthy duplicate detection remains mandatory.
+Source review at41df6a04 returned findings4188772467,4188772484,4188772494
+and4188772507, completed2026-10-05T21:02:58.663672Z. The five-minute monitor
+observed completion and disarmed. Code inspection confirms pathname-read races,
+blocking catalog entries and unbounded required OpenSpec probes. The reviewer
+reports independent reproductions; this session has NOT executed reproductions
+of these four findings because process creation is exhausted.
 
-The repair resolves each root once inside the guarded scan, checks its kind and
-enumerates it explicitly because glob suppresses root read failures on supported
-Python versions. OSError/RuntimeError produce sanitized per-root warnings while
-other catalogs/tool diagnostics continue. Missing optional roots remain absent;
-symlinks, root-file bytes, project files/index and real globals remain unchanged.
-All28 focused checker tests pass (34.654s). Other public project-target resolution
-already rejects symlinks before resolving; no target/global-policy redesign is added.
-Current/active adoption specs and source/consumer operations match.
-
-| Verification | Actual result |
+| Acceptance concern | Implementation / actual evidence |
 | --- | --- |
-| Full source, managed Python3.12.14 | 176 tests, no skips, 172.098s, OK on sequential retry |
-| Actual Ubuntu24.04.5/CPython3.12.14 source CI | 176 tests, no skips, 182.201s, OK; push37368208933 /PR37368217583 pass |
-| Actual installed consumer, managed runtime | 53 tests, 76.954s, OK on sequential retry |
-| Strict OpenSpec/public spec checker | All5 items pass; ok:true |
-| Managed fresh exact-pin bootstrap/hash/index/offline repeat | Pass |
-| Managed literal source-first adoption/repeat | Both exit0; absent index stays absent |
-| Current Ubuntu container/installed53/fresh/literal reruns | Unperformed: OCI container startup fails |
-| Current consumer push/PR CI | First attempts cancel before steps; exact jobs retried once |
-| Current consumer metadata | Pending at this checkpoint |
+| Markdown replacement or FIFO | Shared no-follow/nonblocking descriptor reader binds every directory and verifies a regular final file before reading; public regression covers symlink, FIFO, ancestor replacement and replacement after open. Authored, unrun. |
+| Unsupported catalog entry | Doctor warns per file and continues healthy catalogs/tools; FIFO, symlink and directory regression has an outer deadline. Authored, unrun. |
+| Legacy ledger / feature substitution | Migration reads both through the bound reader; symlink/FIFO substitutions, private canaries, index preservation and a normal record control are authored, unrun. |
+| Required OpenSpec timeout | Version10s and validation120s bounds return required specs.timeout failures without partial captured output; both real sleeping-executable regressions authored, unrun. |
+| Adjacent read consistency | JSON, integrity, policy and bootstrap content reads share the same regular-file primitive. Platforms lacking required descriptor primitives fail closed. No filesystem lock or atomic whole-repository snapshot is claimed. |
+| Source suite | Expected182 tests (previous178 plus4 new methods), unrun at new implementation. |
+| Previous static-symlink / home repairs | At41df6a04:17 failing-before controls/no harness errors;2 focused pass2.023s;30 checker tests pass35.778s. These do not verify the new bound reader. |
+| Previous full source / installed consumer | Full178 failed86 assertions/13 errors150.543s with fork EAGAIN; installed55 failed55 fixture creations0.054s. Never passed. |
+| Current consumer | Published75ed97dd1030b64e806300686c86dc1ab3101304, pin41df6a04ab04f436f5d5519bc7cc218c8fad6d17; not yet repinned to this repair. |
+| Consumer review | Clear6002831610 completed2026-10-05T21:00:31.346623Z at75ed97dd. Does not review new source bytes. |
+| Current-head GitHub / Ubuntu checks | New source publication triggers checks; results must be read separately. Healthy Ubuntu182/full and actual-installed affected tests, fresh/literal exact-pin and strict specs remain unperformed. |
 
-Initial parallel source runs failed with176 tests/2 failures/106 errors locally
-and176/1 failure/94 errors in Ubuntu; installed53 also failed before completion.
-Streams show fork/maintenance EAGAIN (Resource temporarily unavailable), not proof
-of a code regression. The workspace has32320 zombies adopted by non-reaping PID1
-tail. Sequential managed retries use inherited command-scoped maintenance.auto=false
-and gc.auto=0; no global Git config changes or weakened assertions. Process usage
-remains stable. Even sequential Docker --init/GOMAXPROCS=2 startup fails before
-Ubuntu execution. Earlier Ubuntu175/installed52/fresh/literal proof remains
-revision-bound to fef212d/43a877e4, not a current installed53 pass.
-Ubuntu source CI logs independently establish the normal runner result above.
+At consumer75ed97dd, direct source-owned preview/apply and installed check/doctor/
+offline repeat returned exit0/ok:true (repeat changes:[]), preserving all five skill
+files, configuration and raw index
+`7f482f98d4f35d867565c3813b0a15b9610c6deba14e30a7b73d12e07fe8c063`
+before caller staging manifest/operations only. This is prior-runtime evidence,
+not verification of the new candidate. Consumer tree98f25c18e047b6a1d4e718373696bcff4670d349
+matches the independently reconstructed native commit75ed97dd.
 
-Fresh managed clone of the API-verified native commit materializes11 ignored
-dependencies, matches20 hashes, preserves four narrow ignores/project skill/config/
-files/raw index and repeats offline/no-op. Current source-owned update preserves
-all shared-skill bytes/config/raw index
-`7ec2be1680815a6f095b57f52a265c39037d9e588c3714259612ecc67f818457`
-before caller staging only manifest/operations. Native tree
-`2900cdb41e6a4767da3c2aedcbd4e5ee9ae47b50` equals reviewed local1007f2e2,
-parent43a877e4. Independently hashed native commit and guarded non-force publication
-leave both working trees clean. Existing preservation/diagnostic controls remain.
+The workspace has32344 unreaped zombies, including32127 Git processes; even new
+exec and thread starts fail/hang. No PID1, host daemon, system-limit, authentication
+or global configuration change was made. Source local HEAD last confirmed
+c1361214b6ec4608fc7ba1db1a348b34ea9be8f8 remains a separate unpublished evidence
+commit based on41df6a04; an EOF cleanup attempt has unconfirmed local state.
+New repairs/docs are published through native GitHub Git objects with a guarded
+non-force ref update. Local source has NOT been synchronized or reset; do not
+claim it contains the new published code or is clean.
 
-The earlier consumer43a877e4 review was clear6001890391; its metadata run37365909770
-canceled without steps, and its authorized exact-job retry passed at attempt2.
-Current7b31164d push37368314205/PR37368323231 likewise canceled without steps and
-were each retried once; pending results remain separate from semantic review.
-Native Ubuntu startup discovery and actual three-skill use remain proven at
-9bd23d72/a75c3f2 with unchanged shared hashes. Cloud remains deferred; actual global
-host installation/discovery is unperformed and the historical Ubuntu26 harness
-JSON error remains unexplained. New trusted-base metadata deployment still needs an
-authorized adoption merge; old-base execution does not establish it. Current
-read-only rulesets/negative consumer enforcement proof are retained separately.
-No archive/merge/completed closure/admin/global/authentication/release/branch deletion.
-Next: observe repaired-head reviews and CI, run current Ubuntu consumer verification
-on a healthy workstation/environment, then archive/final-check only when premerge
-acceptance passes. Real merge and valid Issue completion need separate authorization.
+Native Ubuntu startup catalog and actual three-skill use at9bd23d72/a75c3f2 remain
+verified with unchanged shared-skill hashes. Cloud is deferred; real global-host
+use and historical Ubuntu26 invalid-JSON root cause remain unverified. Existing
+source/consumer enforcement readbacks and actual consumer negative enforcement
+proof remain revision-bound evidence. New trusted-base metadata deployment and
+source PR-contract administration remain separate gates.
 
+Next action for a fresh healthy Ubuntu task: fetch the published rewrite head;
+read AGENTS, approved v2 documents and the latest Issue15/PR16 checkpoint; run the
+four focused fault regressions, full182 with pinned OpenSpec1.14.0/no optional
+skips and public strict-spec checks. Repair any failures before adoption. Then
+use the actual source-owned setup at the exact verified implementation pin to
+preview/update consumer75ed97dd, preserve project configuration/skill/index bytes,
+commit only owned changes and repeat installed/fresh/literal checks (expected59
+affected installed tests if the retained runner is used). Publish updated PR8,
+observe actual push/PR/body-event Actions and obtain repaired-head semantic reviews.
+Do not substitute source tests for actual installed bytes. Archive only after
+required premerge acceptance; merge, valid completed closure, administrative
+mutations, release and remote deletion still need separate authorization.
 
 ## Latest source-check compatibility repair — 2026-10-05
 

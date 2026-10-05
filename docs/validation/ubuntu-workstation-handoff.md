@@ -16,23 +16,26 @@ do not repeat the original diagnostic merely because doctor says unprobed.
 
 ## Pinned targets
 
-Source: canzheng/workflow-skills, rewrite/workflow-skills-v2, tested implementation
-`510fa9a550a4d0c4ee5d5c195d57b8d13bcd99a0`. All176 tests/no skips pass on managed runtime and actual Ubuntu24.04.5 GitHub CI;
-complete source suite tested at510fa9a. Installed53/fresh/literal checks pass managed;
-current Ubuntu consumer reruns remain pending because container startup fails.
-Exact CI/review/environment results are recorded in the PR checkpoint.
-Consumer: canzheng/workflow-skills-test, pilot/shared-skill-bootstrap, existing
-[Issue7](https://github.com/canzheng/workflow-skills-test/issues/7) and
-[Ready PR8](https://github.com/canzheng/workflow-skills-test/pull/8). Its explicit
-schema-5 reviewed shared-runtime migration is published at `7b31164de734b2f89574f9a572ac1a2c08cf6f11`,
-pinning source `510fa9a550a4d0c4ee5d5c195d57b8d13bcd99a0`. Current consumer/source Actions and exact-head reviews are recorded in the PR checkpoint.
-Prior consumeradaad276 attempt1 fetch failures and successful attempt2 are retained
-as earlier revision-bound evidence; do not carry their approval to this new repair. Initial native discovery/use at
-previous consumer9bd23d72/sourcea75c3f2 remains verified; all shared hashes are unchanged. Existing main
-and older consumerf6394326 still use tracked schema3; do not confuse that with new
-ignored-dependency acceptance. No merge is needed to test an explicit Ubuntu branch.
+Current source repair candidate: canzheng/workflow-skills,
+rewrite/workflow-skills-v2, implementation `dd0abff37c839bac3cdbcf3debbf344c46f2ec73`.
+Four new review repairs and expected182 tests are authored but unrun because
+the old workspace cannot start processes. Validate this source in a fresh healthy
+Ubuntu checkout before updating any consumer. Read the latest checkpoint below
+for the exact source/consumer distinction and required next verification.
+
+Consumer remains published at `75ed97dd1030b64e806300686c86dc1ab3101304`
+on pilot/shared-skill-bootstrap and pins source
+`41df6a04ab04f436f5d5519bc7cc218c8fad6d17`.
+Its review6002831610 is clear at that head; it has not adopted this new candidate.
+Existing Issue7 and PR8 remain open; no merge or completed closure occurred.
+Initial native Ubuntu discovery/use remains valid with unchanged shared-skill bytes.
 
 ## Fresh Ubuntu checkout command
+
+This frozen command targets the PREVIOUS consumer/runtime, which retains the
+newly reviewed defects. It is historical evidence, not current-candidate acceptance
+or a recommendation to adopt that old pin. First validate the new source candidate,
+then perform a reviewed source-owned consumer update and refresh this command.
 
 Run outside an existing checkout, setting an unused absolute path. This selects
 and verifies the exact consumer revision before bootstrap/agent discovery:
@@ -46,23 +49,23 @@ set +e
   test ! -e "$WF2_CONSUMER_ROOT"
   git clone --branch pilot/shared-skill-bootstrap https://github.com/canzheng/workflow-skills-test.git "$WF2_CONSUMER_ROOT"
   cd "$WF2_CONSUMER_ROOT"
-  test "$(git rev-parse HEAD)" = "7b31164de734b2f89574f9a572ac1a2c08cf6f11"
+  test "$(git rev-parse HEAD)" = "75ed97dd1030b64e806300686c86dc1ab3101304"
   WF2_SOURCE_DIR=$(mktemp -d)
   trap 'python3 -c "import shutil, sys; shutil.rmtree(sys.argv[1])" "$WF2_SOURCE_DIR"' EXIT
   git -C "$WF2_SOURCE_DIR" init --quiet
-  git -C "$WF2_SOURCE_DIR" fetch --no-tags --depth=1 https://github.com/canzheng/workflow-skills.git 510fa9a550a4d0c4ee5d5c195d57b8d13bcd99a0
-  git -C "$WF2_SOURCE_DIR" checkout --detach --quiet 510fa9a550a4d0c4ee5d5c195d57b8d13bcd99a0
+  git -C "$WF2_SOURCE_DIR" fetch --no-tags --depth=1 https://github.com/canzheng/workflow-skills.git 41df6a04ab04f436f5d5519bc7cc218c8fad6d17
+  git -C "$WF2_SOURCE_DIR" checkout --detach --quiet 41df6a04ab04f436f5d5519bc7cc218c8fad6d17
   bash "$WF2_SOURCE_DIR/tools/workflow/environment-setup.sh" "$PWD" canzheng/workflow-skills-test
   python3 .agents/tools/workflow/workflow.py check --repo . --run-local --json
-  python3 .agents/tools/workflow/workflow.py doctor --repo . --expect-revision 7b31164de734b2f89574f9a572ac1a2c08cf6f11 --json
+  python3 .agents/tools/workflow/workflow.py doctor --repo . --expect-revision 75ed97dd1030b64e806300686c86dc1ab3101304 --json
 )
 printf 'Validation exit status: %s\n' "$?"
 ```
 
-The exact source pin for first adoption/global install is:
+The previous frozen source pin (not the new repair candidate) is:
 
 ```sh
-WF2_SOURCE_SHA=510fa9a550a4d0c4ee5d5c195d57b8d13bcd99a0
+WF2_SOURCE_SHA=41df6a04ab04f436f5d5519bc7cc218c8fad6d17
 ```
 
 Fetch it using the source README command. Global installation uses that checked-out
@@ -186,3 +189,70 @@ Return one report (text/Markdown or terminal transcript) with:
 
 Merge→valid Issue-completion observation, additional administration and release
 remain pending separate authorization. Cloud evidence is no longer requested.
+
+## Latest diagnostic-probe checkpoint — 2026-10-05
+
+Source implementation `dd0abff37c839bac3cdbcf3debbf344c46f2ec73` on `rewrite/workflow-skills-v2`
+implements four new P2 review repairs. These repairs and four added regression
+tests have NOT executed in this workspace; they are implemented, not locally
+verified or delivered. F01–F13 retain their earlier revision-bound implementation
+and verification evidence; F14 remains partial and blocked on current verification
+and semantic review. Active OpenSpec task4 remains unchecked; no archive occurred.
+
+Source review at41df6a04 returned findings4188772467,4188772484,4188772494
+and4188772507, completed2026-10-05T21:02:58.663672Z. The five-minute monitor
+observed completion and disarmed. Code inspection confirms pathname-read races,
+blocking catalog entries and unbounded required OpenSpec probes. The reviewer
+reports independent reproductions; this session has NOT executed reproductions
+of these four findings because process creation is exhausted.
+
+| Acceptance concern | Implementation / actual evidence |
+| --- | --- |
+| Markdown replacement or FIFO | Shared no-follow/nonblocking descriptor reader binds every directory and verifies a regular final file before reading; public regression covers symlink, FIFO, ancestor replacement and replacement after open. Authored, unrun. |
+| Unsupported catalog entry | Doctor warns per file and continues healthy catalogs/tools; FIFO, symlink and directory regression has an outer deadline. Authored, unrun. |
+| Legacy ledger / feature substitution | Migration reads both through the bound reader; symlink/FIFO substitutions, private canaries, index preservation and a normal record control are authored, unrun. |
+| Required OpenSpec timeout | Version10s and validation120s bounds return required specs.timeout failures without partial captured output; both real sleeping-executable regressions authored, unrun. |
+| Adjacent read consistency | JSON, integrity, policy and bootstrap content reads share the same regular-file primitive. Platforms lacking required descriptor primitives fail closed. No filesystem lock or atomic whole-repository snapshot is claimed. |
+| Source suite | Expected182 tests (previous178 plus4 new methods), unrun at new implementation. |
+| Previous static-symlink / home repairs | At41df6a04:17 failing-before controls/no harness errors;2 focused pass2.023s;30 checker tests pass35.778s. These do not verify the new bound reader. |
+| Previous full source / installed consumer | Full178 failed86 assertions/13 errors150.543s with fork EAGAIN; installed55 failed55 fixture creations0.054s. Never passed. |
+| Current consumer | Published75ed97dd1030b64e806300686c86dc1ab3101304, pin41df6a04ab04f436f5d5519bc7cc218c8fad6d17; not yet repinned to this repair. |
+| Consumer review | Clear6002831610 completed2026-10-05T21:00:31.346623Z at75ed97dd. Does not review new source bytes. |
+| Current-head GitHub / Ubuntu checks | New source publication triggers checks; results must be read separately. Healthy Ubuntu182/full and actual-installed affected tests, fresh/literal exact-pin and strict specs remain unperformed. |
+
+At consumer75ed97dd, direct source-owned preview/apply and installed check/doctor/
+offline repeat returned exit0/ok:true (repeat changes:[]), preserving all five skill
+files, configuration and raw index
+`7f482f98d4f35d867565c3813b0a15b9610c6deba14e30a7b73d12e07fe8c063`
+before caller staging manifest/operations only. This is prior-runtime evidence,
+not verification of the new candidate. Consumer tree98f25c18e047b6a1d4e718373696bcff4670d349
+matches the independently reconstructed native commit75ed97dd.
+
+The workspace has32344 unreaped zombies, including32127 Git processes; even new
+exec and thread starts fail/hang. No PID1, host daemon, system-limit, authentication
+or global configuration change was made. Source local HEAD last confirmed
+c1361214b6ec4608fc7ba1db1a348b34ea9be8f8 remains a separate unpublished evidence
+commit based on41df6a04; an EOF cleanup attempt has unconfirmed local state.
+New repairs/docs are published through native GitHub Git objects with a guarded
+non-force ref update. Local source has NOT been synchronized or reset; do not
+claim it contains the new published code or is clean.
+
+Native Ubuntu startup catalog and actual three-skill use at9bd23d72/a75c3f2 remain
+verified with unchanged shared-skill hashes. Cloud is deferred; real global-host
+use and historical Ubuntu26 invalid-JSON root cause remain unverified. Existing
+source/consumer enforcement readbacks and actual consumer negative enforcement
+proof remain revision-bound evidence. New trusted-base metadata deployment and
+source PR-contract administration remain separate gates.
+
+Next action for a fresh healthy Ubuntu task: fetch the published rewrite head;
+read AGENTS, approved v2 documents and the latest Issue15/PR16 checkpoint; run the
+four focused fault regressions, full182 with pinned OpenSpec1.14.0/no optional
+skips and public strict-spec checks. Repair any failures before adoption. Then
+use the actual source-owned setup at the exact verified implementation pin to
+preview/update consumer75ed97dd, preserve project configuration/skill/index bytes,
+commit only owned changes and repeat installed/fresh/literal checks (expected59
+affected installed tests if the retained runner is used). Publish updated PR8,
+observe actual push/PR/body-event Actions and obtain repaired-head semantic reviews.
+Do not substitute source tests for actual installed bytes. Archive only after
+required premerge acceptance; merge, valid completed closure, administrative
+mutations, release and remote deletion still need separate authorization.
