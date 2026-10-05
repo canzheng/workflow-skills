@@ -80,10 +80,26 @@ and ignored project-skill collision negatives refused selection while preserving
 user bytes, HEAD and index. This establishes mechanical command behavior, not
 Cloud Install execution, publication persistence or host discovery.
 
-Next action: paste [the handoff Install command](cloud-bootstrap-handoff.md#published-environment-setup-command)
-into the consumer environment, capture actual successful Install output/exit status,
-then publish/apply and run [the mini diagnostic](cloud-bootstrap-handoff.md#mini-diagnostic-task-prompt)
-in a fresh task before manual bootstrap or skill-file reads. Keep the frozen
+The latest supplied Install-only mini diagnostic still reports old main5d055649
+and pin139e66d5, no workflow skills in initial metadata, unavailable Install logs,
+a passing old-bundle check and expected-revision failure. Independent Git reads
+confirm its skill sizes match old tracked files. No recovery ran; preservation
+passed as reported. See [the diagnostic evidence](f14-published-cloud-run.md#latest-install-only-diagnostic-intended-preparation-not-demonstrated).
+A separate Ready PR review's expected-HEAD dirty-manifest acceptance was reproduced
+before repair; the pilot Install now refuses dirty trees before its HEAD condition.
+The new regression exercises the actual documented command, with fixture routing.
+Neither this repair nor marker absence explains the old checkout.
+
+The user reports that the UI exposes no Install execution log/exit. The corrected
+pilot command now saves a separate attempt log and exit-status receipt outside
+Git, with initial/prepared HEAD/pin; the mini diagnostic reads it if available.
+Receipt persistence is to be tested; absence does not establish nonexecution.
+
+Next action: publish/apply [the capturing Install command](cloud-bootstrap-handoff.md#published-environment-setup-command)
+and run [the updated mini diagnostic](cloud-bootstrap-handoff.md#mini-diagnostic-task-prompt)
+in a fresh task before manual bootstrap or skill-file reads. Compare prepared
+HEAD/pin in the receipt with the fresh checkout, and investigate configured host
+cwd/project-root routing separately from shell cwd. Keep the frozen
 consumer SHA/source pin above; Start markers are not required. Record initial
 checkout, session/project root, pin and actual available-skills metadata. Preparation
 must precede host discovery; inspect absent catalog exposure separately if files

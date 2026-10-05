@@ -246,3 +246,37 @@ those gates. Limited main summary reports protection disabled; authoritative adm
 reads denied, enforcement not proven. F14 stays unchecked/change active. Cloud/Ubuntu
 agent-host acceptance and real merge→valid Issue completion/admin mutation remain
 distinct; merges/closure/admin changes require separate authorization.
+
+
+Latest Install-only diagnostic transcript still starts on work/oldmain5d05564919c55f1d4d0c2e1e020ad914252a2979,
+pin139e66d5b43cfbd3821fe098c0119b93aaad4928; old-bundle check passes, expectedfd4 doctor
+fails, no initial workflow metadata or Install output, no recovery; preservation
+passed as reported. Independent old-commit reads confirm schema1 pin and three skill
+sizes. Need saved Install command/publication log/exit before retry; distinguish
+preparation from later checkout replacement and configured host cwd/root routing.
+A separate Ready PR review's expected-HEAD dirty-manifest gap was reproduced in
+Ubuntu and by a failing-before public-command regression; pilot guard now runs before
+HEAD selection. Source-owned generic installer/bundle and consumer/source pins remain
+unchanged. F14 stays unchecked/change active; exact new-head verification/CI/review
+are recorded remotely after testing. No merge/completion/admin mutation authorized.
+
+The user cannot obtain Install log/exit from the UI. The pilot handoff now captures
+attempt stdout/stderr, exit and prepared revisions outside Git; mini reads the
+receipt after initial catalog capture. This is temporary diagnostic evidence;
+receipt persistence, freshness and actual pre-agent discovery are still to test.
+Next: publish/apply the capturing command, then use updated mini without recovery.
+The public-command regression verifies successful and refused attempt receipts,
+user bytes and raw index preservation; no generic distribution/API change or repin.
+
+Additional persistent-artifact feedback is applied as install-info.json with
+timestamp, requested/fetched installer revision, initial/prepared consumer revision,
+actual workflow pin, three-skill assertions and log hash. Both successful and refused
+attempts get diagnostic receipts outside Git, keeping scoped ignores/idempotence.
+The linked Learn page returns CONNECT403 here; lifecycle guarantees are not inferred.
+
+Final capturing command SHA256 b1177ebfb4218ce9bd5e7ac33cf1f3ce628bdcbf57515e628fa74c4e1dcde421:
+all82/no skips and strict specs pass on Cloud and fresh Ubuntu owned-source copy;
+actual consumer clones pass receipt identity/hash, all20 assets, repeat/no-op and
+expected/old-HEAD dirty and ignored-file refusals preserving bytes/raw index/HEAD.
+First read-only bind failed Git ownership; disposable owned copy resolved it without
+global trust changes. Publication persistence/discovery remain separate pending gates.

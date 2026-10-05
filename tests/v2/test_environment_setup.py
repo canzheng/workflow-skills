@@ -1,7 +1,10 @@
 """Exercise the source-owned entrypoint against real consumer Git checkouts."""
+import hashlib
 import json
 import os
 import pathlib
+import re
+import shlex
 import shutil
 import subprocess
 import unittest
@@ -69,6 +72,77 @@ class EnvironmentSetupTests(unittest.TestCase):
         self.execute(script, self.target)
         self.assertEqual((self.target / '.workflow/install-manifest.json').read_bytes(), old_pin)
         self.assertEqual(git(self.target, 'status', '--porcelain'), b'')
+
+    def test_documented_pilot_install_rejects_dirty_manifest_at_expected_head(self):
+        self.execute(self.entrypoint(), self.target)
+        consumer_sha = test_setup.commit(self.target)
+        text = (test_setup.ROOT / 'docs/validation/cloud-bootstrap-handoff.md').read_text()
+        script = text.split('```sh\n', 1)[1].split('```', 1)[0]
+        # Execute the documented command with only fixture routing/pins substituted.
+        for name, value in [('WF2_SOURCE_SHA', self.sha),
+                            ('WF2_INSTALL_EVIDENCE_ROOT', str(self.base / 'install evidence')),
+                            ('WF2_CONSUMER_ROOT', str(self.target)),
+                            ('WF2_CONSUMER_REPOSITORY', 'fixture/consumer'),
+                            ('WF2_EXPECTED_CONSUMER_HEAD', consumer_sha)]:
+            script, count = re.subn('^' + name + '=.*$',
+                                    lambda match: name + '=' + shlex.quote(value),
+                                    script, count=1, flags=re.MULTILINE)
+            self.assertEqual(count, 1)
+        script = script.replace('https://github.com/canzheng/workflow-skills.git',
+                                self.source.as_uri())
+        command = self.base / 'pilot-install.sh'
+        command.write_text(script)
+        r = subprocess.run(['bash', str(command)], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn('WF2_INSTALL_END', r.stdout)
+        self.assertEqual(git(self.target, 'status', '--porcelain'), b'')
+        latest = self.base / 'install evidence/latest'
+        first_receipt = pathlib.Path(latest.read_text().strip())
+        self.assertEqual((first_receipt / 'exit-status').read_text().strip(), '0')
+        self.assertEqual((first_receipt / 'install.log').read_text(), r.stdout)
+        installed = json.loads((first_receipt / 'install-info.json').read_text())
+        self.assertTrue(installed['recorded_at'])
+        self.assertEqual(installed['install_log_sha256'],
+                         hashlib.sha256((first_receipt / 'install.log').read_bytes()).hexdigest())
+        self.assertEqual(installed['exit_status'], 0)
+        self.assertEqual(installed['fetched_entrypoint_revision'], self.sha)
+        self.assertEqual(installed['prepared_consumer_revision'], consumer_sha)
+        self.assertEqual(installed['prepared_workflow_revision'], self.sha)
+        self.assertTrue(installed['expected_skills_present'])
+        self.assertIn('WF2_PREPARED_CONSUMER_HEAD=' + consumer_sha, r.stdout)
+        self.assertIn('WF2_PREPARED_WORKFLOW_PIN=' + self.sha, r.stdout)
+
+        (self.source / 'release-note.md').write_text('Another valid source commit.\n')
+        alternate_pin = test_setup.commit(self.source)
+        manifest_path = self.target / '.workflow/install-manifest.json'
+        manifest = json.loads(manifest_path.read_bytes())
+        manifest['source_revision'] = alternate_pin
+        manifest_path.write_text(json.dumps(manifest, indent=2) + '\n')
+        # A read-only refusal must not refresh cached index stats either.
+        policy = self.target / 'AGENTS.md'
+        stat = policy.stat()
+        os.utime(policy, ns=(stat.st_atime_ns, stat.st_mtime_ns + 2_000_000_000))
+        before = {n: (self.target / n).read_bytes()
+                  for n in git(self.target, 'ls-files', '-z').decode().split('\0') if n}
+        index = (self.target / '.git/index').read_bytes()
+        r = subprocess.run(['bash', str(command)], capture_output=True, text=True)
+        self.assertNotEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn('Consumer has changes', r.stdout + r.stderr)
+        self.assertNotIn('WF2_INSTALL_END', r.stdout)
+        self.assertNotIn('From ', r.stdout + r.stderr)
+        failed_receipt = pathlib.Path(latest.read_text().strip())
+        self.assertNotEqual(failed_receipt, first_receipt)
+        self.assertEqual(int((failed_receipt / 'exit-status').read_text()), r.returncode)
+        self.assertEqual((failed_receipt / 'install.log').read_text(), r.stdout)
+        refused = json.loads((failed_receipt / 'install-info.json').read_text())
+        self.assertEqual(refused['exit_status'], r.returncode)
+        self.assertIsNone(refused['fetched_entrypoint_revision'])
+        self.assertIsNone(refused['prepared_consumer_revision'])
+        self.assertIsNone(refused['prepared_workflow_revision'])
+        self.assertFalse(refused['expected_skills_present'])
+        self.assertEqual(git(self.target, 'rev-parse', 'HEAD').decode().strip(), consumer_sha)
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        self.assertEqual(before, {n: (self.target / n).read_bytes() for n in before})
 
     def test_rerun_rejects_wrong_repository_identity_before_dependency_writes(self):
         script = self.entrypoint()

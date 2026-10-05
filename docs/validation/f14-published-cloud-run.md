@@ -8,6 +8,90 @@ temporary evidence files are on the other task's machine and have not been obtai
 here; quoted local results below are supported by the supplied transcript, rather
 than a new execution in this checkout.
 
+## Latest Install-only diagnostic: intended preparation not demonstrated
+
+The user supplied the full 9,994-byte `Pasted text.txt` transcript for the mini
+diagnostic, SHA256
+`e294da110c5ca3364f86f8eb39f3f607fe44b7ce0efafe27ea7c3de5c4dd6370`.
+No fresh-task link, raw command results or environment publication logs accompany
+this attachment. These task outcomes are transcript-reported, not rerun here:
+
+- Initial/final consumer branch `work`, HEAD
+  `5d05564919c55f1d4d0c2e1e020ad914252a2979`, tracked source pin
+  `139e66d5b43cfbd3821fe098c0119b93aaad4928`; both differ from fd4/b1.
+- Session cwd `/workspace`; validation cwd/Git root
+  `/workspace/workflow-skills-test`. The configured host project root is not
+  established by the shell cwd or by running commands in the repository.
+- Available metadata reports55 cloud skills, zero executor skills and none of the
+  three workflow skills in the session's available-skills catalog. Their files exist.
+- `check --repo . --run-local --json` exited0/ok:true, validating the old bundle.
+  `doctor --expect-revision fd4bf175e7b2ea22439511fdfef872ce8bc7c743 --json`
+  exited1/ok:false with target.mismatch. Discovery is unprobed by doctor.
+- No Install output/exit or markers were available. No recovery, bootstrap, Start,
+  branch change or application work ran. Git stayed clean, staged/unstaged diffs
+  empty; non-Git bytes and index reportedly unchanged, index SHA256
+  `4c38b7e1478dd4f1a191e2be4a1d78a47f5699a5a11fe67266a4b875d81d4805`.
+
+Independent canonical-object reads of the old commit confirm its schema1 pin and
+all three reported skill sizes: deliver4,842/design5,501/risk1,754 bytes. These are
+old tracked skill files, not proof that the new ignored dependencies were prepared.
+A repository marker search cannot establish whether a host-owned Install ran.
+The report cannot distinguish nonexecution, failure, stale published configuration
+or later checkout replacement; it does not establish a network/authentication cause.
+Public Codex source7f892275 describes ancestor-based repo roots, making host cwd/root
+routing a separate lead when shell cwd is the consumer's parent. That snapshot does
+not prove the deployed Cloud implementation or a supported discovery refresh.
+
+The user subsequently reported that the environment UI exposes no Install execution
+log or exit status. The handoff therefore now captures each attempt's stdout/stderr,
+exit status and initial/prepared HEAD/pin outside the checkout, under
+`/workspace/.wf2-install-evidence/workflow-skills-test/`. The mini diagnostic reads
+`latest` and its referenced structured `install-info.json`, `install.log` and
+`exit-status` after initial catalog capture. The stronger receipt includes timestamp,
+requested/fetched installer revision, initial/prepared consumer revision, actual
+prepared workflow pin, all-three-skill presence assertions and log SHA256.
+These are temporary diagnostic artifacts, not project policy, another backlog or
+an installer. No tracked files/index or global skills/configuration are changed.
+Receipt persistence must itself be tested; missing/stale receipts are inconclusive.
+
+Next: publish/apply the capturing Install command and run the updated mini diagnostic.
+If the receipt shows successful fd4/b1 preparation, compare that with fresh-task
+checkout replacement/order. Investigate configured host cwd/project-root/catalog
+routing separately. Start remains optional; no global installation, skill relocation
+or distribution redesign is inferred.
+
+The Ready PR review also found an independent pilot-command dirty-tree gap at
+6b25df4: at expected HEAD, a modified schema-valid manifest pin was accepted and
+WF2_INSTALL_END printed. A real Ubuntu run reproduced it, as did a failing-before
+public-command regression. The handoff now checks cleanliness before the HEAD
+condition, including already-correct HEAD. Git status runs with optional locks
+disabled: the full regression also exposed index-stat refresh during refusal, and
+now forces that condition while preserving the raw index assertion. This preserves
+refusal boundaries; it does not explain the old checkout in this diagnostic. Exact repair verification
+and new-head CI/review are recorded in Issue15/PR16 after testing/publication.
+Repair/capture verification: final Install block SHA256
+`b1177ebfb4218ce9bd5e7ac33cf1f3ce628bdcbf57515e628fa74c4e1dcde421`.
+All82 tests/no skips and strict current/delta OpenSpec checks pass on managed Cloud
+and a fresh Ubuntu24.04.5 container using an owned copy of the tested source content
+(Python3.12.3, Git2.43.0, Node24.19.0). The initial read-only source bind failed Git
+ownership validation; copying into the disposable container fixed test preparation,
+without a global safe.directory exception or weakened assertions. Actual consumer
+clones execute the final documented capturing command: pinned source fetch, all20
+hashes, successful receipt identity/hash, repeat/no-op, expected-HEAD dirty pin,
+old-HEAD dirty checkout and ignored project-skill collision all pass. Refused
+attempts preserve user bytes/raw index/HEAD and write accurate failure receipts.
+These prove runtime behavior, not publication persistence or initial host discovery.
+No consumer/source dependency repin or generic installer/API change was needed.
+F14 and its OpenSpec change remain incomplete/active.
+
+The user's additional feedback links
+https://learn.chatgpt.com/docs/environments/cloud-environments and recommends a
+published-filesystem marker. This task's direct request to that page returned
+proxy CONNECT403, so its capture/refresh lifecycle claims remain unverified here.
+The receipt applies the marker principle while avoiding an untracked `.agents/`
+file that would dirty the adopted consumer and break its repeatable clean guard.
+It does not weaken discovery/catalog acceptance or infer automatic hook execution.
+
 ## Second fresh task: automatic startup still unverified
 
 The user supplied `report.txt`, `remote-snapshots.json`, `github-evidence.json`,
