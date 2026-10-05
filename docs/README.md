@@ -30,3 +30,5 @@ reachable through the recorded baseline in Git, not copied into the source head.
 - [Ubuntu workstation handoff](validation/ubuntu-workstation-handoff.md): required first-release setup, repository-root launch and fresh-session acceptance.
 - [Historical Cloud handoff](validation/cloud-bootstrap-handoff.md): deferred setup/discovery experiment; not an F14 release gate.
 - [Published Cloud run evidence](validation/f14-published-cloud-run.md): revision mismatch, successful recovery, discovery limits and next preparation diagnosis.
+
+- [Ubuntu workstation session evidence](validation/ubuntu-workstation-session.md): actual initial discovery/use, index proof, backlog reconciliation and reviewed runtime repair.

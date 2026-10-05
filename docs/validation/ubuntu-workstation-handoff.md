@@ -6,7 +6,7 @@ ignored exact-pin dependencies; the source's authored skills stay tracked. Optio
 explicit global installation is separate from repo-local adoption.
 
 The user's [Ubuntu workstation bootstrap report](ubuntu-workstation-bootstrap.md)
-now passes installation/check/repeatability at the pinned consumer revision on
+passed installation/check/repeatability at original consumer9bd23d72/sourcea75c3f2 on
 Ubuntu26.04/Python3.13.13/codex-cli0.160.0. The subsequent
 [independent session](ubuntu-workstation-session.md) supplies initial native
 discovery, actual three-skill use and no-chat continuation at the recorded pins.
@@ -16,14 +16,15 @@ do not repeat the original diagnostic merely because doctor says unprobed.
 ## Pinned targets
 
 Source: canzheng/workflow-skills, rewrite/workflow-skills-v2, tested implementation
-`a75c3f20e5f4032568b1d1a5cb17d001fc781918`. All107 tests/no skips and strict specs pass on Ubuntu24.04.5
-and managed runtime; source push37280549959/PR37280555919 pass.
+`b5b8da40eef689852bdc3d7dfd644eeca4e878e8`. All112 tests/no skips and strict specs pass on Ubuntu24.04.5
+and managed runtime; source push37295605641/PR37295615153 pass.
 Consumer: canzheng/workflow-skills-test, pilot/shared-skill-bootstrap, existing
 [Issue7](https://github.com/canzheng/workflow-skills-test/issues/7) and
 [Ready PR8](https://github.com/canzheng/workflow-skills-test/pull/8). Its explicit
-schema-4 migration is published at `9bd23d72dc24a741d669c1ea92532f8bf337aa42`,
-pinning source `a75c3f20e5f4032568b1d1a5cb17d001fc781918`. Consumer push37280700304,
-PR37280704952 and metadata37280702909 all pass. Existing main
+schema-4 reviewed repair is published at `fd49a238121b0c0bc54754fb79f792f290d880ff`,
+pinning source `b5b8da40eef689852bdc3d7dfd644eeca4e878e8`. Consumer push37295787146,
+PR37295793465 and metadata37295789815 all pass. Initial native discovery/use at
+previous consumer9bd23d72/sourcea75c3f2 remains verified; all shared hashes are unchanged. Existing main
 and older consumerf6394326 still use tracked schema3; do not confuse that with new
 ignored-dependency acceptance. No merge is needed to test an explicit Ubuntu branch.
 
@@ -41,10 +42,10 @@ set +e
   test ! -e "$WF2_CONSUMER_ROOT"
   git clone --branch pilot/shared-skill-bootstrap https://github.com/canzheng/workflow-skills-test.git "$WF2_CONSUMER_ROOT"
   cd "$WF2_CONSUMER_ROOT"
-  test "$(git rev-parse HEAD)" = "9bd23d72dc24a741d669c1ea92532f8bf337aa42"
+  test "$(git rev-parse HEAD)" = "fd49a238121b0c0bc54754fb79f792f290d880ff"
   python3 tools/workflow/workflow.py bootstrap --repo . --apply --json
   python3 tools/workflow/workflow.py check --repo . --run-local --json
-  python3 tools/workflow/workflow.py doctor --repo . --expect-revision 9bd23d72dc24a741d669c1ea92532f8bf337aa42 --json
+  python3 tools/workflow/workflow.py doctor --repo . --expect-revision fd49a238121b0c0bc54754fb79f792f290d880ff --json
 )
 printf 'Validation exit status: %s\n' "$?"
 ```
@@ -52,7 +53,7 @@ printf 'Validation exit status: %s\n' "$?"
 The exact source pin for first adoption/global install is:
 
 ```sh
-WF2_SOURCE_SHA=a75c3f20e5f4032568b1d1a5cb17d001fc781918
+WF2_SOURCE_SHA=b5b8da40eef689852bdc3d7dfd644eeca4e878e8
 ```
 
 Fetch it using the source README command. Global installation uses that checked-out
@@ -105,6 +106,11 @@ Launch `codex` from that repository root after bootstrap. A catalog probe can sh
 recognition; it does not substitute for this fresh agent session and actual use.
 
 ## Fresh Ubuntu task prompt
+
+Original discovery/use is already verified. For the repaired runtime, use this
+only when affected consumer checks or independent review need a fresh session;
+do not demand another discovery test for byte-identical skills. Source/consumer
+runtime evidence is recorded above; final PR review remains the next gate.
 
 ```text
 Validate WF2-F14 in this Ubuntu checkout. Read host/repository instructions and

@@ -35,6 +35,12 @@ tests/v2 is the required suite. Old root tests and skills/_workflow/tests are
 retired, with disposition and ported safety outcomes documented in the migration
 report. They are preserved in Git, not silently counted as v2 passes.
 
+The user's Ubuntu26.04/Python3.13.13/codex-cli0.160.0 workstation separately passed
+consumer bootstrap/checks, native discovery and actual skill use. Its source-suite
+run reported an intermittent invalid-JSON helper error and two absent-pinned-tool
+OpenSpec skips; it is not a full source-suite pass on Ubuntu26.04. The prepared
+Ubuntu24.04.5 repair run passes112/no skips. See [session evidence](validation/ubuntu-workstation-session.md).
+
 ## Optional Cloud preparation
 Use the current host environment preparation UI to run the three commands above.
 At task start verify branch/SHA, dependency definitions and installed versions;

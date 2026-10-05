@@ -448,3 +448,22 @@ Non-UTF-8 reviewer finding4181357146 reproduced then repaired; public both-stora
 regression preserves bytes/index, thread resolved. Required fresh Ubuntu agent use
 and final review remain pending; Cloud deferred, real merge/completion/admin/release
 requires separate authority. Next: user workstation run from ubuntu-workstation-handoff.
+
+
+## Actual Ubuntu agent acceptance and review repair — 2026-10-05
+
+Independent user session at consumer9bd23d72/sourcea75c3f2 on Ubuntu26.04/Python3.13/
+codex-cli0.160 supplies native initial3-skill catalog, actual delivery/risk/backlog
+use and no-chat continuation. Prepared/fresh index hashes unchanged, five MVP
+identities/phases/dependencies reconcile without writes/default invention.
+Two Ready-PR findings independently reproduced: consumer4181927560 setup mutation
+before schema4 tracking rejection; source4181938333 staged nested ignore policies
+read from working tree. b5b8da40eef689852bdc3d7dfd644eeca4e878e8 fixes both;112/no skips
+and strict specs pass runtime/Ubuntu24.04.5, source actual push/PR pass. Consumer
+fd49a238121b0c0bc54754fb79f792f290d880ff pins it, preserves policy/project/index and
+unchanged shared hashes; actual push/PR/metadata/fresh bootstrap/index/negative
+proof pass. User source-suite intermittent JSON error remains unreproduced; helper
+now preserves command/streams for diagnosis; no assertion weakened/skipped.
+Documentation/immutable consumer links and stale remote titles are reconciled;
+final Ready-head review and final archive/spec/docs acceptance are next. F14 remains
+unchecked until those complete; no Cloud/global/merge/closure/admin/release mutation.

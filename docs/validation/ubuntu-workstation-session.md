@@ -96,8 +96,10 @@ evidence-document revisions are distinct identities; old commits are not rewritt
 The workstation's sourcea75c3f2 full107-test run had one JSONDecodeError and two
 OpenSpec skips; the same tracking test passed alone in40.986s. Missing source-local
 node_modules/.bin/openspec explains the explicitly optional integration skips;
-global OpenSpec is not the pinned runner. Full traceback/subprocess output for the
-JSON error was not supplied: root cause remains unresolved, and no tracking assertion
+global OpenSpec is not the pinned runner. The user later supplied the outer traceback: expected exit1 with invalid JSON
+at the docs/workflow/README.md subtest; the command identity and inner streams
+were discarded by the helper and cannot be recovered. Invalid JSON does not
+necessarily mean empty stdout. Root cause remains unresolved, and no tracking assertion
 may be skipped/weakened. Old Ubuntu24.04.5/no-skips evidence is not a Ubuntu26.04
 pass. Repair verification uses prepared source tooling/full history and Ubuntu24.04.
 
@@ -112,3 +114,34 @@ Cloud is deferred; real global-host installation remains optional/unperformed.
 Merge/completed closure, administration and release need separate authorization.
 F14 stays partial and the rewrite change active until required acceptance/review
 and final archive/specification/document checks finish.
+
+## Independently verified repair checkpoint
+
+Source executable b5b8da40eef689852bdc3d7dfd644eeca4e878e8 passes all112 tests/no
+skips on managed runtime and Ubuntu24.04.5, with strict current/delta specs. New
+regressions cover staged and committed force-tracked setup updates, five nested
+index-only ignore policies, new index-only project skills, valid differing policies
+and index-only symlink modes, preserving the original raw index/file snapshots.
+Before repair the initial three regressions produced8 failures plus one cascading
+error after unsafe apply. An uncommitted full-suite attempt failed two real-source
+pin comparisons; after committing runtime assets the same strict suite passes.
+Those required canonical-pin checks were retained, not relaxed.
+
+Actual source push37295605641/PR37295615153 succeeded. Consumer
+fd49a238121b0c0bc54754fb79f792f290d880ff pins b5b8da4; its reviewed tree
+9174299d5b8324a4533febffa5bdbf2b665a4df2 is identical to original own local
+5043fcdd5ba4baa2a516eda0e7848551fec9a5ef, with parent9bd23d72 retained.
+Source-owned setup preserved index/config/ignore/project skill, and publication was
+non-force/guarded; original local commit remains in reflog. All four shared hashes
+above are unchanged. Actual push37295787146, PR37295793465 and metadata37295789815
+succeeded. Fresh actual remote clones on runtime and Ubuntu bootstrap4 exact files,
+match20 hashes, repeat offline/no-op and preserve tracked/index bytes. Installed
+setup rejects force-tracked shared files and installed check/doctor/bootstrap reject
+three staged-only nested policy probes without mutation.
+
+The test helper now preserves command/exit/stdout/stderr on malformed JSON and still
+fails the original assertion; a bounded diagnostic probe verifies that output.
+This improves future diagnosis, not a claimed fix for the unreproduced workstation
+error. Final semantic review on the repaired Ready heads and final archive/checks
+remain pending. Current handoff/checkpoints replace earlier placeholder/pending
+wording; no repeated Cloud investigation or global mutation is needed.

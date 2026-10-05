@@ -16,10 +16,14 @@ import workflow
 
 
 def run(*args, expect=0):
-    r = subprocess.run([sys.executable, str(TOOLS / 'workflow.py'), *map(str, args), '--json'], capture_output=True, text=True)
+    command = [sys.executable, str(TOOLS / 'workflow.py'), *map(str, args), '--json']
+    r = subprocess.run(command, capture_output=True, text=True)
     if r.returncode != expect:
-        raise AssertionError((r.returncode, r.stdout, r.stderr))
-    return json.loads(r.stdout)
+        raise AssertionError((command, r.returncode, r.stdout, r.stderr))
+    try:
+        return json.loads(r.stdout)
+    except json.JSONDecodeError as exc:
+        raise AssertionError(('CLI returned invalid JSON', command, r.returncode, r.stdout, r.stderr)) from exc
 
 
 def init(root):

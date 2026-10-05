@@ -1,5 +1,39 @@
 # F14 real consumer pilot
 
+## Ubuntu agent acceptance and reviewed repair — 2026-10-05
+
+The [independent workstation session](ubuntu-workstation-session.md) proves native
+initial discovery of all3 repo-local v2 skills before explicit reads, actual delivery/
+risk/backlog use and no-chat continuation at consumer9bd23d72/sourcea75c3f2 on
+Ubuntu26.04/Python3.13.13/codex-cli0.160.0. Prepared/fresh-clone raw-index hashes
+match before/after; the five Pantry MVP identities/dependencies/phases reconcile
+without duplicates, new Issues, invented dietary policy or application dispatch.
+The live Issue collection independently confirms those identities/dependencies.
+Doctor's unprobed host field is not a contradiction of the native startup catalog.
+
+Source runtime repair `b5b8da40eef689852bdc3d7dfd644eeca4e878e8` independently fixes
+consumer4181927560 (schema4 setup checks dependency/index policy before writes) and
+source4181938333 (nested staged policies/project paths come from canonical index).
+All112/no skips and strict specs pass on runtime/Ubuntu24.04.5; source actual
+push37295605641/PR37295615153 pass. Consumer `fd49a238121b0c0bc54754fb79f792f290d880ff`
+pins the repair, preserves project configuration/ignore/index, and all four shared
+hashes remain unchanged from the successful workstation session. Fresh actual
+runtime/Ubuntu clones pass exact materialization/all20 hashes/repeat/index proof and
+installed force-tracked-setup/staged-nested-policy negatives. Consumer actual
+push37295787146/PR37295793465/metadata37295789815 pass.
+
+The workstation's one intermittent source-suite JSON error remains unreproduced;
+its outer traceback identifies expected exit1/invalid stdout JSON but not command
+or inner streams. The helper now retains those streams instead of discarding them.
+Two OpenSpec skips reflect absent source-local pinned tooling, not a reported pass;
+prepared source/Ubuntu runs above have no skips. Original107 evidence retains its
+own environment/revision. Current-head final independent semantic review and final
+rewrite archive/spec/docs verification remain pending; F14 stays partial. Cloud is
+deferred. Merge/completed closure/admin/release need separate authorization.
+
+Earlier dated evidence below retains its original revision and pending state;
+this checkpoint supersedes earlier pending Ubuntu discovery/use wording.
+
 ## Actual user Ubuntu bootstrap — 2026-10-05
 
 [Workstation evidence](ubuntu-workstation-bootstrap.md) now verifies first/repeat
