@@ -27,7 +27,9 @@ It is provenance, not task state. Only these anchored root rules are added:
 Project skills/tools remain trackable. Never ignore all of .agents or force-add shared
 files around this policy. Existing unrelated rules/config/skills are preserved.
 Modified managed bytes or instruction/ignore blocks, unmanaged collisions, unsafe
-paths and symlinks conflict before writes. Multi-file apply stages backups and
+paths and symlinks conflict before writes. Initial adoption also rejects destinations
+owned by the Git index or HEAD, including deleted working copies and deleted policy
+files; it never recreates an unrelated deletion. Multi-file apply stages backups and
 restores only unchanged installer writes on failure. Concurrent edits, deletions,
 permission changes or symlink replacements are preserved and reported as recoverable
 residuals with original backups. Newly created directories are removed only when
@@ -78,7 +80,9 @@ blocks must agree with regular files/no merge stages; good working bytes cannot 
 broken staged content. Applicable nested ignore rules and new project-skill paths
 come from the same index snapshot, never from restored/missing working-tree copies.
 Valid differing project rules are preserved. Shared files must be absent from the index. Checks preserve
-both snapshots and never repair/stage. Initial completely unstaged adoption is
+both snapshots and never repair/stage. Newly staged policy/config or newly introduced managed routing/ignore blocks
+count as adoption and require the complete commit candidate. Pre-existing human
+policy alone does not. Initial completely unstaged adoption is
 reviewable only with trackable project files; commit it before host acceptance.
 
 ## Bootstrap before Ubuntu Codex startup

@@ -131,6 +131,11 @@ provenance, not task state or its own content hash.
 - **WHEN** a managed file has local changes or the target uses a symlink or missing Git root
 - **THEN** update fails without silently overwriting files or selecting another checkout
 
+#### Scenario: Initial adoption preserves indexed deletions
+- **WHEN** a project asset or policy destination is owned by the index or HEAD but absent from the worktree
+- **THEN** preview and apply reject before writing and preserve all files and the raw index
+- **AND** removing the cached path alone does not authorize replacing a committed deletion
+
 #### Scenario: Apply is interrupted
 - **WHEN** a replacement fails during apply
 - **THEN** original bytes/modes are restored or exact recoverable residuals reported

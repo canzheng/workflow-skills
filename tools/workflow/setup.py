@@ -10,7 +10,7 @@ import tempfile
 from core import (Conflict, Invalid, START, END, SKILLS, CI_ASSETS, IGNORE_START, IGNORE_END,
                   SOURCE_URL, REQUIRED_ASSETS, block, config, digest, git, ignore_block, load, manifest,
                   owned, repository, safe, shared, shared_files, source_url, effective_ignore_policy, valid_bundle_version,
-                  dependency_policy, relative, untracked_shared_policy, dependency, dependency_files, required_assets, runtime_prefix)
+                  dependency_policy, relative, untracked_shared_policy, PROJECT_FILES, head_revision, dependency, dependency_files, required_assets, runtime_prefix)
 
 
 def source_bundle(source, revision):
@@ -213,6 +213,14 @@ def transaction(root, changes, fail_after=None):
 
 def setup(args):
     root = repository(args.target)
+    indexed = set(os.fsdecode(git(root, 'ls-files', '--cached', '-z')).split('\0')) - {''}
+    committed = (set(os.fsdecode(git(root, 'ls-tree', '-r', '--name-only', '-z', 'HEAD')).split('\0')) - {''}
+                 if head_revision(root) else set())
+    index_owned = indexed | committed
+    if not args.uninstall:
+        for name in PROJECT_FILES | {'.gitignore'}:
+            if name in index_owned and not safe(root, name).exists():
+                raise Conflict('Indexed project policy deletion preserved: ' + name)
     old = manifest(root)
     agents = safe(root, 'AGENTS.md')
     text = agents.read_text() if agents.exists() else ''
@@ -288,8 +296,8 @@ def setup(args):
                     changes[name] = None
         for name, data in assets.items():
             p = safe(root, name)
-            if p.exists() and (not old or name not in old['files']):
-                raise Conflict('Unmanaged target collision: ' + name)
+            if (p.exists() or name in index_owned) and (not old or name not in old['files']):
+                raise Conflict('Unmanaged indexed/working target collision: ' + name)
             if not p.exists() or p.read_bytes() != data:
                 changes[name] = data
         ignored_dependency = args.skill_storage == 'ignored'

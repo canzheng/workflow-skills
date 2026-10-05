@@ -38,7 +38,7 @@ jobs:
               subprocess.run(['git', '-C', str(source), 'checkout', '--detach', '--quiet', revision], check=True)
               checker = source / 'tools/workflow/workflow.py'
           with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as output:
-              output.write('WF2_CHECKER=' + str(checker) + '\n')
+              print('WF2_CHECKER=' + str(checker), file=output)
           PYCODE
       # Trusted pinned code reads the event and head Git blobs as data only.
       - run: python3 "$WF2_CHECKER" check --repo . --pr-json "$GITHUB_EVENT_PATH" --metadata-only --json

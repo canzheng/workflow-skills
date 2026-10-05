@@ -154,7 +154,7 @@ class IgnoredDependencyTests(unittest.TestCase):
 
     def test_newly_staged_initial_policy_requires_complete_adoption(self):
         for name in ['AGENTS.md', '.workflow/config.json', '.gitignore']:
-            for existing in (False, True) if name == 'AGENTS.md' else (False,):
+            for existing in (False, True) if name in ('AGENTS.md', '.gitignore') else (False,):
                 with self.subTest(path=name, preexisting=existing):
                     self.target = self.base / ('initial-' + name.replace('/', '-') + str(existing))
                     test_setup.init(self.target)
@@ -200,6 +200,60 @@ class IgnoredDependencyTests(unittest.TestCase):
                 if extra.exists():
                     extra.unlink()
                 p.write_bytes(original)
+
+    def test_fresh_setup_preserves_all_index_owned_deletions(self):
+        from core import PROJECT_FILES
+        assets = json.loads((self.source / '.workflow/bundle.json').read_text())['assets'].values()
+        names = sorted({name for name in assets if not shared(name)
+                        and not name.startswith('.agents/tools/workflow/')} | PROJECT_FILES | {'.gitignore'})
+        for i, name in enumerate(names):
+            for state in ['staged', 'committed', 'removed-index']:
+                with self.subTest(path=name, state=state):
+                    self.target = self.base / ('deleted-owned-' + str(i) + '-' + state)
+                    test_setup.init(self.target)
+                    (self.target / 'baseline').write_text('Human baseline\n')
+                    commit(self.target)
+                    p = self.target / name
+                    p.parent.mkdir(parents=True, exist_ok=True)
+                    p.write_bytes(b'Human indexed content\n')
+                    git(self.target, 'add', '--', name)
+                    if state != 'staged':
+                        git(self.target, 'commit', '-qm', 'Fixture existing owned destination')
+                    if state == 'removed-index':
+                        git(self.target, 'rm', '--cached', '--', name)
+                    p.unlink()
+                    before = self.snapshot()
+                    args = self.args[:-2]
+                    args[args.index('--target') + 1] = self.target
+                    for flags in [[], ['--apply']]:
+                        with self.subTest(flags=flags):
+                            report = run(*args, *flags, expect=1)
+                            self.assertIn('indexed', json.dumps(report).lower())
+                            self.assertEqual(self.snapshot(), before)
+
+    def test_project_tools_remain_trackable_in_working_and_staged_policy(self):
+        self.ignored_adopt()
+        name = '.agents/tools/project-check/check.py'
+        p = self.target / name
+        p.parent.mkdir(parents=True)
+        p.write_bytes(b'Project-owned tool\n')
+        commit(self.target)
+        policy = self.target / '.agents/tools/project-check/.gitignore'
+        policy.write_bytes(b'*\n')
+        before = self.snapshot()
+        for command in ['bootstrap', 'check', 'doctor']:
+            report = run(command, '--repo', self.target, expect=1)
+            self.assertIn('skill/tool path is ignored', json.dumps(report))
+            self.assertEqual(self.snapshot(), before)
+        git(self.target, 'add', '-f', '--', str(policy.relative_to(self.target)))
+        policy.unlink()
+        before = self.snapshot()
+        for command in ['bootstrap', 'check', 'doctor']:
+            report = run(command, '--repo', self.target, expect=1)
+            self.assertIn('Staged workflow', json.dumps(report))
+            self.assertEqual(self.snapshot(), before)
+        git(self.target, 'restore', '--staged', '--', str(policy.relative_to(self.target)))
+        run('check', '--repo', self.target)
 
     def test_setup_update_rejects_tracked_ignored_dependency_before_writes(self):
         self.assert_rejected_setup_update(committed=False)

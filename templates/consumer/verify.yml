@@ -38,7 +38,7 @@ jobs:
               subprocess.run(['git', '-C', str(source), 'checkout', '--detach', '--quiet', revision], check=True)
               checker = source / 'tools/workflow/workflow.py'
           with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as output:
-              output.write('WF2_CHECKER=' + str(checker) + '\n')
+              print('WF2_CHECKER=' + str(checker), file=output)
           PYCODE
       - run: python3 "$WF2_CHECKER" bootstrap --repo . --apply --json
       - run: python3 .agents/tools/workflow/workflow.py check --repo . --run-local --json > verification.json

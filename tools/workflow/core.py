@@ -311,27 +311,30 @@ def staged_installation(root):
 def effective_ignore_policy(root, names, proposed=None, ignored_shared=False, ignored_runtime=False,
                             staged_paths=None, read_staged=None):
     """Read Git's effective policy, including nested/global/info rules, before writes."""
-    skills_root = safe(root, '.agents/skills')
     projects = {'.agents/skills/workflow-project-trackability-probe/SKILL.md',
                 '.agents/tools/workflow-project-trackability-probe.py'}
     prefix = runtime_prefix(names)
+    def managed(name):
+        return shared(name) or shared(name + '/') or name.startswith(prefix) or (name + '/').startswith(prefix)
     if staged_paths is None:
-        for p in skills_root.rglob('*') if skills_root.exists() else ():
-            name = p.relative_to(root).as_posix()
-            if shared(name) or shared(name + '/'):
-                continue
-            safe(root, name)
-            if p.is_file():
-                projects.add(name)
-            elif p.is_dir():
-                projects.add(name + '/workflow-project-trackability-probe.md')
+        for namespace in ('.agents/skills', '.agents/tools'):
+            folder = safe(root, namespace)
+            for p in folder.rglob('*') if folder.exists() else ():
+                name = p.relative_to(root).as_posix()
+                if managed(name):
+                    continue
+                safe(root, name)
+                if p.is_file():
+                    projects.add(name)
+                elif p.is_dir():
+                    projects.add(name + '/workflow-project-trackability-probe.md')
     else:
         for name in staged_paths:
-            if name.startswith('.agents/skills/') and not shared(name):
+            if name.startswith(('.agents/skills/', '.agents/tools/')) and not managed(name):
                 relative(name)
                 projects.add(name)
                 for parent in pathlib.PurePosixPath(name).parents:
-                    if str(parent) == '.agents/skills':
+                    if str(parent) in ('.agents/skills', '.agents/tools'):
                         break
                     projects.add((parent / 'workflow-project-trackability-probe.md').as_posix())
     dependency = {name for name in names if shared(name) and ignored_shared or name.startswith(prefix) and ignored_runtime}
@@ -361,7 +364,7 @@ def effective_ignore_policy(root, names, proposed=None, ignored_shared=False, ig
         if dependency - ignored:
             raise Conflict('Shared dependency is not ignored: ' + sorted(dependency - ignored)[0])
         if projects & ignored:
-            raise Conflict('Project-specific skill path is ignored; narrow project ignore policy: ' + sorted(projects & ignored)[0])
+            raise Conflict('Project-specific skill/tool path is ignored; narrow project ignore policy: ' + sorted(projects & ignored)[0])
 
     if proposed is None:
         inspect(None)
