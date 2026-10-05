@@ -1,78 +1,67 @@
 # User Ubuntu Codex session evidence — 2026-10-05
 
-## Latest directory-creation checkpoint — 2026-10-05
+## Latest post-drain identity checkpoint — 2026-10-05
 
-Source implementation `abbc991e413314b11a7a793c40ab49d6a1b06e9b` on
+Source implementation `0f6fc7b8a192d1843b41b3d7600f06a169871004` on
 `rewrite/workflow-skills-v2` is implemented and verified. Consumer
-`de407cb6cd477752eec810591b34fe497d93b040` on `pilot/shared-skill-bootstrap`
-pins that exact source. Source Ready PR16 and consumer Ready PR8 remain open;
-F14 Issue15 and consumer Issue7 remain open. Neither repository is merged or delivered.
+`c9229e14825d5445c97ab4d277fd1fcf654be343` on `pilot/shared-skill-bootstrap`
+pins that exact source. Both Ready PRs remain open; F14 Issue15 and consumer Issue7
+remain open. F01–F13 are implemented/verified/review-ready; F14 remains partial.
+Neither repository has merged or delivered.
 
-The five-minute monitor observed source review5419177864 atf57b866 and consumer
-clear comment6000985156 at406c417, then disarmed both targets. Source finding
-4187595540 is valid: a private directory replaced between mkdir and open was accepted
-as recovery storage. Independent old-code controls fail five cases without harness
-errors: public/same-mode storage replacement, changed private permissions, and two
-privately staged-directory replacements. Symlink rejection preserves both entries.
-
-The repair starts a short-lived Linux inotify watch on the opened parent before
-mkdir, accepts exactly one creation event, and checks path/descriptor identity and
-owner/private permissions before use. Rename/delete/attribute events, watch invalidation,
-queue overflow and missing support fail closed. It prevents claiming a same-mode
-replacement as owned. The watch closes after binding; it is not a process lock,
-task scheduler or persistent monitor. Existing retention, parent/inode/bytes/mode,
-symlink and raw-index preservation assertions remain. Four new tests and all46
-focused setup tests pass (13.139s). Current and active adoption scenarios plus
-operations/development/architecture explain the supported Linux primitives.
+The five-minute monitor observed source review5419306426 ated7b969 and consumer
+clear6001189911 atde407cb6, then disarmed both targets. Source finding4187706836
+is independently valid: pathname identity was cached before the final nonblocking
+event read. Four old-code controls fail without errors at that boundary: same-mode
+inode replacement, symlink, deletion and changed permissions. The repair performs
+the final pathname/descriptor comparison after event draining; this comparison
+defines the end of the observation window. All five focused birth/observation
+controls pass (0.194s before commit; 0.371s at the committed revision).
 
 | Verification | Actual result |
 | --- | --- |
-| Full source suite, managed Python3.12.14 | 171 tests, no skips, 184.728s, OK |
-| Full source suite, Ubuntu24.04.5/Python3.12.3 | 171 tests, no skips, 169.901s, OK |
-| Actual installed consumer tests, managed runtime | 48 tests, 83.326s, OK |
-| Actual installed consumer tests, Ubuntu | 48 tests, 81.153s, OK |
-| Strict OpenSpec | All5 items pass; public spec check passes |
-| Literal exact-pin Ubuntu fetch-and-run adoption/repeat | Both exit0; absent Git index stays absent |
-| Consumer push/PR/existing-main metadata Actions | 37359923934 /37359934307 /37359928511 pass |
+| Full source suite, managed Python3.12.14 | 172 tests, no skips, 184.944s, OK |
+| Full source suite, Ubuntu24.04.5/Python3.12.3 | 172 tests, no skips, 167.686s, OK |
+| Actual installed consumer tests, managed runtime | 49 tests, 84.651s, OK |
+| Actual installed consumer tests, Ubuntu | 49 tests, 81.134s, OK |
+| Strict OpenSpec and public spec checker | All5 items pass; ok:true |
+| Literal exact-pin Ubuntu first adoption/repeat | Both exit0; absent index stays absent |
+| Consumer push/PR/existing-main metadata Actions | 37361217469 /37361225271 /37361220449 pass |
 
-Fresh managed local clone of the API-verified remote commit and fresh Ubuntu remote
-clone materialize11 ignored dependencies and match20 managed hashes. Four narrow
-ignore rules, tracked project skill/config/files and raw index remain unchanged;
-repeat bootstrap is offline/no-op. Installed tests include the new birth controls
-and earlier force-tracking, index-only nested-policy, layout, concurrency, discovery,
-PR-input/rendering and consumer-CI negatives. Two initial proof invocations supplied
-a misplaced expected-SHA argument and stopped at the initial revision assertion;
-corrected fresh runs above passed. Those harness failures are not acceptance evidence.
+Fresh managed clone of the API-verified remote commit and fresh Ubuntu remote clone
+materialize11 ignored dependencies, match20 managed hashes, retain four narrow
+ignores and the tracked project skill/config/files, and preserve raw index. Matching
+repeat bootstrap is offline/no-op. Installed verification includes this final-read
+regression and earlier birth, overflow/unavailable support, capture/parent/inode/
+bytes/mode/symlink, force-tracking/index-only policy, layout, discovery, PR input/
+rendering and actual consumer-CI controls. No original preservation assertion is weakened.
 
-Source-owned consumer update preserves all shared-skill bytes, project config and
-raw index `9c0744b86397f3bdb066559f2aa1bbeef74ae9497a9a3fb9915ba1e8c55993f3`
-before caller staging only provenance and changed operations/development guidance.
-Native publication uses reviewed tree `5317cec44de781d61bfa0ab1e120bf48e246edea`,
-matching local commit25d7db44, parent406c417. Public native commit bytes independently
-hash tode407cb6; guarded non-force publication and same-tree local ref reconciliation
-preserve clean files/index. An initial local reconciliation helper had a quoting
-syntax error before mutation; corrected file-based reconciliation passed.
+Source-owned update preserves all skill bytes/config/raw index
+`95749f0e54ae5c9cc074915ba24292cfc48d90923dde902d781b9123c104cb85`
+before caller staging only manifest and changed operations guidance. Native tree
+`0845408f2970d398278abbde4e5ec967c8f477d9` equals reviewed local6ec0f690,
+parentde407cb6. Native commit bytes independently hash toc9229e14; guarded non-force
+publication and same-tree local ref reconciliation leave files/index clean.
+Current source Actions and fresh reviews are recorded by exact head in the PR checkpoint.
 
-Retained capture files/directories deliberately accumulate in Git-private storage
-(or same-filesystem TMPDIR for explicit shared-only installation); no automatic
-cleanup is claimed. No-op reruns allocate none. Native Ubuntu startup discovery and
-actual use of all three skills remain proven at9bd23d72/a75c3f2; their hashes are
-unchanged. No fresh native workstation session at the repaired runtime pin is claimed.
-Cloud is deferred/unverified. Actual global-host discovery/use is unperformed;
-the historical Ubuntu26 full-suite JSON error remains unexplained.
+Creation observation is a short-lived inotify parent watch, not a process lock or
+persistent task monitor. Captured files/directories remain retained in Git-private
+storage or same-filesystem TMPDIR, without automatic garbage collection. Current
+operations/current+active adoption scenarios explicitly define the post-drain check.
+Native Ubuntu startup discovery and actual three-skill use remain proven at
+9bd23d72/a75c3f2 with unchanged shared hashes; no new native CLI session at this pin
+is claimed. Cloud is deferred/unverified. Actual global-host discovery/use remains
+unperformed; the historical Ubuntu26 full-suite JSON failure remains unexplained.
 
-F01–F13 are implemented/verified/review-ready. F14 remains partial pending repaired-head
-semantic review and native archive/final checks. Source CI and fresh reviews are
-recorded by exact head in the PR checkpoint. Green consumer metadata executes the
-existing main trusted checker; deployment/events for the new schema5 base workflow
-still await authorized adoption merge. Read-only ruleset inspection2026-10-05T18:27:07Z
-confirms active/no-bypass source24457981 verification and consumer24484016 both v2
-checks. Source PR-contract administration, real merge and valid Issue-completion
-observation remain pending separate authorization. No merge/closure/admin/global/
-authentication/release/remote deletion occurred.
-
-Next: repaired-head independent review, then native archive and final checks;
-request separate real-delivery authorization only after those gates pass.
+Repaired-head semantic review and native archive/final checks remain pending.
+Green consumer metadata executes the existing main trusted checker; new schema5
+trusted-base deployment/events require authorized adoption merge. Read-only ruleset
+inspection2026-10-05T18:27:07Z confirms active/no-bypass source24457981 verification
+and consumer24484016 both v2 checks. Source PR-contract administration, real merge
+and valid Issue-completion observation remain pending separate authorization.
+No merge/closure/admin/global/authentication/release/remote deletion occurred.
+Next: repaired-head review, then native archive/final checks; obtain separate delivery
+authorization only after those gates pass.
 
 
 ## Latest source-check compatibility checkpoint — 2026-10-05
