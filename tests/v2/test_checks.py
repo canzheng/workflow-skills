@@ -1,6 +1,7 @@
 import json
 import pathlib
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -194,3 +195,45 @@ class CheckTests(unittest.TestCase):
         r = run('check', '--repo', self.target, '--run-local', expect=1)
         self.assertTrue(any(x['code'] == 'verification.unavailable' for x in r['findings']))
         run('check', '--repo', self.target, '--pr-json', self.snapshot(BODY), '--metadata-only', '--run-local', expect=2)
+
+    def test_invalid_native_argv_rejects_all_commands_before_execution(self):
+        p = self.target / '.workflow/config.json'
+        original = json.loads(p.read_text())
+        marker = self.target / 'MUST_NOT_RUN'
+        first = [sys.executable, '-c', "from pathlib import Path; Path('MUST_NOT_RUN').touch()"]
+        index = (self.target / '.git/index').read_bytes()
+        for category in ('local', 'integration'):
+            for invalid in ('nul\0argument', 'unencodable\ud800argument'):
+                with self.subTest(category=category, argument=invalid):
+                    c = json.loads(json.dumps(original))
+                    c['verification']['local'] = [first]
+                    c['verification'][category].append([sys.executable, '-c', invalid])
+                    p.write_text(json.dumps(c))
+                    before = {x.relative_to(self.target): x.read_bytes()
+                              for x in self.target.rglob('*') if x.is_file()
+                              and '.git' not in x.relative_to(self.target).parts}
+                    r = run('check', '--repo', self.target, '--run-local', '--run-integration', expect=2)
+                    self.assertEqual(r['findings'][0]['code'], 'invalid')
+                    self.assertFalse(marker.exists())
+                    self.assertEqual({x.relative_to(self.target): x.read_bytes()
+                                      for x in self.target.rglob('*') if x.is_file()
+                                      and '.git' not in x.relative_to(self.target).parts}, before)
+                    self.assertEqual((self.target / '.git/index').read_bytes(), index)
+
+    def test_malformed_document_and_metadata_urls_report_findings(self):
+        p = self.target / 'README.md'
+        index = (self.target / '.git/index').read_bytes()
+        for target in ('https://[malformed', 'https://[not-an-ipv6]/path'):
+            with self.subTest(url=target):
+                link = '[malformed](' + target + ')'
+                p.write_text(link)
+                contents = p.read_bytes()
+                r = run('check', '--repo', self.target, expect=1)
+                self.assertTrue(any(x['code'] == 'links.url' for x in r['findings']))
+                self.assertEqual(p.read_bytes(), contents)
+                r = run('check', '--repo', self.target, '--pr-json', self.snapshot(BODY + link),
+                        '--metadata-only', expect=1)
+                self.assertTrue(any(x['code'] == 'links.url' for x in r['findings']))
+                self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        p.write_text('[valid](https://example.invalid/path#anchor)')
+        run('check', '--repo', self.target)

@@ -117,7 +117,7 @@ class SetupTests(unittest.TestCase):
                     self.assertEqual((self.target / '.git/index').read_bytes(), index)
                     self.assertFalse(global_target.exists())
 
-    def test_nul_bundle_paths_return_json_without_writes(self):
+    def test_os_invalid_bundle_paths_return_json_without_writes(self):
         bundle = self.source / '.workflow/bundle.json'
         original = json.loads(bundle.read_text())
         extra = self.source / 'tools/workflow/extra.py'
@@ -127,7 +127,9 @@ class SetupTests(unittest.TestCase):
         index = (self.target / '.git/index').read_bytes()
         global_target = self.base / 'isolated global skills'
         for source, destination in [('tools/workflow/extra\0.py', 'tools/workflow/extra.py'),
-                                    ('tools/workflow/extra.py', 'tools/workflow/extra\0.py')]:
+                                    ('tools/workflow/extra.py', 'tools/workflow/extra\0.py'),
+                                    ('tools/workflow/extra\ud800.py', 'tools/workflow/extra.py'),
+                                    ('tools/workflow/extra.py', 'tools/workflow/extra\ud800.py')]:
             with self.subTest(source=source, destination=destination):
                 spec = json.loads(json.dumps(original))
                 spec['assets'][source] = destination
