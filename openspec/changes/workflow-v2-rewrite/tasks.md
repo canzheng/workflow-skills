@@ -862,50 +862,58 @@ current/delta adoption scenarios are updated. Full local/Ubuntu suites, actual
 installed proof, consumer repin/Actions, evidence and current semantic reviews are
 next. Reviews are disarmed on completion; no archive/merge/closure/admin change.
 
-## Latest directory-binding and native Issue-state checkpoint — 2026-10-05
+## Latest replacement-result and native closure-reason checkpoint — 2026-10-05
 
-Source `09998db554066b742f612d2e95a9c6bdb7c7b578` passes148/no skips on managed Python3.12.14
-(143.175s) and Ubuntu24.04.5/Python3.12.3 (123.474s), plus strict OpenSpec all5 items.
-Consumer `22a5c42c0eb43c9c0eda427061237e27f9079819`, pilot/shared-skill-bootstrap, Ready PR8/Issue7,
-pins this source. Its push37338701217/PR37338713719/existing-main metadata37338708449
-pass. Source pin Actions37338647841/37338660724 were running at recording; current
-head results and semantic review are recorded separately in the live PR checkpoint.
+Source `29d1e1c02df0129eed015491cf18c337e47c6865` passes150/no skips on managed Python3.12.14
+(146.331s) and Ubuntu24.04.5/Python3.12.3 (126.618s), plus strict OpenSpec all5 items.
+Consumer `24c0fa2f119d07c07590a821be28f8dbc53571c5`, pilot/shared-skill-bootstrap, Ready PR8/Issue7,
+pins this source. Push37343258608/PR37343268612/existing-main metadata37343264272
+pass. Source pin Actions37343121762/37343130470 were running at recording; current
+head results and independent review remain separately recorded in the live PR.
 
-Review5417258594 at300ab5c returned P2s4185998816/4185998828. Both independently
-reproduced: swapping a parent inside unlink deletes human content in the replacement
-directory; unknown state strings pass native Issue audit. Two controls fail four
-subcases on the old implementation. Eight additional immediate-parent/ancestor
-stage-open/replace/restore/cleanup controls also fail on the old implementation.
-All controls now pass without narrowing prior concurrent-edit assertions. Apply,
-staging/replacement/cleanup, rollback and created-directory operations bind relative
-names to verified directory handles, opened component by component with no-follow
-and expected inode checks. Replaced namespaces preserve human files and report
-recoverable originals; recovery remains best-effort, with no multi-process lock.
-Issue states normalize case and accept only open/closed; omitted state remains open.
-Malformed input yields structured exit2 JSON without snapshot/index mutation.
+Review5417731872 at204762f returned P2s4186371129/4186371137, both independently
+reproduced. A staging entry changed between validation and rename can install foreign
+bytes while reporting success. An unknown/non-string closure reason or uppercase
+COMPLETED can bypass closure audit. Public setup/check negative controls on committed
+old code produce13 failed subcases across two tests, no errors (1.439s). An initial
+staging fixture accidentally injected a later assertion failure; the guard was corrected
+to permit other replacements, so the recorded control exposes actual false success.
+Post-rename destination bytes/mode/device/inode now must match the owned staging
+identity before setup succeeds. Foreign/changed/missing/symlinked destinations remain
+recoverable conflicts with originals/index preserved. Five public setup cases cover
+bytes, mode, same-content inode replacement, symlink and concurrent deletion.
 
-The57 focused tests pass (24.178s). Fresh actual remote consumer clones on both
-hosts bootstrap11 missing dependencies, match20 managed hashes, retain four narrow
-ignore namespaces/tracked project skill and preserve files/raw index on offline
-repeat. The25-test actual installed runtime suite passes both hosts (55.797s/51.551s),
-including the new mutation controls, native states, both layouts, CI and isolated
-optional-global fixtures. Literal exact-pin Ubuntu fetch-and-run first adoption/
-repeat passes; absent index and repeat bytes remain unchanged. Actual global-host
-installation was not performed. Source-owned consumer update preserved configuration,
-all skill bytes and raw indexb942fe7aa710e079b8d5746cc981f580afccc625b4d49e66a95bcc48fa108d39
-before caller staging. Published treea197399eb44b20431d574b3a64df5e4db3ac6684 matches
-reviewed localc22af21676de7272d97ba2dff53e54b7ad150d8b; parentf860135; guarded non-force publication.
+Optional native reasons validate and normalize before auditing: null, completed,
+not_planned, duplicate, reopened. Official GitHub REST schema at
+[836ce198](https://github.com/github/rest-api-description/blob/836ce198db13a6fb194547e53eea99c6ddae495b/descriptions/api.github.com/api.github.com.json)
+confirms all four strings; schema SHA256f3efa055b46b43f5f133ecf792a36a7f50cf8a4378cbd177390bc2bf8c6097cd.
+Older gh2.46 close help omitted duplicate, so it was not used as the input-schema
+contract. Unknown/non-string values yield structured exit2 JSON, empty stderr and
+unchanged snapshot/index. Uppercase COMPLETED receives the same missing-evidence
+finding as lowercase; supported reasons/null retain compatibility. Mechanical evidence
+annotations never certify semantic delivery. No prior discriminating expectations
+were narrowed. Focused59 tests pass (25.008s), including existing recovery controls.
 
-F01–F13 implemented/verified/review-ready; F14 partial pending repaired-head semantic
-review and native archive/final checks. Previous consumer review5997917302 was clear
-atf860135 and does not approve the repin. Native Ubuntu startup catalog/actual use
-retains original9bd23d72/a75c3f2 evidence with unchanged shared hashes. Cloud deferred;
-historical Ubuntu26 full-suite invalid-JSON cause remains unexplained. Consumer
-required checks/source verification enforcement are read-only observed; new trusted
-base metadata deployment and source PR-contract administration remain pending.
-Real merge and valid completed Issue observation require separate authorization.
-No merge/closure/admin/global/auth/release/remote deletion. Next: current-head review;
-archive only after required premerge review clears. Five-minute monitors apply to
-new review requests during this active turn, with no persistent wake-up claimed.
+Fresh actual remote clones on both hosts bootstrap11 missing ignored dependencies,
+match20 managed hashes, retain the four narrow ignores and tracked project skill,
+and preserve project files/raw index on offline repeat. The27-test actual installed
+runtime suite passes both hosts (54.963s/50.852s), including the new public paths,
+previous mutation controls, layout/CI and isolated optional-global fixtures. Literal
+exact-pin Ubuntu fetch-and-run first adoption/repeat passes with unchanged repeat
+bytes/absent index. Actual global-host installation is unperformed. Source-owned
+update preserved configuration/all skill bytes/raw index13440d17c3b471cb95d78269c76b68a21fa88e61028b7ed65515a2ccce4de883
+before caller staging. Remote tree013ca38ae1eb6589bd41e1d77c899270d88dda61 equals
+reviewed local6ef1c4c3ff47da30d560ec2afce9a67c425d551f, parent22a5c42; guarded non-force publication.
+
+F01–F13 implemented/verified/review-ready; F14 partial pending current semantic
+review and native archive/final checks. Consumer review5998482101 was clear at22a5c42,
+not approval of this repin. Native Ubuntu catalog/actual skill use remains bound to
+original9bd23d72/a75c3f2 with unchanged shared hashes. Cloud deferred; historical
+Ubuntu26 full-suite invalid-JSON cause remains unexplained. Consumer two checks/source
+verification enforcement read-only observed. New trusted-base metadata deployment,
+source PR-contract administration, actual merge and valid completed Issue observation
+remain separately pending authorization. No merge/closure/admin/global/auth/release/
+remote deletion. Next: current-head review; archive after required premerge review
+clears. Five-minute monitors apply to new review requests only in this active turn.
 
 See [wider review](../../../docs/validation/wider-boundary-review.md) for proof.

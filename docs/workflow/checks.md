@@ -103,3 +103,6 @@ An evidence annotation still requires manual acceptance/merge inspection.
 Malformed entries return exit2/ok:false/invalid JSON diagnostics without traceback
 or snapshot/index changes. String labels and native GitHub label objects remain
 supported; structural validity does not prove delivery acceptance.
+
+The native closure-reason enum follows the [GitHub REST schema](https://github.com/github/rest-api-description/blob/836ce198db13a6fb194547e53eea99c6ddae495b/descriptions/api.github.com/api.github.com.json);
+validation uses the pinned implementation, without fetching schemas at runtime.
