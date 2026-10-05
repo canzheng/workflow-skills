@@ -35,3 +35,16 @@ original fixture/assertion strength unless an approved behavior change requires 
 #### Scenario: Parsed currency has no effective consumer
 - **WHEN** a consumer always formats USD despite valid emitted EUR metadata
 - **THEN** an independent EUR output expectation fails the consumer proof
+
+### Requirement: Native Issue audit input
+Issue audits SHALL validate native state and optional state_reason values before
+classifying snapshots, without treating mechanical validity as semantic delivery.
+
+#### Scenario: Malformed closure reason
+- **WHEN** state_reason is an unknown string or a non-string/non-null value
+- **THEN** public check returns structured invalid-input JSON without changing the snapshot or index
+
+#### Scenario: Case-normalized completion
+- **WHEN** a closed Issue supplies COMPLETED without delivery evidence
+- **THEN** the same missing-evidence finding applies as for completed
+- **AND** null, not_planned, duplicate and reopened reasons remain supported without asserting completed delivery

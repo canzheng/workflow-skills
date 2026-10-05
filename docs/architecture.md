@@ -88,3 +88,7 @@ component with no-follow and recorded inode checks. Parent-path checks detect
 namespace changes; descriptor binding preserves replacement-directory human files
 even when a swap occurs inside unlink/open/replace/restore/cleanup. Recovery remains
 best-effort, without a multi-process lock or atomic multi-file promise.
+
+After rename, destination identity/content must match the owned staged inode; a
+foreign or changed destination remains a recoverable conflict. Snapshot helpers
+validate and normalize optional native closure reasons before completion audits.

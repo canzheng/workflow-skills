@@ -233,6 +233,8 @@ def transaction(root, changes, fail_after=None):
                             validate_parents(name)
                             os.replace(basename, p.name, src_dir_fd=parent_fd, dst_dir_fd=parent_fd)
                             applied[name] = (data, installed.st_mode, installed.st_dev, installed.st_ino)
+                            if file_state(parent_fd, p.name) != applied[name]:
+                                raise Conflict('Concurrent destination change after replacement: ' + name)
                         finally:
                             if tmp_state is not None:
                                 try:

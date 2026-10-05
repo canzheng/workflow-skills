@@ -224,6 +224,39 @@ class CheckTests(unittest.TestCase):
         ])))
         run('check', '--repo', self.target, '--issues-json', snapshot)
 
+    def test_issue_snapshot_closure_reasons_validate_and_normalize(self):
+        snapshot = self.root / 'issues.json'
+        index = (self.target / '.git/index').read_bytes()
+        for reason in ('garbage', '', 'unknown', 1, True, [], {}):
+            with self.subTest(reason=reason):
+                snapshot.write_text(json.dumps(dict(repository='fixture/consumer', issues=[
+                    dict(state='closed', state_reason=reason, labels=[])])))
+                original = snapshot.read_bytes()
+                result = subprocess.run([sys.executable, str(self.target / '.agents/tools/workflow/workflow.py'),
+                                         'check', '--repo', str(self.target), '--issues-json', str(snapshot), '--json'],
+                                        capture_output=True, text=True)
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                self.assertFalse(json.loads(result.stdout)['ok'])
+                self.assertEqual(json.loads(result.stdout)['findings'][0]['code'], 'invalid')
+                self.assertEqual(result.stderr, '')
+                self.assertEqual(snapshot.read_bytes(), original)
+                self.assertEqual((self.target / '.git/index').read_bytes(), index)
+        for reason in ('completed', 'COMPLETED'):
+            with self.subTest(reason=reason):
+                snapshot.write_text(json.dumps(dict(repository='fixture/consumer', issues=[
+                    dict(state='closed', state_reason=reason, labels=[])])))
+                r = run('check', '--repo', self.target, '--issues-json', snapshot, expect=1)
+                self.assertTrue(any(x['code'] == 'issue.inconsistent' for x in r['findings']))
+        snapshot.write_text(json.dumps(dict(repository='fixture/consumer', issues=[
+            dict(state='closed', state_reason=None, labels=[]),
+            dict(state='closed', state_reason='NOT_PLANNED', labels=[]),
+            dict(state='closed', state_reason='DUPLICATE', labels=[]),
+            dict(state='open', state_reason='REOPENED', labels=['wf:ready']),
+            dict(state='CLOSED', state_reason='COMPLETED', labels=[], delivery_evidence='Inspect linked PR manually')
+        ])))
+        run('check', '--repo', self.target, '--issues-json', snapshot)
+        self.assertEqual((self.target / '.git/index').read_bytes(), index)
+
     def test_ci_event_and_trust_boundaries_are_explicit(self):
         metadata = (ROOT / '.github/workflows/pr-metadata.yml').read_text()
         code = (ROOT / '.github/workflows/verify.yml').read_text()

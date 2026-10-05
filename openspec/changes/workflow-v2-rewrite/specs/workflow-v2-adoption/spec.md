@@ -186,6 +186,11 @@ provenance, not task state or its own content hash.
 - **AND** replacement-directory human files and staging names remain unchanged, the raw Git index is preserved and original bytes/mode stay recoverable
 - **AND** the namespace change is reported as a residual rather than successful restoration
 
+#### Scenario: Staging entry changes before successful replacement
+- **WHEN** a staging entry is changed after validation but the replacement syscall succeeds, or the destination changes during that call
+- **THEN** destination bytes/mode/device/inode are compared with the owned staged identity before setup can succeed
+- **AND** mismatches preserve foreign/changed destination content or absence, original backups and the raw Git index with a recoverable conflict
+
 ### Requirement: Bounded uninstall and diagnostics
 Uninstall SHALL remove only unmodified managed assets/block, retain configuration
 and user modifications, and report residuals. Doctor SHALL be read-only and distinguish

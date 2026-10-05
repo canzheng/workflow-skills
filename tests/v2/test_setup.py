@@ -195,6 +195,78 @@ class SetupTests(unittest.TestCase):
         self.assertEqual((self.target / '.workflow/install-manifest.json').read_bytes(), manifest)
         self.assertEqual((self.target / '.git/index').read_bytes(), index)
 
+    def test_successful_replace_rejects_foreign_staging_or_changed_destination(self):
+        run(*self.args, '--apply')
+        changed = self.source / 'docs/workflow/contract.md'
+        changed.write_text('Updated contract.\n')
+        revision = commit(self.source)
+        victim = self.target / 'docs/workflow/contract.md'
+        original, mode = victim.read_bytes(), victim.stat().st_mode
+        manifest = (self.target / '.workflow/install-manifest.json').read_bytes()
+        index = (self.target / '.git/index').read_bytes()
+        external = self.base / 'external'
+        external.write_bytes(b'External human content.\n')
+        actual_replace = installer.os.replace
+        for case in ('bytes', 'mode', 'same-content-inode', 'symlink', 'deleted'):
+            with self.subTest(case=case):
+                try:
+                    injected = []
+                    def replace(src, dst, **kwargs):
+                        if operation_path(dst, kwargs.get('dst_dir_fd')) != victim:
+                            return actual_replace(src, dst, **kwargs)
+                        staged = operation_path(src, kwargs.get('src_dir_fd'))
+                        if case == 'bytes':
+                            staged.write_bytes(b'HUMAN-RACE')
+                        elif case == 'mode':
+                            staged.chmod(0o700)
+                        elif case == 'same-content-inode':
+                            replacement = self.base / 'foreign-same-content'
+                            replacement.write_bytes(staged.read_bytes())
+                            replacement.chmod(staged.stat().st_mode)
+                            staged.unlink()
+                            replacement.rename(staged)
+                        elif case == 'symlink':
+                            staged.unlink()
+                            staged.symlink_to(external)
+                        actual_replace(src, dst, **kwargs)
+                        if case == 'deleted':
+                            victim.unlink()
+                        injected.append(True)
+                    with patch.object(installer.os, 'replace', replace), contextlib.redirect_stdout(io.StringIO()) as output:
+                        status = workflow.main(['setup', '--source', str(self.source), '--revision', revision,
+                                                '--target', str(self.target), '--repository', 'fixture/consumer',
+                                                '--skill-storage', 'tracked', '--apply', '--json'])
+                    self.assertEqual(status, 1, output.getvalue())
+                    self.assertEqual(injected, [True])
+                    report = json.loads(output.getvalue())
+                    self.assertFalse(report['ok'])
+                    message = report['findings'][0]['message']
+                    self.assertIn('Rollback residuals: docs/workflow/contract.md', message)
+                    self.assertEqual((self.target / '.workflow/install-manifest.json').read_bytes(), manifest)
+                    self.assertEqual((self.target / '.git/index').read_bytes(), index)
+                    self.assertEqual(external.read_bytes(), b'External human content.\n')
+                    if case == 'bytes':
+                        self.assertEqual(victim.read_bytes(), b'HUMAN-RACE')
+                    elif case == 'mode':
+                        self.assertEqual(victim.stat().st_mode & 0o777, 0o700)
+                    elif case == 'same-content-inode':
+                        self.assertEqual(victim.read_bytes(), changed.read_bytes())
+                    elif case == 'symlink':
+                        self.assertTrue(victim.is_symlink())
+                    else:
+                        self.assertFalse(victim.exists())
+                    recovery = pathlib.Path(message.split('recoverable originals: ', 1)[1])
+                    self.addCleanup(installer.shutil.rmtree, recovery)
+                    record = json.loads((recovery / 'recovery-index.json').read_text())['docs/workflow/contract.md']
+                    self.assertEqual((recovery / record['backup']).read_bytes(), original)
+                    self.assertEqual(record['mode'], mode)
+                finally:
+                    if victim.is_symlink():
+                        victim.unlink()
+                    victim.write_bytes(original)
+                    victim.chmod(mode)  # Explicit recovery only in this owned fixture.
+                    (self.target / '.workflow/install-manifest.json').write_bytes(manifest)
+
     def test_failed_replace_preserves_concurrent_staging_changes(self):
         run(*self.args, '--apply')
         changed = self.source / 'docs/workflow/contract.md'
