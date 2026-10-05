@@ -2,68 +2,76 @@
 
 ## Latest diagnostic-probe checkpoint — 2026-10-05
 
-Source implementation `fef212d70254c0b4c7d57fb65647f3ebee294444` on
-`rewrite/workflow-skills-v2` is implemented and verified. Consumer
-`43a877e4c07f696022270a54ab9e2021126f2147` on `pilot/shared-skill-bootstrap`
-pins that exact source. Both Ready PRs remain open. F01–F13 are implemented/verified;
-F14 remains partial pending current-head CI/semantic review and native archive/final
-checks. No merge, completed Issue closure or delivery is claimed.
+Source implementation `510fa9a550a4d0c4ee5d5c195d57b8d13bcd99a0` on
+`rewrite/workflow-skills-v2` repairs cyclic/inaccessible catalog handling. Consumer
+`7b31164de734b2f89574f9a572ac1a2c08cf6f11` on `pilot/shared-skill-bootstrap`
+pins that source. Both Ready PRs remain open. F01–F13 remain implemented/verified;
+F14 remains partial pending current review, consumer CI and the remaining Ubuntu
+consumer checks, followed by native archive/final checks. No delivery is claimed.
 
-The five-minute monitor observed consumer clear6001659702 at07edc5b3
-(completed2026-10-05T19:36:55.843637Z) and disarmed it. Source review5419637961
-at704f276 completed2026-10-05T19:38:29.047533Z with P2 finding4187986666,
-then its monitor disarmed. The blank-version finding independently reproduces:
-20 old-code subcases fail/no errors across Git/gh/Node/OpenSpec for empty output,
-LF/CRLF blank headers, ASCII whitespace and Unicode whitespace. Four nonblank
-first-line positive controls pass; later content cannot substitute for a blank header.
+Source review5419855440 at1b244d7 completed2026-10-05T20:01:38.600965Z with
+P2 finding4188193137; its five-minute monitor disarmed. The finding independently
+reproduces before root scanning. Wider preparation controls expose eight old-code
+failures/no errors: explicit self/mutual cycles, a default global cycle, denied
+resolve/stat/read operations, an existing nondirectory, and a public subprocess
+case with only the bad optional root. Healthy duplicate detection remains mandatory.
 
-The repair accepts only a nonblank first line of successful UTF-8 version output.
-Empty/blank/whitespace-only headers remain unavailable with a sanitized tool.probe
-warning; healthy probes/authentication continue. Real executable fixtures exercise
-the public JSON CLI, keep captured invalid/auth output private and require unchanged
-project bytes/raw index. Earlier ten-second timeout, execution/encoding failure and
-auth-output controls remain. All27 focused checker tests pass (33.288s).
-Source/consumer operations and current/active diagnostics specifications match.
+The repair resolves each root once inside the guarded scan, checks its kind and
+enumerates it explicitly because glob suppresses root read failures on supported
+Python versions. OSError/RuntimeError produce sanitized per-root warnings while
+other catalogs/tool diagnostics continue. Missing optional roots remain absent;
+symlinks, root-file bytes, project files/index and real globals remain unchanged.
+All28 focused checker tests pass (34.654s). Other public project-target resolution
+already rejects symlinks before resolving; no target/global-policy redesign is added.
+Current/active adoption specs and source/consumer operations match.
 
 | Verification | Actual result |
 | --- | --- |
-| Full source suite, managed Python3.12.14 | 175 tests, no skips, 185.536s, OK |
-| Full source suite, Ubuntu24.04.5/Python3.12.3 | 175 tests, no skips, 163.689s, OK |
-| Actual installed consumer suite, managed runtime | 52 tests, 83.942s, OK |
-| Actual installed consumer suite, Ubuntu | 52 tests, 78.795s, OK |
+| Full source, managed Python3.12.14 | 176 tests, no skips, 172.098s, OK on sequential retry |
+| Actual Ubuntu24.04.5/CPython3.12.14 source CI | 176 tests, no skips, 182.201s, OK; push37368208933 /PR37368217583 pass |
+| Actual installed consumer, managed runtime | 53 tests, 76.954s, OK on sequential retry |
 | Strict OpenSpec/public spec checker | All5 items pass; ok:true |
-| Literal exact-pin Ubuntu first adoption/repeat | Both exit0; absent index stays absent |
-| Current source implementation Actions at recording time | push37365358131 /PR37365366354 queued |
-| Current consumer Actions at recording time | push37365399907 /PR37365406338 /existing-main metadata37365402645 queued |
+| Managed fresh exact-pin bootstrap/hash/index/offline repeat | Pass |
+| Managed literal source-first adoption/repeat | Both exit0; absent index stays absent |
+| Current Ubuntu container/installed53/fresh/literal reruns | Unperformed: OCI container startup fails |
+| Current consumer push/PR CI | First attempts cancel before steps; exact jobs retried once |
+| Current consumer metadata | Pending at this checkpoint |
 
-Fresh managed clone of the API-verified remote commit and fresh Ubuntu remote clone
-materialize11 ignored dependencies, match20 managed hashes, preserve four narrow
-ignores/project skill/config/files/raw index, and repeat offline/no-op. Installed
-checks retain all earlier filesystem birth/final-read/capture/parent/inode/bytes/mode/
-symlink, tracking/index-only policy/layout, discovery and PR-input/rendering/CI controls.
-Source-owned update preserves all shared-skill bytes/config/raw index
-`7d4a82f73a7f24556a0e99d17270f4e920ab5860b2e3187d4e5e9cbe2ea759bd`
-before caller staging only manifest and changed operations guidance. Native tree
-`47e0c74aae869cb2fbd421ddf4cb46ddc665b454` matches reviewed local10d689ca,
-parent07edc5b3. Native commit bytes independently hash to43a877e4; guarded non-force
-publication and same-tree local ref reconciliation leave files/index clean.
+Initial parallel source runs failed with176 tests/2 failures/106 errors locally
+and176/1 failure/94 errors in Ubuntu; installed53 also failed before completion.
+Streams show fork/maintenance EAGAIN (Resource temporarily unavailable), not proof
+of a code regression. The workspace has32320 zombies adopted by non-reaping PID1
+tail. Sequential managed retries use inherited command-scoped maintenance.auto=false
+and gc.auto=0; no global Git config changes or weakened assertions. Process usage
+remains stable. Even sequential Docker --init/GOMAXPROCS=2 startup fails before
+Ubuntu execution. Earlier Ubuntu175/installed52/fresh/literal proof remains
+revision-bound to fef212d/43a877e4, not a current installed53 pass.
+Ubuntu source CI logs independently establish the normal runner result above.
 
-This is a diagnostic repair, not a version-format validator, authentication change
-or new workflow engine. Linux creation observation remains short-lived; recovery
-captures remain retained without automatic cleanup. Native Ubuntu startup catalog
-discovery and actual three-skill use remain proven at9bd23d72/a75c3f2 with unchanged
-shared hashes. No fresh native CLI session at this repaired runtime pin, actual
-global-host discovery/use, or Cloud acceptance is claimed. Cloud is deferred;
-the historical Ubuntu26 harness JSON failure remains unexplained.
-Earlier consumer07ed push/PR/metadata and its clear review remain valid for that
-revision, not proof for43a877e4. Green metadata uses existing main trusted code;
-new schema5 trusted-base deployment/events still need an authorized adoption merge.
-Read-only rulesets require source verification and consumer both v2 checks, with
-no bypass actors. Source PR-contract administration, real merge and valid
-Issue-completion observation remain pending separate authorization.
-No archive/merge/closure/admin/global/authentication/release/remote deletion occurred.
-Next: repaired-head review and queued CI, then native archive/final checks only
-after required premerge acceptance; real delivery needs separate authorization.
+Fresh managed clone of the API-verified native commit materializes11 ignored
+dependencies, matches20 hashes, preserves four narrow ignores/project skill/config/
+files/raw index and repeats offline/no-op. Current source-owned update preserves
+all shared-skill bytes/config/raw index
+`7ec2be1680815a6f095b57f52a265c39037d9e588c3714259612ecc67f818457`
+before caller staging only manifest/operations. Native tree
+`2900cdb41e6a4767da3c2aedcbd4e5ee9ae47b50` equals reviewed local1007f2e2,
+parent43a877e4. Independently hashed native commit and guarded non-force publication
+leave both working trees clean. Existing preservation/diagnostic controls remain.
+
+The earlier consumer43a877e4 review was clear6001890391; its metadata run37365909770
+canceled without steps, and its authorized exact-job retry passed at attempt2.
+Current7b31164d push37368314205/PR37368323231 likewise canceled without steps and
+were each retried once; pending results remain separate from semantic review.
+Native Ubuntu startup discovery and actual three-skill use remain proven at
+9bd23d72/a75c3f2 with unchanged shared hashes. Cloud remains deferred; actual global
+host installation/discovery is unperformed and the historical Ubuntu26 harness
+JSON error remains unexplained. New trusted-base metadata deployment still needs an
+authorized adoption merge; old-base execution does not establish it. Current
+read-only rulesets/negative consumer enforcement proof are retained separately.
+No archive/merge/completed closure/admin/global/authentication/release/branch deletion.
+Next: observe repaired-head reviews and CI, run current Ubuntu consumer verification
+on a healthy workstation/environment, then archive/final-check only when premerge
+acceptance passes. Real merge and valid Issue completion need separate authorization.
 
 
 ## Latest source-check compatibility checkpoint — 2026-10-05
