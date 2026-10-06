@@ -48,7 +48,16 @@ remain revision-bound to their recorded pins with unchanged shared-skill hashes.
 Cloud remains deferred and unverified.
 
 F14 premerge acceptance therefore permits the rewrite archive and post-archive
-specification/document checks. It does not claim merge, completed Issue closure,
+specification/document checks. OpenSpec 1.14.0 archived the change as
+`openspec/changes/archive/2026-10-05-workflow-v2-rewrite/` in source commit
+`9ef0ed137d6af3e90569f65480fa4ee881e0395c`. That committed state passed all
+183 source tests with no skips in 414.805 seconds, strict validation of all five
+current specs, the public `check --specs` documentation/specification gate, and a
+direct link check of all seven archived Markdown files with zero findings.
+`git diff --check` passed and the source tree was clean. The following evidence-only
+commit changes no runtime, consumer bundle or specification content.
+
+The archive does not claim merge, completed Issue closure,
 deployed-base/source administrative configuration, release publication, real
 global-host installation or remote branch deletion; those remain separate
 authorization or deployment gates.
