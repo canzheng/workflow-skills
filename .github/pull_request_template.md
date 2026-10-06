@@ -1,6 +1,10 @@
 ## Assignment
 
-Issue/source ID and full versus partial scope. Use Refs for partial work.
+Issue/source ID and full versus partial scope. Use `Closes #N` only for full delivery
+on merge into the default branch with no required deployment/release afterward.
+Use `Refs #N` for partial/child work or pending post-merge obligations. Confirm all
+required acceptance, verification/docs and review before merging; a clean review
+alone does not establish delivery.
 
 ## Changes
 

@@ -45,6 +45,14 @@ versus current wording. An internal repair may state no impact only when explana
 remain accurate. A random Markdown edit does not prove semantic consistency.
 Prepare PR sections Assignment, Changes, Evidence, Documentation and Remaining,
 including acceptance mapping, meaningful design deviations and exact next action.
+In Assignment, use `Closes #N` (or `Closes owner/repo#N`) only when this PR fully
+delivers the Issue on merge into the default branch: acceptance, required environments,
+docs/specs/archive and required review must be satisfied before merge, with no required
+deployment/release afterward. Before an authorized merge, re-read the final scope and
+Remaining section; a clean Codex review alone does not establish delivery. Use `Refs #N`
+for partial/child work, non-default-branch integration or pending post-merge obligations.
+Do not put a closing keyword in those PRs or their commits. The PR description is the
+preferred closing reference; a merge message is not required.
 When publication is available, open/update a draft PR for continuous deterministic
 checks. After implementation, self-verification and final docs assessment, resolve
 known blockers to review and mark the canonical PR Ready for Review, then update the
@@ -68,5 +76,15 @@ passed/failed/pending checks, prerequisites/blockers and exact next action.
 
 Distinguish implemented, locally verified, integration pending, ready for review,
 merged and delivered. Only the full contract permits delivered or completed closure.
+After an authorized merge or observed external merge, read the actual PR and linked
+Issue. Confirm native completed closure and `wf:done` with no stale active workflow
+labels; preserve unrelated/custom labels. The bundled Issue Action reconciles labels,
+not acceptance or closure. If the Issue remains open, reassess full delivery and use
+native authorized closure only when the contract permits it. Editing an already merged
+PR description is not a retroactive closure mechanism. If labels are stale, inspect
+Actions and rerun the Issue completion workflow or dispatch it with the exact Issue
+number; Actions GITHUB_TOKEN writes may suppress downstream events. When dispatch or
+Actions is unavailable, apply the same bounded label update with native tools. Re-read
+actual state after every recovery and report inaccessible completion as pending.
 Never merge/release/change protections/delete remote branches/change global settings
 without separate authority. Required review authorship/independence is reported honestly.

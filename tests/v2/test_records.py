@@ -41,3 +41,17 @@ class RecordsTests(unittest.TestCase):
         updated = managed_update(fresh, fresh, 'new', '<!-- start -->', '<!-- end -->')
         self.assertIn('Human amendment', updated)
         self.assertIn('\nnew\n', updated)
+
+    def test_completed_cancelled_and_reopened_label_projection(self):
+        current = ['wf:review', 'wf:blocked', 'security', 'wf:custom']
+        completed = phase_labels(current, closed=True, state_reason='completed')
+        self.assertEqual(completed, ['security', 'wf:custom', 'wf:done'])
+        cancelled = phase_labels(completed, closed=True, state_reason='not_planned')
+        self.assertEqual(cancelled, ['security', 'wf:custom'])
+        reopened = phase_labels(completed, 'wf:backlog')
+        self.assertEqual(reopened, ['security', 'wf:backlog', 'wf:custom'])
+        self.assertEqual(issue_findings(dict(state='closed', state_reason='completed',
+                         labels=completed, delivery_evidence='PR and acceptance evidence')), [])
+        self.assertTrue(issue_findings(dict(state='open', labels=completed + ['wf:backlog'])))
+        self.assertTrue(issue_findings(dict(state='closed', state_reason='not_planned', labels=completed)))
+        self.assertTrue(issue_findings(dict(state='closed', state_reason='completed', labels=completed)))

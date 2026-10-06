@@ -75,7 +75,8 @@ def fixture_source(root):
         p.write_bytes((ROOT / source).read_bytes())
         assets[dest] = dest
     for source, dest in [('templates/consumer/verify.yml', '.github/workflows/workflow-v2-verify.yml'),
-                         ('.github/workflows/pr-metadata.yml', '.github/workflows/workflow-v2-pr-metadata.yml')]:
+                         ('.github/workflows/pr-metadata.yml', '.github/workflows/workflow-v2-pr-metadata.yml'),
+                         ('.github/workflows/issue-completion.yml', '.github/workflows/workflow-v2-issue-completion.yml')]:
         p = root / dest
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_bytes((ROOT / source).read_bytes())

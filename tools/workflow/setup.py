@@ -35,7 +35,7 @@ def source_bundle(source, revision):
     for name, dest in assets.items():
         relative(name)
         relative(dest)
-    required = required_assets(assets.values())
+    required = required_assets(assets.values(), spec['bundle_version'])
     if not required <= set(assets.values()):
         raise Conflict('Incomplete production bundle: required consumer assets omitted: ' + ', '.join(sorted(required - set(assets.values()))))
     paths = {'.workflow/bundle.json', *assets.keys()}

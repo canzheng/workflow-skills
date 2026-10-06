@@ -1,4 +1,4 @@
-# Optional development runner. Runtime and required offline tests use stdlib only.
+# Optional Python runner. Python runtime/tests use stdlib; Action fixtures also require Node >=20.
 pytest==8.4.2
 iniconfig==2.1.0
 packaging==25.0

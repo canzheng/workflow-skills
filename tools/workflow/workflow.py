@@ -29,7 +29,7 @@ def doctor(root, skill_roots=()):
         if marker in text:
             findings.append(finding('instructions.legacy', 'AGENTS.md', 'Active legacy routing: ' + marker, 'Cut over only the conflicting workflow rule'))
     if m:
-        if not required_assets(m['files']) <= m['files'].keys():
+        if not required_assets(m['files'], m['bundle_version']) <= m['files'].keys():
             findings.append(finding('bundle.incomplete', '.workflow/install-manifest.json', 'Installed manifest omits required assets', 'Restore reviewed complete adoption'))
         if m:
             try:

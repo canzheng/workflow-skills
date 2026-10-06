@@ -5,8 +5,12 @@ phase: wf:backlog, wf:ready, wf:in-progress or wf:review. wf:blocked adds a reas
 missing input and next action to the current phase; wf:deferred requires backlog.
 Ready requires authorized scope, usable acceptance and available dependencies.
 Cancelled closes as not planned; completed closes only after the delivery contract.
-Closure removes workflow labels when permitted, preserving unrelated labels.
-Reopen restores a justified open phase and invalidates assumed completion.
+Completed closure adds wf:done and removes known active phases/modifiers; cancelled
+closure removes known workflow labels without adding wf:done. Unrelated/custom labels
+survive, including unknown wf:* labels. Reopen removes wf:done, preserves an existing
+single phase or restores backlog, and invalidates assumed completion without dispatch.
+Bundle 2.1 installs Issue-event label reconciliation; native state/reason remain the
+authority. See [operations](../operations.md#issue-completion-and-reopening) for recovery.
 
 Normally wf:review means the canonical linked PR is Ready for Review, following
 implementation/self-verification; a draft PR remains wf:in-progress. Independent
@@ -17,8 +21,11 @@ is unavailable. The cumulative WF2 bootstrap is an explicitly documented excepti
 PR-to-Issue phase automation is deferred; no extra issue-stage reviewer is required.
 
 Parent acceptance remains open across partial PRs/children. Use Refs #N for partial
-work; final closing keywords require aggregate acceptance at merge to the intended
-branch. A phase label/comment is not an atomic execution lock. Record branch/session
+work; final closing keywords require aggregate acceptance at merge to the repository
+default branch with no required post-merge deployment/release. Put `Closes #N` in the
+PR description before merge and verify actual closure afterward; editing a merged
+PR body does not trigger retroactive closure. A clean review alone is insufficient.
+A phase label/comment is not an atomic execution lock. Record branch/session
 ownership and re-read; conflicting execution stops only that item.
 
 Before creating, search both open and closed Issues and inspect exact body marker
@@ -36,8 +43,8 @@ python3 tools/workflow/records.py --catalog docs/v2/v2-feature-list.md > /tmp/wf
 
 This reproducible temporary output is not a backlog or sync source. Published Issue
 links belong in a link-only index. Live status never goes back into approved catalogs.
-No Project fields or closure bot is required. Audit can flag suspicious completed
-claims but cannot enforce manual closure or prove that an evidence statement is true.
+No Project fields or custom Issue-closing bot is required. Audit can flag suspicious
+completed claims but cannot enforce manual closure or prove that an evidence statement is true.
 
 ## Design batch traceability
 Use stable logical design/outcome source IDs across reruns, not title/content hashes.

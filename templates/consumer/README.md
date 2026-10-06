@@ -22,3 +22,8 @@ Ubuntu Codex starts; never fetch main/latest implicitly. Repeat matching bootstr
 is offline/no-op and preserves project files/index. See [operations](operations.md)
 for adoption, migration, safe bootstrap and optional explicit global installation.
 The workstation/environment is not a hidden workflow version source.
+
+Full-delivery PRs use `Closes #N`; partial work or post-merge obligations use `Refs #N`.
+Bundle 2.1 includes Issue completion label reconciliation. See
+[activation and recovery](operations.md#issue-completion-and-reopening), including
+agent merges and explicit reconciliation when Actions events do not fire.
