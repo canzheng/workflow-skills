@@ -10,7 +10,10 @@ The rewrite SHALL provide actual fresh Ubuntu Codex repository-local skill
 discovery/execution, exact-revision Ubuntu portability and continuation, native
 GitHub operations and Actions evidence, and separately
 observed merge enforcement before reporting full release validation. Missing access
-SHALL remain explicit pending acceptance and SHALL prevent early rewrite archive.
+to required premerge acceptance SHALL remain explicit pending and SHALL prevent
+early rewrite archive. Unavailable post-merge or administrative access SHALL remain
+a separate authorization/deployment gate and SHALL NOT by itself prevent premerge
+acceptance or archive.
 Cloud setup/discovery SHALL be deferred for this first release under the user-approved
 2026-10-05 scope change; unsuccessful Cloud checks SHALL NOT be reported as passed.
 

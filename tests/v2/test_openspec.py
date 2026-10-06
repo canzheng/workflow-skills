@@ -56,4 +56,9 @@ class OpenSpecTests(unittest.TestCase):
         archived = ROOT / 'openspec/changes/archive/2026-10-05-workflow-v2-rewrite'
         self.assertTrue((archived / 'proposal.md').is_file())
         self.assertNotIn('[ ]', (archived / 'tasks.md').read_text())
-        self.assertTrue((ROOT / 'openspec/specs/workflow-v2-release/spec.md').is_file())
+        current_release = (ROOT / 'openspec/specs/workflow-v2-release/spec.md').read_text()
+        archived_release = (archived / 'specs/workflow-v2-release/spec.md').read_text()
+        for text in (current_release, archived_release):
+            self.assertIn('Missing access\nto required premerge acceptance SHALL remain explicit pending', text)
+            self.assertIn('administrative access SHALL remain\na separate authorization/deployment gate', text)
+            self.assertNotIn('Missing access\nSHALL remain explicit pending acceptance', text)

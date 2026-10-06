@@ -57,6 +57,16 @@ direct link check of all seven archived Markdown files with zero findings.
 `git diff --check` passed and the source tree was clean. The following evidence-only
 commit changes no runtime, consumer bundle or specification content.
 
+Final archive-head review 5423625569 returned P2 thread 4191382859: the release
+spec's blanket missing-access sentence contradicted the approved distinction between
+required premerge acceptance and separately authorized post-merge/administrative
+enforcement. The finding was validated and repaired in both the current release spec
+and archived delta. The focused two-test OpenSpec suite, strict validation of all
+five current specs and the public documentation/specification check pass after the
+repair. The regression requires the narrower premerge gate, retains the separate
+administrative gate and rejects the blanket wording; current-head CI and semantic
+re-review are recorded in the PR checkpoint.
+
 The archive does not claim merge, completed Issue closure,
 deployed-base/source administrative configuration, release publication, real
 global-host installation or remote branch deletion; those remain separate
