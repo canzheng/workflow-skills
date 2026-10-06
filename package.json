@@ -1,0 +1,7 @@
+{
+  "name": "workflow-skills-verification",
+  "private": true,
+  "version": "2.0.0",
+  "description": "Optional pinned OpenSpec verification only",
+  "devDependencies": { "@fission-ai/openspec": "1.14.0" }
+}

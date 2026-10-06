@@ -1,0 +1,552 @@
+"""Small shared validation and filesystem primitives; no task state."""
+import hashlib
+import json
+import os
+import pathlib
+import re
+import stat
+import subprocess
+import tempfile
+
+DIRECTORY_READS_SUPPORTED = os.open in os.supports_dir_fd
+
+START = '<!-- workflow-v2:start -->'
+END = '<!-- workflow-v2:end -->'
+IGNORE_START = '# workflow-v2-dependency:start'
+IGNORE_END = '# workflow-v2-dependency:end'
+SOURCE_URL = 'https://github.com/canzheng/workflow-skills.git'
+PROJECT_FILES = frozenset(('AGENTS.md', '.workflow/config.json', '.workflow/install-manifest.json'))
+SKILLS = ('workflow-design-to-backlog', 'workflow-deliver-issue', 'workflow-risk-review')
+CI_ASSETS = ('.github/workflows/workflow-v2-verify.yml',
+             '.github/workflows/workflow-v2-pr-metadata.yml')
+LEGACY_RUNTIME_PREFIX = 'tools/workflow/'
+RUNTIME_PREFIX = '.agents/tools/workflow/'
+RUNTIME_ASSETS = tuple(RUNTIME_PREFIX + p for p in
+                      ('workflow.py', 'core.py', 'setup.py', 'bootstrap.py', 'checks.py', 'records.py', 'migration.py'))
+LEGACY_RUNTIME_ASSETS = frozenset(name.replace(RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX, 1) for name in RUNTIME_ASSETS)
+REQUIRED_ASSETS = (frozenset('.agents/skills/' + s + '/SKILL.md' for s in SKILLS) |
+                   frozenset(CI_ASSETS) | frozenset(RUNTIME_ASSETS) | frozenset((
+                       'docs/workflow/contract.md', 'docs/workflow/README.md',
+                       'docs/workflow/development.md', 'docs/workflow/operations.md',
+                       '.github/ISSUE_TEMPLATE/feature.yml', '.github/ISSUE_TEMPLATE/bug.yml',
+                       '.github/pull_request_template.md',
+                       '.agents/skills/workflow-risk-review/references/methods.md')))
+PHASES = {'wf:backlog', 'wf:ready', 'wf:in-progress', 'wf:review'}
+MODIFIERS = {'wf:blocked', 'wf:deferred'}
+
+
+class Invalid(ValueError):
+    pass
+
+
+class Conflict(ValueError):
+    pass
+
+
+def finding(code, path, message, remediation, severity='error'):
+    return dict(code=code, severity=severity, path=str(path), message=message, remediation=remediation)
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def git(root, *args):
+    p = subprocess.run(['git', '--no-optional-locks', '-C', str(root), *args], capture_output=True, check=False)
+    if p.returncode:
+        raise Invalid('Git command failed; confirm repository and revision: ' + ' '.join(args))
+    return p.stdout
+
+
+def native_text(value):
+    """Reject strings the OS cannot use before any filesystem/process action."""
+    if '\0' in value:
+        raise Invalid('NUL is not valid in a native path or argument')
+    try:
+        os.fsencode(value)
+    except UnicodeError as exc:
+        raise Invalid('Native path or argument cannot be encoded for this platform') from exc
+
+
+def relative(value):
+    if not isinstance(value, str) or not value or '\\' in value:
+        raise Invalid('Expected a nonempty repository-relative POSIX path')
+    native_text(value)
+    p = pathlib.PurePosixPath(value)
+    if p.is_absolute() or any(x in ('..', '.', '') for x in value.split('/')) or value.startswith('.git/') or value == '.git':
+        raise Invalid('Unsafe repository-relative path: ' + value)
+    return p
+
+
+def safe(root, name):
+    relative(name)
+    path = root / name
+    for part in [path, *path.parents]:
+        if part == root.parent:
+            break
+        if part.is_symlink():
+            raise Invalid('Symlink destination is ambiguous: ' + str(part))
+    if not path.resolve().is_relative_to(root.resolve()):
+        raise Invalid('Path escapes repository: ' + name)
+    return path
+
+
+def repository(value):
+    path = pathlib.Path(value).absolute()
+    for part in [path, *path.parents]:
+        if part.is_symlink():
+            raise Invalid('Repository path contains a symlink: ' + str(part))
+    if not path.is_dir():
+        raise Invalid('Repository target is missing: ' + str(path))
+    top = pathlib.Path(os.fsdecode(git(path, 'rev-parse', '--show-toplevel')).strip()).resolve()
+    if top != path.resolve():
+        raise Invalid('Target must be the explicit Git repository root')
+    return top
+
+
+def read_regular(path):
+    """Bind every directory and the final regular file without following links."""
+    native_text(os.fspath(path))
+    if any(not hasattr(os, flag) for flag in ('O_DIRECTORY', 'O_NOFOLLOW', 'O_NONBLOCK')) or not DIRECTORY_READS_SUPPORTED:
+        raise Invalid('Safe regular-file reading is unavailable on this platform')
+    full = pathlib.Path(os.path.abspath(path))
+    directory_flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_NONBLOCK
+    directory = os.open(full.anchor, directory_flags)
+    try:
+        for part in full.parts[1:-1]:
+            child = os.open(part, directory_flags, dir_fd=directory)
+            os.close(directory)
+            directory = child
+        descriptor = os.open(full.name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
+    finally:
+        os.close(directory)
+    try:
+        if not stat.S_ISREG(os.fstat(descriptor).st_mode):
+            raise Invalid('Expected a regular file: ' + str(path))
+        stream = os.fdopen(descriptor, 'rb')
+        descriptor = None
+        with stream:
+            return stream.read()
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+
+
+def load(path):
+    try:
+        return json.loads(read_regular(path).decode('utf-8'))
+    except (OSError, ValueError) as exc:
+        raise Invalid('Invalid JSON or missing file: ' + str(path)) from exc
+
+
+def config(root):
+    c = load(safe(root, '.workflow/config.json'))
+    return validate_config(root, c)
+
+
+def validate_config(root, c):
+    if not isinstance(c, dict) or type(c.get('schema_version')) is not int or c['schema_version'] != 1 or c.get('workflow') != 'github-v2':
+        raise Invalid('Unsupported workflow configuration schema/version')
+    if not isinstance(c.get('repository'), str) or not re.fullmatch(r'[\w.-]+/[\w.-]+', c['repository']):
+        raise Invalid('repository must be owner/name')
+    for key in ('docs_index', 'contract'):
+        safe(root, c.get(key))
+    if c.get('openspec') not in ('on-demand', 'disabled'):
+        raise Invalid('openspec must be on-demand or disabled')
+    v = c.get('verification')
+    if not isinstance(v, dict) or set(v) != {'local', 'integration'}:
+        raise Invalid('verification requires local and integration arrays')
+    for commands in v.values():
+        if not isinstance(commands, list):
+            raise Invalid('verification commands must be arrays')
+        for cmd in commands:
+            if not isinstance(cmd, list) or not cmd or any(not isinstance(x, str) or not x for x in cmd):
+                raise Invalid('Each verification command must be a nonempty argv array')
+            for argument in cmd:
+                native_text(argument)
+    if not v['local']:
+        raise Invalid('At least one local verification command is required')
+    return c
+
+
+def block(text):
+    a, b = text.count(START), text.count(END)
+    if (a, b) == (0, 0):
+        return None
+    if (a, b) != (1, 1) or text.index(START) >= text.index(END):
+        raise Conflict('Malformed managed AGENTS markers')
+    return text[text.index(START):text.index(END) + len(END)]
+
+
+def shared(name):
+    return any(name.startswith('.agents/skills/' + s + '/') for s in SKILLS)
+
+
+def ignore_block(text):
+    a, b = text.count(IGNORE_START), text.count(IGNORE_END)
+    if (a, b) == (0, 0):
+        return None
+    if (a, b) != (1, 1) or text.index(IGNORE_START) >= text.index(IGNORE_END):
+        raise Conflict('Malformed shared-dependency gitignore markers')
+    return text[text.index(IGNORE_START):text.index(IGNORE_END) + len(IGNORE_END)]
+
+
+def runtime_prefix(names):
+    names = set(names)
+    if any(name.startswith(RUNTIME_PREFIX) for name in names):
+        if LEGACY_RUNTIME_ASSETS & names:
+            raise Invalid('Mixed legacy/new workflow runtime inventory')
+        return RUNTIME_PREFIX
+    return LEGACY_RUNTIME_PREFIX
+
+
+def required_assets(names):
+    # Existing exact pins remain verifiable in their original layout.
+    if runtime_prefix(names) == LEGACY_RUNTIME_PREFIX:
+        return frozenset(name.replace(RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX, 1) for name in REQUIRED_ASSETS)
+    return REQUIRED_ASSETS
+
+
+def dependency(name, m):
+    return shared(name) or (m['schema_version'] == 5 and name.startswith(runtime_prefix(m['files'])))
+
+
+def dependency_files(root, m):
+    result = shared_files(root)
+    if m['schema_version'] == 5:
+        prefix = runtime_prefix(m['files'])
+        folder = safe(root, prefix.rstrip('/'))
+        if folder.exists() and not folder.is_dir():
+            raise Conflict('Runtime dependency namespace is not a directory: ' + prefix)
+        for p in folder.rglob('*') if folder.exists() else ():
+            if p.is_file() or p.is_symlink():
+                result.add(p.relative_to(root).as_posix())
+    return result
+
+
+def source_url(value):
+    if not isinstance(value, str) or not re.fullmatch(r'https://github\.com/[\w.-]+/[\w.-]+', value):
+        raise Invalid('Dependency source URL must be an explicit HTTPS GitHub repository without credentials')
+    return value
+
+
+def shared_files(root):
+    result = set()
+    for skill in SKILLS:
+        folder = safe(root, '.agents/skills/' + skill)
+        if folder.exists() and not folder.is_dir():
+            raise Conflict('Shared skill directory is not a directory: ' + str(folder))
+        for p in folder.rglob('*') if folder.exists() else ():
+            if p.is_file() or p.is_symlink():
+                result.add(p.relative_to(root).as_posix())
+    return result
+
+
+def untracked_shared_policy(root, tracked=None, runtime=None):
+    """Check the index even when shared paths are absent from the worktree."""
+    if tracked is None:
+        tracked = set(os.fsdecode(git(root, 'ls-files', '--cached', '-z')).split('\0')) - {''}
+    namespaces = {'.agents/skills/' + skill for skill in SKILLS}
+    if runtime:
+        namespaces.add(runtime.rstrip('/'))
+    if any(shared(name) or name in namespaces or (runtime and name.startswith(runtime)) for name in tracked):
+        raise Conflict('Shared dependency remains tracked; review explicit cached removal for only the shared dependency namespaces')
+
+
+def retired_runtime_policy(names, tracked):
+    # Reserve only the seven old shared filenames, never unrelated project tools.
+    if runtime_prefix(names) == RUNTIME_PREFIX and LEGACY_RUNTIME_ASSETS & set(tracked):
+        raise Conflict('Retired workflow runtime remains staged/tracked: ' +
+                       sorted(LEGACY_RUNTIME_ASSETS & set(tracked))[0] +
+                       '; review and stage owned legacy runtime deletions')
+
+
+def indexed_ancestor_policy(names, tracked):
+    """No commit candidate can replace a dependency directory with an index file."""
+    tracked = set(tracked)
+    for name in set(names) | PROJECT_FILES | {'.gitignore'}:
+        for parent in pathlib.PurePosixPath(name).parents:
+            ancestor = parent.as_posix()
+            if ancestor != '.' and ancestor in tracked:
+                raise Conflict('Indexed destination ancestor conflict preserved: ' + ancestor)
+
+
+def dependency_policy(root, m):
+    """Validate project tracking and declared dependency storage without index writes."""
+    if m['schema_version'] not in (3, 4, 5):
+        raise Conflict('Existing adoption needs reviewed setup/update (schema 3 or 4)')
+    ignored_dependency = m['schema_version'] in (4, 5)
+    if ignored_dependency:
+        policy = safe(root, '.gitignore')
+        current = ignore_block(read_regular(policy).decode('utf-8')) if policy.is_file() else None
+        if not current or digest(current.encode()) != m['gitignore_block_hash']:
+            raise Conflict('Managed shared-dependency ignore block modified or missing')
+    for name in dependency_files(root, m):
+        safe(root, name)
+        if name not in m['files']:
+            raise Conflict('Unmanaged shared dependency asset: ' + name)
+    effective_ignore_policy(root, m['files'], ignored_shared=ignored_dependency, ignored_runtime=m['schema_version'] == 5)
+    tracked = set(os.fsdecode(git(root, 'ls-files', '-z')).split('\0')) - {''}
+    retired_runtime_policy(m['files'], tracked)
+    indexed_ancestor_policy(m['files'], tracked)
+    committed = (set(os.fsdecode(git(root, 'ls-tree', '-r', '--name-only', '-z', 'HEAD')).split('\0')) - {''}
+                 if head_revision(root) else set())
+    required = {name for name in m['files'] if not ignored_dependency or not dependency(name, m)} | PROJECT_FILES
+    if ignored_dependency:
+        required.add('.gitignore')
+        untracked_shared_policy(root, tracked, runtime_prefix(m['files']) if m['schema_version'] == 5 else None)
+    # A completely unstaged initial adoption is reviewable. Indexed/committed
+    # managed assets identify adoption even when provenance was removed from the
+    # index. Existing project-owned AGENTS/config alone are not that sentinel.
+    adoption = {name for name in m['files'] if not ignored_dependency or not dependency(name, m)} | {'.workflow/install-manifest.json'}
+    policy_names = PROJECT_FILES | {'.gitignore'}
+    adoption |= policy_names & (tracked - committed)
+    # Existing human policy files are not adoption by themselves. Introducing
+    # the managed routing/ignore block into their staged snapshot is adoption.
+    for name, marker in [('AGENTS.md', START), ('.gitignore', IGNORE_START)]:
+        if name in tracked & committed:
+            previous = git(root, '--no-replace-objects', 'show', 'HEAD:' + name)
+            try:
+                indexed = git(root, '--no-replace-objects', 'show', ':' + name)
+            except Invalid:
+                adoption.add(name)
+                continue
+            if marker.encode() in indexed and marker.encode() not in previous:
+                adoption.add(name)
+    if adoption & (tracked | committed) and required - tracked:
+        raise Conflict('Workflow installation path is not tracked: ' + sorted(required - tracked)[0] +
+                       '; review and commit the complete adoption')
+    if adoption & (tracked | committed):
+        staged_installation(root)
+
+
+def staged_installation(root):
+    """Validate the commit candidate independently; never refresh/write the index."""
+    entries = {}
+    for record in git(root, 'ls-files', '--stage', '-z').split(b'\0'):
+        if not record:
+            continue
+        metadata, name = record.split(b'\t', 1)
+        mode, oid, stage = metadata.decode().split()
+        entries.setdefault(os.fsdecode(name), []).append((mode, oid, stage))
+
+    def read(name):
+        staged = entries.get(name, [])
+        if len(staged) != 1 or staged[0][0] not in ('100644', '100755') or staged[0][2] != '0':
+            raise Conflict('Required path is missing, unmerged or not a regular file: ' + name)
+        return git(root, '--no-replace-objects', 'cat-file', 'blob', staged[0][1])
+
+    try:
+        m = validate_manifest(root, json.loads(read('.workflow/install-manifest.json')))
+        # An explicit schema-1 update may leave a coherent old tracked snapshot
+        # in the index until the caller stages the migration; setup owns no index.
+        if m['schema_version'] not in (1, 3, 4, 5) or not required_assets(m['files']) <= m['files'].keys():
+            raise Conflict('Provenance must describe a complete adoption')
+        retired_runtime_policy(m['files'], entries)
+        indexed_ancestor_policy(m['files'], entries)
+        if m['schema_version'] in (4, 5):
+            if any(dependency(name, m) or name == runtime_prefix(m['files']).rstrip('/') and m['schema_version'] == 5 for name in entries):
+                raise Conflict('Shared dependency must not be staged/tracked')
+            policy = ignore_block(read('.gitignore').decode())
+            if not policy or digest(policy.encode()) != m['gitignore_block_hash']:
+                raise Conflict('Managed ignore block differs from staged provenance')
+            effective_ignore_policy(root, m['files'], proposed=read('.gitignore').decode(),
+                                    ignored_shared=True, ignored_runtime=m['schema_version'] == 5, staged_paths=entries, read_staged=read)
+        c = validate_config(root, json.loads(read('.workflow/config.json')))
+        for key in ('docs_index', 'contract'):
+            read(c[key])
+        for name, expected in m['files'].items():
+            if m['schema_version'] in (4, 5) and dependency(name, m):
+                continue  # Pinned dependency bytes are validated in the working tree/bootstrap.
+            if digest(read(name)) != expected:
+                raise Conflict('Owned bytes differ from staged provenance: ' + name)
+        b = block(read('AGENTS.md').decode())
+        if not b or digest(b.encode()) != m['agents_block_hash']:
+            raise Conflict('Managed AGENTS block differs from staged provenance')
+    except ValueError as exc:
+        raise Conflict('Staged workflow installation invalid: ' + str(exc)) from exc
+
+
+def effective_ignore_policy(root, names, proposed=None, ignored_shared=False, ignored_runtime=False,
+                            staged_paths=None, read_staged=None):
+    """Read Git's effective policy, including nested/global/info rules, before writes."""
+    projects = {'.agents/skills/workflow-project-trackability-probe/SKILL.md',
+                '.agents/tools/workflow-project-trackability-probe.py'}
+    prefix = runtime_prefix(names)
+    def managed(name):
+        return shared(name) or shared(name + '/') or name.startswith(prefix) or (name + '/').startswith(prefix)
+    if staged_paths is None:
+        for namespace in ('.agents/skills', '.agents/tools'):
+            folder = safe(root, namespace)
+            for p in folder.rglob('*') if folder.exists() else ():
+                name = p.relative_to(root).as_posix()
+                if managed(name):
+                    continue
+                safe(root, name)
+                if p.is_file():
+                    projects.add(name)
+                elif p.is_dir():
+                    projects.add(name + '/workflow-project-trackability-probe.md')
+    else:
+        for name in staged_paths:
+            if name.startswith(('.agents/skills/', '.agents/tools/')) and not managed(name):
+                relative(name)
+                projects.add(name)
+                for parent in pathlib.PurePosixPath(name).parents:
+                    if str(parent) in ('.agents/skills', '.agents/tools'):
+                        break
+                    projects.add((parent / 'workflow-project-trackability-probe.md').as_posix())
+    dependency = {name for name in names if shared(name) and ignored_shared or name.startswith(prefix) and ignored_runtime}
+    required = (set(names) - dependency) | PROJECT_FILES
+    if ignored_shared:
+        required.add('.gitignore')
+    candidates = sorted(required | dependency | projects)
+
+    def inspect(worktree):
+        command = ['git', '-C', str(root)]
+        if worktree is not None:
+            command += ['--work-tree=' + str(worktree)]
+            # Relative repository excludes must continue to resolve at the real root.
+            exclude = subprocess.run(['git', '-C', str(root), 'config', '--path', '--get', 'core.excludesFile'], capture_output=True, check=False)
+            if exclude.returncode not in (0, 1):
+                raise Invalid('Cannot inspect repository exclude configuration')
+            if exclude.returncode == 0:
+                path = pathlib.Path(os.fsdecode(exclude.stdout).strip())
+                command += ['-c', 'core.excludesFile=' + str(path if path.is_absolute() else root / path)]
+        result = subprocess.run(command + ['check-ignore', '--no-index', '-z', '--stdin'],
+                                input=os.fsencode('\0'.join(candidates) + '\0'), capture_output=True, check=False)
+        if result.returncode not in (0, 1):
+            raise Invalid('Cannot inspect effective shared/project skill ignore policy')
+        ignored = set(os.fsdecode(result.stdout).split('\0')) - {''}
+        if required & ignored:
+            raise Conflict('Workflow installation path is ignored; remove the conflicting rule: ' + sorted(required & ignored)[0])
+        if dependency - ignored:
+            raise Conflict('Shared dependency is not ignored: ' + sorted(dependency - ignored)[0])
+        if projects & ignored:
+            raise Conflict('Project-specific skill/tool path is ignored; narrow project ignore policy: ' + sorted(projects & ignored)[0])
+
+    if proposed is None:
+        inspect(None)
+    else:
+        # Preview the proposed root policy without touching project files or index.
+        with tempfile.TemporaryDirectory(prefix='wf2-ignore-preview-') as directory:
+            preview = pathlib.Path(directory)
+            (preview / '.gitignore').write_text(proposed, encoding='utf-8')
+            policies = set()
+            for name in candidates:
+                for parent in pathlib.PurePosixPath(name).parents:
+                    if str(parent) == '.':
+                        continue
+                    ignore_name = (parent / '.gitignore').as_posix()
+                    policies.add(ignore_name)
+                (preview / name).parent.mkdir(parents=True, exist_ok=True)
+            for name in sorted(policies):
+                if staged_paths is None:
+                    p = safe(root, name)
+                    data = read_regular(p) if p.is_file() else None
+                else:
+                    data = read_staged(name) if name in staged_paths else None
+                if data is not None:
+                    dest = preview / name
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    dest.write_bytes(data)
+            inspect(preview)
+
+
+def owned(name):
+    relative(name)
+    return (name.startswith(LEGACY_RUNTIME_PREFIX) or name.startswith(RUNTIME_PREFIX) or
+            any(name.startswith('.agents/skills/' + s + '/') for s in SKILLS) or
+            name in ('docs/workflow/contract.md', 'docs/workflow/README.md',
+                     'docs/workflow/development.md', 'docs/workflow/operations.md',
+                     '.github/ISSUE_TEMPLATE/feature.yml', '.github/ISSUE_TEMPLATE/bug.yml',
+                     '.github/pull_request_template.md',
+                     '.github/workflows/workflow-v2-verify.yml',
+                     '.github/workflows/workflow-v2-pr-metadata.yml'))
+
+
+def valid_bundle_version(value):
+    return isinstance(value, str) and re.fullmatch(r'2\.\d+\.\d+', value) is not None
+
+
+def manifest(root):
+    p = safe(root, '.workflow/install-manifest.json')
+    if not p.exists():
+        return None
+    m = load(p)
+    return validate_manifest(root, m)
+
+
+def validate_manifest(root, m):
+    if not isinstance(m, dict) or type(m.get('schema_version')) is not int or m.get('schema_version') not in (1, 2, 3, 4, 5) or not isinstance(m.get('files'), dict) or not re.fullmatch(r'[0-9a-f]{40}', str(m.get('source_revision', ''))) or not valid_bundle_version(m.get('bundle_version')):
+        raise Invalid('Invalid installation manifest')
+    if m['schema_version'] in (2, 3, 4, 5):
+        source_url(m.get('source_url'))
+    if m['schema_version'] == 3 and m.get('skill_storage') != 'tracked':
+        raise Invalid('Schema-3 adoption requires tracked skill storage')
+    if m['schema_version'] in (4, 5) and m.get('skill_storage') != 'ignored':
+        raise Invalid('Schema-4 adoption requires ignored skill storage')
+    if m['schema_version'] == 5 and m.get('dependency_storage') != 'ignored':
+        raise Invalid('Schema-5 adoption requires ignored skills and runtime dependencies')
+    if m['schema_version'] in (2, 4, 5):
+        if not re.fullmatch(r'[0-9a-f]{64}', str(m.get('gitignore_block_hash', ''))):
+            raise Invalid('Invalid shared-dependency ignore hash')
+    for name, h in m['files'].items():
+        if not owned(name) or not isinstance(h, str) or not re.fullmatch(r'[0-9a-f]{64}', h):
+            raise Invalid('Unsafe manifest path/hash: ' + name)
+        safe(root, name)
+    if m['schema_version'] == 5 and runtime_prefix(m['files']) != RUNTIME_PREFIX:
+        raise Invalid('Schema-5 dependency runtime layout must be .agents/tools/workflow/')
+    runtime_prefix(m['files'])
+    if not re.fullmatch(r'[0-9a-f]{64}', str(m.get('agents_block_hash', ''))):
+        raise Invalid('Invalid managed instruction hash')
+    return m
+
+
+def head_revision(root):
+    """Resolve a real commit or a verified unborn branch without inventing history."""
+    resolved = subprocess.run(['git', '-C', str(root), 'rev-parse', '--verify', '--quiet', 'HEAD^{commit}'], capture_output=True, check=False)
+    if resolved.returncode == 0:
+        revision = resolved.stdout.decode().strip()
+    else:
+        ref = git(root, 'symbolic-ref', '--quiet', 'HEAD').decode().strip()
+        exists = subprocess.run(['git', '-C', str(root), 'show-ref', '--verify', '--quiet', ref], capture_output=True, check=False)
+        if not ref.startswith('refs/heads/') or exists.returncode != 1:
+            raise Invalid('Cannot resolve repository commit; inspect Git integrity')
+        revision = None  # An unborn branch has content, but no tested commit to invent.
+    return revision
+
+
+def content_identity(root):
+    """Bind diagnostics/evidence to actual tracked and nonignored untracked bytes."""
+    names = set(os.fsdecode(git(root, 'ls-files', '-z', '--cached', '--others', '--exclude-standard')).split('\0')) - {''}
+    m = manifest(root)
+    dependency_modified = False
+    if m and m['schema_version'] in (2, 3, 4, 5):
+        actual_shared = dependency_files(root, m)
+        names.update(actual_shared)
+        dependency_modified = bool(actual_shared - m['files'].keys())
+        for name, expected in m['files'].items():
+            if dependency(name, m):
+                names.add(name)
+                p = safe(root, name)
+                dependency_modified |= not p.is_file() or digest(read_regular(p)) != expected
+    h = hashlib.sha256()
+    for name in sorted(names):
+        relative(name)
+        p = root / name
+        # A tracked symlink is hashed as its link text, never its destination bytes.
+        if p.is_symlink():
+            data = os.fsencode('symlink:' + p.readlink().as_posix())
+        elif not p.exists():
+            data = b'missing'
+        elif p.is_file():
+            data = read_regular(p)
+        else:
+            data = b'non-file'
+        h.update(os.fsencode(name) + b'\0' + digest(data).encode() + b'\0')
+    revision = head_revision(root)
+    return dict(revision=revision,
+                branch=git(root, 'branch', '--show-current').decode().strip(),
+                dirty=revision is None or bool(git(root, 'status', '--porcelain')) or dependency_modified,
+                dependency_modified=dependency_modified, content_digest=h.hexdigest())

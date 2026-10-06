@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "bundle_version": "2.0.0",
+  "assets": {
+    "tools/workflow/core.py": ".agents/tools/workflow/core.py",
+    "tools/workflow/bootstrap.py": ".agents/tools/workflow/bootstrap.py",
+    "tools/workflow/setup.py": ".agents/tools/workflow/setup.py",
+    "tools/workflow/workflow.py": ".agents/tools/workflow/workflow.py",
+    "tools/workflow/checks.py": ".agents/tools/workflow/checks.py",
+    "tools/workflow/records.py": ".agents/tools/workflow/records.py",
+    ".agents/skills/workflow-design-to-backlog/SKILL.md": ".agents/skills/workflow-design-to-backlog/SKILL.md",
+    ".agents/skills/workflow-deliver-issue/SKILL.md": ".agents/skills/workflow-deliver-issue/SKILL.md",
+    ".agents/skills/workflow-risk-review/SKILL.md": ".agents/skills/workflow-risk-review/SKILL.md",
+    ".github/ISSUE_TEMPLATE/feature.yml": ".github/ISSUE_TEMPLATE/feature.yml",
+    ".github/ISSUE_TEMPLATE/bug.yml": ".github/ISSUE_TEMPLATE/bug.yml",
+    ".github/pull_request_template.md": ".github/pull_request_template.md",
+    "docs/workflow/contract.md": "docs/workflow/contract.md",
+    "templates/consumer/README.md": "docs/workflow/README.md",
+    "templates/consumer/development.md": "docs/workflow/development.md",
+    "templates/consumer/operations.md": "docs/workflow/operations.md",
+    ".agents/skills/workflow-risk-review/references/methods.md": ".agents/skills/workflow-risk-review/references/methods.md",
+    "tools/workflow/migration.py": ".agents/tools/workflow/migration.py",
+    "templates/consumer/verify.yml": ".github/workflows/workflow-v2-verify.yml",
+    ".github/workflows/pr-metadata.yml": ".github/workflows/workflow-v2-pr-metadata.yml"
+  }
+}
