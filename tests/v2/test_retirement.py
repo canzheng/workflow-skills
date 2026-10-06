@@ -27,13 +27,14 @@ class RetirementTests(unittest.TestCase):
                 if entry['disposition'] == 'current-v2':
                     self.assertEqual(entry['destinations'], [entry['path']])
 
-    def test_clean_clone_has_no_retired_tree_and_keeps_active_rewrite(self):
+    def test_clean_clone_has_no_retired_tree_and_keeps_archived_rewrite(self):
         with tempfile.TemporaryDirectory() as td:
             clone = pathlib.Path(td) / 'clone'
             subprocess.run(['git', 'clone', '-q', '--no-hardlinks', str(ROOT), str(clone)], check=True)
             for name in ('skills', 'docs/planning', 'docs/lessons', 'docs/superpowers',
                          'docs/history', 'AGENTS-global-workflow.md', 'install.sh', 'environment.yml', 'bin'):
                 self.assertFalse((clone / name).exists(), name)
-            archive = clone / 'openspec/changes/archive'
-            self.assertFalse(archive.exists())
-            self.assertTrue((clone / 'openspec/changes/workflow-v2-rewrite/tasks.md').is_file())
+            self.assertFalse((clone / 'openspec/changes/workflow-v2-rewrite').exists())
+            archive = clone / 'openspec/changes/archive/2026-10-05-workflow-v2-rewrite'
+            self.assertTrue((archive / 'tasks.md').is_file())
+            self.assertNotIn('[ ]', (archive / 'tasks.md').read_text())

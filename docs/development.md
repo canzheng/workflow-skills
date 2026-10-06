@@ -68,7 +68,7 @@ also requires the pinned specification checks below.
 Install pinned local tooling with `npm ci --ignore-scripts` (Node >=20.19.0).
 Tested Node 24.19.0, npm 11.9.0, OpenSpec 1.14.0. See
 [specification procedure](workflow/openspec.md). Disable telemetry only for commands:
-`OPENSPEC_TELEMETRY=0 DO_NOT_TRACK=1 node_modules/.bin/openspec validate workflow-v2-rewrite --strict --no-interactive`.
+`OPENSPEC_TELEMETRY=0 DO_NOT_TRACK=1 node_modules/.bin/openspec validate --specs --strict --no-interactive`.
 No global OpenSpec configuration is changed. Actual environment results and versions
 are in [acceptance evidence](validation/v2-acceptance.md).
 

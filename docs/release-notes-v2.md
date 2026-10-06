@@ -2,7 +2,8 @@
 
 This rewrite branch implements the approved v2 system and is available for review.
 It has not merged or released. Required Ubuntu discovery/actual-use acceptance is verified in the independent
-workstation session; final current-head review and archive checks remain open.
+workstation session; final current-head source/consumer reviews passed and the rewrite
+change is archived with post-archive checks recorded in the acceptance evidence.
 Cloud is deferred by the user-approved 2026-10-05 scope change; see [actual evidence](validation/v2-acceptance.md).
 
 V2 selects one short repository contract and three repository-scoped skills:
@@ -49,5 +50,5 @@ Tracked schema-3 and mixed schema-4 consumers migrate explicitly; setup never un
 Optional explicit global skills-only installation into ~/.agents/skills is supported,
 without installing global project policy or changing authentication. No real global
 installation was performed by this rewrite task; tests use isolated targets.
-Ubuntu discovery/use is verified; final review/archive and authorized merge remain pending;
+Ubuntu discovery/use and final review/archive are verified; authorized merge remains pending;
 Cloud is deferred. This is not a published release.

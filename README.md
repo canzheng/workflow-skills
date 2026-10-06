@@ -119,9 +119,10 @@ from the selected repository, not the global install directory.
 
 ## Acceptance boundary
 
-F01–F13 are implemented/locally verified. Required Ubuntu native skill discovery/use
-and runtime verification are recorded; F14 awaits final semantic review/archive
-and the separately authorized merge/deployed-base checks. [Evidence](docs/validation/v2-acceptance.md) distinguishes
+F01–F14 premerge acceptance is verified and the rewrite change is archived on this
+delivering branch. Required Ubuntu native skill discovery/use, runtime verification,
+GitHub checks, semantic review and consumer enforcement are recorded; the separately
+authorized merge/deployed-base checks remain. [Evidence](docs/validation/v2-acceptance.md) distinguishes
 runtime, native discovery, semantic use/review, actual CI/enforcement and merge.
 Cloud is deferred/unverified, not passed. Merge/release/admin/global writes require
 explicit authorization; no local pass or PR alone means delivered. The v1 tree is

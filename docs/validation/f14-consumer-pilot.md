@@ -1,5 +1,58 @@
 # F14 real consumer pilot
 
+## Final premerge acceptance checkpoint — 2026-10-05
+
+Required premerge acceptance is complete. Source branch
+`rewrite/workflow-skills-v2` was supplied and verified clean at
+`820b349679b88f19f4dea27aaa20e87a08b4ac37`. Its executable implementation
+`687552bf15e4c128deb584f8727fce23722d8b74` and reviewed evidence head
+`9517df4d9fb2f10fde9c571e962adb0b4e57373b` passed 183 tests with no skips and
+strict specifications on Ubuntu 24.04.5 with Python 3.12.14 and 3.14.7 in source
+push run 37377321908 and PR run 37377329392. Codex review 6003670456 reported no
+major issues. The later source head is documentation-only; its push/PR runs
+37378671805/37378663573 passed.
+
+The source-owned installer previewed and applied the exact `820b349...` bundle to
+consumer branch `pilot/shared-skill-bootstrap` from starting revision
+`75ed97dd1030b64e806300686c86dc1ab3101304`. Before caller staging, setup changed
+only the manifest, consumer operations and ignored shared dependency bytes. The raw
+index digest stayed `3d51c44fccaa98712e6e57a387fb296cee6f8e2426d9231d06c1ad35a2fdff69`;
+project skill, config, `.gitignore` and `AGENTS.md` hashes were unchanged. All 20
+manifest hashes matched; only the three shared skill namespaces and
+`.agents/tools/workflow/` were ignored, while the pantry project skill remained
+tracked and non-ignored.
+
+Consumer commit `c7097a8eaf6c2a0ea5e9a640ae3fb014f7decfd3` contains only the
+reviewed manifest and operations changes. The actual installed runtime passed the
+retained 60-test consumer selection in 241.403 seconds on Python 3.13.13, including
+bound-read/FIFO/symlink/substitution, catalog-cycle/absent-root, timeout,
+malformed-input, staged-index, broad-ignore and missing/modified/symlinked
+dependency negatives. Public check, `--run-local`, doctor and a network-disabled
+repeat bootstrap passed; the repeat returned `changes: []`.
+
+Fresh local and literal GitHub clones began without the ignored runtime. The exact
+source entrypoint materialized 11 dependency files, matched all 20 hashes, preserved
+the project skill and raw index, passed check/run-local/doctor and stayed clean.
+The local clone index stayed
+`5335342755e156d05f9a3251146cefdf7aedacadc7ba714667066ebe07f596d6`;
+the literal remote clone index stayed
+`646136e8ea660ecd1fb2c3d14fd2e8f95e10efc2b42b420a3e68770bd4df0d09`.
+Both offline repeats were no-ops.
+
+Consumer push run 37409812735, PR run 37409816140 and trusted-base PR-contract run
+37409814639 passed at `c7097a8...`. Review request 6008830517 was observed at the
+five-minute poll and disarmed after review 6008865031 reported no major issues at
+that exact head; all 14 historical PR review threads are resolved. The earlier
+native Ubuntu startup catalog, actual three-skill use and no-chat continuation
+remain revision-bound to their recorded pins with unchanged shared-skill hashes.
+Cloud remains deferred and unverified.
+
+F14 premerge acceptance therefore permits the rewrite archive and post-archive
+specification/document checks. It does not claim merge, completed Issue closure,
+deployed-base/source administrative configuration, release publication, real
+global-host installation or remote branch deletion; those remain separate
+authorization or deployment gates.
+
 ## Latest diagnostic-probe checkpoint — 2026-10-05
 
 Source implementation `dd0abff37c839bac3cdbcf3debbf344c46f2ec73` on `rewrite/workflow-skills-v2`

@@ -49,7 +49,11 @@ class OpenSpecTests(unittest.TestCase):
             r = subprocess.run([str(CLI), 'validate', '--specs', '--strict', '--no-interactive'], cwd=root, env={**os.environ, 'OPENSPEC_TELEMETRY': '0', 'DO_NOT_TRACK': '1'}, capture_output=True, text=True)
             self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
 
-    def test_rewrite_is_valid_and_active_with_environment_gate(self):
-        r = subprocess.run([str(CLI), 'validate', 'workflow-v2-rewrite', '--strict', '--no-interactive'], cwd=ROOT, env={**os.environ, 'OPENSPEC_TELEMETRY': '0', 'DO_NOT_TRACK': '1'}, capture_output=True, text=True)
+    def test_rewrite_is_valid_and_archived_after_environment_gate(self):
+        r = subprocess.run([str(CLI), 'validate', '--specs', '--strict', '--no-interactive'], cwd=ROOT, env={**os.environ, 'OPENSPEC_TELEMETRY': '0', 'DO_NOT_TRACK': '1'}, capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertTrue((ROOT / 'openspec/changes/workflow-v2-rewrite/tasks.md').exists())
+        self.assertFalse((ROOT / 'openspec/changes/workflow-v2-rewrite').exists())
+        archived = ROOT / 'openspec/changes/archive/2026-10-05-workflow-v2-rewrite'
+        self.assertTrue((archived / 'proposal.md').is_file())
+        self.assertNotIn('[ ]', (archived / 'tasks.md').read_text())
+        self.assertTrue((ROOT / 'openspec/specs/workflow-v2-release/spec.md').is_file())

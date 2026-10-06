@@ -4,8 +4,9 @@
 - [Approved design](v2/v2-design.md), [capabilities](v2/v2-capability-map.md),
   [feature acceptance](v2/v2-feature-list.md): approved target, not completion claims.
 - [Migration baseline](migration-v1-v2.md): history and instruction cutover.
-- [Rewrite change](../openspec/changes/workflow-v2-rewrite/proposal.md): active
-  implementation and acceptance owner; its tasks hold temporary bootstrap evidence.
+- [Archived rewrite change](../openspec/changes/archive/2026-10-05-workflow-v2-rewrite/proposal.md):
+  completed implementation and premerge acceptance record; its tasks retain the
+  revision-bound bootstrap evidence.
 
 Current documentation describes implemented branch behavior. Target behavior is
 explicitly labeled; v1-only histories are

@@ -7,7 +7,6 @@ skipped when the pinned local CLI is absent. Required spec acceptance stays pend
 
 ```sh
 npm ci --ignore-scripts
-node_modules/.bin/openspec validate workflow-v2-rewrite --strict --no-interactive
 node_modules/.bin/openspec validate --specs --strict --no-interactive
 ```
 
@@ -23,6 +22,8 @@ and run `node_modules/.bin/openspec archive CHANGE_ID --yes` in the delivering
 branch, then rerun spec/docs checks on the archive diff. The CLI validates structure;
 it cannot establish product completion or independent review. The skill/contract
 prevents premature archive; do not claim that CLI flags enforce environmental gates.
-Archive is not merge. Pending environment acceptance keeps the rewrite active.
+Archive is not merge. The completed rewrite record is at
+`openspec/changes/archive/2026-10-05-workflow-v2-rewrite/`; later changes follow the
+same acceptance-before-archive rule.
 The disposable receipt fixture executes actual validation/archive without changing
-this repository's active rewrite. OpenSpec apply is allowed within authorized scope.
+the repository's completed rewrite record. OpenSpec apply is allowed within authorized scope.

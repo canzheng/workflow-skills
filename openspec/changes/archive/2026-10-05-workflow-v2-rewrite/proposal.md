@@ -8,11 +8,12 @@ no merge, release, administration or global-change authority is added.
 Replace local v1 lifecycle machinery with repository-scoped skills and GitHub delivery.
 
 ## What Changes
-Implement the approved [design](../../../docs/v2/v2-design.md),
-[capabilities](../../../docs/v2/v2-capability-map.md) and
-[WF2-F01–F14 acceptance](../../../docs/v2/v2-feature-list.md).
+Implement the approved [design](../../../../docs/v2/v2-design.md),
+[capabilities](../../../../docs/v2/v2-capability-map.md) and
+[WF2-F01–F14 acceptance](../../../../docs/v2/v2-feature-list.md).
 This change owns the whole bounded rewrite; WF2-F14 is its closing owner.
-No intermediate feature archives it. Required environment acceptance is pending.
+No intermediate feature archived it. Required premerge acceptance completed before
+this record was archived.
 
 ## Impact
 Repository routing, portable utilities, three skills, GitHub templates/checks,

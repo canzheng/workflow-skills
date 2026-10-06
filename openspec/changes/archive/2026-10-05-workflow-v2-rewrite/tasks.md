@@ -3,9 +3,26 @@
 - [x] 1. Establish repository-scoped foundation (WF2-F01–F06).
 - [x] 2. Implement specifications, risk proof, handoffs, checks and scenarios (WF2-F07–F11).
 - [x] 3. Inventory migration and retire active v1 assets (WF2-F12–F13).
-- [ ] 4. Complete required Ubuntu skill-use/runtime/GitHub/review/enforcement acceptance and archive (WF2-F14).
+- [x] 4. Complete required Ubuntu skill-use/runtime/GitHub/review/enforcement acceptance and archive (WF2-F14).
 
 ## Bootstrap checkpoint evidence
+
+Final premerge acceptance at source
+`820b349679b88f19f4dea27aaa20e87a08b4ac37` and consumer
+`c7097a8eaf6c2a0ea5e9a640ae3fb014f7decfd3` is recorded in
+`docs/validation/v2-acceptance.md` and
+`docs/validation/f14-consumer-pilot.md`. The source-owned exact-pin update,
+actual installed 60-test suite, public consumer commands, two fresh-clone
+materializations, 20 hashes, narrow ignores, project-skill trackability, raw-index
+preservation, network-disabled no-op repeats, consumer Actions and exact-head
+semantic review all passed. The five-minute review monitor observed terminal review
+6008865031 and disarmed; all consumer review threads are resolved. Native Ubuntu
+discovery/use evidence remains valid with unchanged shared-skill hashes and Cloud is
+deferred. OpenSpec 1.14.0 archived this record as
+`2026-10-05-workflow-v2-rewrite`; post-archive checks are recorded in the linked
+acceptance evidence. The archive is not a merge or release.
+merge, completed Issue closure, administration, release, global installation and
+remote deletion remain outside authorization.
 
 2026-10-04: F01 instruction cutover implemented from clean baseline
 `d2aaf1904b2ccbe7fbab9733627e9c82fcf12f53` on `rewrite/workflow-skills-v2`.
@@ -557,7 +574,7 @@ approval. User Ubuntu initial discovery/actual3-skill use remains at unchanged b
 Cloud deferred, intermittent Ubuntu26 source-suite cause still unresolved.
 
 The user requested automatic review continuation. The optional
-[host integration design](../../../docs/workflow/review-continuation.md) specifies scoped
+[host integration design](../../../../docs/workflow/review-continuation.md) specifies scoped
 wake-ups, current-head completion evidence (including comments/reactions), duplicate/
 concurrency controls, authorized remediation and the merge boundary. This chat exposes
 notification scheduling but no Codex wake-up/event-subscription tool, so no monitor
@@ -611,7 +628,7 @@ No merge/completed closure/admin/global/auth/release/remote-deletion action.
 ## Wider local malformed-input review — 2026-10-05
 
 The user clarified that the latest PR P2 was already addressed and requested wider
-pattern review. [The local review](../../../docs/validation/wider-boundary-review.md) records three independently
+pattern review. [The local review](../../../../docs/validation/wider-boundary-review.md) records three independently
 reproduced analogous defects (argv partial execution, unencodable paths, malformed
 Markdown URLs), their public negative controls and inspected rollback ownership cases.
 Runtime7be9f1538b96d7dd98247e7e5eadffa042350496 passes121/no skips on managed runtime
@@ -661,7 +678,7 @@ No extra user workstation discovery session is required for these runtime-only r
 Cloud is deferred; real global installation unperformed; Ubuntu26 historical source
 JSON error remains unexplained. Source required-check administration and real merge →
 completed Issue observation remain pending separate authorization, not simulated.
-See [wider boundary review](../../../docs/validation/wider-boundary-review.md) for discriminating controls and documentation impact.
+See [wider boundary review](../../../../docs/validation/wider-boundary-review.md) for discriminating controls and documentation impact.
 
 ## Current shared-runtime checkpoint — 2026-10-05
 
@@ -676,9 +693,9 @@ consumer push/PR Actions pass; existing-main metadata also passes. The new trust
 base pin-fetch YAML is locally exercised; actual deployment/event execution on main
 awaits the separately authorized adoption merge.
 
-[Exact evidence and review controls](../../../docs/validation/wider-boundary-review.md) supersede earlier
+[Exact evidence and review controls](../../../../docs/validation/wider-boundary-review.md) supersede earlier
 current/default claims below; earlier revision-specific observations remain historical.
-[Ubuntu setup handoff](../../../docs/validation/ubuntu-workstation-handoff.md) records exact usable pins and
+[Ubuntu setup handoff](../../../../docs/validation/ubuntu-workstation-handoff.md) records exact usable pins and
 source-first commands. Both latest P2s were reproduced before repair; current-head
 semantic review and final archive/docs/spec checks remain pending. Original native
 Ubuntu discovery/use retains its unchanged skill hashes. Consumer ruleset requires
@@ -695,8 +712,8 @@ All137/no skips pass locally and Ubuntu24.04.5; current source/consumer docs/spe
 cover indexed ancestors, complete runtime retirement and executable migration.
 Actual remote fresh clones, installed public boundary tests and consumer push/PR/
 metadata pass;11 pinned dependencies remain ignored/untracked under four namespaces.
-[Exact current evidence](../../../docs/validation/wider-boundary-review.md) supersedes earlier checkpoints.
-[Source-first Ubuntu command](../../../docs/validation/ubuntu-workstation-handoff.md) records both full SHAs.
+[Exact current evidence](../../../../docs/validation/wider-boundary-review.md) supersedes earlier checkpoints.
+[Source-first Ubuntu command](../../../../docs/validation/ubuntu-workstation-handoff.md) records both full SHAs.
 Original native discovery/use keeps its actual unchanged skill hashes. Current-head
 semantic review and final archive remain pending; deployed-base new metadata and
 real merge→valid completion are separate authorization gates. Cloud deferred, real
@@ -845,7 +862,7 @@ metadata37330140351 pass; current source CI is recorded in the PR checkpoint.
 Current repaired-head semantic review and archive remain pending. Native Ubuntu
 catalog/use retains unchanged-skill original evidence. Cloud is deferred; actual
 merge/completed closure, deployed-base metadata and source PR-contract admin gates
-remain pending separate authorization. See [wider review](../../../docs/validation/wider-boundary-review.md).
+remain pending separate authorization. See [wider review](../../../../docs/validation/wider-boundary-review.md).
 
 ## Parent-chain recovery and Issue snapshot review repairs — 2026-10-05
 
