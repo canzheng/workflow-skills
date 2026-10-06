@@ -127,3 +127,13 @@ runtime, native discovery, semantic use/review, actual CI/enforcement and merge.
 Cloud is deferred/unverified, not passed. Merge/release/admin/global writes require
 explicit authorization; no local pass or PR alone means delivered. The v1 tree is
 retired, with provenance at the [recorded baseline](docs/migration-v1-v2.md).
+
+## Completing Issues
+
+Use `Closes #N` in a full-delivery PR description; use `Refs #N` when scope or required
+post-merge deployment/release remains. GitHub closes on merge into the default branch.
+Bundle 2.1 includes Issue-event label reconciliation: completed -> wf:done, cancellation
+-> no active workflow labels, reopening -> backlog unless a phase is already present.
+The delivery agent verifies actual closure after merge. See
+[activation and recovery](docs/operations.md#issue-completion-and-reopening), including
+Cloud agent merges, suppressed GITHUB_TOKEN events and existing-Issue reconciliation.

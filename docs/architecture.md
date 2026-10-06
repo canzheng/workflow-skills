@@ -31,7 +31,12 @@ verify.py is source development tooling, not part of the consumer runtime.
 setup consumes every entry and verifies actual bytes against the full source SHA.
 Consumer config remains user-owned. templates/consumer contains rendered consumer
 guidance rather than a duplicate skill source. GitHub forms/PR templates ship;
-consumer verification and trusted-base PR metadata workflows ship as owned assets.
+consumer verification, trusted-base PR metadata and Issue completion label workflows
+ship as owned assets. The Issue Action runs inline trusted github-script with only
+issues:write and no checkout, projects fresh native state/reason into exact owned
+labels and offers on-demand reconciliation. GitHub closing keywords own Issue closure;
+automation never decides delivery or executes Issue/PR bodies. Bundle 2.1 requires
+this asset while 2.0 inventories remain valid.
 The generic verification job invokes configured local argv commands plus mechanical
 checks; source development CI/dependencies are not copied into applications.
 

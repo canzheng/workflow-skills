@@ -105,7 +105,9 @@ wf:in-progress. Pending review/environment requirements remain explicit.
 When PR publication is unavailable, a committed reviewable branch and exact evidence
 may use the branch-only review fallback. The cumulative WF2 rewrite is a bounded
 bootstrap exception, not the default consumer lifecycle. Labels are updated with
-native authorized tools; no phase automation or closure bot is required.
+native authorized tools during execution. The bundled Issue completion Action mirrors
+native closure/reopening into known workflow labels; it never decides acceptance,
+closes Issues, merges PRs or dispatches implementation.
 
 ## Evidence and completion
 Report implemented, locally verified, integration pending, ready for review,
@@ -115,6 +117,20 @@ content, not an unrelated commit. Material changes invalidate affected evidence.
 Delivery requires approved acceptance, relevant tests and required environments,
 accurate docs/specs/archive, resolved required review, merge to the intended branch
 and any required deployment/release. A PR or local pass alone does not deliver.
+Final-delivery PR descriptions use `Closes #N` only when merge into the default
+branch completes the contract. Partial/child work, non-default-branch integration
+and required post-merge deployment/release use `Refs #N` without closing keywords
+in commits. Reassess final scope before merge; clean review alone is insufficient.
+After an authorized or externally observed merge, verify the linked Issue's actual
+state and reconcile completion through native authorized tools if necessary.
+Completed closure uses native state_reason completed plus `wf:done`; other closure
+reasons never gain that label. Closed Issues lose only the four known phases and
+wf:blocked/wf:deferred. Reopening removes wf:done and preserves an existing single
+phase, otherwise returns to wf:backlog without authorizing execution. Preserve
+unrelated/custom labels. Native state/reason, not labels, remain authoritative.
+Automation must be installed on the default branch and permitted to run; suppressed
+GITHUB_TOKEN events, existing Issues and failed runs require explicit reconciliation.
+See installed operations guidance for recovery and activation limits.
 
 ## Authorization
 Authorized implementation includes routine reversible code/tests/docs decisions.

@@ -19,6 +19,7 @@ PROJECT_FILES = frozenset(('AGENTS.md', '.workflow/config.json', '.workflow/inst
 SKILLS = ('workflow-design-to-backlog', 'workflow-deliver-issue', 'workflow-risk-review')
 CI_ASSETS = ('.github/workflows/workflow-v2-verify.yml',
              '.github/workflows/workflow-v2-pr-metadata.yml')
+COMPLETION_ASSET = '.github/workflows/workflow-v2-issue-completion.yml'
 LEGACY_RUNTIME_PREFIX = 'tools/workflow/'
 RUNTIME_PREFIX = '.agents/tools/workflow/'
 RUNTIME_ASSETS = tuple(RUNTIME_PREFIX + p for p in
@@ -33,6 +34,7 @@ REQUIRED_ASSETS = (frozenset('.agents/skills/' + s + '/SKILL.md' for s in SKILLS
                        '.agents/skills/workflow-risk-review/references/methods.md')))
 PHASES = {'wf:backlog', 'wf:ready', 'wf:in-progress', 'wf:review'}
 MODIFIERS = {'wf:blocked', 'wf:deferred'}
+TERMINAL_LABELS = {'wf:done'}
 
 
 class Invalid(ValueError):
@@ -200,11 +202,14 @@ def runtime_prefix(names):
     return LEGACY_RUNTIME_PREFIX
 
 
-def required_assets(names):
+def required_assets(names, bundle_version='2.0.0'):
     # Existing exact pins remain verifiable in their original layout.
+    required = REQUIRED_ASSETS
+    if tuple(map(int, bundle_version.split('.'))) >= (2, 1, 0):
+        required |= {COMPLETION_ASSET}
     if runtime_prefix(names) == LEGACY_RUNTIME_PREFIX:
-        return frozenset(name.replace(RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX, 1) for name in REQUIRED_ASSETS)
-    return REQUIRED_ASSETS
+        return frozenset(name.replace(RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX, 1) for name in required)
+    return required
 
 
 def dependency(name, m):
@@ -340,7 +345,7 @@ def staged_installation(root):
         m = validate_manifest(root, json.loads(read('.workflow/install-manifest.json')))
         # An explicit schema-1 update may leave a coherent old tracked snapshot
         # in the index until the caller stages the migration; setup owns no index.
-        if m['schema_version'] not in (1, 3, 4, 5) or not required_assets(m['files']) <= m['files'].keys():
+        if m['schema_version'] not in (1, 3, 4, 5) or not required_assets(m['files'], m['bundle_version']) <= m['files'].keys():
             raise Conflict('Provenance must describe a complete adoption')
         retired_runtime_policy(m['files'], entries)
         indexed_ancestor_policy(m['files'], entries)
@@ -462,7 +467,7 @@ def owned(name):
                      '.github/ISSUE_TEMPLATE/feature.yml', '.github/ISSUE_TEMPLATE/bug.yml',
                      '.github/pull_request_template.md',
                      '.github/workflows/workflow-v2-verify.yml',
-                     '.github/workflows/workflow-v2-pr-metadata.yml'))
+                     '.github/workflows/workflow-v2-pr-metadata.yml', COMPLETION_ASSET))
 
 
 def valid_bundle_version(value):

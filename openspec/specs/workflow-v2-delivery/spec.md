@@ -53,6 +53,44 @@ when publication is unavailable; approved cumulative rewrite bootstrap is an exc
 - **THEN** a committed reviewable branch and precise evidence can use the review fallback
 - **AND** required integration, review and merge remain pending
 
+### Requirement: Final delivery closing references and observation
+The delivery skill SHALL use a PR-description closing reference only when the PR
+fully delivers its Issue on merge into the default branch. Partial/child scope,
+non-default-branch integration and required post-merge deployment/release SHALL use
+non-closing references without closing keywords in commits. Before an authorized
+merge the agent SHALL reassess final scope, acceptance and remaining obligations;
+clean code review alone SHALL NOT establish delivery.
+
+#### Scenario: Final delivery is merged by a separate Cloud agent
+- **WHEN** an authorized agent observes the full-delivery PR merged
+- **THEN** it reads actual PR and Issue state and confirms completed closure and reconciled labels
+- **AND** unavailable or failed completion is reported pending and recovered through authorized native tools
+
+#### Scenario: Merge leaves required deployment pending
+- **WHEN** a reviewed PR still requires deployment or release before acceptance is complete
+- **THEN** it uses a non-closing reference and the Issue remains open after merge
+- **AND** closure occurs only after the remaining contract obligations are met
+
+### Requirement: Bounded native Issue label projection
+Bundle 2.1 SHALL reconcile known workflow Issue labels from fresh native state and
+state_reason on closure/reopening and explicit dispatch. Completed closure SHALL add
+wf:done and remove known phases/modifiers; cancellation or duplicate closure SHALL
+remove known workflow labels without asserting completion. Reopening SHALL remove
+wf:done and preserve one existing phase or restore backlog without dispatching work.
+Unrelated and unknown wf:* labels SHALL be preserved. Native state/reason SHALL remain
+authoritative; projection SHALL NOT close Issues, decide acceptance, merge or execute
+Issue/PR content. Older 2.0 pins SHALL remain verifiable without this Action.
+
+#### Scenario: Event is delayed or a write suppresses downstream events
+- **WHEN** closure/reopening is newer than the event or an Actions GITHUB_TOKEN write does not trigger the Issue workflow
+- **THEN** a run or explicit dispatch reconciles from the current Issue rather than event state
+- **AND** bounded incremental edits preserve concurrent unrelated labels and state changes are retried or fail visibly
+
+#### Scenario: Unknown closure reason or unrelated Issue
+- **WHEN** a workflow Issue has an unknown closed reason or multiple open phases
+- **THEN** reconciliation fails for manual inspection without inventing completion or readiness
+- **AND** Issues without a source marker or known workflow labels and all PRs remain untouched
+
 ### Requirement: One-shot initial design backlog
 Design shaping SHALL treat one or more supplied existing design documents as the
 durable intent source and produce the smallest coherent initial or MVP delivery-outcome

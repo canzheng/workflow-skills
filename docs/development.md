@@ -9,8 +9,10 @@ target filesystem (repository Git directory, or same-filesystem TMPDIR for expli
 shared-only installs). Captured files and empty private directories are retained; see operations for
 recovery and manual-cleanup guidance.
  Tested: Python 3.12.14 on Debian 13 and Python 3.12.3 on Ubuntu 24.04. No Conda,
-Node, global AGENTS/skills or GitHub token is needed for offline verification.
-The required runner uses Python's standard library. The optional pytest runner
+global AGENTS/skills or GitHub token is needed for offline verification.
+Node >=20 is required for source Action fixtures; consumer CLI checks use Python/Git.
+The required runner uses Python's standard library and invokes Node for Action
+fixtures. The optional pytest runner
 and its dependencies are pinned in requirements.txt; never substitute an
 unrelated interpreter if the selected environment is missing.
 
@@ -26,7 +28,7 @@ fi
 git cat-file -e 'd2aaf1904b2ccbe7fbab9733627e9c82fcf12f53^{commit}'
 ```
 
-History preparation needs remote read access. Once present, the standard-library
+History preparation needs remote read access. Once present, the Python/Node
 suite runs offline. Consumer adoption/update uses an exact pinned source
 fetch; repeat verification needs no fetch or source retirement suite. Source CI checks out full history.
 
@@ -97,3 +99,14 @@ Source bundle verification uses the same layout-aware required inventory as setu
 Complete legacy tracked compatibility bundles remain verifiable; missing runtime
 modules and mixed legacy/new inventories are rejected. This does not permit legacy
 runtime layouts for ignored schema-5 installations.
+
+## Issue completion Action verification
+
+Source verification now also requires Node >=20 to execute the actual github-script
+body against native API/event fixtures. The Python test runner fails if Node is
+missing; it never counts an absent JS runtime as a pass. Node is not a consumer CLI
+runtime requirement: GitHub hosts github-script, and installed consumer checks remain
+Python/Git. Fixtures cover completed/cancelled/reopened states, non-workflow Issues,
+custom-label preservation, permission errors, retry and concurrent edits. Local
+fixtures are not evidence that a live repository permits Actions; observe the
+post-merge Issue event and actual run separately.

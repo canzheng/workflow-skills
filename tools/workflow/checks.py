@@ -137,7 +137,7 @@ def check(root, args):
             findings.append(finding('config.path', c[key], 'Configured document is missing', 'Restore or correct configured path'))
     m = manifest(root)
     if m:
-        if not required_assets(m['files']) <= m['files'].keys():
+        if not required_assets(m['files'], m['bundle_version']) <= m['files'].keys():
             findings.append(finding('bundle.incomplete', '.workflow/install-manifest.json', 'Installed manifest omits required assets', 'Restore reviewed complete adoption; do not hide missing files in provenance'))
         if m:
             try:
@@ -163,7 +163,7 @@ def check(root, args):
             destinations.add(dest)
             if not safe(root, source).is_file():
                 findings.append(finding('bundle.missing', source, 'Production asset missing', 'Assemble complete bundle before installation'))
-        required = required_assets(destinations)
+        required = required_assets(destinations, spec['bundle_version'])
         if not required <= destinations:
             findings.append(finding('bundle.incomplete', '.workflow/bundle.json', 'Required consumer assets omitted: ' + ', '.join(sorted(required - destinations)), 'Include every mandatory consumer asset'))
     for s in SKILLS:

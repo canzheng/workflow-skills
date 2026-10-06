@@ -275,3 +275,57 @@ per-root warnings and do not block other catalogs/tools. Genuinely absent option
 roots remain silent. This explicitly handles Python3.14's changed non-strict
 resolution behavior. Source CI verifies Python3.12 and3.14 sequentially under the
 same required-check name; generic consumer CI retains its declared Python3.12 runtime.
+
+## Issue completion and reopening
+
+Bundle 2.1 installs `.github/workflows/workflow-v2-issue-completion.yml`.
+GitHub native closing keywords close Issues: put `Closes #N` in the PR description
+before merging into the default branch only when merge fully delivers the contract.
+Use `Refs #N` for partial work, non-default-branch integration or required post-merge
+deployment/release. Clean Codex review alone is not full acceptance. If a PR is
+already merged, editing its description does not retroactively close an Issue;
+inspect acceptance and close it explicitly as completed when authorized.
+
+The Action does not close Issues. On closed/reopened events it reads current native
+state/reason, not the old event's state, and changes only these known labels:
+`wf:backlog`, `wf:ready`, `wf:in-progress`, `wf:review`, `wf:blocked`, `wf:deferred`,
+`wf:done`. Completed closure removes active labels and adds wf:done; not_planned or
+duplicate closure removes these labels without asserting delivery. Unknown/null
+closed reasons fail for manual inspection. Reopening removes wf:done, preserves a
+single existing phase and its modifiers, or adds wf:backlog. Multiple phases require
+manual reconciliation; reopening never authorizes implementation. Custom labels,
+including other wf:* names, are preserved. Missing wf:done/backlog labels are created
+only when needed; existing label definitions are preserved.
+
+Workflow Issues carry a stable `<!-- workflow-source: ID -->` body marker or a known
+workflow label. Keep the source marker to recognize them after cancellation removes
+all workflow labels. Other Issues and PRs are left alone. A completed label is a
+projection of native state, not proof of acceptance, review, release or delivery.
+
+Commit the workflow on the repository's default branch and permit Actions and
+`actions/github-script@v7` under Settings -> Actions -> General. The job requests
+only issues:write, checks out no code and never executes Issue/PR text. Installation
+does not enable Actions, change organization restrictions/protections, create live
+labels or repair existing Issues. Older 2.0 pins remain supported; explicitly update
+to a tested 2.1 source pin through setup preview/apply to install this Action.
+
+A Cloud agent merging via native tools or a user/GitHub App token normally produces
+Issue events. Writes made with an Actions GITHUB_TOKEN generally do not start another
+workflow. After every authorized merge, the delivery agent verifies actual Issue
+closure and labels. If events were suppressed, the workflow was absent/disabled, or
+labels are stale, inspect the run and dispatch reconciliation with the exact number:
+
+```sh
+gh workflow run workflow-v2-issue-completion.yml --repo OWNER/REPO -f issue_number=N
+```
+
+Use the source workflow name `issue-completion.yml` in this source repository.
+workflow_dispatch is supported even when triggered with GITHUB_TOKEN; that token
+needs actions:write to dispatch, separately from the reconciliation job's issues:write.
+An agent with insufficient dispatch access can make the same bounded label edits
+through authorized native tools. Verify actual results; never assume dispatch succeeded.
+A failed job can be rerun safely because it re-reads current Issue state, preserving
+unrelated labels. Concurrent state changes are retried up to three times; continuing
+changes fail visibly and require another run. This is not an atomic remote transaction.
+Existing closed Issues are not swept automatically. Install first, then dispatch
+individual reconciliation or perform native recovery; no close/reopen cycle is needed.

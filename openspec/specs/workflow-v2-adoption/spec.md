@@ -166,6 +166,13 @@ commands and mechanical checks without assuming source development dependencies 
 executing environment-specific integration commands. Setup SHALL NOT configure
 repository protections or overwrite unmanaged or modified workflows.
 
+Bundle versions from 2.1 SHALL also include the Issue completion label Action with
+only issues:write job permissions, no checkout and explicit recovery dispatch.
+Older 2.0 bundle inventories SHALL remain supported without silently installing new
+automation. Explicit setup updates SHALL own the new workflow through normal pin,
+hash, collision, modified-file preservation and uninstall rules. Installation SHALL
+NOT claim default-branch activation or organization permission enforcement.
+
 #### Scenario: Consumer commands and ownership
 - **WHEN** a consumer installs the pinned bundle with declared application verification
 - **THEN** the installed verification workflow runs those commands and mechanical checks
@@ -176,6 +183,12 @@ repository protections or overwrite unmanaged or modified workflows.
 - **WHEN** setup installs workflow files
 - **THEN** trusted-base metadata still requires base adoption
 - **AND** required check enforcement remains pending until separately configured and observed
+
+#### Scenario: Explicit completion Action adoption
+- **WHEN** an older pinned consumer previews and applies a reviewed 2.1 update
+- **THEN** the completion workflow is installed and recorded in provenance without changing native Issue state
+- **AND** missing mandatory 2.1 assets fail before writes while complete 2.0 snapshots remain valid
+- **AND** unmanaged workflow collisions and modified managed workflows are preserved during update and uninstall
 
 ### Requirement: Tracked policy and pinned local skill dependencies
 Consumer adoption SHALL track project policy/configuration, CI/templates,

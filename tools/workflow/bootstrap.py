@@ -12,7 +12,7 @@ def bootstrap(args):
     m = manifest(root)
     if not m:
         raise Conflict('Installation provenance missing; perform one-time adoption first')
-    if not required_assets(m['files']) <= m['files'].keys():
+    if not required_assets(m['files'], m['bundle_version']) <= m['files'].keys():
         raise Conflict('Incomplete installed manifest; restore reviewed complete adoption')
     dependency_policy(root, m)
     expected = {name: h for name, h in m['files'].items() if dependency(name, m)}

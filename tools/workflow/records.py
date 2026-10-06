@@ -3,7 +3,7 @@ import argparse
 import json
 import pathlib
 import re
-from core import Conflict, Invalid, MODIFIERS, PHASES
+from core import Conflict, Invalid, MODIFIERS, PHASES, TERMINAL_LABELS
 
 
 def source_match(items, source_id):
@@ -14,7 +14,7 @@ def source_match(items, source_id):
     return matches[0] if matches else None
 
 
-def phase_labels(current, phase=None, modifiers=(), closed=False):
+def phase_labels(current, phase=None, modifiers=(), closed=False, state_reason=None):
     """Compute bounded label edit from a freshly read snapshot, preserving others."""
     if not closed and phase not in PHASES:
         raise Invalid('An open workflow Issue requires one supported phase')
@@ -22,7 +22,9 @@ def phase_labels(current, phase=None, modifiers=(), closed=False):
         raise Invalid('Unknown workflow modifier')
     if 'wf:deferred' in modifiers and phase != 'wf:backlog' and not closed:
         raise Invalid('Deferred work must be backlog')
-    return sorted((set(current) - PHASES - MODIFIERS) | (set() if closed else {phase, *modifiers}))
+    terminal = TERMINAL_LABELS if state_reason == 'completed' else set()
+    return sorted((set(current) - PHASES - MODIFIERS - TERMINAL_LABELS) |
+                  (terminal if closed else {phase, *modifiers}))
 
 
 def managed_update(expected, fresh, replacement, start, end):
@@ -67,9 +69,13 @@ def issue_findings(item):
     if state == 'closed':
         if labels & (PHASES | MODIFIERS):
             problems.append('Closed Issue has stale workflow labels')
+        if labels & TERMINAL_LABELS and reason != 'completed':
+            problems.append('Completion label contradicts native closure reason')
         if reason == 'completed' and not (evidence and evidence.strip()):
             problems.append('Completed claim has no indexed delivery evidence; inspect acceptance and merge manually')
     else:
+        if labels & TERMINAL_LABELS:
+            problems.append('Open Issue has a stale completion label')
         if len(labels & PHASES) != 1:
             problems.append('Open workflow Issue must have exactly one phase')
         if 'wf:deferred' in labels and 'wf:backlog' not in labels:

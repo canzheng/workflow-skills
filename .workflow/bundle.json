@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "bundle_version": "2.0.0",
+  "bundle_version": "2.1.0",
   "assets": {
     "tools/workflow/core.py": ".agents/tools/workflow/core.py",
     "tools/workflow/bootstrap.py": ".agents/tools/workflow/bootstrap.py",
@@ -21,6 +21,7 @@
     ".agents/skills/workflow-risk-review/references/methods.md": ".agents/skills/workflow-risk-review/references/methods.md",
     "tools/workflow/migration.py": ".agents/tools/workflow/migration.py",
     "templates/consumer/verify.yml": ".github/workflows/workflow-v2-verify.yml",
-    ".github/workflows/pr-metadata.yml": ".github/workflows/workflow-v2-pr-metadata.yml"
+    ".github/workflows/pr-metadata.yml": ".github/workflows/workflow-v2-pr-metadata.yml",
+    ".github/workflows/issue-completion.yml": ".github/workflows/workflow-v2-issue-completion.yml"
   }
 }

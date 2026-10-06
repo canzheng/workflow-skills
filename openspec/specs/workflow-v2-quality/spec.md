@@ -83,3 +83,8 @@ missing-evidence finding, without treating mechanical validity as semantic deliv
 - **THEN** public check returns structured invalid-input JSON without changing the snapshot or index
 - **AND** absent, null, empty or whitespace-only references leave completed claims missing evidence
 - **AND** a nonblank reference still requires manual semantic acceptance and merge review
+
+#### Scenario: Completion label contradicts native state
+- **WHEN** an open Issue or a closed Issue not completed carries wf:done
+- **THEN** audit reports the contradictory terminal label
+- **AND** wf:done on completed closure never substitutes for actual delivery evidence
