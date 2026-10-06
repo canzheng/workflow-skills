@@ -76,8 +76,8 @@ passed/failed/pending checks, prerequisites/blockers and exact next action.
 
 Distinguish implemented, locally verified, integration pending, ready for review,
 merged and delivered. Only the full contract permits delivered or completed closure.
-After an authorized merge or observed external merge, read the actual PR and linked
-Issue. Confirm native completed closure and `wf:done` with no stale active workflow
+For a full-delivery Issue, after an authorized or externally observed merge, read
+the actual PR and linked Issue. Confirm native completed closure and `wf:done` with no stale active workflow
 labels; preserve unrelated/custom labels. The bundled Issue Action reconciles labels,
 not acceptance or closure. If the Issue remains open, reassess full delivery and use
 native authorized closure only when the contract permits it. Editing an already merged

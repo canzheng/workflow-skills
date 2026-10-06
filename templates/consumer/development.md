@@ -28,8 +28,8 @@ or configure branch protection. An authorized administrator must observe check
 contexts and require v2 verification/v2 PR contract where appropriate, then read back
 settings and observe blocking. Merge protection and skill discovery remain separate
 acceptance. Existing workflow name collisions are conflicts; modified owned workflows
-are preserved on update/uninstall. Bundle 2.1 also installs workflow-v2-issue-completion.yml for bounded Issue label
-reconciliation after native closure/reopening. It requests issues:write, executes
+are preserved on update/uninstall. Bundle 2.1 also installs
+workflow-v2-issue-completion.yml for bounded Issue label reconciliation after native closure/reopening. It requests issues:write, executes
 no checkout/head code and never closes Issues or decides delivery. See operations
 for default-branch activation, event suppression and explicit recovery.
 
