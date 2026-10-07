@@ -155,6 +155,8 @@ def validate_config(root, c):
         safe(root, c.get(key))
     if c.get('openspec') not in ('on-demand', 'disabled'):
         raise Invalid('openspec must be on-demand or disabled')
+    if c.get('author_local_review', 'disabled') not in ('disabled', 'optional', 'required'):
+        raise Invalid('author_local_review must be disabled, optional or required')
     v = c.get('verification')
     if not isinstance(v, dict) or set(v) != {'local', 'integration'}:
         raise Invalid('verification requires local and integration arrays')

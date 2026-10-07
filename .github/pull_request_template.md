@@ -14,6 +14,9 @@ Problem, resulting behavior, scope/exclusions and material design deviations.
 
 Acceptance -> command/inspection -> actual result, environment and full revision.
 Distinguish passed, failed, skipped and pending checks; identify dirty content.
+When author local review is selected, record covered head/base SHAs, effort and
+substantive findings/disposition, or "none available" with the agent used.
+This self-check does not replace independent PR review.
 
 ## Documentation
 

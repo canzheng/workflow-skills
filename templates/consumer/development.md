@@ -55,3 +55,22 @@ shared-skills-only installation. Capture initial native catalog separately from
 actual use; files/hash checks do not prove either. Required Ubuntu discovery/use and
 GitHub enforcement remain separate acceptance. Cloud discovery is deferred for this
 first release; no published Cloud environment is needed for workstation use.
+
+## Author local review policy
+
+Project-owned `.workflow/config.json` may set `"author_local_review": "optional"`
+or `"author_local_review": "required"`. New setup uses `"disabled"`; omission in
+existing configurations has the same default. Updates preserve project settings.
+Project instructions may also enable this self-check. Required means run the
+agent's native report-only local review, or record "none available" if it has no
+such facility; it does not require installing another agent. Failed fetches or
+review launches remain pending. See the delivery contract for timing, exact
+head/base evidence, findings and reruns. `check` validates the policy value in
+working and staged configuration; it does not prove a local review took place.
+
+The outcome is agent-neutral. Codex can use `codex review --base <base>` or its
+TUI `/review`; these are commands, not workflow skills. Claude Code may use its
+native `code-review` skill only in a mode that reports locally without posting
+comments, applying fixes or changing the issue checkout. Verify the selected
+tool's behavior and availability in the issue worktree before running it. Other
+agents without native local review use the explicit unavailability record.

@@ -76,6 +76,15 @@ are in [acceptance evidence](validation/v2-acceptance.md).
 
 ## Consumer preparation versus source authoring
 
+Consumer `.workflow/config.json` supports `author_local_review` with `disabled`
+(default, including omission), `optional`, or `required`. Setup initializes it to
+`disabled` and preserves existing project policy on updates. This controls the
+delivery skill's author self-check; CLI checks validate the value in working and
+staged snapshots, not whether semantic review occurred. Required allows an
+explicit "none available" record for agents without native local review; actual
+launch/fetch failures remain pending. See [consumer guidance](../templates/consumer/development.md)
+and [the contract](workflow/contract.md) for tool examples and revision evidence.
+
 Source canonical skills remain tracked. Consumers track project policy/config,
 CI/docs/project skills and schema-5 provenance; shared skills and
 .agents/tools/workflow runtime are ignored dependencies. Fetch the tracked pin and

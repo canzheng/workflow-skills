@@ -723,7 +723,7 @@ def setup(args):
                 raise Invalid('Fresh setup requires --repository owner/name')
             c = dict(schema_version=1, workflow='github-v2', repository=args.repository,
                      docs_index='docs/workflow/README.md', contract='docs/workflow/contract.md',
-                     openspec='on-demand', verification={'local': [['python3', runtime_prefix(assets) + 'workflow.py', 'check', '--repo', '.']], 'integration': []})
+                     openspec='on-demand', author_local_review='disabled', verification={'local': [['python3', runtime_prefix(assets) + 'workflow.py', 'check', '--repo', '.']], 'integration': []})
             changes['.workflow/config.json'] = (json.dumps(c, indent=2) + '\n').encode()
         m = dict(schema_version=5 if ignored_dependency else 3, skill_storage=args.skill_storage, bundle_version=version, source_revision=args.revision, source_url=url,
                  files={name: digest(data) for name, data in assets.items()}, agents_block_hash=digest(entry.encode()))

@@ -1,5 +1,12 @@
 # Operations
 
+For author local review, edit the project-owned `.workflow/config.json` field
+`author_local_review` (`disabled`, `optional`, or `required`), then run `check`
+and review/commit the policy. Setup preserves existing configuration. Existing
+consumers must adopt an exact source pin supporting this policy through normal
+setup preview/apply to receive the updated contract, skill and validator.
+See [development](development.md) for defaults and evidence limits.
+
 ## One-time adoption and explicit updates
 
 Use the source checkout at an exact full commit, explicit consumer Git root and
@@ -282,7 +289,7 @@ Bundle 2.1 installs `.github/workflows/workflow-v2-issue-completion.yml`.
 GitHub native closing keywords close Issues: put `Closes #N` in the PR description
 before merging into the default branch only when merge fully delivers the contract.
 Use `Refs #N` for partial work, non-default-branch integration or required post-merge
-deployment/release. Clean Codex review alone is not full acceptance. If a PR is
+deployment/release. Clean code review alone is not full acceptance. If a PR is
 already merged, editing its description does not retroactively close an Issue;
 inspect acceptance and close it explicitly as completed when authorized.
 
