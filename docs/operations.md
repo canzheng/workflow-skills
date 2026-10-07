@@ -1,5 +1,12 @@
 # Operations
 
+For author local review, edit the project-owned `.workflow/config.json` field
+`author_local_review` (`disabled`, `optional`, or `required`), then run `check`
+and review/commit the policy. Setup preserves existing configuration. Existing
+consumers must adopt an exact source pin supporting this policy through normal
+setup preview/apply to receive the updated contract, skill and validator.
+See [development](development.md) for defaults and evidence limits.
+
 ## One-time adoption and explicit updates
 
 Use the source checkout at an exact full commit, explicit consumer Git root and

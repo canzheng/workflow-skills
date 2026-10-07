@@ -44,6 +44,33 @@ class CheckTests(unittest.TestCase):
         p.write_text(json.dumps(dict(repository='fixture/consumer', body=body)))
         return p
 
+    def test_author_local_review_policy_in_working_and_staged_config(self):
+        path = self.target / '.workflow/config.json'
+        original = json.loads(path.read_text())
+        self.assertEqual(original['author_local_review'], 'disabled')
+        # Adopt all project files first so staged validation is active.
+        commit(self.target)
+        for policy in ('disabled', 'optional', 'required', None):
+            with self.subTest(policy=policy):
+                config = dict(original)
+                if policy is None:
+                    del config['author_local_review']
+                else:
+                    config['author_local_review'] = policy
+                path.write_text(json.dumps(config))
+                subprocess.run(['git', '-C', str(self.target), 'add', '.workflow/config.json'], check=True)
+                run('check', '--repo', self.target)
+        for policy in ('enabled', '', True, None, 1, [], {}):
+            with self.subTest(invalid=policy):
+                config = dict(original, author_local_review=policy)
+                path.write_text(json.dumps(config))
+                run('check', '--repo', self.target, expect=2)
+                subprocess.run(['git', '-C', str(self.target), 'add', '.workflow/config.json'], check=True)
+                # A valid working copy cannot conceal invalid staged policy.
+                path.write_text(json.dumps(original))
+                result = run('check', '--repo', self.target, expect=1)
+                self.assertIn('author_local_review', json.dumps(result))
+
     def test_public_installed_checker_and_no_impact_pr(self):
         run('check', '--repo', self.target)
         run('check', '--repo', self.target, '--pr-json', self.snapshot(BODY))

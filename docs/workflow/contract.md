@@ -99,8 +99,31 @@ Normal published work proceeds from wf:in-progress through implementation,
 self-verification and documentation reassessment to a canonical PR Ready for Review,
 then wf:review. Draft PRs provide continuous deterministic checks while the Issue
 remains in progress. Formal independent semantic/code review uses the Ready PR;
-ordinary work has no mandatory independent pre-PR reviewer stage. Targeted risk
-methods remain available during implementation. Returning to draft restores
+ordinary work has no mandatory independent pre-PR reviewer stage.
+
+Projects may enable an author-run local code review self-check through project
+instructions or `.workflow/config.json` `author_local_review`: `disabled` (the
+default when omitted; no bundle requirement), `optional` (author discretion), or
+`required` (complete the self-check or record native review unavailability before
+Ready). Preserve additional project instructions. This is an author self-check,
+never independent review and never a replacement for required PR review.
+When selected, run after self-verification/documentation reassessment and before
+Ready for Review, and repeat before later remote review requests after material
+changes. Use the coding agent's native local code review on the committed head
+against its fetched base, in report-only mode, at effort proportionate to risk.
+Resolve the issue worktree and exact head/base SHAs; do not review another checkout
+or allow the review to post comments, apply fixes or switch the target checkout.
+Validate substantive findings, fix valid ones and rerun affected verification;
+speculative or invalid findings may be dropped with a reason. Review the resulting
+committed head after material fixes. Record the covered head/base SHAs, effort,
+substantive findings and disposition in PR evidence (or branch-only handoff).
+If no native local review exists, record "none available" and the agent used;
+this satisfies the bundle's required attempt/record path, not an independent
+review requirement. Launch/fetch failures remain pending, not unavailable-tool
+success. Mechanical checks validate the configuration, not execution or semantic
+acceptance of this self-check.
+
+Targeted risk methods remain available during implementation. Returning to draft restores
 wf:in-progress. Pending review/environment requirements remain explicit.
 When PR publication is unavailable, a committed reviewable branch and exact evidence
 may use the branch-only review fallback. The cumulative WF2 rewrite is a bounded

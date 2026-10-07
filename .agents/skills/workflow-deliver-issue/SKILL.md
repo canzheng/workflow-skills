@@ -49,13 +49,27 @@ In Assignment, use `Closes #N` (or `Closes owner/repo#N`) only when this PR full
 delivers the Issue on merge into the default branch: acceptance, required environments,
 docs/specs/archive and required review must be satisfied before merge, with no required
 deployment/release afterward. Before an authorized merge, re-read the final scope and
-Remaining section; a clean Codex review alone does not establish delivery. Use `Refs #N`
+Remaining section; a clean code review alone does not establish delivery. Use `Refs #N`
 for partial/child work, non-default-branch integration or pending post-merge obligations.
 Do not put a closing keyword in those PRs or their commits. The PR description is the
 preferred closing reference; a merge message is not required.
 When publication is available, open/update a draft PR for continuous deterministic
-checks. After implementation, self-verification and final docs assessment, resolve
-known blockers to review and mark the canonical PR Ready for Review, then update the
+checks. After implementation, self-verification and final docs assessment, apply
+the project's author local review policy (`author_local_review`, omitted means
+`disabled`, plus project instructions). `optional` leaves selection to the author;
+`required` requires the self-check or an explicit native-tool-unavailable record.
+When selected, run the coding agent's native local code review in the issue
+worktree on the committed head against its fetched base, report-only, at effort
+proportionate to risk. Resolve and record full head/base SHAs. Do not let review
+post PR comments, apply fixes or switch the target checkout. Validate substantive
+findings, fix valid ones, rerun affected verification and review the resulting
+committed head after material fixes; record dropped findings with reasons.
+Record covered head/base, effort and substantive findings/disposition in PR
+Evidence or branch-only handoff. If no native local review exists, record "none
+available" and the agent used. Fetch/launch failures remain pending. Repeat the
+selected self-check before later remote review requests after material changes.
+This author self-check is not independent review and does not replace PR review.
+Resolve known blockers to review and mark the canonical PR Ready for Review, then update the
 linked Issue to wf:review while preserving unrelated labels. Record the PR link.
 Keep a draft PR's Issue wf:in-progress; conversion back to draft restores that phase.
 Formal independent semantic/code review belongs on the Ready PR, with fixes and

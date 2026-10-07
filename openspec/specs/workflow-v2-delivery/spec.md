@@ -110,3 +110,31 @@ intent SHALL receive proportional shaping with product choices surfaced explicit
 - **THEN** stable logical identities reuse open or closed matches without silent reopening
 - **AND** human edits and contradictory acceptance are preserved for reconciliation
 - **AND** genuinely new scope gets new candidates without a second editable backlog
+
+### Requirement: Project-enabled author local review
+Delivery SHALL honor project instructions and the optional `author_local_review`
+configuration: `disabled` (also the omitted default), `optional`, or `required`.
+Setup SHALL default to disabled and preserve existing project configuration.
+Selected review SHALL be an author self-check after self-verification/docs
+reassessment before Ready, repeated before later remote review requests after
+material changes. It SHALL use the coding agent's native local review on the
+committed head against its fetched base in the issue worktree, report-only and
+at effort proportionate to risk. It SHALL NOT replace independent PR review,
+post comments, apply fixes or switch the target checkout.
+
+#### Scenario: Substantive findings
+- **WHEN** native local review reports findings
+- **THEN** the author validates them, fixes valid substantive findings and reruns affected verification
+- **AND** material fixes receive review on the resulting committed head
+- **AND** PR evidence or branch-only handoff records full head/base SHAs, effort, findings and disposition including reasons for dropped findings
+
+#### Scenario: Native local review unavailable
+- **WHEN** required local review has no native facility for the coding agent
+- **THEN** an explicit "none available" record with the agent used satisfies the bundle self-check path
+- **AND** independent review requirements remain unchanged
+- **AND** fetch or launch failures remain pending rather than satisfying that path
+
+#### Scenario: Policy validation
+- **WHEN** working or staged configuration contains an unsupported author_local_review value
+- **THEN** mechanical checks reject the configuration
+- **AND** accepted configuration alone never proves review execution or semantic acceptance

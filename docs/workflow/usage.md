@@ -25,6 +25,11 @@ Use workflow-design-to-backlog for bounded candidate refinement;
 use workflow-deliver-issue for an authorized Issue or approved bootstrap feature.
 A ready small bug goes directly to delivery. Relevant material risk selects
 workflow-risk-review; ordinary work needs no mandatory independent review.
+Projects may enable or require a report-only author local code review through
+`author_local_review` or project instructions. It follows self-verification and
+documentation reassessment before Ready, with reruns before remote review requests
+after material changes. Record exact head/base, effort and findings, or native
+review unavailability. This self-check never replaces independent PR review.
 Repository-local skill discovery is host-owned and must be tested separately.
 Explicitly reading skill files can support a run when discovery is unavailable,
 but does not prove discovery worked.

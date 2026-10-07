@@ -950,9 +950,11 @@ class SetupTests(unittest.TestCase):
         cp = self.target / '.workflow/config.json'
         c = json.loads(cp.read_text())
         c['openspec'] = 'disabled'
+        c['author_local_review'] = 'required'
         cp.write_text(json.dumps(c))
         run(*self.args, '--apply')
         self.assertEqual(json.loads(cp.read_text())['openspec'], 'disabled')
+        self.assertEqual(json.loads(cp.read_text())['author_local_review'], 'required')
         p = self.target / 'docs/workflow/contract.md'
         p.write_text('local modifications')
         run(*self.args, '--apply', expect=1)

@@ -1,5 +1,12 @@
 # Operations
 
+To change author local review policy, edit project-owned `.workflow/config.json`
+`author_local_review` to `disabled`, `optional`, or `required`; run `check`, then
+review/commit the policy. Setup updates preserve the value. Adopt an exact source
+pin supporting this policy through normal setup preview/apply before enabling it
+on older consumers. See development guidance and the contract for the agent-neutral
+self-check and explicit unavailable-tool path; `check` does not execute review.
+
 ## One-time adoption and explicit updates
 
 Use the source checkout at an exact full commit, explicit consumer Git root and
