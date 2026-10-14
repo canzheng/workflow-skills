@@ -23,7 +23,7 @@ class ConsumerCITests(unittest.TestCase):
         scripts = re.findall(r'^\s+run: (.+)$|^      - run: (.+)$', text, re.M)
         steps = [left or right for left, right in scripts]
         self.assertEqual(len(steps), 3)
-        preparation = re.search(r'run: \|\n((?:          .*\n)+)', text).group(1)
+        preparation = re.search(r'- name: Prepare pinned workflow checker\n        run: \|\n((?:          .*\n)+)', text).group(1)
         environment = self.base / 'github-env'
         runner = self.base / 'runner-temp'
         runner.mkdir()
@@ -100,7 +100,7 @@ class ConsumerCITests(unittest.TestCase):
         for name in ['workflow-v2-verify.yml', 'workflow-v2-pr-metadata.yml']:
             with self.subTest(workflow=name):
                 text = (self.target / '.github/workflows' / name).read_text()
-                preparation = re.search(r'run: \|\n((?:          .*\n)+)', text).group(1)
+                preparation = re.search(r'- name: Prepare pinned workflow checker\n        run: \|\n((?:          .*\n)+)', text).group(1)
                 runner = self.base / name
                 runner.mkdir()
                 environment = runner / 'env'
@@ -136,7 +136,7 @@ class ConsumerCITests(unittest.TestCase):
             '--repository', 'fixture/consumer', '--dependency-storage', 'tracked', '--apply')
         test_setup.commit(self.target)
         text = (self.target / '.github/workflows/workflow-v2-verify.yml').read_text()
-        preparation = re.search(r'run: \|\n((?:          .*\n)+)', text).group(1)
+        preparation = re.search(r'- name: Prepare pinned workflow checker\n        run: \|\n((?:          .*\n)+)', text).group(1)
         runner = self.base / 'legacy-runner'
         runner.mkdir()
         environment = runner / 'env'

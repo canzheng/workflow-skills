@@ -88,3 +88,22 @@ missing-evidence finding, without treating mechanical validity as semantic deliv
 - **WHEN** an open Issue or a closed Issue not completed carries wf:done
 - **THEN** audit reports the contradictory terminal label
 - **AND** wf:done on completed closure never substitutes for actual delivery evidence
+
+### Requirement: PR metadata credential lifetime
+
+The trusted-base metadata workflow SHALL disable checkout credential persistence
+and prefetch missing PR head objects with read-only authentication scoped to a
+single fetch process tree before loading or executing the checker. It SHALL NOT
+pass that authentication to checker steps or persist it in Git config or workflow
+environment files. It SHALL keep PR head content as data and fail on fetch failure.
+
+#### Scenario: Private head absent from base checkout
+- **GIVEN** the PR head commit is absent and the base repository requires authentication
+- **WHEN** the dedicated authenticated fetch succeeds
+- **THEN** metadata checks read the head blobs with no checker authentication
+- **AND** the base HEAD, index and worktree remain unchanged
+
+#### Scenario: Fetch denied
+- **WHEN** head retrieval fails with the existing read-only token
+- **THEN** the job stops before preparing or running the checker
+- **AND** no fetch credential remains in Git configuration

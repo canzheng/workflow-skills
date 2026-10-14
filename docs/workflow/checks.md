@@ -16,7 +16,9 @@ Event body accepts string or null (null/absent yields missing-section findings).
 Malformed shapes and wrong identities return structured invalid-input diagnostics
 before fetching head objects, preserving the snapshot and index without a traceback.
 A trusted checker reads head files through Git blobs, fetching the exact SHA if
-needed; it never checks out/executes head content in the metadata job.
+needed. CI prefetches missing head objects in a dedicated authenticated step,
+then runs the checker without persisted credentials; it never checks out/executes
+head content in the metadata job. See [operations](../operations.md) for credential lifetime and consumer updates.
 Fragment-only links targeting #changes resolve against the supplied
 Markdown body, including decoded fragments. Missing body headings produce
 links.anchor even if a head file named PR.md contains that heading. A bare #

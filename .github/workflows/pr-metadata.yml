@@ -13,7 +13,40 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.base.sha }}
-          persist-credentials: true
+          persist-credentials: false
+      # Authentication exists only in this step, before any checker is loaded.
+      - name: Fetch PR head objects
+        env:
+          WF2_FETCH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PYCODE'
+          import base64, json, os, re, subprocess
+          token = os.environ.pop('WF2_FETCH_TOKEN')
+          with open(os.environ['GITHUB_EVENT_PATH'], encoding='utf-8') as source:
+              event = json.load(source)
+          repository = os.environ['GITHUB_REPOSITORY']
+          pr = event['pull_request']
+          if (event['repository']['full_name'] != repository
+                  or pr['base']['repo']['full_name'] != repository):
+              raise SystemExit('PR base repository differs from workflow repository')
+          sha = pr['head']['sha']
+          if not isinstance(sha, str) or not re.fullmatch(r'[0-9a-f]{40}', sha):
+              raise SystemExit('PR head must be a full commit SHA')
+          probe = ['git', 'cat-file', '-e', sha + '^{commit}']
+          if subprocess.run(probe, capture_output=True).returncode:
+              # Use the trusted base URL, never a head-repository URL from the PR.
+              url = os.environ['GITHUB_SERVER_URL'].rstrip('/') + '/' + repository + '.git'
+              auth = 'AUTHORIZATION: basic ' + base64.b64encode(
+                  ('x-access-token:' + token).encode()).decode()
+              # --config-env avoids putting the header in argv or writing Git config.
+              env = dict(os.environ, WF2_FETCH_AUTH=auth, GIT_TERMINAL_PROMPT='0')
+              subprocess.run(['git', '-c', 'credential.helper=',
+                              '-c', 'http.followRedirects=false',
+                              '--config-env=http.' + url + '.extraheader=WF2_FETCH_AUTH',
+                              'fetch', '--no-tags', '--depth=1', '--no-recurse-submodules',
+                              url, sha], env=env, check=True)
+              subprocess.run(probe, check=True)
+          PYCODE
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

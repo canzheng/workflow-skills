@@ -175,6 +175,23 @@ local commands/mechanical checks. Trusted-base metadata treats PR content as dat
 base adoption and observed required-check enforcement remain separate from YAML
 installation. Setup never configures protections or performs merge/Issue closure.
 
+
+PR metadata checks check out the trusted base with `persist-credentials: false`.
+Before loading the checker, a dedicated step validates the event head SHA and
+fetches missing head objects from the trusted base repository URL. Only that step
+receives `github.token`; only its fetch process tree receives the Basic header
+through `git --config-env`. No header is placed in argv, a credential helper,
+Git config, or `GITHUB_ENV`. Authentication remains readable to the fetch process
+and its children while it runs; it is not a sandbox against concurrent processes
+on a compromised runner. Subsequent checker steps receive neither token variable
+nor header and read head blobs without checking out/executing head code. A fetch
+failure stops the job rather than retrying with broader privileges. Keep
+`contents: read` and `pull-requests: read`. The CLI's existing missing-head fetch
+fallback remains available outside CI; this workflow prefetches so it is unused.
+Existing consumers must adopt a reviewed exact source pin through setup; do not
+hand-edit hash-owned workflows in installed consumers. Local authenticated-HTTP
+regression tests do not replace a real private-repository Actions acceptance run.
+
 ## Optional global shared-skills installation
 
 Explicit source-owned `install-skills` defaults to ~/.agents/skills; --target chooses
