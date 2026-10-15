@@ -5,6 +5,7 @@
   "docs_index": "docs/README.md",
   "contract": "docs/workflow/contract.md",
   "openspec": "on-demand",
+  "author_local_review": "required",
   "verification": {
     "local": [
       [
