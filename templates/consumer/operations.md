@@ -20,7 +20,8 @@ Repeat with `--apply` for authorized adoption/update. Setup installs tracked pro
 policy/config/docs/CI/templates and materializes shared skills plus the Python
 runtime as ignored dependencies. Schema-5 .workflow/install-manifest.json tracks
 the full source commit, credential-free URL, asset hashes and owned ignore-block hash.
-It is provenance, not task state. Only these anchored root rules are added:
+It is provenance, not task state. For the default Codex host only these anchored
+root rules are added:
 
 ```gitignore
 # workflow-v2-dependency:start
@@ -30,6 +31,30 @@ It is provenance, not task state. Only these anchored root rules are added:
 /.agents/tools/workflow/
 # workflow-v2-dependency:end
 ```
+
+### Skill hosts
+
+Add `--host codex|claude|both` to choose where the shared skills are installed.
+`codex`, the default for a fresh adoption, uses `.agents/skills/`, which Codex
+discovers. `claude` uses `.claude/skills/`, which Claude Code discovers, and creates
+no `.agents/skills/` copies. `both` installs identical copies in each folder. The
+Python runtime always stays in `.agents/tools/workflow/`, because configuration, CI
+and these commands call it by that path. The manifest records a non-default choice as
+`hosts`. Omitting `--host` keeps the recorded choice, so an upgrade never switches
+hosts; changing it needs an explicit `--host`, which adds or removes only unmodified
+installed copies and their ignore lines. With `claude` the ignore block lists
+`/.claude/skills/<skill>/` lines instead of the `.agents/skills` lines, and with `both`
+it lists both. Project skills in `.claude/skills/` must stay trackable, so a
+repository that ignores all of `.claude/` must narrow that rule first, for example to
+`/.claude/settings.local.json`.
+
+If `.claude/skills` is a link to this repository's `.agents/skills`, setup writes the
+skills once there, records those real paths, and Claude Code finds them through the
+link. A link to anywhere else, a `.claude/skills` that is not a folder, or a file in a
+shared skill folder that setup did not install is refused before any write. Setup
+never creates or removes links. Claude Code reads `CLAUDE.md`, not `AGENTS.md`, so a
+Claude-only repository should route `CLAUDE.md` to `AGENTS.md` (for example with
+`@AGENTS.md`).
 
 Project skills/tools remain trackable. Never ignore all of .agents or force-add shared
 files around this policy. Existing unrelated rules/config/skills are preserved.
@@ -155,6 +180,9 @@ SHA and run its source-owned environment-setup.sh as documented in the source
 README before running the commands above; never expect an absent consumer CLI to
 bootstrap itself. The source entrypoint preserves existing pins and tracked files,
 materializes missing dependency files, then runs the installed checker/doctor.
+Set `WF2_HOST=codex|claude|both` to choose skill hosts for a fresh adoption; for an
+existing adoption the entrypoint fails if `WF2_HOST` differs from the recorded hosts,
+because hosts change only through a reviewed setup.
 
 Bootstrap fetches only the manifest's full commit when ignored files are missing,
 verifies canonical pinned skill bytes/hashes and writes only missing shared skill/runtime files.
@@ -194,8 +222,13 @@ regression tests do not replace a real private-repository Actions acceptance run
 
 ## Optional global shared-skills installation
 
-Explicit source-owned `install-skills` defaults to ~/.agents/skills; --target chooses
-an absolute alternate skills root. It installs only three skills/references plus
+Explicit source-owned `install-skills --host codex|claude|both` installs into
+~/.agents/skills (Codex, the default), ~/.claude/skills (Claude Code) or both;
+--target chooses an absolute alternate skills root for one host and is refused with
+`both`. A linked target is written at its real location. With `both`, every target
+is checked before any is written, and changes are reported as absolute paths.
+If writing a later target is interrupted, earlier targets stay installed and the
+interrupted one is rolled back; rerun the same command to finish. It installs only three skills/references plus
 .workflow-skills-install.json provenance, never AGENTS/project config/helpers.
 Preview, then repeat with --apply:
 
@@ -211,6 +244,70 @@ assuming repo-local precedence. A global skill resolves documents/policy from th
 selected project, not a global docs tree. Global installation alone does not adopt
 project policy or satisfy the repo-local dependency checks; test its host catalog/use
 separately in a project without local shared copies. Do not change authentication.
+
+## Removing v1 workflow skills
+
+Setup, install-skills and doctor report likely v1 skills as `discovery.legacy`
+warnings: a v1 skill name whose files mention `docs/planning`, `_workflow` or
+`audit-workflow`, or a dangling link with a v1 name. They never remove them; a
+repository or user that still sees v1 skills gets both versions. Remove them as
+below. Each command moves entries into a dated backup instead of deleting them,
+checks file content and not only names, and runs in bash or zsh.
+
+Global skills, from any directory:
+
+```sh
+backup="$HOME/.workflow-v1-backup-$(date +%Y%m%d%H%M%S)"
+for root in "$HOME/.agents/skills" "$HOME/.claude/skills" "$HOME/.codex/skills"; do
+  for name in _workflow audit-workflow autonomous-backlog-loop complete-task defer-feature diagnose-workflow fastlane finish-feature initialize-workflow-artifacts prioritize-backlog ready-feature repair-drift shape-backlog-item start-task; do
+    entry="$root/$name"
+    if [ -L "$entry" ] && [ ! -e "$entry" ]; then :
+    elif [ -e "$entry" ] && grep -rqsE 'docs/planning|_workflow|audit-workflow' "$entry"; then :
+    else continue; fi
+    mkdir -p "$backup${root#"$HOME"}" && mv "$entry" "$backup${root#"$HOME"}/" && echo "moved $entry"
+  done
+done
+for file in "$HOME/.agents/AGENTS.md" "$HOME/.codex/AGENTS.md" "$HOME/.claude/CLAUDE.md"; do
+  if [ -f "$file" ] && grep -q '<!-- Beginning of Workflow Section -->' "$file"; then
+    mkdir -p "$backup" && cp "$file" "$backup/$(basename "$(dirname "$file")")-$(basename "$file")"
+    awk '/<!-- Beginning of Workflow Section -->/{skip=1} !skip{print} /<!-- End of Workflow Section -->/{skip=0}' "$file" > "$file.wf2-tmp" && cat "$file.wf2-tmp" > "$file" && rm "$file.wf2-tmp" && echo "cleaned $file"
+  fi
+done
+```
+
+Repository-local copies, from the repository root:
+
+```sh
+backup="$(git rev-parse --git-dir)/workflow-v1-backup-$(date +%Y%m%d%H%M%S)"
+for root in .agents/skills .claude/skills; do
+  for name in _workflow audit-workflow autonomous-backlog-loop complete-task defer-feature diagnose-workflow fastlane finish-feature initialize-workflow-artifacts prioritize-backlog ready-feature repair-drift shape-backlog-item start-task; do
+    entry="$root/$name"
+    if [ -L "$entry" ] && [ ! -e "$entry" ]; then :
+    elif [ -e "$entry" ] && grep -rqsE 'docs/planning|_workflow|audit-workflow' "$entry"; then :
+    else continue; fi
+    mkdir -p "$backup/$root" && mv "$entry" "$backup/$root/" && echo "moved $entry"
+  done
+done
+for file in AGENTS.md CLAUDE.md; do
+  if [ -f "$file" ] && grep -q '<!-- Beginning of Workflow Section -->' "$file"; then
+    mkdir -p "$backup" && cp "$file" "$backup/$file"
+    awk '/<!-- Beginning of Workflow Section -->/{skip=1} !skip{print} /<!-- End of Workflow Section -->/{skip=0}' "$file" > "$file.wf2-tmp" && cat "$file.wf2-tmp" > "$file" && rm "$file.wf2-tmp" && echo "cleaned $file"
+  fi
+done
+```
+
+The global backup is `~/.workflow-v1-backup-<time>`; the repository backup is under
+Git's private directory, so it never appears in `git status`. Review `git status` and
+commit the removal of any tracked v1 entries. Other v1 routing, such as instructions
+to run `bash install.sh` or to invoke `start-task`, is reported by setup and doctor and
+must be edited by hand. Planning ledgers are separate; see the v1-to-v2 migration
+inventory (`migrate inspect`).
+
+To hide a v1 skill instead of removing it: Claude Code can deny it per user or per
+project in `.claude/settings.json`, for example
+`{"permissions": {"deny": ["Skill(start-task)"]}}`. Codex can disable a skill only in
+the user-level `~/.codex/config.toml` (`[[skills.config]]` entries with
+`enabled = false`, as reported in canzheng/workflow-skills#19); project configuration had no effect.
 
 ## Recovery and evidence
 
@@ -243,7 +340,7 @@ other catalogs and diagnostics. Missing optional catalogs remain silently absent
 It preserves the inaccessible root and any symlinks; it does not repair global paths.
 Repository commands do not require a resolvable home directory. Doctor warns if
 home catalogs cannot be located and still inspects repository/explicit catalogs
-and tools. Only install-skills without --target resolves ~/.agents/skills; an
+and tools. Only install-skills without --target resolves the home skills folders; an
 unavailable default returns structured invalid-input JSON asking for --target.
 Check rejects enumerated Markdown symlinks before reading their content, including
 dangling/cyclic links. It reports the repository-relative path without disclosing

@@ -10,8 +10,25 @@ import sys
 sys.dont_write_bytecode = True
 
 from core import (Conflict, Invalid, SKILLS, START, block, config, content_identity, digest, finding,
-                  SOURCE_URL, REQUIRED_ASSETS, required_assets, dependency_policy, manifest, repository, safe, read_regular)
+                  SOURCE_URL, REQUIRED_ASSETS, required_assets, dependency_policy, manifest, repository, safe, read_regular,
+                  HOST_CHOICES, HOST_SKILL_ROOTS, hosts, legacy_skills)
 from setup import setup
+
+
+def legacy_findings(folders):
+    """Report likely v1 skills; removal stays a user decision."""
+    return [finding('discovery.legacy', path, 'Likely v1 workflow skill is discoverable',
+                    'Remove or hide it; see "Removing v1 workflow skills" in the workflow operations guide', 'warning')
+            for path in legacy_skills(folders)]
+
+
+def home_skill_folders():
+    """Home catalogs for every host; empty when home cannot be resolved."""
+    try:
+        home = pathlib.Path.home()
+    except (OSError, RuntimeError):
+        return []
+    return [home / '.agents/skills', home / '.codex/skills', home / '.claude/skills']
 
 
 def doctor(root, skill_roots=()):
@@ -95,13 +112,15 @@ def doctor(root, skill_roots=()):
         except (OSError, RuntimeError):
             findings.append(finding('discovery.inaccessible', folder, 'Cannot inspect skills location', 'Inspect in the actual host', 'warning'))
     for s in SKILLS:
-        if not safe(root, '.agents/skills/' + s + '/SKILL.md').is_file():
-            findings.append(finding('bundle.incomplete', s, 'Required skill missing', 'Assemble all three canonical skills'))
+        # Each selected host must find the skill in its own folder, including through a repository link.
+        for host in hosts(m) if m else ('codex',):
+            path = HOST_SKILL_ROOTS[host] + '/' + s + '/SKILL.md'
+            if not (safe(root, path) if host == 'codex' else root / path).is_file():
+                findings.append(finding('bundle.incomplete', path, 'Required skill missing for ' + host, 'Assemble all three canonical skills'))
         if len(discovered.get(s, [])) > 1:
             findings.append(finding('discovery.duplicate', s, 'Duplicate active name: ' + ', '.join(discovered[s]), 'Choose one discovery source; do not auto-delete globals'))
-    for name, paths in discovered.items():
-        if name in ('start-task', 'complete-task', 'audit-workflow'):
-            findings.append(finding('discovery.legacy', paths[0], 'Legacy skill discoverable; v2 guidance must take precedence', 'Resolve applicable host routing manually', 'warning'))
+    findings.extend(legacy_findings([root / '.agents/skills', root / '.claude/skills', *home_skill_folders(),
+                                     *map(pathlib.Path, skill_roots)]))
     tools = {'python': sys.version.split()[0]}
     def probe(command, label):
         try:
@@ -151,11 +170,15 @@ def main(argv=None):
     s.add_argument('--dependency-storage', '--skill-storage', dest='skill_storage', choices=('ignored', 'tracked'), default='ignored',
                    help='Ignored pinned dependency by default; tracked is legacy compatibility')
     s.add_argument('--repository')
+    s.add_argument('--host', choices=tuple(HOST_CHOICES),
+                   help='Skill hosts: codex (.agents/skills), claude (.claude/skills) or both; '
+                        'omitted keeps the recorded choice, or codex for a fresh adoption')
     s.add_argument('--apply', action='store_true')
     s.add_argument('--uninstall', action='store_true')
     s.add_argument('--json', action='store_true')
     g = sub.add_parser('install-skills', help='Explicit shared-skills-only global/custom-root installation')
-    g.add_argument('--target', help='Defaults to ~/.agents/skills only when this command is selected')
+    g.add_argument('--target', help='Alternate root for one host; defaults to ~/.agents/skills (codex) or ~/.claude/skills (claude)')
+    g.add_argument('--host', choices=tuple(HOST_CHOICES), help='codex (default), claude or both')
     g.add_argument('--source')
     g.add_argument('--revision')
     g.add_argument('--source-url', default=SOURCE_URL)
@@ -193,17 +216,15 @@ def main(argv=None):
     try:
         if args.command in ('setup', 'install-skills'):
             if args.command == 'install-skills':
-                if args.target is None:
-                    try:
-                        args.target = str(pathlib.Path.home() / '.agents/skills')
-                    except (OSError, RuntimeError) as exc:
-                        raise Invalid('Cannot resolve default global skills target; provide --target') from exc
                 from setup import install_skills
                 changes, residuals = install_skills(args)
+                folders = [pathlib.Path(args.target)] if args.target else []
             else:
                 changes, residuals = setup(args)
+                folders = [pathlib.Path(args.target) / '.agents/skills', pathlib.Path(args.target) / '.claude/skills']
             extra = dict(applied=args.apply, changes=changes, residuals=residuals)
             findings = [finding('uninstall.residual', x, 'Modified asset preserved', 'Review and remove manually if desired', 'warning') for x in residuals]
+            findings += legacy_findings(folders + home_skill_folders())
             code = 1 if residuals else 0
         elif args.command == 'bootstrap':
             from bootstrap import bootstrap

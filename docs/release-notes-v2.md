@@ -43,11 +43,14 @@ configuration need their own observed evidence and authorization.
 
 The default consumer setup tracks project policy/config, CI/templates,
 docs/specs, project skills and schema-5 exact-source provenance. Shared skills and Python runtime in .agents/tools/workflow are
-repo-local ignored dependencies, materialized before Ubuntu Codex starts. Only those
-four dependency namespaces are ignored. Complete matching bootstrap repeats offline and does
+repo-local ignored dependencies, materialized before Codex or Claude Code starts on Ubuntu.
+Only those dependency namespaces are ignored. `setup --host codex|claude|both` installs the
+shared skills in .agents/skills (Codex, the default), .claude/skills (Claude Code) or both,
+with one runtime; omitting --host keeps the recorded choice. Complete matching bootstrap repeats offline and does
 not change tracked files/index; modified dependencies fail without overwrite.
 Tracked schema-3 and mixed schema-4 consumers migrate explicitly; setup never untracks or stages.
-Optional explicit global skills-only installation into ~/.agents/skills is supported,
+Optional explicit global skills-only installation into ~/.agents/skills, ~/.claude/skills
+or both (`install-skills --host`) is supported,
 without installing global project policy or changing authentication. No real global
 installation was performed by this rewrite task; tests use isolated targets.
 Ubuntu discovery/use and final review/archive are verified; authorized merge remains pending;

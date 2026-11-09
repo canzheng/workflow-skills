@@ -11,11 +11,13 @@ Continue independent authorized work when remote writes or environments fail.
 Consumer project policy/configuration, CI/templates, docs/specs,
 project-specific skills and exact dependency provenance are tracked. The three
 shared workflow directories/references and .agents/tools/workflow Python runtime
-are ignored repo-local dependencies. Source-owned bootstrap must be available
+are ignored repo-local dependencies. The shared directories are installed for the
+selected skill hosts: .agents/skills for Codex (the default), .claude/skills for
+Claude Code, or both; the runtime is never copied per host. Source-owned bootstrap must be available
 before invoking the installed consumer CLI.
 Schema-5 provenance records the full source commit/URL, asset hashes and the narrow
 owned .gitignore block. Do not ignore all of .agents or fetch main/latest.
-Run pinned bootstrap before starting Ubuntu Codex; missing ignored skill files can
+Run pinned bootstrap before starting Codex or Claude Code on Ubuntu; missing ignored skill files can
 be materialized with --apply, while complete matching reruns are offline no-ops.
 Bootstrap preserves project files, source pin and index; modified/extra/symlinked
 skills or project-policy conflicts are errors, never permission to overwrite.
@@ -23,6 +25,7 @@ Source authoring keeps canonical shared skills tracked. Explicit optional global
 skills-only installation is supported; it does not adopt project policy or install
 global AGENTS/config. Never install globally as a repository-setup side effect.
 Choose one active discovery location per shared name; report duplicates honestly.
+Likely v1 skills are reported as warnings and never removed by the installer.
 
 Review and commit initial project adoption/updates before acceptance. All non-shared
 manifest assets, provenance/config, managed AGENTS and .gitignore remain indexed

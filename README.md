@@ -24,8 +24,22 @@ Canonical shared skills are authored and tracked in this source repository. Cons
 AGENTS/config, CI/templates, docs/specs, project skills and exact source pin;
 the three shared skill directories/references and Python runtime in
 `.agents/tools/workflow/` are materialized repo-locally and ignored together.
-Setup adds only those four anchored ignore rules, never all of .agents. It is idempotent,
+Setup adds only anchored ignore rules for those shared skill directories and the
+runtime, never all of .agents. It is idempotent,
 previews before apply, preserves unrelated files/index and never stages/commits.
+
+### Skill hosts
+
+`setup --host codex|claude|both` chooses where the shared skills are installed:
+`codex` (the default) uses `.agents/skills/`, which Codex discovers; `claude` uses
+`.claude/skills/`, which Claude Code discovers; `both` installs identical copies in
+each. `claude` alone does not create `.agents/skills/` copies. There is always one
+runtime, in `.agents/tools/workflow/`. Omitting `--host` keeps the selection recorded
+by an earlier setup, so upgrades never switch hosts silently; a fresh adoption without
+`--host` installs for Codex only. With the environment entrypoint, set `WF2_HOST` for
+a fresh adoption. If `.claude/skills` is a link to the repository's `.agents/skills`,
+setup writes the skills once there and Claude Code finds them through the link; any
+other link is refused. Setup never creates or removes such links.
 
 The source owns the installer; a fresh target needs no existing workflow tools.
 Set the full tested source SHA from the [Ubuntu handoff](docs/validation/ubuntu-workstation-handoff.md)
@@ -66,13 +80,15 @@ canonical runtime in `tools/workflow/`.
 
 Adoption creates `AGENTS.md` if absent or appends an owned section between
 `<!-- workflow-v2:start -->` and `<!-- workflow-v2:end -->`. It instructs agents
-to use repo-local workflow-skills v2 in `.agents/skills/`, read the installed
+to use repo-local workflow-skills v2 in the selected host folders, read the installed
 contract/document index, and avoid obsolete workflow wrappers. Existing project
 instructions remain intact; repeating setup does not duplicate the section.
 
 Globally discoverable v1 skills such as `start-task`, `complete-task` and
 `audit-workflow` do not select this repository's workflow. Do not invoke them for
-v2 delivery or delete global files during adoption. Higher-level host policies
+v2 delivery. Setup, install-skills and doctor report likely v1 skills as warnings
+but never remove them; follow "Removing v1 workflow skills" in
+[operations](docs/operations.md#removing-v1-workflow-skills). Higher-level host policies
 still apply; report an actual conflict rather than claiming this section overrides
 them. Active repository-local v1 routing requires the documented bounded migration
 before setup; the installer refuses to silently append conflicting instructions.
@@ -108,8 +124,10 @@ Use the same exact checked-out source. Preview, then add --apply only when inten
 python3 /pinned/source/tools/workflow/workflow.py install-skills --source /pinned/source --revision FULL_40_CHAR_SHA --json
 ```
 
-Default target is ~/.agents/skills; --target chooses an absolute alternate skills
-root. Only the three skills/references and their provenance are installed, with
+`--host codex|claude|both` selects ~/.agents/skills (Codex, the default),
+~/.claude/skills (Claude Code) or both; --target chooses an absolute alternate root
+for one host. A linked target is written at its real location. With `both`, every
+target is checked before any is written. Only the three skills/references and their provenance are installed, with
 bounded update/uninstall and preservation of user modifications. Project/global
 AGENTS, project helpers/config, authentication and other skills are untouched.
 Repository adoption never installs globally. Choose one active location per name;
