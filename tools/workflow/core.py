@@ -240,6 +240,19 @@ def host_skill_roots(root, selected):
     return tuple(r for r in HOST_SKILL_ROOTS.values() if r in real)
 
 
+def recorded_hosts_policy(root, m):
+    """Each recorded host keeps its skill folder in provenance; dropping one cannot shrink requirements."""
+    if 'hosts' not in m:
+        return
+    present = {r for r in HOST_SKILL_ROOTS.values() if any(shared(n, (r,)) for n in m['files'])}
+    codex, claude = HOST_SKILL_ROOTS['codex'], HOST_SKILL_ROOTS['claude']
+    if 'codex' in m['hosts'] and codex not in present:
+        raise Conflict('Recorded codex host has no .agents/skills skills in provenance; restore reviewed provenance or rerun setup')
+    if 'claude' in m['hosts'] and claude not in present and (
+            codex not in present or claude_skill_root(root) != codex):
+        raise Conflict('Recorded claude host has no .claude/skills skills in provenance or .claude/skills link; restore it or rerun setup')
+
+
 def legacy_skills(folders):
     """Paths of likely v1 skills: a v1 name with v1 content, or a dangling link with a v1 name."""
     found, seen = [], set()
@@ -373,10 +386,16 @@ def indexed_ancestor_policy(names, tracked):
                 raise Conflict('Indexed destination ancestor conflict preserved: ' + ancestor)
 
 
-def dependency_policy(root, m):
-    """Validate project tracking and declared dependency storage without index writes."""
+def dependency_policy(root, m, hosts_policy=True):
+    """Validate project tracking and declared dependency storage without index writes.
+
+    Setup validates an old manifest with hosts_policy=False: it is the repair path
+    that writes a new, consistent host layout.
+    """
     if m['schema_version'] not in (3, 4, 5):
         raise Conflict('Existing adoption needs reviewed setup/update (schema 3 or 4)')
+    if hosts_policy:
+        recorded_hosts_policy(root, m)
     ignored_dependency = m['schema_version'] in (4, 5)
     if ignored_dependency:
         policy = safe(root, '.gitignore')
@@ -420,10 +439,10 @@ def dependency_policy(root, m):
         raise Conflict('Workflow installation path is not tracked: ' + sorted(required - tracked)[0] +
                        '; review and commit the complete adoption')
     if adoption & (tracked | committed):
-        staged_installation(root)
+        staged_installation(root, hosts_policy)
 
 
-def staged_installation(root):
+def staged_installation(root, hosts_policy=True):
     """Validate the commit candidate independently; never refresh/write the index."""
     entries = {}
     for record in git(root, 'ls-files', '--stage', '-z').split(b'\0'):
@@ -445,6 +464,8 @@ def staged_installation(root):
         # in the index until the caller stages the migration; setup owns no index.
         if m['schema_version'] not in (1, 3, 4, 5) or not required_assets(m['files'], m['bundle_version']) <= m['files'].keys():
             raise Conflict('Provenance must describe a complete adoption')
+        if hosts_policy:
+            recorded_hosts_policy(root, m)
         retired_runtime_policy(m['files'], entries)
         indexed_ancestor_policy(m['files'], entries)
         if m['schema_version'] in (4, 5):

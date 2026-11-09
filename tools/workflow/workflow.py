@@ -60,18 +60,21 @@ def doctor(root, skill_roots=()):
         b = block(text)
         if not b or digest(b.encode()) != m['agents_block_hash']:
             findings.append(finding('instructions.modified', 'AGENTS.md', 'Managed block differs', 'Resolve ownership before setup'))
-    discovered = {}
-    roots = [root / '.agents/skills']
+    # Each host discovers skills in its own catalogs; duplicates matter within one host.
+    catalogs = {'codex': [root / '.agents/skills'], 'claude': [root / '.claude/skills']}
     try:
         home = pathlib.Path.home()
-        roots.extend((home / '.agents/skills', home / '.codex/skills'))
+        catalogs['codex'] += [home / '.agents/skills', home / '.codex/skills']
+        catalogs['claude'].append(home / '.claude/skills')
     except (OSError, RuntimeError):
         findings.append(finding('discovery.inaccessible', 'home skills catalogs',
                                 'Cannot resolve home skills locations',
                                 'Inspect home configuration; repository and explicit catalogs still run', 'warning'))
-    roots.extend(map(pathlib.Path, skill_roots))
-    seen = set()
-    for folder in roots:
+    catalogs['codex'] += list(map(pathlib.Path, skill_roots))
+    discovered = {host: {} for host in catalogs}
+    inspected = {host: set() for host in catalogs}  # Real paths, so a linked catalog counts once per host.
+    for host, folder in ((h, f) for h, folders in catalogs.items() for f in folders):
+        seen = inspected[host]
         try:
             try:
                 # Python 3.14 non-strict resolution can silently retain cycles.
@@ -108,7 +111,7 @@ def doctor(root, skill_roots=()):
                 import re
                 match = re.search(r'^name:\s*(.+)$', text, re.M)
                 name = match.group(1).strip(' \"\'') if match else p.parent.name
-                discovered.setdefault(name, []).append(str(p))
+                discovered[host].setdefault(name, []).append(str(p))
         except (OSError, RuntimeError):
             findings.append(finding('discovery.inaccessible', folder, 'Cannot inspect skills location', 'Inspect in the actual host', 'warning'))
     for s in SKILLS:
@@ -117,8 +120,10 @@ def doctor(root, skill_roots=()):
             path = HOST_SKILL_ROOTS[host] + '/' + s + '/SKILL.md'
             if not (safe(root, path) if host == 'codex' else root / path).is_file():
                 findings.append(finding('bundle.incomplete', path, 'Required skill missing for ' + host, 'Assemble all three canonical skills'))
-        if len(discovered.get(s, [])) > 1:
-            findings.append(finding('discovery.duplicate', s, 'Duplicate active name: ' + ', '.join(discovered[s]), 'Choose one discovery source; do not auto-delete globals'))
+        for host, names in discovered.items():
+            if len(names.get(s, [])) > 1:
+                findings.append(finding('discovery.duplicate', s, 'Duplicate active ' + host + ' name: ' + ', '.join(names[s]),
+                                        'Choose one discovery source per host; do not auto-delete globals'))
     findings.extend(legacy_findings([root / '.agents/skills', root / '.claude/skills', *home_skill_folders(),
                                      *map(pathlib.Path, skill_roots)]))
     tools = {'python': sys.version.split()[0]}

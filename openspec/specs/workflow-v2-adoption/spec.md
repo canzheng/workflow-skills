@@ -364,6 +364,15 @@ provenance, ignore, untracked and no-overwrite rules as codex copies.
 - **WHEN** .claude/skills links anywhere else, is not a folder, or holds a file in a shared skill folder that setup did not install, or the repository ignores project skills under .claude/skills
 - **THEN** setup refuses before any write
 
+#### Scenario: Recorded host loses its folder
+- **WHEN** provenance with recorded hosts no longer lists a recorded host's skill folder, and no supported link replaces it
+- **THEN** check, doctor and bootstrap fail instead of shrinking the required skills
+- **AND** rerunning setup restores the folder
+
+#### Scenario: Duplicate skill within one host
+- **WHEN** a shared skill is discoverable twice in one host's catalogs, such as repository and home .claude/skills
+- **THEN** doctor reports a duplicate for that host, while one copy per host for both is not a duplicate
+
 #### Scenario: Global hosts
 - **WHEN** install-skills runs with --host claude or both
 - **THEN** it writes ~/.claude/skills, or both home folders after planning every target, and resolves a linked target to its real location

@@ -692,7 +692,7 @@ def setup(args):
             if not current or digest(current.encode()) != old['agents_block_hash']:
                 raise Conflict('Managed AGENTS block modified or missing')
             if old['schema_version'] in (4, 5):
-                dependency_policy(root, old)
+                dependency_policy(root, old, hosts_policy=False)
             for name, h in old['files'].items():
                 p = safe(root, name)
                 if dependency(name, old) and old['schema_version'] in (2, 4, 5) and not p.exists():

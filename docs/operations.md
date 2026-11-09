@@ -52,7 +52,10 @@ If `.claude/skills` is a link to this repository's `.agents/skills`, setup write
 skills once there, records those real paths, and Claude Code finds them through the
 link. A link to anywhere else, a `.claude/skills` that is not a folder, or a file in a
 shared skill folder that setup did not install is refused before any write. Setup
-never creates or removes links. Claude Code reads `CLAUDE.md`, not `AGENTS.md`, so a
+never creates or removes links. To replace such a link with real copies, remove it with
+`git rm --cached .claude/skills`, delete the link, commit, and rerun setup. Check,
+doctor and bootstrap fail when a recorded host has lost its skill folder from the
+manifest or its link; rerunning setup restores it. Claude Code reads `CLAUDE.md`, not `AGENTS.md`, so a
 Claude-only repository should route `CLAUDE.md` to `AGENTS.md` (for example with
 `@AGENTS.md`).
 
@@ -239,7 +242,9 @@ python3 /pinned/source/tools/workflow/workflow.py install-skills --source /pinne
 Reruns are no-ops; updates preserve edited/unmanaged skills and unrelated names.
 `install-skills --uninstall --apply` removes only unmodified owned files and reports
 modified residuals. No repository setup/bootstrap implicitly writes global skills.
-Use one active discovery location per name; doctor reports duplicates rather than
+Use one active discovery location per name and host; doctor reports duplicates within
+each host (Codex: repository and home `.agents/skills`, `~/.codex/skills` and
+`--skill-root`; Claude Code: repository and home `.claude/skills`) rather than
 assuming repo-local precedence. A global skill resolves documents/policy from the
 selected project, not a global docs tree. Global installation alone does not adopt
 project policy or satisfy the repo-local dependency checks; test its host catalog/use

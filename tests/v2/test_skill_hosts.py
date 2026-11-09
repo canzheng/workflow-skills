@@ -321,6 +321,58 @@ class SkillHostTests(unittest.TestCase):
         self.cli(*args[:-1])
         self.assert_installed('', claude)
 
+    def test_dropping_a_recorded_host_cannot_shrink_requirements_and_setup_repairs(self):
+        for dropped in ('.claude/skills/', '.agents/skills/'):
+            with self.subTest(dropped=dropped):
+                target = self.base / ('dropped-' + dropped.split('/')[0].strip('.'))
+                init(target)
+                (target / 'AGENTS.md').write_text('User rule.\n')
+                commit(target)
+                adopt = ('setup', '--source', self.source, '--revision', self.sha, '--target', target,
+                         '--repository', 'fixture/consumer')
+                self.cli(*adopt, '--host', 'both', '--apply')
+                commit(target)
+                path = target / '.workflow/install-manifest.json'
+                m = json.loads(path.read_text())
+                m['files'] = {n: h for n, h in m['files'].items() if not n.startswith(dropped)}
+                path.write_text(json.dumps(m, indent=2) + '\n')
+                for name in SHARED:
+                    (target / dropped / name).unlink()
+                commit(target)  # Staged and committed: the tampered snapshot is the candidate.
+                for args in [('check', '--repo', target), ('doctor', '--repo', target),
+                             ('bootstrap', '--repo', target, '--source', self.source, '--apply')]:
+                    report = self.cli(*args, expect=1)
+                    self.assertIn('Recorded', json.dumps(report['findings']), args[0])
+                self.cli(*adopt, '--apply')  # Omitted --host keeps both and restores the folder.
+                self.assert_installed(dropped.rstrip('/'), target)
+                commit(target)
+                self.cli('check', '--repo', target)
+
+    def test_setup_repairs_a_removed_claude_link_into_real_copies(self):
+        (self.target / '.claude').mkdir()
+        (self.target / '.claude/skills').symlink_to('../.agents/skills')
+        commit(self.target)
+        self.adopt('--host', 'claude')
+        git(self.target, 'rm', '-q', '--cached', '.claude/skills')
+        (self.target / '.claude/skills').unlink()
+        commit(self.target)
+        self.cli('check', '--repo', self.target, expect=1)
+        self.adopt()  # The recorded claude host now lands in a real .claude/skills folder.
+        self.assert_installed('.claude/skills')
+        self.assert_absent('.agents/skills')
+        self.cli('check', '--repo', self.target)
+        self.cli('doctor', '--repo', self.target)
+
+    def test_duplicate_skills_are_reported_within_each_host(self):
+        self.adopt('--host', 'claude')
+        duplicate = self.home / '.claude/skills/workflow-deliver-issue/SKILL.md'
+        duplicate.parent.mkdir(parents=True)
+        duplicate.write_text('---\nname: workflow-deliver-issue\ndescription: global copy\n---\n')
+        findings = self.cli('doctor', '--repo', self.target, expect=1)['findings']
+        self.assertTrue(any(f['code'] == 'discovery.duplicate' and 'claude' in f['message'] for f in findings), findings)
+        duplicate.unlink()
+        self.cli('doctor', '--repo', self.target)
+
     def test_claude_project_skills_must_stay_trackable(self):
         (self.target / '.gitignore').write_text('/.claude/\n')
         commit(self.target)
