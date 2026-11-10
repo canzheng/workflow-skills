@@ -377,6 +377,11 @@ provenance, ignore, untracked and no-overwrite rules as codex copies.
 - **WHEN** a shared skill is discoverable twice in one host's catalogs, such as repository and home .claude/skills
 - **THEN** doctor reports a duplicate for that host, while one copy per host for both is not a duplicate
 
+#### Scenario: Linked skill folder
+- **WHEN** a discovery catalog holds a link to a skill folder, such as ~/.claude/skills/<name> linking to ~/.agents/skills/<name>
+- **THEN** doctor reads that folder's SKILL.md at its real location and counts it like a copy, without an unreadable-file warning
+- **AND** a link that leads nowhere stays silent, and a SKILL.md that is itself a link still warns
+
 #### Scenario: Global hosts
 - **WHEN** install-skills runs with --host claude or both
 - **THEN** it writes ~/.claude/skills, or both home folders after planning every target, and resolves a linked target to its real location

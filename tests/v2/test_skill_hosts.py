@@ -398,6 +398,47 @@ class SkillHostTests(unittest.TestCase):
         duplicate.unlink()
         self.cli('doctor', '--repo', self.target)
 
+    def test_linked_skill_folders_are_discovered_like_copies(self):
+        self.adopt('--host', 'claude')
+        store = self.base / 'store'
+
+        def skill(name, folder=store):
+            path = folder / name / 'SKILL.md'
+            path.parent.mkdir(parents=True)
+            path.write_text('---\nname: ' + name + '\ndescription: elsewhere\n---\n')
+            return path.parent
+
+        def link(catalog, name, destination):
+            (self.home / catalog).mkdir(parents=True, exist_ok=True)
+            (self.home / catalog / name).symlink_to(destination)
+
+        def doctor(expect):
+            findings = self.cli('doctor', '--repo', self.target, expect=expect)['findings']
+            return ({f['message'].split(':')[0] for f in findings if f['code'] == 'discovery.duplicate'},
+                    [f['path'] for f in findings if f['code'] == 'discovery.inaccessible'])
+
+        # Working links to other skills, a dangling link and one copy per host: nothing to report.
+        for catalog in ('.agents/skills', '.codex/skills', '.claude/skills'):
+            link(catalog, 'other-' + catalog.split('/')[0].strip('.'), skill('other-' + catalog.split('/')[0].strip('.')))
+        link('.claude/skills', 'gone', self.base / 'nowhere')
+        self.assertEqual(doctor(0), (set(), []))
+        # Home Claude links into home .agents/skills, the common layout: a Claude duplicate,
+        # not an unreadable file. The home .agents copy alone is not a Codex duplicate.
+        link('.claude/skills', 'workflow-deliver-issue', '../../.agents/skills/workflow-deliver-issue')
+        skill('workflow-deliver-issue', self.home / '.agents/skills')
+        self.assertEqual(doctor(1), ({'Duplicate active claude name'}, []))
+        # A linked Codex catalog entry counts like a copy too.
+        (self.home / '.claude/skills/workflow-deliver-issue').unlink()
+        link('.codex/skills', 'workflow-deliver-issue', skill('workflow-deliver-issue'))
+        self.assertEqual(doctor(1), ({'Duplicate active codex name'}, []))
+        # The link is followed only to the skill folder: a linked SKILL.md still is not read.
+        (self.home / '.codex/skills/workflow-deliver-issue').unlink()
+        target = skill('linked-file')
+        (target / 'SKILL.md').rename(target / 'real.md')
+        (target / 'SKILL.md').symlink_to('real.md')
+        link('.claude/skills', 'linked-file', target)
+        self.assertEqual(doctor(0), (set(), [str(self.home / '.claude/skills/linked-file/SKILL.md')]))
+
     def test_claude_project_skills_must_stay_trackable(self):
         (self.target / '.gitignore').write_text('/.claude/\n')
         commit(self.target)
