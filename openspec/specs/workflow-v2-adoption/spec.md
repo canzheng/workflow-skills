@@ -332,3 +332,63 @@ install globally as a side effect; global installation SHALL NOT claim project a
 - **WHEN** repo-local and global shared names are both visible
 - **THEN** report duplicate discovery and choose one active location explicitly
 - **AND** global skill instructions resolve contract/docs from the selected project rather than a global docs tree
+
+### Requirement: Skill host selection
+Setup and install-skills SHALL install the shared skills for the selected hosts:
+codex in .agents/skills, claude in .claude/skills, or both with identical copies.
+A fresh adoption without a selection SHALL install for codex only, and a later setup
+without a selection SHALL keep the recorded hosts. The Python runtime SHALL stay a
+single copy in .agents/tools/workflow. Claude copies SHALL follow the same
+provenance, ignore, untracked and no-overwrite rules as codex copies.
+
+#### Scenario: Claude-only adoption
+- **WHEN** setup runs with --host claude
+- **THEN** the shared skills exist only under .claude/skills, ignored and untracked, and no .agents/skills copies are created
+- **AND** the manifest records the hosts, and check and doctor pass
+
+#### Scenario: Fresh clone of a host selection
+- **WHEN** a fresh clone of an adoption with recorded hosts runs bootstrap
+- **THEN** exactly the recorded skill folders are materialized and a matching rerun is an offline no-op
+
+#### Scenario: Changing hosts
+- **WHEN** setup runs with a different --host
+- **THEN** only unmodified installed copies and their ignore lines are added or removed
+- **AND** a modified installed copy is a conflict and nothing is written
+
+#### Scenario: Claude folder linked to the Codex folder
+- **WHEN** .claude/skills is a link to the repository's .agents/skills and claude is selected
+- **THEN** setup writes each skill once at the real .agents/skills path, records real paths and leaves the link unchanged
+- **AND** doctor reports a missing skill for claude if the link later disappears
+
+#### Scenario: Unsupported Claude folder
+- **WHEN** .claude/skills links anywhere else, is not a folder, or holds a file in a shared skill folder that setup did not install, or the repository ignores project skills under .claude/skills
+- **THEN** setup refuses before any write
+
+#### Scenario: Recorded host loses its folder
+- **WHEN** provenance with recorded hosts no longer lists a recorded host's skill folder, and no supported link replaces it
+- **THEN** check, doctor and bootstrap fail instead of shrinking the required skills
+- **AND** rerunning setup restores the folder
+
+#### Scenario: Claude link in the commit candidate
+- **WHEN** recorded Claude Code discovery depends on a .claude/skills link, and the staged or committed snapshot lacks that link, or holds one that is absolute or leads anywhere but .agents/skills
+- **THEN** check, doctor and bootstrap fail, even when the link on disk is correct
+
+#### Scenario: Duplicate skill within one host
+- **WHEN** a shared skill is discoverable twice in one host's catalogs, such as repository and home .claude/skills
+- **THEN** doctor reports a duplicate for that host, while one copy per host for both is not a duplicate
+
+#### Scenario: Global hosts
+- **WHEN** install-skills runs with --host claude or both
+- **THEN** it writes ~/.claude/skills, or both home folders after planning every target, and resolves a linked target to its real location
+- **AND** --target with both is invalid input
+
+### Requirement: Likely v1 skill reporting
+Setup, install-skills and doctor SHALL report likely v1 workflow skills as warnings
+and SHALL NOT remove them. A likely v1 skill has a v1 name and files that mention
+docs/planning, _workflow or audit-workflow, or is a dangling link with a v1 name.
+The operations guide SHALL provide tested global and repository cleanup commands
+that move only such entries to a dated backup.
+
+#### Scenario: Third-party skill with a v1 name
+- **WHEN** a skill named like a v1 skill has no v1 content
+- **THEN** no warning is reported and the documented cleanup leaves it in place

@@ -3,6 +3,8 @@
 The active entrypoint selects explicit github-v2 configuration and the short
 contract; historical planning does not select execution. Three canonical authored
 skills live only in .agents/skills: design-to-backlog, deliver-issue and risk-review.
+Consumers install them for the selected skill hosts: .agents/skills (Codex),
+.claude/skills (Claude Code) or both, recorded as manifest `hosts`.
 Native Codex execution handles internal work; GitHub owns shared delivery identity
 and state. There is no task-state service, feature ledger or synchronizer.
 
@@ -67,11 +69,13 @@ not a requirement for unrelated project edits to match HEAD or the working tree.
 ## Approved Ubuntu distribution refinement — 2026-10-05
 
 Canonical source skills remain tracked; consumer skills are ignored dependencies.
-Setup owns four anchored dependency ignore entries and schema-5 pin/hash provenance.
+Setup owns anchored dependency ignore entries for each installed shared skill folder
+and the runtime, plus schema-5 pin/hash provenance.
 Bootstrap uses canonical exact Git objects, never latest, and writes only missing
 skills after policy/project preflight. Consumer CI performs the same bootstrap.
 Optional explicit install-skills installs shared bytes/provenance at a chosen root
-(default ~/.agents/skills), without project policy/helpers or authentication changes.
+(~/.agents/skills, ~/.claude/skills or both by host), without project policy/helpers
+or authentication changes.
 Both installer paths reuse preflight/rollback and preserve edits and unrelated files.
 Ubuntu initial catalog plus actual use is the first-release host gate; Cloud is deferred.
 

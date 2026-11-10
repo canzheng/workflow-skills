@@ -55,6 +55,14 @@ both systems. Deferred/cancelled outcomes retain reasons and evidence; Done hist
 is not recreated. Missing write permission leaves authorized code work possible,
 but cutover/remote confirmation stays pending.
 
+## Removing v1 skills
+
+Setup, install-skills and doctor report likely v1 skills as warnings and never
+remove them. Use the tested global and repository commands in
+[Removing v1 workflow skills](operations.md#removing-v1-workflow-skills); they move
+v1 entries to a dated backup and remove the v1 marked section from AGENTS.md or
+CLAUDE.md. Planning ledgers follow the inventory and cutover above.
+
 ## Rollback limits
 Restore bundle/config/instruction ownership through a reviewed revert to the actual
 pre-cutover revision; no hard reset discards newer work. Uninstall removes only

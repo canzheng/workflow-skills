@@ -3,6 +3,7 @@ import hashlib
 import json
 import os
 import pathlib
+import posixpath
 import re
 import stat
 import subprocess
@@ -17,6 +18,14 @@ IGNORE_END = '# workflow-v2-dependency:end'
 SOURCE_URL = 'https://github.com/canzheng/workflow-skills.git'
 PROJECT_FILES = frozenset(('AGENTS.md', '.workflow/config.json', '.workflow/install-manifest.json'))
 SKILLS = ('workflow-design-to-backlog', 'workflow-deliver-issue', 'workflow-risk-review')
+# Each host discovers skills in its own folder, in repositories and under home.
+HOST_SKILL_ROOTS = {'codex': '.agents/skills', 'claude': '.claude/skills'}
+HOST_CHOICES = {'codex': ('codex',), 'claude': ('claude',), 'both': ('codex', 'claude')}
+# Retired v1 entries are reported (never removed) when a v1 name holds v1 content.
+V1_SKILLS = ('_workflow', 'audit-workflow', 'autonomous-backlog-loop', 'complete-task', 'defer-feature',
+             'diagnose-workflow', 'fastlane', 'finish-feature', 'initialize-workflow-artifacts',
+             'prioritize-backlog', 'ready-feature', 'repair-drift', 'shape-backlog-item', 'start-task')
+V1_MARKERS = (b'docs/planning', b'_workflow', b'audit-workflow')
 CI_ASSETS = ('.github/workflows/workflow-v2-verify.yml',
              '.github/workflows/workflow-v2-pr-metadata.yml')
 COMPLETION_ASSET = '.github/workflows/workflow-v2-issue-completion.yml'
@@ -182,8 +191,126 @@ def block(text):
     return text[text.index(START):text.index(END) + len(END)]
 
 
-def shared(name):
-    return any(name.startswith('.agents/skills/' + s + '/') for s in SKILLS)
+def shared(name, roots=None):
+    roots = HOST_SKILL_ROOTS.values() if roots is None else roots
+    return any(name.startswith(r + '/' + s + '/') for r in roots for s in SKILLS)
+
+
+def skill_roots(names):
+    """Real skill folders holding shared skills in an inventory; .agents/skills when none."""
+    found = tuple(r for r in HOST_SKILL_ROOTS.values() if any(shared(n, (r,)) for n in names))
+    return found or (HOST_SKILL_ROOTS['codex'],)
+
+
+def host_assets(assets, roots):
+    """Place the source's .agents/skills entries in each selected real skill folder."""
+    codex = HOST_SKILL_ROOTS['codex']
+    result = {}
+    for name, value in assets.items():
+        if shared(name, (codex,)):
+            for r in roots:
+                result[r + name[len(codex):]] = value
+        else:
+            result[name] = value
+    return result
+
+
+def hosts(m):
+    return tuple(m.get('hosts', ('codex',)))
+
+
+def claude_skill_root(root):
+    """Real folder behind .claude/skills: itself, or .agents/skills through a repository link."""
+    folder = root / HOST_SKILL_ROOTS['claude']
+    if folder.is_symlink() or folder.parent.is_symlink():
+        try:
+            same = folder.resolve() == (root / HOST_SKILL_ROOTS['codex']).resolve()
+        except (OSError, RuntimeError):
+            same = False
+        if not same:
+            raise Conflict('.claude/skills must be a folder or a link to this repository\'s .agents/skills')
+        return HOST_SKILL_ROOTS['codex']
+    if folder.exists() and not folder.is_dir():
+        raise Conflict('.claude/skills is not a directory')
+    return HOST_SKILL_ROOTS['claude']
+
+
+def host_skill_roots(root, selected):
+    """Real repository skill folders for the selected hosts, in stable order."""
+    real = {HOST_SKILL_ROOTS[h] if h == 'codex' else claude_skill_root(root) for h in selected}
+    return tuple(r for r in HOST_SKILL_ROOTS.values() if r in real)
+
+
+def staged_claude_skill_root(root, entries):
+    """claude_skill_root for the commit candidate: the link comes from the index, not the working tree.
+
+    A fresh clone gets only the committed link, so it must be relative and lead to .agents/skills.
+    """
+    claude, codex = HOST_SKILL_ROOTS['claude'], HOST_SKILL_ROOTS['codex']
+    for name in ('.claude', claude):
+        staged = entries.get(name)
+        if not staged:
+            continue
+        if len(staged) != 1 or staged[0][0] != '120000' or staged[0][2] != '0':
+            raise Conflict('Staged ' + name + ' is not a link; .claude/skills must be a folder or a link to this repository\'s .agents/skills')
+        target = os.fsdecode(git(root, '--no-replace-objects', 'cat-file', 'blob', staged[0][1]))
+        real = posixpath.normpath(posixpath.join(posixpath.dirname(name), target, posixpath.relpath(claude, name)))
+        if posixpath.isabs(target) or real != codex:
+            raise Conflict('Staged .claude/skills must be a relative link to this repository\'s .agents/skills')
+        return codex
+    return claude
+
+
+def recorded_hosts_policy(root, m, link_root=claude_skill_root):
+    """Each recorded host keeps its skill folder in provenance; dropping one cannot shrink requirements."""
+    if 'hosts' not in m:
+        return
+    present = {r for r in HOST_SKILL_ROOTS.values() if any(shared(n, (r,)) for n in m['files'])}
+    codex, claude = HOST_SKILL_ROOTS['codex'], HOST_SKILL_ROOTS['claude']
+    if 'codex' in m['hosts'] and codex not in present:
+        raise Conflict('Recorded codex host has no .agents/skills skills in provenance; restore reviewed provenance or rerun setup')
+    if 'claude' in m['hosts'] and claude not in present and (
+            codex not in present or link_root(root) != codex):
+        raise Conflict('Recorded claude host has no .claude/skills skills in provenance or .claude/skills link; restore it or rerun setup')
+
+
+def legacy_skills(folders):
+    """Paths of likely v1 skills: a v1 name with v1 content, or a dangling link with a v1 name."""
+    found, seen = [], set()
+    for folder in folders:
+        try:
+            resolved = folder.resolve(strict=True)
+            if resolved in seen or not resolved.is_dir():
+                continue
+            seen.add(resolved)
+        except (OSError, RuntimeError):
+            continue
+        for name in V1_SKILLS:
+            entry = folder / name
+            try:
+                if entry.is_symlink() and not entry.exists():
+                    found.append(str(entry))
+                elif entry.exists() and v1_content(entry.resolve(strict=True)):
+                    found.append(str(entry))
+            except (OSError, RuntimeError, Invalid):
+                continue
+    return found
+
+
+def v1_content(path, limit=500, size=1 << 20):
+    """Bounded, no-follow scan for v1 markers in a skill file or folder."""
+    if path.is_file():
+        files = [path]
+    else:
+        files = (pathlib.Path(d) / f for d, _, names in os.walk(path) for f in names)
+    for count, p in enumerate(files):
+        if count >= limit:
+            break
+        if p.is_symlink() or not p.is_file() or p.stat().st_size > size:
+            continue
+        if any(marker in read_regular(p) for marker in V1_MARKERS):
+            return True
+    return False
 
 
 def ignore_block(text):
@@ -209,17 +336,18 @@ def required_assets(names, bundle_version='2.0.0'):
     required = REQUIRED_ASSETS
     if tuple(map(int, bundle_version.split('.'))) >= (2, 1, 0):
         required |= {COMPLETION_ASSET}
+    required = frozenset(host_assets(dict.fromkeys(required), skill_roots(names)))
     if runtime_prefix(names) == LEGACY_RUNTIME_PREFIX:
         return frozenset(name.replace(RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX, 1) for name in required)
     return required
 
 
 def dependency(name, m):
-    return shared(name) or (m['schema_version'] == 5 and name.startswith(runtime_prefix(m['files'])))
+    return shared(name, skill_roots(m['files'])) or (m['schema_version'] == 5 and name.startswith(runtime_prefix(m['files'])))
 
 
 def dependency_files(root, m):
-    result = shared_files(root)
+    result = shared_files(root, skill_roots(m['files']))
     if m['schema_version'] == 5:
         prefix = runtime_prefix(m['files'])
         folder = safe(root, prefix.rstrip('/'))
@@ -237,26 +365,27 @@ def source_url(value):
     return value
 
 
-def shared_files(root):
+def shared_files(root, roots=(HOST_SKILL_ROOTS['codex'],)):
     result = set()
     for skill in SKILLS:
-        folder = safe(root, '.agents/skills/' + skill)
-        if folder.exists() and not folder.is_dir():
-            raise Conflict('Shared skill directory is not a directory: ' + str(folder))
-        for p in folder.rglob('*') if folder.exists() else ():
-            if p.is_file() or p.is_symlink():
-                result.add(p.relative_to(root).as_posix())
+        for r in roots:
+            folder = safe(root, r + '/' + skill)
+            if folder.exists() and not folder.is_dir():
+                raise Conflict('Shared skill directory is not a directory: ' + str(folder))
+            for p in folder.rglob('*') if folder.exists() else ():
+                if p.is_file() or p.is_symlink():
+                    result.add(p.relative_to(root).as_posix())
     return result
 
 
-def untracked_shared_policy(root, tracked=None, runtime=None):
+def untracked_shared_policy(root, tracked=None, runtime=None, roots=(HOST_SKILL_ROOTS['codex'],)):
     """Check the index even when shared paths are absent from the worktree."""
     if tracked is None:
         tracked = set(os.fsdecode(git(root, 'ls-files', '--cached', '-z')).split('\0')) - {''}
-    namespaces = {'.agents/skills/' + skill for skill in SKILLS}
+    namespaces = {r + '/' + skill for r in roots for skill in SKILLS}
     if runtime:
         namespaces.add(runtime.rstrip('/'))
-    if any(shared(name) or name in namespaces or (runtime and name.startswith(runtime)) for name in tracked):
+    if any(shared(name, roots) or name in namespaces or (runtime and name.startswith(runtime)) for name in tracked):
         raise Conflict('Shared dependency remains tracked; review explicit cached removal for only the shared dependency namespaces')
 
 
@@ -278,10 +407,16 @@ def indexed_ancestor_policy(names, tracked):
                 raise Conflict('Indexed destination ancestor conflict preserved: ' + ancestor)
 
 
-def dependency_policy(root, m):
-    """Validate project tracking and declared dependency storage without index writes."""
+def dependency_policy(root, m, hosts_policy=True):
+    """Validate project tracking and declared dependency storage without index writes.
+
+    Setup validates an old manifest with hosts_policy=False: it is the repair path
+    that writes a new, consistent host layout.
+    """
     if m['schema_version'] not in (3, 4, 5):
         raise Conflict('Existing adoption needs reviewed setup/update (schema 3 or 4)')
+    if hosts_policy:
+        recorded_hosts_policy(root, m)
     ignored_dependency = m['schema_version'] in (4, 5)
     if ignored_dependency:
         policy = safe(root, '.gitignore')
@@ -301,7 +436,8 @@ def dependency_policy(root, m):
     required = {name for name in m['files'] if not ignored_dependency or not dependency(name, m)} | PROJECT_FILES
     if ignored_dependency:
         required.add('.gitignore')
-        untracked_shared_policy(root, tracked, runtime_prefix(m['files']) if m['schema_version'] == 5 else None)
+        untracked_shared_policy(root, tracked, runtime_prefix(m['files']) if m['schema_version'] == 5 else None,
+                                skill_roots(m['files']))
     # A completely unstaged initial adoption is reviewable. Indexed/committed
     # managed assets identify adoption even when provenance was removed from the
     # index. Existing project-owned AGENTS/config alone are not that sentinel.
@@ -324,10 +460,10 @@ def dependency_policy(root, m):
         raise Conflict('Workflow installation path is not tracked: ' + sorted(required - tracked)[0] +
                        '; review and commit the complete adoption')
     if adoption & (tracked | committed):
-        staged_installation(root)
+        staged_installation(root, hosts_policy)
 
 
-def staged_installation(root):
+def staged_installation(root, hosts_policy=True):
     """Validate the commit candidate independently; never refresh/write the index."""
     entries = {}
     for record in git(root, 'ls-files', '--stage', '-z').split(b'\0'):
@@ -349,6 +485,8 @@ def staged_installation(root):
         # in the index until the caller stages the migration; setup owns no index.
         if m['schema_version'] not in (1, 3, 4, 5) or not required_assets(m['files'], m['bundle_version']) <= m['files'].keys():
             raise Conflict('Provenance must describe a complete adoption')
+        if hosts_policy:
+            recorded_hosts_policy(root, m, lambda root: staged_claude_skill_root(root, entries))
         retired_runtime_policy(m['files'], entries)
         indexed_ancestor_policy(m['files'], entries)
         if m['schema_version'] in (4, 5):
@@ -379,11 +517,16 @@ def effective_ignore_policy(root, names, proposed=None, ignored_shared=False, ig
     """Read Git's effective policy, including nested/global/info rules, before writes."""
     projects = {'.agents/skills/workflow-project-trackability-probe/SKILL.md',
                 '.agents/tools/workflow-project-trackability-probe.py'}
+    namespaces = ('.agents/skills', '.agents/tools')
+    if HOST_SKILL_ROOTS['claude'] in skill_roots(names):
+        # Project-owned Claude skills beside installed copies must stay trackable.
+        namespaces += (HOST_SKILL_ROOTS['claude'],)
+        projects.add(HOST_SKILL_ROOTS['claude'] + '/workflow-project-trackability-probe/SKILL.md')
     prefix = runtime_prefix(names)
     def managed(name):
         return shared(name) or shared(name + '/') or name.startswith(prefix) or (name + '/').startswith(prefix)
     if staged_paths is None:
-        for namespace in ('.agents/skills', '.agents/tools'):
+        for namespace in namespaces:
             folder = safe(root, namespace)
             for p in folder.rglob('*') if folder.exists() else ():
                 name = p.relative_to(root).as_posix()
@@ -396,11 +539,11 @@ def effective_ignore_policy(root, names, proposed=None, ignored_shared=False, ig
                     projects.add(name + '/workflow-project-trackability-probe.md')
     else:
         for name in staged_paths:
-            if name.startswith(('.agents/skills/', '.agents/tools/')) and not managed(name):
+            if name.startswith(tuple(n + '/' for n in namespaces)) and not managed(name):
                 relative(name)
                 projects.add(name)
                 for parent in pathlib.PurePosixPath(name).parents:
-                    if str(parent) in ('.agents/skills', '.agents/tools'):
+                    if str(parent) in namespaces:
                         break
                     projects.add((parent / 'workflow-project-trackability-probe.md').as_posix())
     dependency = {name for name in names if shared(name) and ignored_shared or name.startswith(prefix) and ignored_runtime}
@@ -462,8 +605,7 @@ def effective_ignore_policy(root, names, proposed=None, ignored_shared=False, ig
 
 def owned(name):
     relative(name)
-    return (name.startswith(LEGACY_RUNTIME_PREFIX) or name.startswith(RUNTIME_PREFIX) or
-            any(name.startswith('.agents/skills/' + s + '/') for s in SKILLS) or
+    return (name.startswith(LEGACY_RUNTIME_PREFIX) or name.startswith(RUNTIME_PREFIX) or shared(name) or
             name in ('docs/workflow/contract.md', 'docs/workflow/README.md',
                      'docs/workflow/development.md', 'docs/workflow/operations.md',
                      '.github/ISSUE_TEMPLATE/feature.yml', '.github/ISSUE_TEMPLATE/bug.yml',
@@ -504,6 +646,13 @@ def validate_manifest(root, m):
         safe(root, name)
     if m['schema_version'] == 5 and runtime_prefix(m['files']) != RUNTIME_PREFIX:
         raise Invalid('Schema-5 dependency runtime layout must be .agents/tools/workflow/')
+    if 'hosts' in m:
+        selected = m['hosts']
+        if (m['schema_version'] != 5 or not isinstance(selected, list) or
+                tuple(selected) not in HOST_CHOICES.values()):
+            raise Invalid('Invalid recorded skill hosts')
+    if HOST_SKILL_ROOTS['claude'] in skill_roots(m['files']) and 'claude' not in hosts(m):
+        raise Invalid('Claude skill copies require a recorded claude host')
     runtime_prefix(m['files'])
     if not re.fullmatch(r'[0-9a-f]{64}', str(m.get('agents_block_hash', ''))):
         raise Invalid('Invalid managed instruction hash')

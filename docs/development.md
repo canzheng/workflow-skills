@@ -38,6 +38,15 @@ python3 -m venv .venv
 .venv/bin/python tools/workflow/verify.py
 ```
 
+After changing skill-host installation or the v1 cleanup commands, also run the
+negative controls. Each one plants a defect in the real code or both operations docs,
+runs the test that must catch it, and restores the files; it exits nonzero if any
+defect survives or its test is skipped. The documented-cleanup tests need zsh.
+
+```sh
+python3 tests/v2/mutate_skill_hosts.py
+```
+
 Offline equivalent: `python3 tools/workflow/verify.py`. Rerun installation after
 requirements changes, then capture `python3 --version` and installed versions.
 The entrypoint rejects an empty suite and propagates required failures.

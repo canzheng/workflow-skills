@@ -28,12 +28,28 @@ except Invalid as exc:
     sys.exit(str(exc))
 PY
 cd -- "$WF2_CONSUMER_ROOT"
+# Optional WF2_HOST (codex, claude or both) selects skill hosts for a fresh adoption only.
+WF2_HOST=${WF2_HOST:-}
+case "$WF2_HOST" in
+    ''|codex|claude|both) ;;
+    *) echo 'WF2_HOST must be codex, claude or both' >&2; exit 2 ;;
+esac
 if [ ! -f .workflow/install-manifest.json ]; then
     WF2_SOURCE_SHA=$(git -C "$WF2_SOURCE_ROOT" rev-parse --verify 'HEAD^{commit}')
-    python3 "$WF2_SOURCE_ROOT/tools/workflow/workflow.py" setup --source "$WF2_SOURCE_ROOT" --revision "$WF2_SOURCE_SHA" --target "$PWD" --repository "$WF2_CONSUMER_REPOSITORY" --json
-    python3 "$WF2_SOURCE_ROOT/tools/workflow/workflow.py" setup --source "$WF2_SOURCE_ROOT" --revision "$WF2_SOURCE_SHA" --target "$PWD" --repository "$WF2_CONSUMER_REPOSITORY" --apply --json
+    set -- setup --source "$WF2_SOURCE_ROOT" --revision "$WF2_SOURCE_SHA" --target "$PWD" --repository "$WF2_CONSUMER_REPOSITORY" --json
+    if [ -n "$WF2_HOST" ]; then set -- "$@" --host "$WF2_HOST"; fi
+    python3 "$WF2_SOURCE_ROOT/tools/workflow/workflow.py" "$@"
+    python3 "$WF2_SOURCE_ROOT/tools/workflow/workflow.py" "$@" --apply
 fi
 python3 -c 'import json, pathlib, sys; m=json.loads(pathlib.Path(".workflow/install-manifest.json").read_text(encoding="utf-8")); sys.exit(0 if m.get("schema_version") in (3, 4, 5) else "Existing adoption needs reviewed setup/update; do not migrate during environment startup")'
+python3 - "$WF2_HOST" <<'PY'
+import json, pathlib, sys
+choices = {'codex': ['codex'], 'claude': ['claude'], 'both': ['codex', 'claude']}
+recorded = json.loads(pathlib.Path('.workflow/install-manifest.json').read_text(encoding='utf-8')).get('hosts', ['codex'])
+if sys.argv[1] and choices[sys.argv[1]] != recorded:
+    sys.exit('WF2_HOST differs from the recorded skill hosts ' + ','.join(recorded) +
+             '; change hosts with a reviewed setup --host, not during environment startup')
+PY
 python3 "$WF2_SOURCE_ROOT/tools/workflow/workflow.py" bootstrap --repo . --apply --json
 WF2_CONSUMER_CLI=$(python3 -c 'import json; m=json.load(open(".workflow/install-manifest.json")); print(".agents/tools/workflow/workflow.py" if ".agents/tools/workflow/workflow.py" in m["files"] else "tools/workflow/workflow.py")')
 python3 "$WF2_CONSUMER_CLI" check --repo . --run-local --json

@@ -8,7 +8,7 @@ import subprocess
 from urllib.parse import unquote, urlsplit
 
 from core import (Conflict, Invalid, SKILLS, CI_ASSETS, required_assets, START, block, config, dependency_policy, digest, finding, git, load,
-                  manifest, owned, relative, safe, valid_bundle_version, read_regular)
+                  manifest, owned, relative, safe, valid_bundle_version, read_regular, skill_roots)
 from records import issue_findings
 
 SECTIONS = ('Assignment', 'Changes', 'Evidence', 'Documentation', 'Remaining')
@@ -166,15 +166,17 @@ def check(root, args):
         required = required_assets(destinations, spec['bundle_version'])
         if not required <= destinations:
             findings.append(finding('bundle.incomplete', '.workflow/bundle.json', 'Required consumer assets omitted: ' + ', '.join(sorted(required - destinations)), 'Include every mandatory consumer asset'))
-    for s in SKILLS:
-        p = safe(root, '.agents/skills/' + s + '/SKILL.md')
+    # Installed copies live in the recorded real skill folders; a source checkout uses .agents/skills.
+    roots = skill_roots(m['files']) if m else ('.agents/skills',)
+    for s, folder in ((s, r) for r in roots for s in SKILLS):
+        p = safe(root, folder + '/' + s + '/SKILL.md')
         if not p.is_file():
             findings.append(finding('skill.missing', p, 'Required skill is absent', 'Restore canonical source'))
         elif not re.match(r'\A---\nname: ' + re.escape(s) + r'\ndescription: .+\n---\n', read_regular(p).decode('utf-8')):
             findings.append(finding('skill.header', p, 'Invalid skill frontmatter', 'Provide canonical name and focused description'))
     docs = [root / x for x in ('README.md', 'AGENTS.md', 'CLAUDE.md')
             if (root / x).is_file() or (root / x).is_symlink()]
-    docs += list((root / 'docs').rglob('*.md')) + list((root / '.agents/skills').rglob('*.md'))
+    docs += list((root / 'docs').rglob('*.md')) + [p for r in dict.fromkeys(('.agents/skills', *roots)) for p in (root / r).rglob('*.md')]
     docs += list((root / 'openspec/specs').rglob('*.md'))
     docs += list((root / 'openspec/changes/workflow-v2-rewrite').rglob('*.md'))
     for p in docs:

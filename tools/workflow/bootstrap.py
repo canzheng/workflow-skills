@@ -3,7 +3,8 @@ import pathlib
 import tempfile
 
 from core import (Conflict, REQUIRED_ASSETS, block, dependency_policy, digest, git,
-                  manifest, repository, safe, shared, dependency, required_assets, read_regular)
+                  manifest, repository, safe, shared, dependency, required_assets, read_regular,
+                  host_assets, skill_roots)
 from setup import source_bundle, transaction
 
 
@@ -37,6 +38,7 @@ def bootstrap(args):
 
     def resolve(source):
         version, assets = source_bundle(source, m['source_revision'])
+        assets = host_assets(assets, skill_roots(m['files']))
         skills = {name: digest(data) for name, data in assets.items() if dependency(name, m)}
         if version != m['bundle_version'] or skills != expected:
             raise Conflict('Pinned source skill bytes differ from provenance hashes')

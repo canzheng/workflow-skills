@@ -14,7 +14,8 @@ import tempfile
 from core import (Conflict, Invalid, START, END, SKILLS, CI_ASSETS, IGNORE_START, IGNORE_END,
                   SOURCE_URL, REQUIRED_ASSETS, block, config, digest, git, ignore_block, load, manifest,
                   owned, repository, safe, shared, shared_files, source_url, effective_ignore_policy, valid_bundle_version,
-                  dependency_policy, relative, untracked_shared_policy, PROJECT_FILES, head_revision, dependency, dependency_files, required_assets, runtime_prefix, RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX, LEGACY_RUNTIME_ASSETS, retired_runtime_policy, indexed_ancestor_policy)
+                  dependency_policy, relative, untracked_shared_policy, PROJECT_FILES, head_revision, dependency, dependency_files, required_assets, runtime_prefix, RUNTIME_PREFIX, LEGACY_RUNTIME_PREFIX, LEGACY_RUNTIME_ASSETS, retired_runtime_policy, indexed_ancestor_policy,
+                  HOST_CHOICES, HOST_SKILL_ROOTS, host_assets, host_skill_roots, hosts)
 
 
 def source_bundle(source, revision):
@@ -652,12 +653,19 @@ def setup(args):
     else:
         if not args.source or not args.revision:
             raise Invalid('setup requires --source and --revision')
+        # Omitting --host keeps a recorded selection; fresh adoption defaults to Codex.
+        requested = getattr(args, 'host', None)
+        selected = HOST_CHOICES[requested] if requested else hosts(old) if old else HOST_CHOICES['codex']
+        if selected != HOST_CHOICES['codex'] and args.skill_storage != 'ignored':
+            raise Invalid('Claude Code skill hosts require ignored dependency storage')
         version, assets = source_bundle(args.source, args.revision)
+        roots = host_skill_roots(root, selected)
+        assets = host_assets(assets, roots)
         url = source_url(getattr(args, 'source_url', SOURCE_URL))
         if args.skill_storage == 'ignored' and runtime_prefix(assets) != RUNTIME_PREFIX:
             raise Conflict('Ignored dependency runtime layout requires .agents/tools/workflow/; keep legacy runtime tracked or update the source bundle')
         if args.skill_storage == 'ignored' and (not old or old['schema_version'] in (4, 5)):
-            untracked_shared_policy(root, runtime=runtime_prefix(assets))
+            untracked_shared_policy(root, runtime=runtime_prefix(assets), roots=roots)
         # An indexed/HEAD-owned file or gitlink can be an absent destination
         # ancestor. Never repurpose its deletion as an installer directory.
         indexed_ancestor_policy(assets, index_owned)
@@ -684,7 +692,7 @@ def setup(args):
             if not current or digest(current.encode()) != old['agents_block_hash']:
                 raise Conflict('Managed AGENTS block modified or missing')
             if old['schema_version'] in (4, 5):
-                dependency_policy(root, old)
+                dependency_policy(root, old, hosts_policy=False)
             for name, h in old['files'].items():
                 p = safe(root, name)
                 if dependency(name, old) and old['schema_version'] in (2, 4, 5) and not p.exists():
@@ -700,9 +708,11 @@ def setup(args):
             if not p.exists() or p.read_bytes() != data:
                 changes[name] = data
         ignored_dependency = args.skill_storage == 'ignored'
-        entry = (START + '\nUse the repo-local workflow-skills v2 in .agents/skills/. Read\n'
+        locations = ' and '.join(HOST_SKILL_ROOTS[h] + '/' for h in selected)
+        agents = ' or '.join({'codex': 'Codex', 'claude': 'Claude Code'}[h] for h in selected)
+        entry = (START + '\nUse the repo-local workflow-skills v2 in ' + locations + '. Read\n'
                  'docs/workflow/contract.md and docs/workflow/README.md.\n'
-                 'Run pinned bootstrap before Codex starts; then verify with\n'
+                 'Run pinned bootstrap before ' + agents + ' starts; then verify with\n'
                  'python3 ' + runtime_prefix(assets) + 'workflow.py check --repo .\n'
                  'Historical planning directories do not select v1. Never use obsolete\n'
                  'repository wrappers or global installation here. Preserve unrelated rules.\n' + END)
@@ -713,7 +723,7 @@ def setup(args):
         # Other root/nested/global ignores are preserved and checked for conflicts.
         new_ignore = ignore_text.replace(current_ignore + ('\n' if current_ignore + '\n' in ignore_text else ''), '', 1) if current_ignore else ignore_text
         if ignored_dependency:
-            dependency_ignore = (IGNORE_START + '\n' + '\n'.join('/.agents/skills/' + s + '/' for s in SKILLS) + '\n/' + runtime_prefix(assets) + '\n' + IGNORE_END)
+            dependency_ignore = (IGNORE_START + '\n' + '\n'.join('/' + r + '/' + s + '/' for r in roots for s in SKILLS) + '\n/' + runtime_prefix(assets) + '\n' + IGNORE_END)
             new_ignore += ('\n' if new_ignore and not new_ignore.endswith('\n') else '') + dependency_ignore + '\n'
         effective_ignore_policy(root, assets, proposed=new_ignore, ignored_shared=ignored_dependency, ignored_runtime=ignored_dependency)
         if new_ignore != ignore_text:
@@ -730,6 +740,8 @@ def setup(args):
         if ignored_dependency:
             m['dependency_storage'] = 'ignored'
             m['gitignore_block_hash'] = digest(dependency_ignore.encode())
+            if selected != HOST_CHOICES['codex']:
+                m['hosts'] = list(selected)
         data = (json.dumps(m, indent=2) + '\n').encode()
         p = safe(root, '.workflow/install-manifest.json')
         if not p.exists() or p.read_bytes() != data:
@@ -742,9 +754,37 @@ def setup(args):
 
 def install_skills(args):
     """Explicit optional global installation; never change project policy/auth/config."""
-    root = pathlib.Path(args.target).absolute()
-    if not pathlib.Path(args.target).is_absolute():
+    requested = getattr(args, 'host', None)
+    if args.target is not None:
+        if requested == 'both':
+            raise Invalid('--target accepts one host; omit --target to install both default locations')
+        targets = [args.target]
+    else:
+        try:
+            home = pathlib.Path.home()
+        except (OSError, RuntimeError) as exc:
+            raise Invalid('Cannot resolve default global skills target; provide --target') from exc
+        targets = [str(home / HOST_SKILL_ROOTS[h]) for h in HOST_CHOICES[requested or 'codex']]
+    # Plan every target before writing any, so a conflict in one leaves all unchanged.
+    plans = [skills_plan(target, args) for target in targets]
+    changes, residuals = [], []
+    for root, planned, left in plans:
+        if args.apply:
+            transaction(root, planned)
+        prefix = '' if len(plans) == 1 else str(root) + '/'
+        changes += [prefix + name for name in planned]
+        residuals += [prefix + name for name in left]
+    return changes, residuals
+
+
+def skills_plan(target, args):
+    if not pathlib.Path(target).is_absolute():
         raise Invalid('Global/custom skill target must be an explicit absolute path')
+    try:
+        # Like cp, a linked target is written at its real location.
+        root = pathlib.Path(target).resolve()
+    except (OSError, RuntimeError) as exc:
+        raise Invalid('Cannot resolve global skill target: ' + str(target)) from exc
     for p in (root, *root.parents):
         if p.is_symlink():
             raise Invalid('Global skill target contains a symlink')
@@ -768,7 +808,7 @@ def install_skills(args):
     changes, residuals = {}, []
     if args.uninstall:
         if not old:
-            return [], []
+            return root, {}, []
         remaining = {}
         for name, h in old['files'].items():
             p = safe(root, name)
@@ -781,8 +821,8 @@ def install_skills(args):
         if not args.source or not args.revision:
             raise Invalid('install-skills requires --source and --revision')
         version, assets = source_bundle(args.source, args.revision)
-        prefix = '.agents/skills/'
-        skills = {name[len(prefix):]: data for name, data in assets.items() if shared(name)}
+        prefix = HOST_SKILL_ROOTS['codex'] + '/'
+        skills = {name[len(prefix):]: data for name, data in assets.items() if shared(name, (HOST_SKILL_ROOTS['codex'],))}
         for s in SKILLS:
             folder = safe(root, s)
             if folder.exists() and not folder.is_dir():
@@ -810,6 +850,4 @@ def install_skills(args):
         if not pin.exists() or pin.read_bytes() != data:
             changes[pin_name] = data
     preflight_destinations(root, changes)
-    if args.apply:
-        transaction(root, changes)
-    return list(changes), residuals
+    return root, changes, residuals

@@ -15,10 +15,11 @@ engineering-task Issue explosion or duplicate backlog document is required.
 
 Project policy/config, CI/templates, docs/specs, project skills and the
 exact dependency manifest are tracked. Shared workflow skills and Python runtime are ignored repo-local
-dependencies in three skill directories and .agents/tools/workflow. Fresh clones
+dependencies in three skill directories per selected skill host (.agents/skills for
+Codex, .claude/skills for Claude Code) and .agents/tools/workflow. Fresh clones
 fetch the manifest pin and run its source-owned initializer before invoking
 .agents/tools/workflow/workflow.py; neither main/latest nor global tools supply it. Bootstrap the full source pin before
-Ubuntu Codex starts; never fetch main/latest implicitly. Repeat matching bootstrap
+Codex or Claude Code starts on Ubuntu; never fetch main/latest implicitly. Repeat matching bootstrap
 is offline/no-op and preserves project files/index. See [operations](operations.md)
 for adoption, migration, safe bootstrap and optional explicit global installation.
 The workstation/environment is not a hidden workflow version source.
