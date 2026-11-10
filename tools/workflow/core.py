@@ -3,6 +3,7 @@ import hashlib
 import json
 import os
 import pathlib
+import posixpath
 import re
 import stat
 import subprocess
@@ -240,7 +241,27 @@ def host_skill_roots(root, selected):
     return tuple(r for r in HOST_SKILL_ROOTS.values() if r in real)
 
 
-def recorded_hosts_policy(root, m):
+def staged_claude_skill_root(root, entries):
+    """claude_skill_root for the commit candidate: the link comes from the index, not the working tree.
+
+    A fresh clone gets only the committed link, so it must be relative and lead to .agents/skills.
+    """
+    claude, codex = HOST_SKILL_ROOTS['claude'], HOST_SKILL_ROOTS['codex']
+    for name in ('.claude', claude):
+        staged = entries.get(name)
+        if not staged:
+            continue
+        if len(staged) != 1 or staged[0][0] != '120000' or staged[0][2] != '0':
+            raise Conflict('Staged ' + name + ' is not a link; .claude/skills must be a folder or a link to this repository\'s .agents/skills')
+        target = os.fsdecode(git(root, '--no-replace-objects', 'cat-file', 'blob', staged[0][1]))
+        real = posixpath.normpath(posixpath.join(posixpath.dirname(name), target, posixpath.relpath(claude, name)))
+        if posixpath.isabs(target) or real != codex:
+            raise Conflict('Staged .claude/skills must be a relative link to this repository\'s .agents/skills')
+        return codex
+    return claude
+
+
+def recorded_hosts_policy(root, m, link_root=claude_skill_root):
     """Each recorded host keeps its skill folder in provenance; dropping one cannot shrink requirements."""
     if 'hosts' not in m:
         return
@@ -249,7 +270,7 @@ def recorded_hosts_policy(root, m):
     if 'codex' in m['hosts'] and codex not in present:
         raise Conflict('Recorded codex host has no .agents/skills skills in provenance; restore reviewed provenance or rerun setup')
     if 'claude' in m['hosts'] and claude not in present and (
-            codex not in present or claude_skill_root(root) != codex):
+            codex not in present or link_root(root) != codex):
         raise Conflict('Recorded claude host has no .claude/skills skills in provenance or .claude/skills link; restore it or rerun setup')
 
 
@@ -465,7 +486,7 @@ def staged_installation(root, hosts_policy=True):
         if m['schema_version'] not in (1, 3, 4, 5) or not required_assets(m['files'], m['bundle_version']) <= m['files'].keys():
             raise Conflict('Provenance must describe a complete adoption')
         if hosts_policy:
-            recorded_hosts_policy(root, m)
+            recorded_hosts_policy(root, m, lambda root: staged_claude_skill_root(root, entries))
         retired_runtime_policy(m['files'], entries)
         indexed_ancestor_policy(m['files'], entries)
         if m['schema_version'] in (4, 5):

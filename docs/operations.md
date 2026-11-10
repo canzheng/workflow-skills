@@ -50,6 +50,9 @@ repository that ignores all of `.claude/` must narrow that rule first, for examp
 
 If `.claude/skills` is a link to this repository's `.agents/skills`, setup writes the
 skills once there, records those real paths, and Claude Code finds them through the
+link. Commit the link as a relative link, such as `../.agents/skills`: once the adoption
+is staged or committed, check, doctor and bootstrap validate the link in the commit
+candidate, not only the one on disk, because a fresh clone gets only the committed
 link. A link to anywhere else, a `.claude/skills` that is not a folder, or a file in a
 shared skill folder that setup did not install is refused before any write. Setup
 never creates or removes links. To replace such a link with real copies, remove it with

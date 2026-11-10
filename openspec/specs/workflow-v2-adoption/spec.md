@@ -369,6 +369,10 @@ provenance, ignore, untracked and no-overwrite rules as codex copies.
 - **THEN** check, doctor and bootstrap fail instead of shrinking the required skills
 - **AND** rerunning setup restores the folder
 
+#### Scenario: Claude link in the commit candidate
+- **WHEN** recorded Claude Code discovery depends on a .claude/skills link, and the staged or committed snapshot lacks that link, or holds one that is absolute or leads anywhere but .agents/skills
+- **THEN** check, doctor and bootstrap fail, even when the link on disk is correct
+
 #### Scenario: Duplicate skill within one host
 - **WHEN** a shared skill is discoverable twice in one host's catalogs, such as repository and home .claude/skills
 - **THEN** doctor reports a duplicate for that host, while one copy per host for both is not a duplicate

@@ -259,6 +259,31 @@ class SkillHostTests(unittest.TestCase):
                 self.assertTrue(any(f['code'] == 'bundle.incomplete' and f['path'].startswith('.claude/skills/')
                                     for f in findings), findings)
 
+    def test_staged_claude_link_is_validated_from_the_index(self):
+        (self.target / '.claude').mkdir()
+        (self.target / '.claude/skills').symlink_to('../.agents/skills')
+        commit(self.target)
+        self.adopt('--host', 'claude')
+
+        def stage_link(destination):
+            oid = subprocess.run(['git', '-C', str(self.target), 'hash-object', '-w', '--stdin'],
+                                 input=os.fsencode(destination), capture_output=True, check=True).stdout
+            git(self.target, 'update-index', '--add', '--cacheinfo', '120000,' + oid.decode().strip() + ',.claude/skills')
+
+        # The working link stays correct throughout: only the commit candidate changes.
+        for label, change, message in [
+                ('deleted', lambda: git(self.target, 'rm', '-q', '--cached', '--', '.claude/skills'), 'Recorded claude host'),
+                ('elsewhere', lambda: stage_link('../elsewhere'), 'relative link'),
+                ('absolute', lambda: stage_link(str(self.target / '.agents/skills')), 'relative link')]:
+            with self.subTest(staged=label):
+                change()
+                self.assertEqual(os.readlink(self.target / '.claude/skills'), '../.agents/skills')
+                for command in ('check', 'doctor'):
+                    report = self.cli(command, '--repo', self.target, expect=1)
+                    self.assertIn(message, json.dumps(report['findings']), command)
+                git(self.target, 'add', '--', '.claude/skills')
+                self.cli('check', '--repo', self.target)
+
     def test_unsupported_claude_folders_refuse_without_writes(self):
         outside = self.base / 'outside skills'
         outside.mkdir()
