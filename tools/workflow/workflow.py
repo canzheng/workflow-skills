@@ -95,11 +95,14 @@ def doctor(root, skill_roots=()):
                 raise NotADirectoryError('Discovery root is not a directory')
             # glob suppresses directory read failures on supported Python versions.
             # Enumerate the root explicitly so an unreadable catalog is reported.
-            paths = (p for child in folder.iterdir() if child.is_dir()
+            paths = ((child, p) for child in folder.iterdir() if child.is_dir()
                      for p in child.glob('SKILL.md'))
-            for p in paths:
+            for child, p in paths:
                 try:
-                    text = read_regular(resolved / p.relative_to(folder)).decode('utf-8')
+                    # Hosts load a linked skill folder, so read it at its real location;
+                    # below that folder nothing is followed, including SKILL.md itself.
+                    real = child.resolve(strict=True) if child.is_symlink() else resolved / child.name
+                    text = read_regular(real / p.name).decode('utf-8')
                 except UnicodeError:
                     findings.append(finding('discovery.invalid', p, 'Skill file is not valid UTF-8',
                                             'Review the invalid skill in the actual host', 'warning'))

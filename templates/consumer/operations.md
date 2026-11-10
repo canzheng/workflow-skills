@@ -248,7 +248,9 @@ modified residuals. No repository setup/bootstrap implicitly writes global skill
 Use one active discovery location per name and host; doctor reports duplicates within
 each host (Codex: repository and home `.agents/skills`, `~/.codex/skills` and
 `--skill-root`; Claude Code: repository and home `.claude/skills`) rather than
-assuming repo-local precedence. A global skill resolves documents/policy from the
+assuming repo-local precedence. A linked skill folder counts like a copy: doctor reads
+its `SKILL.md` at the real location, but does not follow a `SKILL.md` that is itself a
+link, and skips links that lead nowhere. A global skill resolves documents/policy from the
 selected project, not a global docs tree. Global installation alone does not adopt
 project policy or satisfy the repo-local dependency checks; test its host catalog/use
 separately in a project without local shared copies. Do not change authentication.
