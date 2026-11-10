@@ -371,7 +371,9 @@ class IgnoredDependencyTests(unittest.TestCase):
         for command in ['bootstrap', 'check', 'doctor']:
             run(command, '--repo', self.target)
             self.assertEqual(self.snapshot(), before)
-        oid = git(self.target, 'hash-object', '-w', '--stdin').strip().decode()
+        # Supply the link target explicitly: inherited stdin may never close.
+        oid = subprocess.run(['git', '-C', str(self.target), 'hash-object', '-w', '--stdin'], input=b'../.gitignore',
+                             capture_output=True, check=True).stdout.strip().decode()
         git(self.target, 'update-index', '--cacheinfo', '120000,' + oid + ',.agents/.gitignore')
         before = self.snapshot()
         for command in ['bootstrap', 'check', 'doctor']:
